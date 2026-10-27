@@ -71,6 +71,7 @@ class DocsTests(unittest.TestCase):
         self.assertIn("events", text)
         self.assertIn("observation add", text)
         self.assertIn("analysis stats", text)
+        self.assertIn("analysis trend", text)
 
     def test_architecture_documents_binding_and_digests(self) -> None:
         text = (ROOT / "docs" / "ARCHITECTURE.md").read_text(encoding="utf-8")

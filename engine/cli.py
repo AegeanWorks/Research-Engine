@@ -13,6 +13,7 @@ from typing import Callable, Dict, List
 from engine import __version__
 from engine.analysis import (
     claim_statistics,
+    claim_trend,
     contradictions,
     evidence_matrix,
     expose,
@@ -265,6 +266,9 @@ def _build_parser() -> argparse.ArgumentParser:
     stats_c.add_argument("--treatment", required=True)
     stats_c.add_argument("--seed", type=int, default=0)
     stats_c.add_argument("--resamples", type=int, default=2000)
+    trend_c = analysis_sub.add_parser("trend", help="fit a trend over one observation group")
+    trend_c.add_argument("claim")
+    trend_c.add_argument("--group", required=True)
     expose_c.add_argument("ref")
 
     db_c = commands.add_parser("db", help="database maintenance")
@@ -628,6 +632,16 @@ def main(argv: List[str] | None = None) -> int:
                         f" depth {item['max_depth']} [{item['status']}]\n"
                         for item in result
                     ) or "no claims\n"
+                    return _emit(result, args.json, text)
+                if args.action == "trend":
+                    result = claim_trend(conn, args.claim, args.group)
+                    text = (
+                        f"{result['claim']} {result['group']} n={result['n']}"
+                        f"  slope={result['slope']:+.6g}  r={result['r']:.3f}"
+                        f"  p={result['p']:.4g}\n"
+                    )
+                    for warning in result["warnings"]:
+                        text += f"  warning: {warning}\n"
                     return _emit(result, args.json, text)
                 if args.action == "stats":
                     result = claim_statistics(

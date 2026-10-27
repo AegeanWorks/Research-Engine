@@ -12,7 +12,14 @@ from engine.database import transaction
 from engine.errors import EngineError
 from engine.events import record as record_event
 from engine.observations import group_values
-from engine.stats import ALPHA, DEFAULT_RESAMPLES, DEFAULT_SEED, compare_groups
+from engine.stats import (
+    ALPHA,
+    DEFAULT_RESAMPLES,
+    DEFAULT_SEED,
+    MIN_GROUP,
+    compare_groups,
+    linregress,
+)
 from engine.questions import list_questions
 from engine.researches import get_research
 from engine.synthesis import stance_claims
@@ -237,6 +244,10 @@ def claim_statistics(
                 f"add values with `observation add`, or choose one of: {available}.",
             )
     result = compare_groups(groups[baseline], groups[treatment], seed=seed, resamples=resamples)
+    if len(groups) > 2:
+        result["warnings"].append(
+            f"{len(groups)} groups recorded; this single pairwise test is uncorrected"
+        )
     result["claim"] = claim.id
     result["baseline_label"] = baseline
     result["treatment_label"] = treatment
@@ -276,3 +287,45 @@ def observation_summary(conn: sqlite3.Connection, claim_ref: str) -> List[dict]:
         }
         for row in rows
     ]
+
+
+def claim_trend(
+    conn: sqlite3.Connection,
+    claim_ref: str,
+    group: str,
+    actor: str = "agent",
+) -> dict:
+    """Fit a least-squares trend over a group's observations in recording order.
+
+    The x axis is the recording position, not a timestamp: two observations in the same second
+    would otherwise be indistinguishable. Fewer than three values yield no estimate and a warning.
+    """
+    claim = get_claim(conn, claim_ref)
+    groups = group_values(conn, claim.id)
+    if group not in groups:
+        available = ", ".join(sorted(groups)) or "none"
+        raise EngineError(
+            f"no observations in group {group!r} for {claim.id}",
+            "a trend needs a recorded sequence.",
+            f"add values with `observation add`, or choose one of: {available}.",
+        )
+    values = groups[group]
+    result = linregress([float(index) for index in range(1, len(values) + 1)], values)
+    warnings = []
+    if len(values) < MIN_GROUP:
+        warnings.append(f"fewer than {MIN_GROUP} observations; no trend is estimated")
+    result.update({"claim": claim.id, "group": group, "warnings": warnings})
+    detail = (
+        f"{group} n={len(values)} slope={result['slope']:.6g} r={result['r']:.3f}"
+        f" p={result['p']:.4g}"
+    )
+    with transaction(conn):
+        record_event(
+            conn,
+            "claim.trend",
+            claim.id,
+            detail,
+            research_id=claim.research_id,
+            actor=actor,
+        )
+    return result

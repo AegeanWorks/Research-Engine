@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import unittest
 
-from engine.analysis import claim_statistics, observation_summary
+from engine.analysis import claim_statistics, claim_trend, observation_summary
 from engine.claims import add_claim
 from engine.errors import EngineError
 from engine.events import list_events
@@ -108,6 +108,34 @@ class ObservationTests(DatabaseCase):
         result = claim_statistics(self.conn, self.claim, "baseline", "treatment", resamples=50)
         self.assertEqual(result["baseline"]["n"], 6)
         self.assertLess(result["baseline"]["mean"], 2.0)
+
+
+    def test_trend_is_fitted_over_recording_order(self) -> None:
+        result = claim_trend(self.conn, self.claim, "baseline")
+        self.assertEqual(result["n"], 6)
+        self.assertNotEqual(result["slope"], 0.0)
+        self.assertEqual(result["warnings"], [])
+        self.assertIn("claim.trend", [event.kind for event in list_events(self.conn)])
+
+    def test_trend_needs_a_group(self) -> None:
+        with self.assertRaises(EngineError) as caught:
+            claim_trend(self.conn, self.claim, "control")
+        self.assertIn("baseline", caught.exception.fix)
+
+    def test_short_series_warns_instead_of_pretending(self) -> None:
+        short = add_claim(self.conn, self.research, "Short series.", "assumption", basis="s").id
+        add_observation(self.conn, short, "run", 1.0)
+        result = claim_trend(self.conn, short, "run")
+        self.assertEqual(result["n"], 1)
+        self.assertTrue(any("fewer than" in warning for warning in result["warnings"]))
+
+    def test_more_than_two_groups_warns_about_uncorrected_comparison(self) -> None:
+        for value in (3.0, 3.1, 3.2):
+            add_observation(self.conn, self.claim, "control", value)
+        result = claim_statistics(
+            self.conn, self.claim, "baseline", "treatment", resamples=50
+        )
+        self.assertTrue(any("uncorrected" in warning for warning in result["warnings"]))
 
 
 if __name__ == "__main__":

@@ -8,9 +8,9 @@
 ## 📊 Codebase Metrics
 - **Total Python Modules**: `63`
 - **Total Classes**: `55`
-- **Total Top-Level Functions**: `186`
-- **Total Class Methods**: `305`
-- **Total Source Lines**: `9074`
+- **Total Top-Level Functions**: `187`
+- **Total Class Methods**: `310`
+- **Total Source Lines**: `9183`
 
 ---
 
@@ -33,7 +33,7 @@
 ### [`engine/analysis.py`](engine/analysis.py)
 > *Discovery and ranking over the graph: contradictions, coverage, keystones.*
 
-**Size**: `278` lines (`10946` bytes)
+**Size**: `331` lines (`12657` bytes)
 
 **Functions:**
 - `def keywords(text)` - *Content words of an assertion, lowercased and de-duplicated.*
@@ -46,6 +46,7 @@
 - `def expose(conn, claim_ref)` - *What a claim would take down with it, plus what cites it.*
 - `def claim_statistics(conn, claim_ref, baseline, treatment, seed, resamples, actor)` - *Compare two observation groups of a claim and record that the comparison happened.*
 - `def observation_summary(conn, claim_ref)` - *Per-group counts and basic summaries for one claim.*
+- `def claim_trend(conn, claim_ref, group, actor)` - *Fit a least-squares trend over a group's observations in recording order.*
 
 ---
 
@@ -116,7 +117,7 @@
 ### [`engine/cli.py`](engine/cli.py)
 > *Command-line surface: one entry point for every engine mechanic.*
 
-**Size**: `705` lines (`35149` bytes)
+**Size**: `719` lines (`35890` bytes)
 
 **Functions:**
 - `def _build_parser()`
@@ -625,7 +626,7 @@
 ### [`tests/test_cli.py`](tests/test_cli.py)
 > *The CLI surface: JSON output, exit codes and the error triad.*
 
-**Size**: `284` lines (`11290` bytes)
+**Size**: `297` lines (`11859` bytes)
 
 **Classes:**
 - `class CliTests`
@@ -652,6 +653,7 @@
   - Method `.test_negative_control_through_the_cli()`
   - Method `.test_observations_and_statistics()`
   - Method `.test_observation_errors_use_the_triad()`
+  - Method `.test_analysis_trend()`
 
 ---
 
@@ -719,7 +721,7 @@
 ### [`tests/test_docs.py`](tests/test_docs.py)
 > *Documentation and project memory stay discoverable and within budget.*
 
-**Size**: `84` lines (`3275` bytes)
+**Size**: `85` lines (`3321` bytes)
 
 **Classes:**
 - `class DocsTests`
@@ -957,7 +959,7 @@
 ### [`tests/test_observations.py`](tests/test_observations.py)
 > *Observations: raw values, their voiding, and the statistics projection over them.*
 
-**Size**: `114` lines (`5288` bytes)
+**Size**: `142` lines (`6680` bytes)
 
 **Classes:**
 - `class ObservationTests`
@@ -974,6 +976,10 @@
   - Method `.test_statistics_are_logged_and_clear_the_warning()`
   - Method `.test_summary_and_detail()`
   - Method `.test_voided_values_are_excluded_from_statistics()`
+  - Method `.test_trend_is_fitted_over_recording_order()`
+  - Method `.test_trend_needs_a_group()`
+  - Method `.test_short_series_warns_instead_of_pretending()`
+  - Method `.test_more_than_two_groups_warns_about_uncorrected_comparison()`
 
 ---
 

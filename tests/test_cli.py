@@ -280,5 +280,18 @@ class CliTests(unittest.TestCase):
         self.assertIn("Fix:", err)
 
 
+    def test_analysis_trend(self) -> None:
+        self.run_cli("demo")
+        for value in (1.0, 1.2, 1.4, 1.6):
+            self.run_cli("observation", "add", "c_000003", "--group", "series",
+                         "--value", str(value))
+        code, out, _ = self.run_cli("analysis", "trend", "c_000003", "--group", "series")
+        self.assertEqual(code, 0)
+        self.assertIn("slope=+0.2", out)
+        code, _, err = self.run_cli("analysis", "trend", "c_000003", "--group", "absent")
+        self.assertEqual(code, 1)
+        self.assertIn("Why:", err)
+
+
 if __name__ == "__main__":
     unittest.main()

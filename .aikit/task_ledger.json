@@ -3,26 +3,14 @@
   "active_task": {
     "task_id": "T-007-observations-stats",
     "last_phase": "phase 4",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1793098540.251437,
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1793098945.68257,
     "owner": "kilo:research-engine",
     "started_by": "kilo:research-engine",
-    "continuations": [],
-    "completed_at": 1793098540.4079034
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "T-001-core-engine",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[6/6] Core engine delivered: 74 tests pass, demo gate reports no findings, 4/4 AIKit gates pass; checklists: passed; changes left uncommitted by request",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793080798.0193763,
-      "timestamp_str": "2026-10-27 08:59:58",
-      "agent": "kilo:research-engine"
-    },
     {
       "task_id": "T-001-core-engine",
       "phase": "completed",
@@ -259,6 +247,17 @@
       "status": "completed",
       "timestamp": 1793098540.407905,
       "timestamp_str": "2026-10-27 13:55:40",
+      "agent": "kilo:research-engine"
+    },
+    {
+      "task_id": "T-007-observations-stats",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[2/2] Trend and multiple-comparison guard added: analysis trend with least-squares slope/p and a short-series warning, uncorrected-pairwise warning for >2 groups; 277 tests pass; 4/4 gates pass; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793098945.68257,
+      "timestamp_str": "2026-10-27 14:02:25",
       "agent": "kilo:research-engine"
     }
   ]

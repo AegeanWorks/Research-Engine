@@ -59,7 +59,7 @@ provenance rule and adds what a claim is allowed to mean.
 | `lattice` | Evidence matrix and keystones | Source x question coverage, and the claims the rest of the graph leans on |
 | `lattice` | Screening and PRISMA flow | A source moves identified -> screened -> included or excluded, with a closed reason taxonomy and flow counts in the report |
 | `obezite-mekanizma-projesi` | Non-vacuity | A test without a negative control has not shown that it can fail; a declared control that passes is an error |
-| `N1-Engine` | Deterministic comparison | Recorded observations become mean, effect size, Welch t, exact/asymptotic Mann-Whitney and a seeded bootstrap interval, with disagreements and degenerate samples stated as warnings |
+| `N1-Engine` | Deterministic comparison | Observations become effect size, Welch t, exact/asymptotic Mann-Whitney and a seeded bootstrap, with caveats stated |
 | `aegean-licensing` | Domain-separated digests | Every digest hashes its artifact kind first, so a report digest can never equal a graph digest |
 | `aegean-licensing` | Pinned license identity | Every manifest records the license id and the digest of the licence text it was generated under |
 | `aegean-licensing-ops` | Verified backup and event log | `db integrity`, `db backup` and an append-only event trail cover the actions verdicts do not |
@@ -198,6 +198,7 @@ python -m engine [--db PATH] analysis matrix REF
 python -m engine [--db PATH] analysis keystone REF [--limit N]
 python -m engine [--db PATH] analysis expose REF
 python -m engine [--db PATH] analysis stats CLAIM --baseline LABEL --treatment LABEL [--seed N] [--resamples N]
+python -m engine [--db PATH] analysis trend CLAIM --group LABEL
 python -m engine [--db PATH] diff OLD.jsonl NEW.jsonl [--exact]
 python -m engine [--db PATH] db integrity
 python -m engine [--db PATH] db backup PATH
@@ -325,6 +326,8 @@ research-engine/
   representativeness are assumed and unchecked.
 - **The rank test's method is stated.** Exact for untied small samples, tie-corrected
   approximation otherwise.
+- **Multiple comparisons are flagged, not corrected.** A pairwise test among more than two
+  groups warns; p-values are not adjusted.
 - **A control proves falsifiability, not correctness.** It shows the test can fail, not that the
   assertion is right.
 - **Screening is local.** States and reasons are recorded; correctness is not verified.

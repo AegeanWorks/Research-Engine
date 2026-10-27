@@ -243,8 +243,10 @@ against testing many metrics at once.
 groups with `engine/stats.py`: Cohen's d, Welch t with a beta-function p-value, Mann-Whitney U
 (exact for untied small samples, tie-corrected normal otherwise), and a seeded percentile bootstrap.
 The result states whether the two tests agree and carries explicit warnings for small groups,
-degenerate variance, the approximation, and disagreement. Every run is logged as `claim.stats` and
-`OBS-001` warns when observations exist without one.
+degenerate variance, the approximation, disagreement, and an uncorrected pairwise test among more
+than two groups. `analysis trend` fits a least-squares slope over a group's recording order, and
+refuses to pretend when there are fewer than three points. Every run is logged as `claim.stats`
+or `claim.trend`, and `OBS-001` warns when observations exist without a statistics run.
 
 **Deliberately not copied.** The intervention/baseline domain model, the medical metrics, pandas,
 scipy, SQLAlchemy and PyQt. The port is stdlib-only and deterministic; the reference bootstrap is
