@@ -1,5 +1,206 @@
 {
   "version": 1,
-  "active_task": null,
-  "checkpoints": []
+  "active_task": {
+    "task_id": "T-005-audit-review",
+    "last_phase": "phase 4",
+    "active_phase": 5,
+    "status": "completed",
+    "updated_at": 1793091349.7676542,
+    "owner": "kilo:research-engine",
+    "started_by": "kilo:research-engine",
+    "continuations": [],
+    "completed_at": 1793091349.937229
+  },
+  "checkpoints": [
+    {
+      "task_id": "T-001-core-engine",
+      "phase": "phase 2",
+      "phase_num": 2,
+      "description": "[1/6] Core engine: SQLite provenance graph, epistemic ledger, executable kill tests, cascade invalidation",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793079774.9345958,
+      "timestamp_str": "2026-10-27 08:42:54",
+      "agent": "kilo:research-engine",
+      "impact_assessment": {
+        "why": "Unify the four reference mechanics into one auditable research engine instead of maintaining four disconnected research codebases",
+        "benefits": "One provenance-first store; falsification-first verdicts; pre-registered hypotheses; executable gates; transitive invalidation; stdlib-only reproducibility",
+        "risks": "contract: new schema and CLI are unproven; dependency: stdlib only, so no external graph libraries; concurrency: single-writer SQLite with atomic replace; state: append-only verdict history must survive cascade",
+        "mitigation": "Failing-first tests per module, frozen DTOs, additive schema migration, single-writer transactions with fsync, and a check gate that refuses inconsistent graphs"
+      }
+    },
+    {
+      "task_id": "T-001-core-engine",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[6/6] Core engine delivered: 74 tests pass, demo gate reports no findings, 4/4 AIKit gates pass; checklists: passed; changes left uncommitted by request",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793080798.0193763,
+      "timestamp_str": "2026-10-27 08:59:58",
+      "agent": "kilo:research-engine"
+    },
+    {
+      "task_id": "T-001-core-engine",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'T-001-core-engine' completed successfully.",
+      "status": "completed",
+      "timestamp": 1793080816.0773368,
+      "timestamp_str": "2026-10-27 09:00:16",
+      "agent": "kilo:research-engine"
+    },
+    {
+      "task_id": "T-002-provenance-v2",
+      "phase": "phase 2",
+      "phase_num": 2,
+      "description": "[1/6] Schema v2: run provenance, stale-evidence gate, source retraction, report manifest with drift check",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793082936.165106,
+      "timestamp_str": "2026-10-27 09:35:36",
+      "agent": "kilo:research-engine",
+      "impact_assessment": {
+        "why": "Verification probes proved two agreeing runs still pass after the tested code, inputs or command change, and reports have no drift check",
+        "benefits": "Evidence is bound to code+inputs+command; retracted sources cascade; generated reports are verifiable artifacts",
+        "risks": "contract: test_run/killtest/source columns change and schema becomes v2; dependency: none beyond stdlib git CLI; concurrency: single-writer migration inside one transaction; state: v1 databases must migrate without data loss and future versions must be refused",
+        "mitigation": "Failing-first tests for migration, binding and drift; additive ALTER TABLE migration with row preservation; fingerprint scope limited to engine code plus declared inputs to avoid README-driven false invalidation"
+      }
+    },
+    {
+      "task_id": "T-002-provenance-v2",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[6/6] Schema v2 delivered: evidence bound to code+inputs+command, EVID-005 stale gate, source retraction cascade, report manifests with drift check; 108 tests pass; demo gate has no findings; 4/4 AIKit gates pass; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793083987.7389612,
+      "timestamp_str": "2026-10-27 09:53:07",
+      "agent": "kilo:research-engine"
+    },
+    {
+      "task_id": "T-002-provenance-v2",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'T-002-provenance-v2' completed successfully.",
+      "status": "completed",
+      "timestamp": 1793083994.5519412,
+      "timestamp_str": "2026-10-27 09:53:14",
+      "agent": "kilo:research-engine"
+    },
+    {
+      "task_id": "T-003-binding-hardening",
+      "phase": "phase 2",
+      "phase_num": 2,
+      "description": "[1/6] Binding and promotion hardening: typed input hashing, normalized content digest, evidence_group, promotion requires verified evidence",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793087155.8595371,
+      "timestamp_str": "2026-10-27 10:45:55",
+      "agent": "kilo:research-engine",
+      "impact_assessment": {
+        "why": "Probes proved directory/glob inputs hash nothing, a file containing 'missing' collides with an absent file, report --check false-alarms on every re-verify, and a NUMERIC claim can ride on evidence from a changed command",
+        "benefits": "Declared inputs actually bind; drift detects content not run allocation; promotions cite a specific verified group; the write path matches the gate",
+        "risks": "contract: verdict gains evidence_group and manifest gains content_sha256; dependency: none; concurrency: promotion and verification stay separate transactions; state: schema v3 migration must preserve v1/v2 rows and old verdicts must stay readable",
+        "mitigation": "Failing-first tests per defect, additive migration with a notice, typed digest markers, deterministic glob expansion, and a --strict escape hatch for exact-record digests"
+      }
+    },
+    {
+      "task_id": "T-003-binding-hardening",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[6/6] Hardening delivered: typed glob-aware input binding, semantic vs strict report digests, evidence_group promotion gate with EVID-006, migration notice, import cycles broken via engine/evidence.py; 134 tests pass; 4/4 AIKit gates pass; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793088908.2128634,
+      "timestamp_str": "2026-10-27 11:15:08",
+      "agent": "kilo:research-engine"
+    },
+    {
+      "task_id": "T-003-binding-hardening",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'T-003-binding-hardening' completed successfully.",
+      "status": "completed",
+      "timestamp": 1793088908.3645911,
+      "timestamp_str": "2026-10-27 11:15:08",
+      "agent": "kilo:research-engine"
+    },
+    {
+      "task_id": "T-004-analysis-views",
+      "phase": "phase 2",
+      "phase_num": 2,
+      "description": "[1/6] Analysis and agent views: token-budgeted outline/brief, contradiction discovery, evidence matrix, snapshot diff, UNKNOWN evidence state, claim merge",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793089503.6736298,
+      "timestamp_str": "2026-10-27 11:25:03",
+      "agent": "kilo:research-engine",
+      "impact_assessment": {
+        "why": "The engine can audit a graph but cannot be read by an agent within a token budget, cannot surface unlinked contradictions, and cannot compare two snapshots",
+        "benefits": "Agents get bounded, deterministic views; contradictions are discoverable rather than only recorded; UNKNOWN stops missing data from counting as evidence; snapshots become comparable",
+        "risks": "contract: CLAIM_STATUSES gains UNKNOWN and consensus weights change; dependency: stdlib only; concurrency: read-only analysis; state: merge rewrites edges and must preserve verdict history",
+        "mitigation": "Closed-vocabulary tests, deterministic ordering, explicit omitted counts, merge recorded as a verdict plus edges, and integrity codes for unresolved UNKNOWN"
+      }
+    },
+    {
+      "task_id": "T-004-analysis-views",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[6/6] Analysis and views delivered: token-budgeted outline/brief/claim context with OMITTED counts, contradiction discovery + unlinked proposals, evidence matrix, keystone ranking, exposure, semantic/exact snapshot diff, UNKNOWN evidence state with EVID-007, claim merge; 180 tests pass; 4/4 AIKit gates pass; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793090606.9535983,
+      "timestamp_str": "2026-10-27 11:43:26",
+      "agent": "kilo:research-engine"
+    },
+    {
+      "task_id": "T-004-analysis-views",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'T-004-analysis-views' completed successfully.",
+      "status": "completed",
+      "timestamp": 1793090607.1113079,
+      "timestamp_str": "2026-10-27 11:43:27",
+      "agent": "kilo:research-engine"
+    },
+    {
+      "task_id": "T-005-audit-review",
+      "phase": "phase 2",
+      "phase_num": 2,
+      "description": "[1/2] Review the uncommitted engine delivery for defects, fix confirmed gaps, then commit and publish",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793091340.0161078,
+      "timestamp_str": "2026-10-27 11:55:40",
+      "agent": "kilo:research-engine",
+      "impact_assessment": {
+        "why": "The delivery has no remote and no review pass; four defects were suspected in the newest analysis surface",
+        "benefits": "Diff identity, contradiction scope, merge follow-through and scoped audit corrected; evidence chain stays attached through merges",
+        "risks": "contract: run identity in snapshots, record_edge rename, TEST-001 added; dependency: none; concurrency: read-only review plus transactional writes; state: merge now also rebinds tests",
+        "mitigation": "Failing-first regression tests for each defect, full suite, gates and CLI acceptance before commit"
+      }
+    },
+    {
+      "task_id": "T-005-audit-review",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[2/2] Review complete: four defects fixed (run identity in semantic diff, contradiction question scope, merge test rebinding with TEST-001, scoped outline audit), record_edge made public; 188 tests pass; 4/4 AIKit gates pass; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793091349.7676542,
+      "timestamp_str": "2026-10-27 11:55:49",
+      "agent": "kilo:research-engine"
+    },
+    {
+      "task_id": "T-005-audit-review",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'T-005-audit-review' completed successfully.",
+      "status": "completed",
+      "timestamp": 1793091349.9372308,
+      "timestamp_str": "2026-10-27 11:55:49",
+      "agent": "kilo:research-engine"
+    }
+  ]
 }

@@ -1,0 +1,248 @@
+"""Evidence synthesis: weighted consensus, contradiction pairs, and generated reports."""
+
+from __future__ import annotations
+
+import sqlite3
+from typing import Dict, List, Tuple
+
+from engine.claims import get_claim
+from engine.integrity import check
+from engine.questions import list_questions
+from engine.researches import get_research, research_counts
+
+_STATUS_WEIGHT = {
+    "PROVEN": 1.0,
+    "NUMERIC": 0.9,
+    "UNKNOWN": 0.0,
+    "UNVERIFIED": 0.4,
+    "FALSIFIED": 0.0,
+    "RETRACTED": 0.0,
+    "INVALIDATED": 0.0,
+}
+
+LIMITS = (
+    "PROVEN records an evidence path and a named kill test; it is not a machine-checked proof.",
+    "Consensus is a display heuristic over recorded stances; it never changes a verdict.",
+    "Numeric evidence is current only while its verified run matches the engine code, declared"
+    " inputs and command.",
+    "UNKNOWN records that the evidence is missing; it never counts as support.",
+    "Sources are registered explicitly; the engine performs no literature crawling.",
+    "Single-writer SQLite; concurrent authorship is out of scope.",
+)
+
+
+def stance_claims(conn: sqlite3.Connection, question_id: str) -> List[Tuple[str, str, sqlite3.Row]]:
+    rows = conn.execute(
+        "SELECT e.rel, c.* FROM edge e JOIN claim c ON c.id = e.src_id"
+        " WHERE e.src_kind = 'claim' AND e.dst_kind = 'question' AND e.dst_id = ?"
+        " AND e.rel IN ('supports', 'contradicts', 'answers', 'mentions') ORDER BY c.id",
+        (question_id,),
+    ).fetchall()
+    return [(str(row["id"]), str(row["rel"]), row) for row in rows]
+
+
+def consensus(conn: sqlite3.Connection, question_ref: str) -> float:
+    """Confidence-weighted support minus contradiction in [-1, 1]."""
+    support = 0.0
+    against = 0.0
+    for _claim_id, rel, row in stance_claims(conn, question_ref):
+        weight = _STATUS_WEIGHT.get(str(row["status"]), 0.0) * float(row["confidence"])
+        if rel in ("supports", "answers"):
+            support += weight
+        elif rel == "contradicts":
+            against += weight
+    total = support + against
+    return 0.0 if total == 0 else round((support - against) / total, 4)
+
+
+def _contradictions(conn: sqlite3.Connection, question_id: str) -> List[Tuple[str, str]]:
+    supports = [cid for cid, rel, _ in stance_claims(conn, question_id) if rel == "supports"]
+    against = [cid for cid, rel, _ in stance_claims(conn, question_id) if rel == "contradicts"]
+    return [(left, right) for left in supports for right in against]
+
+
+def report(conn: sqlite3.Connection, research_ref: str) -> str:
+    """Render a full, reproducible research report from the graph."""
+    research = get_research(conn, research_ref)
+    counts = research_counts(conn, research.id)
+    findings = check(conn)
+    lines = [
+        f"# {research.title}",
+        "",
+        f"**Program:** `{research.id}` (`{research.slug}`)  ",
+        f"**Scope:** {research.scope or 'not stated'}  ",
+        f"**Generated from:** the engine database (no hand-written numbers)",
+        "",
+        "## Inventory",
+        "",
+        f"- sources: {counts['source']}",
+        f"- questions: {counts['question']} ({counts['open_questions']} open)",
+        f"- claims: {counts['claim']}",
+        f"- hypotheses: {counts['hypothesis']}",
+        f"- kill tests: {counts['killtest']}",
+        f"- integrity: {sum(f.severity == 'error' for f in findings)} error(s), "
+        f"{sum(f.severity == 'warning' for f in findings)} warning(s)",
+        "",
+        "## Questions",
+        "",
+    ]
+    questions = list_questions(conn, research.id)
+    if not questions:
+        lines.append("_No questions recorded._")
+    for question in questions:
+        stance_rows = stance_claims(conn, question.id)
+        lines.extend(
+            [
+                f"### {question.id}: {question.text}",
+                "",
+                f"- status: {question.status}",
+                f"- consensus: {consensus(conn, question.id):+.4f} (support vs contradiction, weighted)",
+                f"- evidence: {len(stance_rows)} claim(s)",
+                "",
+            ]
+        )
+        if not stance_rows:
+            lines.append("_No claim is linked to this question._")
+        else:
+            lines.extend(
+                [
+                    "| Claim | Stance | Status | Confidence | Assertion | Provenance |",
+                    "|---|---|---|---|---|---|",
+                ]
+            )
+            for claim_id, rel, row in stance_rows:
+                provenance = "-"
+                if row["kind"] == "empirical":
+                    provenance = f"quote at {row['locator']}"
+                elif row["basis"]:
+                    provenance = row["basis"]
+                lines.append(
+                    f"| {claim_id} | {rel} | {row['status']} | {float(row['confidence']):.2f} | "
+                    f"{row['text'].replace('|', '/')} | {str(provenance).replace('|', '/')} |"
+                )
+            lines.append("")
+        pairs = _contradictions(conn, question.id)
+        if pairs:
+            lines.append("**Contradictions:** " + ", ".join(f"{a} vs {b}" for a, b in pairs))
+            lines.append("")
+
+    lines.extend(["## Hypotheses", ""])
+    hypotheses = conn.execute(
+        "SELECT * FROM hypothesis WHERE research_id = ? ORDER BY id", (research.id,)
+    ).fetchall()
+    if not hypotheses:
+        lines.append("_No hypotheses pre-registered._")
+    for row in hypotheses:
+        lines.extend(
+            [
+                f"### {row['id']}: {row['statement']}",
+                "",
+                f"- status: {row['status']}",
+                f"- confidence: {float(row['confidence']):.2f}",
+                f"- registered: {row['registered_at']}",
+                f"- verification criterion: {row['criterion']}",
+                f"- outcome note: {row['outcome_note'] or '-'}",
+                "",
+            ]
+        )
+
+    lines.extend(["## Kill tests", ""])
+    tests = conn.execute(
+        "SELECT * FROM killtest WHERE research_id = ? ORDER BY id", (research.id,)
+    ).fetchall()
+    if not tests:
+        lines.append("_No executable kill tests._")
+    else:
+        lines.extend(["| Test | Target | Command | Latest run |", "|---|---|---|---|"])
+        for row in tests:
+            latest = conn.execute(
+                "SELECT * FROM test_run WHERE test_id = ? ORDER BY id DESC LIMIT 1", (row["id"],)
+            ).fetchone()
+            outcome = "never run" if latest is None else (
+                f"{'PASS' if latest['passed'] else 'FAIL'} (exit {latest['exit_code']})"
+            )
+            target = row["claim_id"] or row["hypothesis_id"]
+            lines.append(
+                f"| {row['id']} | {target} | `{row['command'].replace('|', '/')}` | {outcome} |"
+            )
+        lines.append("")
+
+    lines.extend(["## Audit", ""])
+    if not findings:
+        lines.append("_No integrity findings._")
+    for finding in findings:
+        lines.append(f"- **{finding.severity.upper()} {finding.code}** `{finding.subject}`: {finding.message}")
+
+    lines.extend(["", "## Limits", ""])
+    for limit in LIMITS:
+        lines.append(f"- {limit}")
+    return "\n".join(lines) + "\n"
+
+
+def scorecard(conn: sqlite3.Connection, research_ref: str) -> str:
+    """Render one line per claim, ordered by status then identifier."""
+    research = get_research(conn, research_ref)
+    order = {status: index for index, status in enumerate(
+        ("FALSIFIED", "INVALIDATED", "RETRACTED", "UNVERIFIED", "NUMERIC", "PROVEN")
+    )}
+    rows = conn.execute(
+        "SELECT * FROM claim WHERE research_id = ? ORDER BY id", (research.id,)
+    ).fetchall()
+    ranked = sorted(rows, key=lambda row: (order.get(str(row["status"]), 99), str(row["id"])))
+    lines = [f"# Scorecard: {research.title}", "", "| Claim | Status | Confidence | Assertion |", "|---|---|---|---|"]
+    for row in ranked:
+        lines.append(
+            f"| {row['id']} | {row['status']} | {float(row['confidence']):.2f} | "
+            f"{row['text'].replace('|', '/')} |"
+        )
+    if not ranked:
+        lines.append("| - | - | - | no claims |")
+    return "\n".join(lines) + "\n"
+
+
+def claim_detail(conn: sqlite3.Connection, claim_ref: str) -> str:
+    """Render one claim with provenance, dependencies, verdicts and linked tests."""
+    claim = get_claim(conn, claim_ref)
+    lines = [
+        f"# {claim.id}: {claim.text}",
+        "",
+        f"- research: {claim.research_id}",
+        f"- kind: {claim.kind}",
+        f"- status: {claim.status}",
+        f"- confidence: {claim.confidence:.2f}",
+        f"- kill test: {claim.kill_test or '-'}",
+        f"- source: {claim.source_id or '-'}",
+        f"- quote: {claim.quote or '-'}",
+        f"- locator: {claim.locator or '-'}",
+        f"- basis: {claim.basis or '-'}",
+        "",
+        "## Verdict history",
+        "",
+    ]
+    verdicts = conn.execute(
+        "SELECT * FROM verdict WHERE subject_kind = 'claim' AND subject_id = ? ORDER BY id",
+        (claim.id,),
+    ).fetchall()
+    if not verdicts:
+        lines.append("_No verdict recorded._")
+    for row in verdicts:
+        lines.append(f"- {row['at']} {row['previous_status']} -> {row['status']}: {row['evidence']}")
+    lines.extend(["", "## Edges", ""])
+    edges = conn.execute(
+        "SELECT * FROM edge WHERE (src_kind = 'claim' AND src_id = ?)"
+        " OR (dst_kind = 'claim' AND dst_id = ?) ORDER BY id",
+        (claim.id, claim.id),
+    ).fetchall()
+    if not edges:
+        lines.append("_No edges._")
+    for row in edges:
+        lines.append(
+            f"- {row['src_kind']}:{row['src_id']} --{row['rel']}--> {row['dst_kind']}:{row['dst_id']}"
+        )
+    return "\n".join(lines) + "\n"
+
+
+def inventory(conn: sqlite3.Connection) -> Dict[str, int]:
+    """Return engine-wide counts used by the CLI overview."""
+    tables = ("research", "source", "question", "claim", "hypothesis", "killtest", "test_run", "verdict")
+    return {table: conn.execute(f"SELECT COUNT(*) AS n FROM {table}").fetchone()["n"] for table in tables}

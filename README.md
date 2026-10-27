@@ -6,10 +6,28 @@ A falsification-first research engine that turns questions into provenance-backe
 
 ## ⚡ 30-Second Cold-Start Quick Reference
 
-- **Runtime Prerequisites**: <FILL: each runtime this project needs and its minimum version>
+- **Runtime Prerequisites**: Python 3.10 or newer. Standard library only: no network calls, no third-party packages.
 - **Canonical Regression Shield Gate**:
   ```bash
-  <FILL: the command that runs the whole test suite from this project root>
+  python -m unittest discover -s tests -t .
+  ```
+- **Try every mechanic in under 10 seconds** (from this folder):
+  ```bash
+  python -m engine demo
+  python -m engine check
+  python -m engine report r_000001
+  ```
+  `demo` builds a synthetic program with a source quote, a derived claim, a pre-registered
+  hypothesis, a two-run kill test, a numeric verdict, and a transitive collapse. It is clearly
+  labelled synthetic and makes no scientific claim.
+- **Start a real program**:
+  ```bash
+  python -m engine research add "My research" --scope "What this program is allowed to conclude"
+  python -m engine question add r_000001 "Does mechanism M drive outcome O?"
+  python -m engine source add r_000001 --title "Paper title" --year 2026 --doi 10.1000/example
+  python -m engine claim add r_000001 --kind empirical --text "M covaries with O." \
+    --source s_000001 --quote "exact source sentence" --locator "Results, paragraph 2" \
+    --kill-test "A replicate where M rises and O falls."
   ```
 
 ### 🛠️ AIKit Commands (run from the AIKit folder)
@@ -20,19 +38,265 @@ A falsification-first research engine that turns questions into provenance-backe
 | Repair memory and map, then check | `python aikit.py fix research-engine` |
 | Resume an interrupted task | `python aikit.py resume research-engine` |
 
-## 📦 What's Inside
+## Why this is not "just lattice"
+
+`lattice` is a good evidence store: a provenance-first graph of papers, quote-backed claims and
+questions. It is not a research lifecycle. The engine borrows its strongest mechanic (a claim
+cannot exist without provenance) and adds the parts that decide what a claim is allowed to mean.
+
+| Reference | Mechanic adopted | What it becomes here |
+|---|---|---|
+| `lattice` | Provenance-first claim graph | Every empirical claim stores a source, an exact quote and a locator; questions collect supporting and contradicting claims |
+| `fluid-universe` | Falsification-first claim ledger | Closed verdict vocabulary, a required kill test, negative results kept, every number regenerated from recorded evidence |
+| `fluid-universe` | Two-run independent verification | `test verify` runs a command twice in separate processes and refuses a NUMERIC verdict when the runs disagree |
+| `obezite-mekanizma-projesi` | Pre-registration (K13) | A hypothesis must be registered with a verification criterion before an outcome exists |
+| `obezite-mekanizma-projesi` | Transitive cascade invalidation | Retracting or falsifying a premise invalidates every dependent claim in one transaction |
+| `PNN` | Executable phase gates and golden run | One `check` gate audits the whole graph; `demo` is a deterministic golden path; generated reports carry a manifest with digests and limits |
+| `fluid-universe` (extended) | Stale-evidence rejection | Every run records the engine code, declared inputs and command hash; a NUMERIC claim is only current while a verified run matches them |
+| `obezite-mekanizma-projesi` (extended) | Source verification | A source can be marked under concern or retracted; retraction retires every claim that cites it |
+| `lattice` (extended) | Snapshot tooling | Report manifests and JSONL digests make drift detectable |
+| `lattice` | Token-budgeted views | `outline`, `brief` and `claim context` render the graph under a token budget and state exactly how many lines were omitted |
+| `lattice` | Contradiction discovery | Pairs supporting and contradicting claims inside one question, ranked by confidence and keyword overlap, with an opt-in unlinked proposal mode |
+| `lattice` | Evidence matrix and keystones | Source x question coverage, and the claims the rest of the graph leans on |
+| `PNN` (extended) | Explicit UNKNOWN | Missing evidence is a state, never a silent pass |
+
+The decision was **not** to fork all four projects. Three of them carry domain content and large
+pipelines that would drown a general engine. The engine takes the transferable *mechanics*,
+implements them clean-room on one standard-library SQLite graph, and leaves domain research as
+programs the engine can host.
+
+## How It Works
+
+1. **A program is a boundary.** A research program (`research`) owns its sources, questions,
+   claims, hypotheses and tests. Edges may not cross programs.
+2. **Sources enter once.** A source needs a title and at least one of year, DOI or URL. Claims
+   cite the registered source, never a raw URL.
+3. **Empirical claims need provenance.** `kind=empirical` refuses to save unless a source, an
+   exact quote and a locator are present. `kind=derived` needs a basis or premise claims.
+4. **Hypotheses are pre-registered.** `hypothesis add` records the statement, confidence and the
+   observation that would refute it at the moment of registration. The outcome is recorded later
+   and is append-only.
+5. **Kill tests are executable and bound.** A test binds a shell command, its declared inputs
+   (`--input`, with globs expanded) and the engine code to a claim or hypothesis. `test verify`
+   runs it twice and requires the same exit code and output hashes. Each run records
+   `command_sha256`, `code_sha256`, `inputs_sha256`, the git commit and the runtime, so evidence
+   produced against different code is detectable and never silently reused. A directory is refused
+   as an input: it has no stable content, so declare files or a glob.
+6. **Verdicts are append-only and tied to evidence.** `claim verdict` records `previous -> new`,
+   evidence, note, actor, time and — for `NUMERIC` — the verified run group it cites. A `NUMERIC`
+   promotion is refused unless the claim has a test whose two agreeing runs are bound to the
+   current code, inputs and command; `--group` pins a specific group.
+7. **Collapse is transitive.** `claim invalidate` records the failed root and marks every claim
+   that depends on it as `INVALIDATED`, with the reason preserved in the invalidation record.
+8. **Reports are generated and verifiable.** `report` and `scorecard` compute consensus,
+   contradictions, gaps and audit findings from the graph. `report --out` also writes a manifest
+   with a content digest, an exact record digest, the report digest, counts, findings and limits.
+   `report --check` compares content, so re-verifying an unchanged test is not drift; `--strict`
+   also compares the exact records and reports that churn. No number in a report is hand-written.
+9. **Sources can be retired.** `source status` records an expression of concern; `source retract`
+   retires every claim that cites the source and cascades to their dependents.
+10. **Missing evidence is explicit.** `claim verdict --status UNKNOWN` records that the evidence
+    does not exist and why. UNKNOWN has zero consensus weight, never promotes a dependent, and
+    is never treated as a failure that would cascade.
+11. **The graph is readable under a budget.** `outline` gives one line per question, hypothesis
+    and test; `brief` gives the strongest support and contradiction per question; `claim context`
+    gives one claim with provenance, premises and history. Each states its omitted line count.
+12. **Duplicates merge instead of accumulating.** `claim merge KEEP DUP...` repoints every edge
+    and every bound test to the survivor and records each duplicate as RETRACTED with the
+    survivor as its evidence.
+
+## Verdict Vocabulary
+
+| Status | Meaning | Requirements |
+|---|---|---|
+| `UNVERIFIED` | Recorded, not yet adjudicated | provenance rules for its kind |
+| `PROVEN` | An argument establishes it | kill test + evidence-backed verdict |
+| `UNKNOWN` | The evidence does not exist | evidence naming what is missing; zero consensus weight |
+| `NUMERIC` | A reproducible measurement establishes it | kill test + evidence + a test that passed twice with identical output, bound to the current code, inputs and command; the verdict cites that run group |
+| `FALSIFIED` | Evidence contradicts it | evidence-backed verdict |
+| `RETRACTED` | The author withdraws it, or its only source was retracted | evidence-backed verdict |
+| `INVALIDATED` | A premise collapsed; this claim was not independently re-established | cascade record |
+
+`PROVEN` means "the evidence path is recorded and the kill test is named"; it is not a
+machine-checked formal proof. The engine's job is to keep the record honest, not to replace the
+researcher's judgment.
+
+## Commands
+
+```text
+python -m engine [--db PATH] [--json] init
+python -m engine [--db PATH] [--json] demo
+python -m engine [--db PATH] [--json] check
+python -m engine [--db PATH] [--json] inventory
+
+python -m engine [--db PATH] research add TITLE [--scope TEXT] [--slug SLUG]
+python -m engine [--db PATH] research list
+python -m engine [--db PATH] research show REF
+
+python -m engine [--db PATH] question add RESEARCH TEXT
+python -m engine [--db PATH] question list [--research REF]
+python -m engine [--db PATH] question close REF
+
+python -m engine [--db PATH] source add RESEARCH --title TITLE [--year Y] [--doi DOI] [--url URL]
+python -m engine [--db PATH] source list [--research REF]
+python -m engine [--db PATH] source status REF --status active|expression_of_concern|retracted [--note TEXT]
+python -m engine [--db PATH] source retract REF --reason TEXT --evidence TEXT
+
+python -m engine [--db PATH] claim add RESEARCH --text TEXT --kind KIND [--source REF]
+                        [--quote TEXT] [--locator TEXT] [--confidence C] [--kill-test TEXT]
+                        [--basis TEXT] [--from CLAIM]...
+python -m engine [--db PATH] claim list [--research REF] [--status STATUS]
+python -m engine [--db PATH] claim show REF
+python -m engine [--db PATH] claim link SRC DST --rel REL
+python -m engine [--db PATH] claim link-question CLAIM QUESTION --stance STANCE
+python -m engine [--db PATH] claim verdict REF --status STATUS --evidence TEXT [--note TEXT] [--group GROUP]
+python -m engine [--db PATH] claim invalidate REF --status FALSIFIED|RETRACTED --reason TEXT --evidence TEXT
+python -m engine [--db PATH] claim merge KEEP DUP... [--note TEXT]
+python -m engine [--db PATH] claim context REF [--budget N]
+
+python -m engine [--db PATH] hypothesis add RESEARCH --statement TEXT --criterion TEXT
+                        [--confidence C] [--question REF]
+python -m engine [--db PATH] hypothesis list [--research REF]
+python -m engine [--db PATH] hypothesis outcome REF --status SUPPORTED|REFUTED|INCONCLUSIVE --evidence TEXT
+python -m engine [--db PATH] hypothesis card REF
+
+python -m engine [--db PATH] test add RESEARCH --name NAME --command CMD [--claim REF]
+                        [--hypothesis REF] [--expect-exit N] [--timeout SECONDS] [--input PATH]...
+python -m engine [--db PATH] test list [--research REF]
+python -m engine [--db PATH] test run REF [--runs N]
+python -m engine [--db PATH] test verify REF
+python -m engine [--db PATH] test runs [REF] [--limit N]
+
+python -m engine [--db PATH] cascade preview REF
+python -m engine [--db PATH] report REF [--out PATH]
+python -m engine [--db PATH] report REF --check PATH [--strict]
+python -m engine [--db PATH] outline REF [--budget N]
+python -m engine [--db PATH] brief REF [--budget N]
+python -m engine [--db PATH] analysis contradictions REF [--min-score S] [--unlinked]
+python -m engine [--db PATH] analysis matrix REF
+python -m engine [--db PATH] analysis keystone REF [--limit N]
+python -m engine [--db PATH] analysis expose REF
+python -m engine [--db PATH] diff OLD.jsonl NEW.jsonl [--exact]
+python -m engine [--db PATH] scorecard REF
+python -m engine [--db PATH] export PATH [--research REF]
+```
+
+`--json` prints stable machine-readable payloads. `check` exits 1 when any error-level finding is
+present and 0 when only warnings remain. Domain errors print the `Error / Why / Fix` triad and exit 1.
+
+## Integrity Gate
+
+`python -m engine check` audits:
+
+- empirical claims missing a source, quote or locator (`PROV-001`);
+- sources with no year, DOI or URL (`PROV-002`);
+- promoted claims without a kill test or evidence-backed verdict (`EVID-001`);
+- numeric claims without a two-run agreeing test (`EVID-002`);
+- numeric claims whose verified run no longer matches the current engine code, declared inputs or
+  command (`EVID-005`);
+- numeric claims whose promotion verdict cites a group that is no longer current (`EVID-006`);
+- failed or invalidated claims without verdict evidence (`EVID-003`);
+- hypothesis outcomes without verdict evidence (`EVID-004`);
+- claims that still cite a retracted source (`PROV-003`) or one under an expression of concern
+  (`PROV-004`, warning);
+- dependency cycles (`GRAPH-001`), dangling edges (`GRAPH-002`), self edges (`GRAPH-003`);
+- edges that cross program boundaries (`SCOPE-001`);
+- dependents left standing after a premise failed (`CASCADE-001`);
+- outcome timestamps before registration (`PRE-001`);
+- evidence gaps (`GAP-001`, `GAP-002`), duplicate claim text (`DUP-001`, live claims only),
+  empty programs (`EMPTY-001`);
+- a test still bound to a retired claim (`TEST-001`, warning);
+- an UNKNOWN claim with no recorded reason (`EVID-007`, warning).
+
+Warnings are research hygiene; errors block a trustworthy report.
+
+## Data Model
+
+One SQLite file (default `research.db`), schema version 3. Tables: `research`, `source`, `question`,
+`claim`, `edge`, `hypothesis`, `killtest`, `test_run`, `verdict`, `invalidation`, plus
+`schema_meta` and `counters`. Writes use `BEGIN IMMEDIATE`; WAL and `synchronous=FULL` are enabled
+for a durable state file. `verdict`, `test_run` and `invalidation` are append-only. An older
+database is migrated additively in place and the upgrade is announced with the number of numeric
+claims that need re-binding; a newer version is refused without modification.
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
+## Non-Negotiables
+
+- No empirical claim without a source, exact quote and locator.
+- No promotion without a named kill test and an evidence path.
+- No NUMERIC verdict without two agreeing runs; a single run is recorded as evidence, not proof.
+- A NUMERIC promotion must cite a current verified run group; there is no promotion without one.
+- Numeric evidence must still match the current engine code, declared inputs and command; stale
+  evidence is an error, not a pass.
+- A retracted source retires the claims that cite it; a live claim citing one is an error.
+- A committed report is only valid alongside its manifest, and `report --check` must stay clean.
+- Negative results are kept. Corrections are new verdicts, never silent edits.
+- A failed premise invalidates its dependents; a report with `CASCADE-001` is not trustworthy.
+- Reports and scorecards are generated from the graph. Do not hand-write their numbers.
+- The engine is standard library only and makes no network calls. Sources are registered explicitly.
+
+## What's Inside
 
 ```text
 research-engine/
-├── .gitignore                <- transient AIKit state excluded
-├── LICENSE                   <- Aegean Science License 1.1 (ASL-1.1): free non-commercial research
-├── COMMERCIAL.md             <- Commercial licensing terms
-├── ASSETS.md                 <- Asset/data manifest: what the license covers
-├── LICENSES/                 <- REUSE license texts
-├── REUSE.toml                <- Machine-readable SPDX metadata
+├── .aikit/                   <- project memory: ledger, decisions, guidelines
+├── .gitignore
+├── ASSETS.md                 <- data and asset manifest
+├── COMMERCIAL.md
+├── LICENSE                   <- Aegean Science License 1.1 (ASL-1.1)
+├── LICENSES/
+├── REUSE.toml
 ├── README.md
-└── .aikit/                   <- this project's memory: record, ledger, decisions
+├── docs/
+│   ├── ARCHITECTURE.md       <- layers, schema, transactions, extension points
+│   └── MECHANICS.md          <- reference mechanics and their clean-room rules
+├── engine/
+│   ├── __init__.py
+│   ├── __main__.py           <- `python -m engine`
+│   ├── analysis.py           <- contradictions, coverage matrix, keystones
+│   ├── artifacts.py          <- timestamps, output digests and atomic writes
+│   ├── bundle.py             <- deterministic JSONL export
+│   ├── cascade.py            <- transitive invalidation
+│   ├── claims.py             <- provenance rules, verdicts, edges
+│   ├── cli.py                <- one parser and dispatch surface
+│   ├── context.py            <- token-budgeted outline, brief and claim views
+│   ├── database.py           <- connection, schema, transactions, IDs
+│   ├── demo.py               <- synthetic golden path
+│   ├── diffing.py            <- snapshot comparison
+│   ├── errors.py             <- Error / Why / Fix
+│   ├── evidence.py           <- run binding and current verified groups
+│   ├── hypotheses.py         <- pre-registration and outcomes
+│   ├── integrity.py          <- the check gate
+│   ├── killtests.py          <- executable tests, binding and two-run verification
+│   ├── manifest.py           <- report manifests and drift checks
+│   ├── merging.py            <- duplicate claim merge
+│   ├── models.py             <- frozen DTOs and closed vocabularies
+│   ├── provenance.py         <- code and input identity recorded with evidence
+│   ├── questions.py
+│   ├── researches.py
+│   ├── sources.py
+│   └── synthesis.py          <- consensus, report, scorecard
+└── tests/                    <- regression shield
 ```
+
+## Deliberate Limits
+
+- **No literature crawling.** The engine is a reasoning ledger, not a search engine. Sources are
+  registered explicitly; ingestion adapters are a separate concern.
+- **Single writer.** SQLite serialises writes by design; that is enough for one researcher or one
+  agent at a time.
+- **Consensus is a display heuristic.** The weighted score helps compare questions; it is not a
+  posterior probability and never changes a verdict. UNKNOWN contributes zero.
+- **Discovery is advisory.** `analysis` proposes contradictions and keystones; it never writes
+  an edge. Only an explicit `claim link` records a relation.
+- **Views are summaries.** A token budget truncates lines; the omitted count is always shown so
+  a reader can tell a complete view from a clipped one. The anchor line is always kept, so a
+  budget smaller than that line yields a single over-budget line rather than an empty view.
+- **Human judgment stays in the loop.** Tests produce evidence; they do not auto-promote claims.
+- **Undeclared inputs are invisible.** Evidence is bound to the engine code and to `--input` paths.
+  A script that reads an undeclared file can change without invalidating its run; declare the file.
+  Globs are expanded deterministically and a directory is refused, so a declaration cannot
+  silently cover nothing.
 
 ## 📜 License
 

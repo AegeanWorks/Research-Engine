@@ -1,0 +1,205 @@
+# Architecture
+
+## Shape
+
+The engine is one process, one SQLite file, and one dependency direction:
+
+```text
+cli.py
+  -> researches / questions / sources / claims / hypotheses / killtests
+     -> database.py (transactions, IDs, schema)
+     -> models.py (frozen records, closed vocabularies)
+  -> cascade.py      (uses claims + database)
+  -> integrity.py    (reads the whole graph)
+  -> synthesis.py    (reads the whole graph, calls integrity)
+  -> bundle.py       (reads the whole graph)
+demo.py              (composes every write path for the golden path)
+```
+
+No domain module imports `cli.py`; `integrity.py` and `synthesis.py` are read-only over the graph.
+`cascade.py` is the only writer that composes other writers, and it does so inside one transaction.
+
+## Storage
+
+SQLite with WAL, `synchronous=FULL` and `foreign_keys=ON`. The connection runs in autocommit mode
+(`isolation_level=None`) and every public write uses:
+
+```text
+BEGIN IMMEDIATE -> validate -> insert/update -> COMMIT
+```
+
+`transaction()` is re-entrant: a nested call joins the outer transaction. That is what lets
+`cascade.invalidate` record the root verdict, every dependent verdict, and the invalidation record
+as one atomic unit. A crash leaves either the whole collapse or none of it.
+
+Identifiers come from a `counters` table inside the transaction, so `c000001`-style references are
+readable and gap-free without `AUTOINCREMENT` surprises.
+
+## Records
+
+| Table | Role | Mutable? |
+|---|---|---|
+| `research` | program boundary | title/scope by hand; never deleted by the engine |
+| `source` | bibliographic provenance | metadata and evidence status (`active`, `expression_of_concern`, `retracted`) |
+| `question` | collection point for evidence | status (open/closed) |
+| `claim` | assertion + provenance + verdict | status via append-only verdicts |
+| `edge` | typed relation between claims/questions/hypotheses | append-only |
+| `hypothesis` | pre-registered prediction | outcome once |
+| `killtest` | executable command, declared inputs and target | append-only |
+| `test_run` | one process execution, its output hashes and binding | append-only |
+| `verdict` | `previous -> new` with evidence, actor and time | append-only |
+| `invalidation` | root, reason, and the JSON list of affected dependents | append-only |
+
+`claim.status` is a cached projection of its latest verdict. The verdict table is the source of
+truth for history; the cached column makes listings and consensus cheap. Integrity checks compare
+them.
+
+## Invariants
+
+1. Empirical claims carry a source, quote and locator.
+2. A derived claim carries a basis or at least one premise edge.
+3. A promoted claim has a kill test and an evidence-backed verdict.
+4. A numeric claim has a run group with at least two passing runs and identical fingerprints.
+5. A numeric claim is current only while a verified group matches the engine code, declared inputs
+   and command hash, and its promotion verdict cites such a group.
+6. Dependency edges (`derived_from`, `depends_on`) form a DAG.
+7. Edges never cross program boundaries.
+8. A dependent of a failed premise must be invalidated or retracted.
+9. A claim does not cite a retracted source unless it is already failed.
+10. Outcomes are dated after registration.
+11. An UNKNOWN claim carries the reason its evidence is missing, contributes zero consensus
+    weight, and blocks the promotion of anything that depends on it without cascading.
+
+## Evidence Binding
+
+Each run records four identities: `command_sha256` of the command string, `code_sha256` over
+`engine/**.py`, `inputs_sha256` over the test's declared `--input` paths, and the git commit plus
+runtime for diagnosis. `current_verified_groups` accepts only groups whose two runs agree and whose
+three binding hashes equal the values computed now. Editing the command, the engine code or a
+declared input therefore retires the evidence instead of silently reusing it. Files a test reads
+without declaring them are outside the guarantee; that limit is stated in the README.
+
+Declarations are canonicalised by `provenance.resolve_inputs`: globs are expanded and sorted, names
+are de-duplicated, and a directory is refused. Hashing is injective — each entry contributes a
+length-prefixed name, a typed kind tag (`file` or `missing`) and length-prefixed content — so an
+absent declaration cannot collide with a file whose bytes happen to be the word `missing`, and a
+new file appearing under a declared glob changes the digest.
+
+The binding excludes `git_dirty`, the Python version and the platform: a durable result should not
+die because the worktree has an unrelated edit or the reviewer upgraded Python. Those fields are
+recorded so a disagreement can be diagnosed.
+
+## Promotion
+
+`set_verdict` refuses a `NUMERIC` verdict unless the claim has a test with a verified group that
+matches the current binding, and stores that group in `verdict.evidence_group`. `PROVEN` needs no
+group because it records an argument, not a measurement. Integrity reports `EVID-005` when no
+group is current at all and `EVID-006` when the promotion cites a group that is no longer current —
+the case where a claim was promoted on evidence that has since been superseded.
+
+Any *current* group is acceptable, not only the newest: re-verifying unchanged code allocates a new
+group and must not invalidate the promotion.
+
+## Schema Versions
+
+`initialize` creates missing tables, then migrates an older `schema_meta.version` additively and
+raises the version, returning a report with the starting version and how many numeric claims lost
+their binding. `CREATE TABLE IF NOT EXISTS` alone would leave an older table without its new
+columns, so `_add_missing_columns` inspects `PRAGMA table_info` and adds each missing column inside
+the same transaction. Each version step is separate, so a version-1 database passes through the
+version-2 step and then the version-3 step. A version newer than the build is refused without
+modification, and the migration preserves existing rows, including legacy runs whose binding
+columns are empty.
+
+## Generated Reports
+
+`report` is a pure function of the graph. `report --out PATH` writes the Markdown plus
+`PATH.manifest.json` with a schema id, engine version, research id, `report_sha256`,
+`content_sha256`, `graph_sha256`, counts, finding totals and the shared `LIMITS` block.
+
+Two digests exist because one is not enough:
+
+- `content_sha256` hashes a projection where `test_run` rows lose `id`, `run_group`, `started_at`,
+  `duration_ms` and `output_tail` and are de-duplicated. It is stable across a pure
+  re-verification and changes when a claim, verdict, source or run fingerprint changes.
+- `graph_sha256` hashes every exported record exactly, so any recorded run changes it.
+
+`report --check PATH` compares content, the rendered text and the counts, and exits 1 on drift.
+`--strict` additionally compares `graph_sha256`, which is the right check at release time.
+
+## Reproducibility
+
+`test_run` stores the exit code, duration, stdout/stderr SHA-256 hashes and a 2,000-character tail.
+Two runs are comparable because the fingerprint is `(exit code, stdout hash, stderr hash)`.
+Commands run in the project root with a bounded timeout; on timeout the whole process tree is
+killed (`taskkill /T` on Windows, `killpg` on POSIX). A test that prints timings or random values
+will fail two-run verification by design: make the evidence deterministic or do not call it
+numeric.
+
+Reports contain only values computed from the graph. `export` writes JSONL through a flushed
+temporary file and `os.replace`, so a partial bundle is never visible. Report and manifest are
+written through the same atomic helper, in that order; a manifest without a report is detectable
+and `report --check` refuses to invent one.
+
+## Extension Points
+
+- **New relation:** add it to the relevant vocabulary in `models.py`, validate it in the adding
+  function, and decide whether integrity should treat it as a dependency.
+- **New verdict rule:** add a check to `integrity.check` with a stable code; never weaken an
+  existing code silently.
+- **New evidence adapter:** register sources from a new module and keep it outside `engine/cli.py`;
+  the graph contract should not depend on the adapter.
+- **New report:** read the graph and keep it free of hand-written numeric claims.
+
+## Deliberate Non-Goals
+
+- Distributed writers, CRDTs or multi-user concurrency.
+- Network discovery inside the engine.
+- Automatic promotion from test results.
+- A formal proof checker. `PROVEN` records an evidence path, not a verified derivation.
+
+## Agent Views
+
+`engine/context.py` renders the graph for a bounded reader. `estimate_tokens` is the stable
+`(chars + 3) / 4` heuristic; `pack` always keeps the first line as an anchor, drops from the end
+when the budget is exhausted, reserves 40 tokens and returns the omitted count. Every view ends
+with `OMITTED: n` when it was clipped, so a truncated view is never mistaken for a complete one.
+
+| View | Content | Cost driver |
+|---|---|---|
+| `outline` | counts, one line per question/hypothesis/test, audit totals | questions + hypotheses + tests |
+| `brief` | per question: consensus, strongest support, strongest contradiction | questions + 2 lines each |
+| `claim context` | one claim with provenance, premises, verdict history | premises + verdicts |
+
+The audit line in `outline` is scoped with `integrity.findings_for_research`, so a second
+program's findings never inflate this program's totals. A budget smaller than the anchor line
+still returns that one line: an empty view would be less useful than an honest overrun.
+
+Views are read-only and deterministic: the same graph and budget produce the same bytes.
+
+## Discovery
+
+`engine/analysis.py` is advisory and never writes. `contradictions` pairs a supporting and a
+contradicting claim **inside one question** — deliberately narrower than a global pairing, because
+two claims about different questions are not in conflict. The score is
+`0.6 * mean(confidence) + 0.4 * jaccard(keywords)`, sorted descending. `unlinked_contradictions`
+proposes pairs with no `contradicts` edge at a default overlap of 0.35; a human records the edge.
+`evidence_matrix` counts claims per source and question and reports uncovered questions.
+`keystone_claims` ranks by transitive dependents plus inbound edges, reusing `cascade.dependents`
+so the ranking matches what a collapse would actually do.
+
+## Snapshots and Merges
+
+`engine/diffing.py` compares two exports. The default comparison is semantic: it reuses
+`bundle.content_records`, so re-verifying an unchanged test is not a difference; `--exact` compares
+run bookkeeping too. Records are matched by `(type, id)`, so a renamed field is a change and a
+reordering is not. Projected runs carry the identity `run:<test>:<run_tag>`: stable across a
+re-verification, distinct across a test's two runs, and changed in place when a run's content
+changes. The CLI exits 1 when the snapshots differ.
+
+`engine/merging.py` keeps one live claim, repoints every edge that touched a duplicate (dropping
+edges that would become self-loops), repoints bound kill tests to the survivor, deletes the
+duplicate's edges, and records the duplicate as `RETRACTED` with the survivor as its evidence.
+Nothing is deleted from history: the duplicate keeps its verdict trail, and `DUP-001` ignores
+retired claims. A test that still targets a retired claim through any other path is reported as
+`TEST-001`.

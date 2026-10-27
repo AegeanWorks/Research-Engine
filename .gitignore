@@ -6,3 +6,10 @@
 __pycache__/
 *.py[cod]
 node_modules/
+
+# generated local evidence graph
+research.db
+*.db
+*.db-wal
+*.db-shm
+*.tmp_*
