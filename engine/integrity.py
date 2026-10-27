@@ -216,7 +216,7 @@ def check(conn: sqlite3.Connection) -> List[Finding]:
                 )
             )
             continue
-        state = control_state(conn, test, groups[-1])
+        state = control_state(conn, test, groups[0])
         if not state["falsified"]:
             findings.append(
                 _finding(
@@ -456,17 +456,51 @@ def check(conn: sqlite3.Connection) -> List[Finding]:
         )
 
     for row in conn.execute(
-        "SELECT DISTINCT o.claim_id AS claim_id FROM observation o WHERE o.voided = 0"
-        " AND NOT EXISTS (SELECT 1 FROM event e WHERE e.kind = 'claim.stats'"
-        " AND e.subject = o.claim_id) ORDER BY o.claim_id"
+        "SELECT claim_id, MAX(at) AS data_at FROM observation GROUP BY claim_id ORDER BY claim_id"
     ):
+        claim_id = str(row["claim_id"])
+        analysis = conn.execute(
+            "SELECT MAX(at) AS last FROM event WHERE subject = ?"
+            " AND kind IN ('claim.stats', 'claim.trend')",
+            (claim_id,),
+        ).fetchone()["last"]
+        observation_ids = [
+            str(item["id"])
+            for item in conn.execute(
+                "SELECT id FROM observation WHERE claim_id = ? ORDER BY id", (claim_id,)
+            )
+        ]
+        voided_at = None
+        if observation_ids:
+            marks = ",".join("?" for _ in observation_ids)
+            voided_at = conn.execute(
+                f"SELECT MAX(at) AS last FROM event WHERE kind = 'observation.void'"
+                f" AND subject IN ({marks})",
+                observation_ids,
+            ).fetchone()["last"]
+        live = int(
+            conn.execute(
+                "SELECT COUNT(*) AS n FROM observation WHERE claim_id = ? AND voided = 0",
+                (claim_id,),
+            ).fetchone()["n"]
+        )
+        data_at = max(str(row["data_at"]), str(voided_at or ""))
+        if analysis is not None and str(analysis) >= data_at:
+            continue
+        if analysis is None and live == 0:
+            continue
+        message = (
+            "claim has recorded observations but no statistics run"
+            if analysis is None
+            else "observations changed after the last statistics run"
+        )
         findings.append(
             _finding(
                 "OBS-001",
                 "warning",
-                str(row["claim_id"]),
-                "claim has recorded observations but no statistics run",
-                "run `analysis stats CLAIM --baseline ... --treatment ...` before citing numbers.",
+                claim_id,
+                message,
+                "re-run `analysis stats CLAIM --baseline ... --treatment ...` before citing numbers.",
             )
         )
 

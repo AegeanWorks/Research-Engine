@@ -245,7 +245,8 @@ groups with `engine/stats.py`: Cohen's d, Welch t with a beta-function p-value, 
 (exact for untied small samples, tie-corrected normal otherwise), and a seeded percentile bootstrap.
 The result states whether the two tests agree and carries explicit warnings for small groups,
 degenerate variance, the approximation, disagreement, and an uncorrected pairwise test among more
-than two groups. `analysis trend` fits a least-squares slope over a group's recording order, and
+than two groups. Labels are case-insensitive, a self-comparison is refused, and so is a bootstrap
+with fewer than ten resamples. `analysis trend` fits a least-squares slope over a group's recording order, and
 refuses to pretend when there are fewer than three points. Every run is logged as `claim.stats`
 or `claim.trend`, and `OBS-001` warns when observations exist without a statistics run.
 

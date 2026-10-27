@@ -234,6 +234,20 @@ def claim_statistics(
 ) -> dict:
     """Compare two observation groups of a claim and record that the comparison happened."""
     claim = get_claim(conn, claim_ref)
+    baseline = baseline.strip().lower()
+    treatment = treatment.strip().lower()
+    if baseline == treatment:
+        raise EngineError(
+            f"cannot compare group {baseline!r} with itself",
+            "a comparison needs two different groups for a difference to mean anything.",
+            "choose a different baseline or treatment label.",
+        )
+    if resamples < 10:
+        raise EngineError(
+            f"too few bootstrap resamples: {resamples}",
+            "a percentile interval from fewer than ten resamples is noise.",
+            "pass --resamples 2000 or more.",
+        )
     groups = group_values(conn, claim.id)
     for label in (baseline, treatment):
         if label not in groups:
@@ -301,6 +315,7 @@ def claim_trend(
     would otherwise be indistinguishable. Fewer than three values yield no estimate and a warning.
     """
     claim = get_claim(conn, claim_ref)
+    group = group.strip().lower()
     groups = group_values(conn, claim.id)
     if group not in groups:
         available = ", ".join(sorted(groups)) or "none"
@@ -315,10 +330,13 @@ def claim_trend(
     if len(values) < MIN_GROUP:
         warnings.append(f"fewer than {MIN_GROUP} observations; no trend is estimated")
     result.update({"claim": claim.id, "group": group, "warnings": warnings})
-    detail = (
-        f"{group} n={len(values)} slope={result['slope']:.6g} r={result['r']:.3f}"
-        f" p={result['p']:.4g}"
-    )
+    if len(values) < MIN_GROUP:
+        detail = f"{group} n={len(values)} insufficient for a trend"
+    else:
+        detail = (
+            f"{group} n={len(values)} slope={result['slope']:.6g} r={result['r']:.3f}"
+            f" p={result['p']:.4g}"
+        )
     with transaction(conn):
         record_event(
             conn,

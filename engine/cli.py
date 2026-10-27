@@ -701,6 +701,13 @@ def main(argv: List[str] | None = None) -> int:
             if args.command == "scorecard":
                 return _emit({"scorecard": scorecard(conn, args.ref)}, args.json, scorecard(conn, args.ref))
             if args.command == "export":
+                if args.check and args.research:
+                    raise EngineError(
+                        "--research cannot be combined with --check",
+                        "verification reads the snapshot's own scope; filtering it would be"
+                        " misleading.",
+                        "drop --research when checking a file.",
+                    )
                 if args.check:
                     result = verify_export(Path(args.path))
                     text = (

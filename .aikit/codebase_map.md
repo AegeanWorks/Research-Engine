@@ -9,8 +9,8 @@
 - **Total Python Modules**: `64`
 - **Total Classes**: `56`
 - **Total Top-Level Functions**: `189`
-- **Total Class Methods**: `326`
-- **Total Source Lines**: `9627`
+- **Total Class Methods**: `336`
+- **Total Source Lines**: `9768`
 
 ---
 
@@ -33,7 +33,7 @@
 ### [`engine/analysis.py`](engine/analysis.py)
 > *Discovery and ranking over the graph: contradictions, coverage, keystones.*
 
-**Size**: `331` lines (`12657` bytes)
+**Size**: `349` lines (`13422` bytes)
 
 **Functions:**
 - `def keywords(text)` - *Content words of an assertion, lowercased and de-duplicated.*
@@ -97,7 +97,7 @@
 ### [`engine/claims.py`](engine/claims.py)
 > *Claims: the unit of knowledge, with provenance and an append-only verdict history.*
 
-**Size**: `380` lines (`14666` bytes)
+**Size**: `380` lines (`14665` bytes)
 
 **Functions:**
 - `def _to_claim(row)`
@@ -119,7 +119,7 @@
 ### [`engine/cli.py`](engine/cli.py)
 > *Command-line surface: one entry point for every engine mechanic.*
 
-**Size**: `732` lines (`36659` bytes)
+**Size**: `739` lines (`37037` bytes)
 
 **Functions:**
 - `def _build_parser()`
@@ -267,7 +267,7 @@
 ### [`engine/integrity.py`](engine/integrity.py)
 > *Graph integrity: provenance, evidence paths, dependency acyclicity and stale dependents.*
 
-**Size**: `539` lines (`20426` bytes)
+**Size**: `573` lines (`21667` bytes)
 
 **Functions:**
 - `def _finding(code, severity, subject, message, fix)`
@@ -635,7 +635,7 @@
 ### [`tests/test_cli.py`](tests/test_cli.py)
 > *The CLI surface: JSON output, exit codes and the error triad.*
 
-**Size**: `312` lines (`12517` bytes)
+**Size**: `321` lines (`12879` bytes)
 
 **Classes:**
 - `class CliTests`
@@ -664,6 +664,7 @@
   - Method `.test_observation_errors_use_the_triad()`
   - Method `.test_analysis_trend()`
   - Method `.test_export_check_detects_tampering()`
+  - Method `.test_export_check_refuses_a_research_filter()`
 
 ---
 
@@ -693,7 +694,7 @@
 ### [`tests/test_controls.py`](tests/test_controls.py)
 > *Negative controls: a test must be able to fail before its pass is evidence.*
 
-**Size**: `111` lines (`4563` bytes)
+**Size**: `125` lines (`5231` bytes)
 
 **Classes:**
 - `class ControlTests`
@@ -707,6 +708,7 @@
   - Method `.test_editing_the_control_retires_the_evidence()`
   - Method `.test_control_state_reports_absence_explicitly()`
   - Method `.test_outline_counts_the_program_screening()`
+  - Method `.test_adding_a_control_later_clears_the_error()`
 
 ---
 
@@ -985,7 +987,7 @@
 ### [`tests/test_observations.py`](tests/test_observations.py)
 > *Observations: raw values, their voiding, and the statistics projection over them.*
 
-**Size**: `142` lines (`6680` bytes)
+**Size**: `201` lines (`9695` bytes)
 
 **Classes:**
 - `class ObservationTests`
@@ -1006,6 +1008,14 @@
   - Method `.test_trend_needs_a_group()`
   - Method `.test_short_series_warns_instead_of_pretending()`
   - Method `.test_more_than_two_groups_warns_about_uncorrected_comparison()`
+  - Method `.test_group_labels_are_case_insensitive()`
+  - Method `.test_a_group_cannot_be_compared_with_itself()`
+  - Method `.test_too_few_resamples_are_refused()`
+  - Method `.test_trend_labels_are_case_insensitive()`
+  - Method `.test_new_observations_after_a_run_warn_again()`
+  - Method `.test_a_void_after_a_run_warns_again()`
+  - Method `.test_a_short_trend_says_it_is_insufficient()`
+  - Method `.test_a_claim_whose_observations_were_all_voided_does_not_warn()`
 
 ---
 

@@ -234,7 +234,8 @@ present and 0 when only warnings remain. Domain errors print the `Error / Why / 
   empty programs (`EMPTY-001`);
 - a test that produced verified evidence without a negative control (`EVID-008`, warning) or
   whose declared control never failed (`EVID-009`, error);
-- a claim with observations but no statistics run (`OBS-001`, warning);
+- observations with no statistics run, or changed after the last one (`OBS-001`,
+  warning);
 - a live claim citing a source screened out of the review (`SCREEN-001`, warning);
 - a test still bound to a retired claim (`TEST-001`, warning);
 - an UNKNOWN claim with no recorded reason (`EVID-007`, warning).

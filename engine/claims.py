@@ -252,7 +252,7 @@ def set_verdict(
                 "the named run does not match the current code, inputs and command.",
                 "pass one of: " + ", ".join(groups) + ".",
             )
-        bound_group = evidence_group or groups[-1]
+        bound_group = evidence_group or groups[0]
     with transaction(conn):
         stamp = utc_now()
         conn.execute(

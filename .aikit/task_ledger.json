@@ -1,55 +1,17 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "T-009-artifact-parity",
+    "task_id": "T-010-review-fixes",
     "last_phase": "phase 4",
     "active_phase": 5,
     "status": "completed",
-    "updated_at": 1793115803.1601632,
+    "updated_at": 1793117119.5419173,
     "owner": "kilo:research-engine",
     "started_by": "kilo:research-engine",
     "continuations": [],
-    "completed_at": 1793115803.315487
+    "completed_at": 1793117119.7227485
   },
   "checkpoints": [
-    {
-      "task_id": "T-004-analysis-views",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[6/6] Analysis and views delivered: token-budgeted outline/brief/claim context with OMITTED counts, contradiction discovery + unlinked proposals, evidence matrix, keystone ranking, exposure, semantic/exact snapshot diff, UNKNOWN evidence state with EVID-007, claim merge; 180 tests pass; 4/4 AIKit gates pass; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793090606.9535983,
-      "timestamp_str": "2026-10-27 11:43:26",
-      "agent": "kilo:research-engine"
-    },
-    {
-      "task_id": "T-004-analysis-views",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'T-004-analysis-views' completed successfully.",
-      "status": "completed",
-      "timestamp": 1793090607.1113079,
-      "timestamp_str": "2026-10-27 11:43:27",
-      "agent": "kilo:research-engine"
-    },
-    {
-      "task_id": "T-005-audit-review",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/2] Review the uncommitted engine delivery for defects, fix confirmed gaps, then commit and publish",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793091340.0161078,
-      "timestamp_str": "2026-10-27 11:55:40",
-      "agent": "kilo:research-engine",
-      "impact_assessment": {
-        "why": "The delivery has no remote and no review pass; four defects were suspected in the newest analysis surface",
-        "benefits": "Diff identity, contradiction scope, merge follow-through and scoped audit corrected; evidence chain stays attached through merges",
-        "risks": "contract: run identity in snapshots, record_edge rename, TEST-001 added; dependency: none; concurrency: read-only review plus transactional writes; state: merge now also rebinds tests",
-        "mitigation": "Failing-first regression tests for each defect, full suite, gates and CLI acceptance before commit"
-      }
-    },
     {
       "task_id": "T-005-audit-review",
       "phase": "phase 4",
@@ -246,6 +208,44 @@
       "status": "completed",
       "timestamp": 1793115803.3154883,
       "timestamp_str": "2026-10-27 18:43:23",
+      "agent": "kilo:research-engine"
+    },
+    {
+      "task_id": "T-010-review-fixes",
+      "phase": "phase 2",
+      "phase_num": 2,
+      "description": "[1/2] Review the last three pushes: fix stale-group control check, label normalisation, self-comparison, OBS-001 staleness, export flag conflict",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793117051.3556347,
+      "timestamp_str": "2026-10-27 19:04:11",
+      "agent": "kilo:research-engine",
+      "impact_assessment": {
+        "why": "A code review found false gate errors and silently meaningless comparisons",
+        "benefits": "Control checks use the newest group; labels are case-insensitive; self-comparison and tiny bootstraps are refused; stale analysis is flagged",
+        "risks": "contract: none beyond behaviour; dependency: none; concurrency: read-only checks; state: OBS-001 uses timestamps with one-second resolution",
+        "mitigation": "Regression test per defect, full suite, gates before commit"
+      }
+    },
+    {
+      "task_id": "T-010-review-fixes",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[2/2] Review fixes delivered: EVID-009 reads the newest verified group, labels normalised + self-comparison and <10 resamples refused, OBS-001 detects data changed after the last run (all-voided excluded), export --check refuses --research, short trend states insufficiency; 300 tests pass; 4/4 gates pass; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793117119.5419173,
+      "timestamp_str": "2026-10-27 19:05:19",
+      "agent": "kilo:research-engine"
+    },
+    {
+      "task_id": "T-010-review-fixes",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'T-010-review-fixes' completed successfully.",
+      "status": "completed",
+      "timestamp": 1793117119.7227502,
+      "timestamp_str": "2026-10-27 19:05:19",
       "agent": "kilo:research-engine"
     }
   ]

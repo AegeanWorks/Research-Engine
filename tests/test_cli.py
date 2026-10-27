@@ -308,5 +308,14 @@ class CliTests(unittest.TestCase):
         self.assertIn("intact: False", out)
 
 
+    def test_export_check_refuses_a_research_filter(self) -> None:
+        self.run_cli("demo")
+        target = self.dir / "snap.jsonl"
+        self.run_cli("export", str(target))
+        code, _, err = self.run_cli("export", str(target), "--check", "--research", "r_000001")
+        self.assertEqual(code, 1)
+        self.assertIn("cannot be combined", err)
+
+
 if __name__ == "__main__":
     unittest.main()

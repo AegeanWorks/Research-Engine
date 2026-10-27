@@ -206,8 +206,11 @@ is voided so the record keeps its history. `analysis stats` compares two groups 
 
 `compare_groups` returns the numbers, `tests_agree`, `significant`, and warnings: fewer than three
 observations, degenerate zero variance, the asymptotic rank method, and parametric/rank
-disagreement at alpha 0.05. A run appends a `claim.stats` event; a claim with live observations and
-no such event warns as `OBS-001`.
+disagreement at alpha 0.05. Group labels are normalised to lowercase, a group cannot be compared
+with itself, and fewer than ten bootstrap resamples are refused. A run appends a `claim.stats`
+or `claim.trend` event; `OBS-001` warns when no run exists **or when an observation was added or
+voided after the last run**. Timestamps have second resolution, so a change inside the same
+second as the run is not distinguished.
 
 ## Maintenance
 

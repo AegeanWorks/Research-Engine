@@ -138,5 +138,64 @@ class ObservationTests(DatabaseCase):
         self.assertTrue(any("uncorrected" in warning for warning in result["warnings"]))
 
 
+    def test_group_labels_are_case_insensitive(self) -> None:
+        result = claim_statistics(
+            self.conn, self.claim, "  Baseline ", "TREATMENT", resamples=50
+        )
+        self.assertEqual(result["baseline_label"], "baseline")
+        self.assertEqual(result["treatment_label"], "treatment")
+        self.assertEqual(result["baseline"]["n"], 6)
+
+    def test_a_group_cannot_be_compared_with_itself(self) -> None:
+        with self.assertRaises(EngineError):
+            claim_statistics(self.conn, self.claim, "baseline", "baseline", resamples=50)
+
+    def test_too_few_resamples_are_refused(self) -> None:
+        with self.assertRaises(EngineError):
+            claim_statistics(self.conn, self.claim, "baseline", "treatment", resamples=5)
+
+    def test_trend_labels_are_case_insensitive(self) -> None:
+        self.assertEqual(claim_trend(self.conn, self.claim, " Baseline ")["group"], "baseline")
+
+    def test_new_observations_after_a_run_warn_again(self) -> None:
+        claim_statistics(self.conn, self.claim, "baseline", "treatment", resamples=50)
+        self.assertNotIn("OBS-001", {finding.code for finding in check(self.conn)})
+        add_observation(
+            self.conn, self.claim, "baseline", 1.5, at="2099-01-01T00:00:00+00:00"
+        )
+        findings = [item for item in check(self.conn) if item.code == "OBS-001"]
+        self.assertEqual([item.subject for item in findings], [self.claim])
+        self.assertIn("changed after", findings[0].message)
+
+    def test_a_void_after_a_run_warns_again(self) -> None:
+        claim_statistics(self.conn, self.claim, "baseline", "treatment", resamples=50)
+        record = add_observation(self.conn, self.claim, "baseline", 9.9)
+        claim_statistics(self.conn, self.claim, "baseline", "treatment", resamples=50)
+        void_observation(self.conn, record.id, "outlier")
+        self.conn.execute(
+            "UPDATE event SET at = '2099-01-01T00:00:00+00:00' WHERE kind = 'observation.void'"
+        )
+        self.assertIn("OBS-001", {finding.code for finding in check(self.conn)})
+
+    def test_a_short_trend_says_it_is_insufficient(self) -> None:
+        short = add_claim(self.conn, self.research, "Short.", "assumption", basis="s").id
+        add_observation(self.conn, short, "run", 1.0)
+        claim_trend(self.conn, short, "run")
+        detail = self.conn.execute(
+            "SELECT detail FROM event WHERE kind = 'claim.trend' AND subject = ?", (short,)
+        ).fetchone()["detail"]
+        self.assertIn("insufficient for a trend", detail)
+
+
+    def test_a_claim_whose_observations_were_all_voided_does_not_warn(self) -> None:
+        other = add_claim(self.conn, self.research, "Withdrawn.", "assumption", basis="w").id
+        record = add_observation(self.conn, other, "baseline", 1.0)
+        void_observation(self.conn, record.id, "recorded by mistake")
+        self.assertNotIn(
+            "OBS-001",
+            {finding.code for finding in check(self.conn) if finding.subject == other},
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

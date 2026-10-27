@@ -286,3 +286,21 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Consequences**: An export is self-describing and tamper-evident. A file edited with a text
   editor fails verification; a legacy file must be re-exported before it can be trusted. The report
   now shows the numbers a claim rests on, not just its verdict.
+
+### ADR-024: Review fixes for evidence selection and label handling
+- **Date**: 2026-10-27
+- **Status**: Accepted
+- **Context**: A review of the last three pushes found three defects. `EVID-009` inspected the
+  oldest verified run group instead of the newest, so adding a control after an early run produced
+  a false error. Group labels were compared verbatim while observations store them lowercased, so
+  `--baseline Baseline` failed. A group could be compared with itself, producing a meaningless
+  zero-difference result. `OBS-001` also cleared forever after the first statistics run, even when
+  new measurements arrived.
+- **Decision**: Control checks and default promotion binding use the newest verified group. Labels
+  are normalised in the analysis layer, self-comparison is refused, and a bootstrap with fewer than
+  ten resamples is refused. `OBS-001` compares the latest observation or void timestamp with the
+  latest `claim.stats`/`claim.trend` event and warns when data is newer. `export --check` refuses a
+  `--research` filter, and an insufficient trend records that fact instead of printing a slope of 0.
+- **Consequences**: A late-added control no longer breaks the gate. Label case never matters.
+  Comparisons must be between two distinct groups. Analysis is flagged as stale when data changes,
+  with a documented one-second resolution limit.

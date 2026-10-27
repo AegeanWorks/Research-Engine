@@ -107,5 +107,19 @@ class ControlTests(DatabaseCase):
         self.assertIn("OUTLINE", view.text)
 
 
+    def test_adding_a_control_later_clears_the_error(self) -> None:
+        test_id = self._test()  # first verification has no control
+        verify_test(self.conn, test_id)
+        self.assertIn("EVID-008", {finding.code for finding in check(self.conn)})
+        control = self._script("control.py", "import sys\nprint('diverged')\nsys.exit(2)\n")
+        self.conn.execute(
+            "UPDATE killtest SET control_command = ? WHERE id = ?", (control, test_id)
+        )
+        verify_test(self.conn, test_id)
+        codes = {finding.code for finding in check(self.conn)}
+        self.assertNotIn("EVID-009", codes)
+        self.assertNotIn("EVID-008", codes)
+
+
 if __name__ == "__main__":
     unittest.main()
