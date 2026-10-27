@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "name": "research-engine",
+  "test_command": null,
+  "topics": [
+    "aikit",
+    "research",
+    "knowledge-graph",
+    "reproducibility"
+  ],
+  "gates": {},
+  "ui_required": false,
+  "created": "2026-10-27"
+}
