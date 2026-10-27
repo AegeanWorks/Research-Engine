@@ -8,7 +8,7 @@ import sqlite3
 from pathlib import Path
 from typing import List, Set, Tuple
 
-from engine.artifacts import atomic_write_text, utc_now
+from engine.artifacts import atomic_write_text, digest, utc_now
 from engine.database import SCHEMA_VERSION
 from engine.researches import get_research
 
@@ -134,21 +134,21 @@ def content_records(records: List[dict]) -> List[dict]:
     return kept
 
 
-def _digest(records: List[dict]) -> str:
+def _digest(records: List[dict], kind: str) -> str:
     blob = "\n".join(json.dumps(record, sort_keys=True) for record in records)
-    return hashlib.sha256(blob.encode("utf-8")).hexdigest()
+    return digest(kind, blob)
 
 
 def graph_sha256(conn: sqlite3.Connection, research_ref: str | None = None) -> str:
     """Exact digest of every exported record, including run bookkeeping."""
     records, _ = export_records(conn, research_ref)
-    return _digest(records)
+    return _digest(records, "graph/1")
 
 
 def content_sha256(conn: sqlite3.Connection, research_ref: str | None = None) -> str:
     """Digest of the graph's content, stable across a pure re-verification."""
     records, _ = export_records(conn, research_ref)
-    return _digest(content_records(records))
+    return _digest(content_records(records), "content/1")
 
 
 def export_jsonl(

@@ -182,3 +182,52 @@ and inbound edges. All four are read-only; only `claim link` records a relation.
 
 **Deliberately not copied.** Global stance pairing (lattice's model stores stance on the claim,
 so it can pair across questions) and its auto-link flag default.
+
+## 9. Non-vacuity of a gate (`obezite-mekanizma-projesi`)
+
+**Mechanic.** The reference project measured the base rate of its annotation marker (60%) against
+the dependent set (100%) before trusting the gate, because "the discipline holds" and "the test
+tests nothing" produce the same passing output.
+
+**Rule here.** A kill test declares a negative control: a command that must fail. `test verify`
+runs the control twice and requires an identical failure. A test with verified evidence and no
+control is a warning (`EVID-008`); a declared control that passes is an error (`EVID-009`). The
+control is part of the command binding, so editing it retires the evidence.
+
+**Deliberately not copied.** The Turkish prose ledger, the annotation-marker convention and its
+per-row audit script.
+
+## 10. Screening and PRISMA (`lattice`)
+
+**Mechanic.** A source is not simply present or absent: it is identified, screened against stated
+criteria, then included or excluded for a recorded reason, and the flow is reported.
+
+**Rule here.** `source screen` uses the five-state lattice vocabulary and a closed reason taxonomy;
+`source prisma` and the report show counts, reasons and the included fraction. A claim citing an
+excluded source warns (`SCREEN-001`).
+
+**Deliberately not copied.** Database search, deduplication against external indexes and the web
+screening UI.
+
+## 11. Domain-separated digests and pinned licence identity (`aegean-licensing`)
+
+**Mechanic.** Canonical JSON is hashed with a domain prefix so a certificate digest and a signature
+can never collide; the licence text is normalized and pinned by SHA-256.
+
+**Rule here.** `artifacts.digest(kind, payload)` prefixes every digest with its artifact kind
+(`graph/1`, `content/1`, `report/1`, `license/1`). Manifest schema 3 records the license id and the
+digest of the normalized `LICENSE` file, and `report --check` treats a terms change as drift.
+
+**Deliberately not copied.** The certificate schema, HMAC signing and the revocation register;
+those belong to licence issuance, not to evidence.
+
+## 12. Verified backup and event trail (`aegean-licensing-ops`)
+
+**Mechanic.** State is copied through the storage engine's own backup path, verified, and moved
+into place atomically; every mutation leaves an audit trail.
+
+**Rule here.** `db backup` uses `sqlite3.Connection.backup`, verifies the copy, fsyncs and renames;
+an existing target is refused. `event` records source status, screening, merges, report generation
+and migrations, inside the writer's transaction.
+
+**Deliberately not copied.** The commercial key store, issuance workflow and web console.

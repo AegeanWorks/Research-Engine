@@ -15,6 +15,20 @@ def utc_now() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
 
 
+def digest(kind: str, payload: str | bytes) -> str:
+    """Domain-separated digest: the artifact kind is hashed before the payload.
+
+    Two artifacts with identical bytes still get different digests when their kinds differ, so a
+    report digest can never be mistaken for a graph digest.
+    """
+    data = payload.encode("utf-8") if isinstance(payload, str) else payload
+    hasher = hashlib.sha256()
+    hasher.update(kind.encode("utf-8"))
+    hasher.update(b"\n")
+    hasher.update(data)
+    return hasher.hexdigest()
+
+
 def sha256_text(value: str) -> str:
     """Hash extracted output so reproducibility is checked without storing it all."""
     return hashlib.sha256(value.encode("utf-8", errors="replace")).hexdigest()

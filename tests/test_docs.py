@@ -47,17 +47,25 @@ class DocsTests(unittest.TestCase):
             "integrity.py",
             "manifest.py",
             "provenance.py",
+            "events.py",
+            "maintenance.py",
+            "markdown.py",
+            "screening.py",
         ):
             self.assertIn(module, text)
             self.assertTrue((ROOT / "engine" / module).exists())
 
     def test_readme_documents_the_current_schema_and_gates(self) -> None:
         text = (ROOT / "README.md").read_text(encoding="utf-8")
-        self.assertIn("schema version 3", text)
-        for code in ("EVID-005", "EVID-006", "PROV-003"):
+        self.assertIn("schema version 4", text)
+        for code in ("EVID-005", "EVID-006", "EVID-008", "EVID-009", "PROV-003", "SCREEN-001", "TEST-001"):
             self.assertIn(code, text)
         self.assertIn("--group", text)
         self.assertIn("--strict", text)
+        self.assertIn("--control", text)
+        self.assertIn("source screen", text)
+        self.assertIn("db backup", text)
+        self.assertIn("events", text)
 
     def test_architecture_documents_binding_and_digests(self) -> None:
         text = (ROOT / "docs" / "ARCHITECTURE.md").read_text(encoding="utf-8")

@@ -6,7 +6,11 @@ import json
 import sqlite3
 from typing import Dict, Iterable, List
 
-from engine.evidence import current_verified_groups, verified_groups
+from engine.evidence import (
+    control_state,
+    current_verified_groups,
+    verified_groups,
+)
 from engine.killtests import get_test
 from engine.models import (
     BROKEN_SOURCE_STATUSES,
@@ -119,7 +123,7 @@ def check(conn: sqlite3.Connection) -> List[Finding]:
         "SELECT c.* FROM claim c WHERE c.status = 'NUMERIC' AND NOT EXISTS ("
         " SELECT 1 FROM killtest t WHERE t.claim_id = c.id AND EXISTS ("
         "  SELECT 1 FROM (SELECT run_group FROM test_run WHERE test_id = t.id"
-        "   GROUP BY run_group HAVING COUNT(*) >= 2 AND SUM(passed) = COUNT(*)"
+        "   AND role = 'main' GROUP BY run_group HAVING COUNT(*) >= 2 AND SUM(passed) = COUNT(*)"
         "   AND COUNT(DISTINCT exit_code || ':' || stdout_sha256 || ':' || stderr_sha256) = 1)))"
     ):
         findings.append(
@@ -193,6 +197,55 @@ def check(conn: sqlite3.Connection) -> List[Finding]:
                     "re-record the verdict against a current group with `claim verdict --group`.",
                 )
             )
+
+    # A test that has produced verified evidence is the unit that must be able to fail.
+    for row in conn.execute("SELECT id FROM killtest ORDER BY id"):
+        groups = verified_groups(conn, str(row["id"]))
+        if not groups:
+            continue
+        test = get_test(conn, str(row["id"]))
+        if not test.control_command:
+            findings.append(
+                _finding(
+                    "EVID-008",
+                    "warning",
+                    test.id,
+                    "test produces verified evidence but declares no negative control,"
+                    " so vacuity is not excluded",
+                    "add `--control CMD` with a command that must fail, then re-verify.",
+                )
+            )
+            continue
+        state = control_state(conn, test, groups[-1])
+        if not state["falsified"]:
+            findings.append(
+                _finding(
+                    "EVID-009",
+                    "error",
+                    test.id,
+                    "the declared negative control never failed reproducibly,"
+                    " so the test has not shown it can fail",
+                    "make the control fail deterministically twice, then re-verify the test.",
+                )
+            )
+
+    for row in conn.execute(
+        "SELECT c.id, s.id AS source_id, s.screening AS screening"
+        " FROM claim c JOIN source s ON s.id = c.source_id"
+        " WHERE s.screening IN ('screened_out', 'excluded') AND c.status NOT IN"
+        f" ({','.join('?' for _ in _FAILED)}) ORDER BY c.id",
+        _FAILED,
+    ):
+        findings.append(
+            _finding(
+                "SCREEN-001",
+                "warning",
+                str(row["id"]),
+                f"claim cites source {row['source_id']} screened out of the review"
+                f" ({row['screening']})",
+                "justify the inclusion, or replace the source and re-record the claim.",
+            )
+        )
 
     for row in conn.execute(
         "SELECT c.id, c.status, s.id AS source_id, s.status AS source_status"

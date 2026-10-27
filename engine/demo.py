@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sqlite3
+import sys
 
 from engine.cascade import invalidate
 from engine.claims import add_claim, link_claims, link_to_question, set_verdict
@@ -83,6 +84,10 @@ def seed_demo(conn: sqlite3.Connection) -> dict:
         'python -c "print(\'kill-test:signal-consistent\')"',
         claim_ref=claim.id,
         timeout_seconds=30,
+        control_command=(
+            '"' + sys.executable + '" -c "import sys; print(\'kill-test:control-diverged\');'
+            ' sys.exit(2)"'
+        ),
     )
     run = run_test(conn, test.id, runs=2)
     if not run["verification_complete"]:

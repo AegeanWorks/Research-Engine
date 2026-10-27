@@ -58,6 +58,11 @@ cannot exist without provenance) and adds the parts that decide what a claim is 
 | `lattice` | Token-budgeted views | `outline`, `brief` and `claim context` render the graph under a token budget and state exactly how many lines were omitted |
 | `lattice` | Contradiction discovery | Pairs supporting and contradicting claims inside one question, ranked by confidence and keyword overlap, with an opt-in unlinked proposal mode |
 | `lattice` | Evidence matrix and keystones | Source x question coverage, and the claims the rest of the graph leans on |
+| `lattice` | Screening and PRISMA flow | A source moves identified -> screened -> included or excluded, with a closed reason taxonomy and flow counts in the report |
+| `obezite-mekanizma-projesi` | Non-vacuity | A test without a negative control has not shown that it can fail; a declared control that passes is an error |
+| `aegean-licensing` | Domain-separated digests | Every digest hashes its artifact kind first, so a report digest can never equal a graph digest |
+| `aegean-licensing` | Pinned license identity | Every manifest records the license id and the digest of the licence text it was generated under |
+| `aegean-licensing-ops` | Verified backup and event log | `db integrity`, `db backup` and an append-only event trail cover the actions verdicts do not |
 | `PNN` (extended) | Explicit UNKNOWN | Missing evidence is a state, never a silent pass |
 
 The decision was **not** to fork all four projects. Three of them carry domain content and large
@@ -104,6 +109,16 @@ programs the engine can host.
 12. **Duplicates merge instead of accumulating.** `claim merge KEEP DUP...` repoints every edge
     and every bound test to the survivor and records each duplicate as RETRACTED with the
     survivor as its evidence.
+13. **A test must be able to fail.** `test add --control CMD` declares a negative control that
+    must fail reproducibly. A test that has produced verified evidence without a control is a
+    warning (`EVID-008`); a declared control that does not fail is an error (`EVID-009`).
+14. **Sources are screened, not just stored.** `source screen` moves a source through
+    `identified`, `screened_in`/`screened_out` and `included`/`excluded`, with a reason from a
+    closed taxonomy. `source prisma` and the report show the flow; a claim citing an excluded
+    source warns (`SCREEN-001`).
+15. **Every non-verdict action is logged.** Source status changes, screening, merges, report
+    generation and schema migration append to an event log; `events` lists it newest first.
+    Verdicts keep their own append-only history.
 
 ## Verdict Vocabulary
 
@@ -140,6 +155,8 @@ python -m engine [--db PATH] question close REF
 python -m engine [--db PATH] source add RESEARCH --title TITLE [--year Y] [--doi DOI] [--url URL]
 python -m engine [--db PATH] source list [--research REF]
 python -m engine [--db PATH] source status REF --status active|expression_of_concern|retracted [--note TEXT]
+python -m engine [--db PATH] source screen REF --status identified|screened_in|screened_out|included|excluded [--reason R]
+python -m engine [--db PATH] source prisma [--research REF]
 python -m engine [--db PATH] source retract REF --reason TEXT --evidence TEXT
 
 python -m engine [--db PATH] claim add RESEARCH --text TEXT --kind KIND [--source REF]
@@ -162,6 +179,7 @@ python -m engine [--db PATH] hypothesis card REF
 
 python -m engine [--db PATH] test add RESEARCH --name NAME --command CMD [--claim REF]
                         [--hypothesis REF] [--expect-exit N] [--timeout SECONDS] [--input PATH]...
+                        [--control CMD]
 python -m engine [--db PATH] test list [--research REF]
 python -m engine [--db PATH] test run REF [--runs N]
 python -m engine [--db PATH] test verify REF
@@ -177,6 +195,9 @@ python -m engine [--db PATH] analysis matrix REF
 python -m engine [--db PATH] analysis keystone REF [--limit N]
 python -m engine [--db PATH] analysis expose REF
 python -m engine [--db PATH] diff OLD.jsonl NEW.jsonl [--exact]
+python -m engine [--db PATH] db integrity
+python -m engine [--db PATH] db backup PATH
+python -m engine [--db PATH] events [--research REF] [--kind K] [--limit N]
 python -m engine [--db PATH] scorecard REF
 python -m engine [--db PATH] export PATH [--research REF]
 ```
@@ -205,6 +226,9 @@ present and 0 when only warnings remain. Domain errors print the `Error / Why / 
 - outcome timestamps before registration (`PRE-001`);
 - evidence gaps (`GAP-001`, `GAP-002`), duplicate claim text (`DUP-001`, live claims only),
   empty programs (`EMPTY-001`);
+- a test that produced verified evidence without a negative control (`EVID-008`, warning) or
+  whose declared control never failed (`EVID-009`, error);
+- a live claim citing a source screened out of the review (`SCREEN-001`, warning);
 - a test still bound to a retired claim (`TEST-001`, warning);
 - an UNKNOWN claim with no recorded reason (`EVID-007`, warning).
 
@@ -212,10 +236,10 @@ Warnings are research hygiene; errors block a trustworthy report.
 
 ## Data Model
 
-One SQLite file (default `research.db`), schema version 3. Tables: `research`, `source`, `question`,
+One SQLite file (default `research.db`), schema version 4. Tables: `research`, `source`, `question`,
 `claim`, `edge`, `hypothesis`, `killtest`, `test_run`, `verdict`, `invalidation`, plus
 `schema_meta` and `counters`. Writes use `BEGIN IMMEDIATE`; WAL and `synchronous=FULL` are enabled
-for a durable state file. `verdict`, `test_run` and `invalidation` are append-only. An older
+for a durable state file. `verdict`, `test_run`, `event` and `invalidation` are append-only. An older
 database is migrated additively in place and the upgrade is announced with the number of numeric
 claims that need re-binding; a newer version is refused without modification.
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
@@ -263,17 +287,21 @@ research-engine/
 │   ├── database.py           <- connection, schema, transactions, IDs
 │   ├── demo.py               <- synthetic golden path
 │   ├── diffing.py            <- snapshot comparison
+│   ├── events.py             <- append-only action log
 │   ├── errors.py             <- Error / Why / Fix
 │   ├── evidence.py           <- run binding and current verified groups
 │   ├── hypotheses.py         <- pre-registration and outcomes
 │   ├── integrity.py          <- the check gate
 │   ├── killtests.py          <- executable tests, binding and two-run verification
+│   ├── maintenance.py        <- integrity check and verified backup
 │   ├── manifest.py           <- report manifests and drift checks
+│   ├── markdown.py           <- safe rendering of untrusted text
 │   ├── merging.py            <- duplicate claim merge
 │   ├── models.py             <- frozen DTOs and closed vocabularies
 │   ├── provenance.py         <- code and input identity recorded with evidence
 │   ├── questions.py
 │   ├── researches.py
+│   ├── screening.py          <- screening decisions and PRISMA flow
 │   ├── sources.py
 │   └── synthesis.py          <- consensus, report, scorecard
 └── tests/                    <- regression shield
@@ -289,6 +317,10 @@ research-engine/
   posterior probability and never changes a verdict. UNKNOWN contributes zero.
 - **Discovery is advisory.** `analysis` proposes contradictions and keystones; it never writes
   an edge. Only an explicit `claim link` records a relation.
+- **A control proves falsifiability, not correctness.** A negative control shows the test can
+  fail; it does not show that the assertion is the right one.
+- **Screening is a local decision.** The engine records screening states and reasons; it does
+  not search databases or verify that an exclusion was correct.
 - **Views are summaries.** A token budget truncates lines; the omitted count is always shown so
   a reader can tell a complete view from a clipped one. The anchor line is always kept, so a
   budget smaller than that line yields a single over-budget line rather than an empty view.

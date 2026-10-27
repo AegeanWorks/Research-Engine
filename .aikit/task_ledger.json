@@ -1,15 +1,15 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "T-005-audit-review",
+    "task_id": "T-006-cross-project-mechanics",
     "last_phase": "phase 4",
     "active_phase": 5,
     "status": "completed",
-    "updated_at": 1793091349.7676542,
+    "updated_at": 1793094532.7792177,
     "owner": "kilo:research-engine",
     "started_by": "kilo:research-engine",
     "continuations": [],
-    "completed_at": 1793091349.937229
+    "completed_at": 1793094532.928018
   },
   "checkpoints": [
     {
@@ -200,6 +200,44 @@
       "status": "completed",
       "timestamp": 1793091349.9372308,
       "timestamp_str": "2026-10-27 11:55:49",
+      "agent": "kilo:research-engine"
+    },
+    {
+      "task_id": "T-006-cross-project-mechanics",
+      "phase": "phase 2",
+      "phase_num": 2,
+      "description": "[1/2] Adopt mechanics from N1-Engine, Aegean licensing, lattice, obezite and fluid-universe: negative controls, screening/PRISMA, event log, verified backup, safe markdown, domain-separated digests, licence identity",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793094522.1385953,
+      "timestamp_str": "2026-10-27 12:48:42",
+      "agent": "kilo:research-engine",
+      "impact_assessment": {
+        "why": "Seven reference projects were reviewed at code level; six mechanics fill verified gaps in the engine's falsifiability, audit trail, state safety and output integrity",
+        "benefits": "Vacuity detectable; screening auditable; every non-verdict action logged; state verifiable and copyable; untrusted text cannot alter documents; digests and licence are unambiguous",
+        "risks": "contract: schema v4 adds screening, control and event columns; dependency: stdlib only; concurrency: single-writer transactions; state: migration must preserve v1-v3 rows and legacy tests must keep verifying",
+        "mitigation": "Failing-first tests per mechanic, additive v4 migration with event record, demo updated with a control, and full gate run before commit"
+      }
+    },
+    {
+      "task_id": "T-006-cross-project-mechanics",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[2/2] Cross-project mechanics delivered: negative-control kill tests (EVID-008/009), screening + PRISMA (SCREEN-001), append-only event log, db integrity + verified backup, safe markdown rendering, domain-separated digests, licence identity in manifest; schema v4; 235 tests pass; 4/4 AIKit gates pass; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793094532.7792177,
+      "timestamp_str": "2026-10-27 12:48:52",
+      "agent": "kilo:research-engine"
+    },
+    {
+      "task_id": "T-006-cross-project-mechanics",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'T-006-cross-project-mechanics' completed successfully.",
+      "status": "completed",
+      "timestamp": 1793094532.9280198,
+      "timestamp_str": "2026-10-27 12:48:52",
       "agent": "kilo:research-engine"
     }
   ]

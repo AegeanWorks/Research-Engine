@@ -8,6 +8,7 @@ from typing import Iterable, List
 from engine.claims import get_claim, record_edge, set_verdict
 from engine.database import transaction
 from engine.errors import EngineError
+from engine.events import record as record_event
 
 
 def merge_claims(
@@ -100,6 +101,14 @@ def merge_claims(
                 actor=actor,
             )
             retired.append(claim.id)
+        record_event(
+            conn,
+            "claim.merge",
+            keep.id,
+            "retired " + ", ".join(retired),
+            research_id=keep.research_id,
+            actor=actor,
+        )
     return {
         "keep": keep.id,
         "retired": retired,

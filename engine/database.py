@@ -7,9 +7,10 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Iterator
 
+from engine.artifacts import utc_now
 from engine.errors import EngineError
 
-SCHEMA_VERSION = 3
+SCHEMA_VERSION = 4
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS schema_meta (
@@ -38,7 +39,10 @@ CREATE TABLE IF NOT EXISTS source (
     retrieved_at TEXT NOT NULL,
     status TEXT NOT NULL DEFAULT 'active',
     status_note TEXT NOT NULL DEFAULT '',
-    status_at TEXT NOT NULL DEFAULT ''
+    status_at TEXT NOT NULL DEFAULT '',
+    screening TEXT NOT NULL DEFAULT 'identified',
+    screening_reason TEXT NOT NULL DEFAULT '',
+    screening_at TEXT NOT NULL DEFAULT ''
 );
 CREATE TABLE IF NOT EXISTS question (
     id TEXT PRIMARY KEY,
@@ -94,7 +98,8 @@ CREATE TABLE IF NOT EXISTS killtest (
     expect_exit INTEGER NOT NULL DEFAULT 0,
     timeout_seconds INTEGER NOT NULL DEFAULT 120,
     created_at TEXT NOT NULL,
-    inputs_json TEXT NOT NULL DEFAULT '[]'
+    inputs_json TEXT NOT NULL DEFAULT '[]',
+    control_command TEXT NOT NULL DEFAULT ''
 );
 CREATE TABLE IF NOT EXISTS test_run (
     id TEXT PRIMARY KEY,
@@ -114,7 +119,8 @@ CREATE TABLE IF NOT EXISTS test_run (
     git_commit TEXT NOT NULL DEFAULT '',
     git_dirty INTEGER NOT NULL DEFAULT 0,
     python_version TEXT NOT NULL DEFAULT '',
-    platform TEXT NOT NULL DEFAULT ''
+    platform TEXT NOT NULL DEFAULT '',
+    role TEXT NOT NULL DEFAULT 'main'
 );
 CREATE TABLE IF NOT EXISTS verdict (
     id TEXT PRIMARY KEY,
@@ -127,6 +133,15 @@ CREATE TABLE IF NOT EXISTS verdict (
     actor TEXT NOT NULL,
     at TEXT NOT NULL,
     evidence_group TEXT NOT NULL DEFAULT ''
+);
+CREATE TABLE IF NOT EXISTS event (
+    id TEXT PRIMARY KEY,
+    at TEXT NOT NULL,
+    research_id TEXT NOT NULL DEFAULT '',
+    kind TEXT NOT NULL,
+    subject TEXT NOT NULL,
+    detail TEXT NOT NULL DEFAULT '',
+    actor TEXT NOT NULL DEFAULT 'agent'
 );
 CREATE TABLE IF NOT EXISTS invalidation (
     id TEXT PRIMARY KEY,
@@ -143,6 +158,7 @@ CREATE INDEX IF NOT EXISTS idx_edge_dst ON edge(dst_kind, dst_id);
 CREATE INDEX IF NOT EXISTS idx_edge_src ON edge(src_kind, src_id);
 CREATE INDEX IF NOT EXISTS idx_run_test ON test_run(test_id);
 CREATE INDEX IF NOT EXISTS idx_verdict_subject ON verdict(subject_kind, subject_id);
+CREATE INDEX IF NOT EXISTS idx_event_research ON event(research_id, id);
 """
 
 
@@ -178,7 +194,19 @@ _MIGRATIONS = {
     2: (
         ("verdict", "evidence_group", "TEXT NOT NULL DEFAULT ''"),
     ),
+    3: (
+        ("source", "screening", "TEXT NOT NULL DEFAULT 'identified'"),
+        ("source", "screening_reason", "TEXT NOT NULL DEFAULT ''"),
+        ("source", "screening_at", "TEXT NOT NULL DEFAULT ''"),
+        ("killtest", "control_command", "TEXT NOT NULL DEFAULT ''"),
+        ("test_run", "role", "TEXT NOT NULL DEFAULT 'main'"),
+    ),
 }
+
+
+def _ensure_indexes(conn: sqlite3.Connection) -> None:
+    """Create indexes that depend on migrated columns; safe to run after every migration."""
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_source_screening ON source(screening)")
 
 
 def _add_missing_columns(conn: sqlite3.Connection, version: int) -> None:
@@ -199,6 +227,7 @@ def initialize(conn: sqlite3.Connection) -> dict | None:
     with transaction(conn):
         row = conn.execute("SELECT version FROM schema_meta").fetchone()
         if row is None:
+            _ensure_indexes(conn)
             conn.execute("INSERT INTO schema_meta(version) VALUES (?)", (SCHEMA_VERSION,))
             return None
         version = int(row["version"])
@@ -214,7 +243,26 @@ def initialize(conn: sqlite3.Connection) -> dict | None:
         while version < SCHEMA_VERSION:
             _add_missing_columns(conn, version)
             version += 1
+        _ensure_indexes(conn)
         conn.execute("UPDATE schema_meta SET version = ?", (SCHEMA_VERSION,))
+        # Inline event insert: importing engine.events here would close an import cycle.
+        counter = conn.execute(
+            "UPDATE counters SET value = value + 1 WHERE prefix = 'ev'"
+        )
+        if counter.rowcount == 0:
+            conn.execute("INSERT INTO counters(prefix, value) VALUES ('ev', 1)")
+        event_id = "ev_%06d" % conn.execute(
+            "SELECT value FROM counters WHERE prefix = 'ev'"
+        ).fetchone()["value"]
+        conn.execute(
+            "INSERT INTO event(id, at, research_id, kind, subject, detail, actor)"
+            " VALUES (?, ?, '', 'db.migrate', 'schema_meta', ?, 'engine')",
+            (
+                event_id,
+                utc_now(),
+                f"schema {started_from} -> {SCHEMA_VERSION}",
+            ),
+        )
         report = {
             "migrated_from": started_from,
             "migrated_to": SCHEMA_VERSION,

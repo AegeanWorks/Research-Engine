@@ -36,8 +36,9 @@ class RunIdentityTests(DatabaseCase):
         records, _ = export_records(self.conn, demo["research"])
         index = _index(records, semantic=True)
         run_keys = [key for key in index if key[0] == "test_run"]
-        self.assertEqual(len(run_keys), 2)
-        self.assertNotEqual(run_keys[0][1], "")
+        self.assertGreaterEqual(len(run_keys), 2)
+        self.assertEqual(len({key[1] for key in run_keys}), len(run_keys))
+        self.assertTrue(all(key[1] for key in run_keys))
 
     def test_a_changed_run_is_reported_by_identity(self) -> None:
         from engine.demo import seed_demo

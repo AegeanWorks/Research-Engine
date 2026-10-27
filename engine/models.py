@@ -22,6 +22,19 @@ HYPOTHESIS_OUTCOMES = ("SUPPORTED", "REFUTED", "INCONCLUSIVE")
 SOURCE_KINDS = ("paper", "preprint", "dataset", "book", "report", "web")
 SOURCE_STATUSES = ("active", "expression_of_concern", "retracted")
 BROKEN_SOURCE_STATUSES = ("retracted",)
+SCREENING_STATUSES = ("identified", "screened_in", "screened_out", "included", "excluded")
+SCREENING_REASONS = (
+    "duplicate",
+    "not_relevant",
+    "wrong_population",
+    "wrong_outcome",
+    "no_primary_data",
+    "not_peer_reviewed",
+    "language",
+    "full_text_unavailable",
+    "superseded",
+    "other",
+)
 DEPENDENCY_RELATIONS = ("derived_from", "depends_on")
 CLAIM_CLAIM_RELATIONS = (
     "supports",
@@ -59,6 +72,9 @@ class Source:
     status: str = "active"
     status_note: str = ""
     status_at: str = ""
+    screening: str = "identified"
+    screening_reason: str = ""
+    screening_at: str = ""
 
 
 @dataclass(frozen=True)
@@ -113,6 +129,7 @@ class KillTest:
     timeout_seconds: int
     created_at: str
     inputs_json: str = "[]"
+    control_command: str = ""
 
 
 @dataclass(frozen=True)
@@ -135,6 +152,7 @@ class TestRun:
     git_dirty: bool = False
     python_version: str = ""
     platform: str = ""
+    role: str = "main"
 
 
 @dataclass(frozen=True)

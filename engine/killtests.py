@@ -52,8 +52,15 @@ def add_test(
     expect_exit: int = 0,
     timeout_seconds: int = 120,
     inputs: Sequence[str] = (),
+    control_command: str = "",
 ) -> KillTest:
-    """Register an executable test bound to a claim, a hypothesis, and its inputs."""
+    """Register an executable test bound to a claim, a hypothesis, its inputs and a control.
+
+    `control_command` is a negative control: a command that must NOT satisfy the expectation. A
+    test without one cannot show that it is capable of failing, so its passing result is weaker
+    evidence. The control is optional because existing tests predate it, but integrity reports the
+    gap for every NUMERIC claim.
+    """
     research = get_research(conn, research_ref)
     if not name.strip() or not command.strip():
         raise EngineError("test needs a name and a command", "a kill test is runnable.", "pass --name and --command.")
@@ -98,11 +105,12 @@ def add_test(
             timeout_seconds=int(timeout_seconds),
             created_at=utc_now(),
             inputs_json=json.dumps(list(declared)),
+            control_command=control_command.strip(),
         )
         conn.execute(
             "INSERT INTO killtest(id, research_id, claim_id, hypothesis_id, name, command,"
-            " expect_exit, timeout_seconds, created_at, inputs_json)"
-            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            " expect_exit, timeout_seconds, created_at, inputs_json, control_command)"
+            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
                 record.id,
                 record.research_id,
@@ -114,6 +122,7 @@ def add_test(
                 record.timeout_seconds,
                 record.created_at,
                 record.inputs_json,
+                record.control_command,
             ),
         )
     return record
@@ -198,7 +207,12 @@ def run_test(
     test_ref: str,
     runs: int = 1,
 ) -> dict:
-    """Run a test one or more times, recording the code and input identity of each run."""
+    """Run a test one or more times, plus its negative control, recording each run's identity.
+
+    The control runs in its own group and must fail on every repetition. When a control is
+    declared, verification is complete only if the main command passed twice and the control
+    failed twice with identical output.
+    """
     test = get_test(conn, test_ref)
     if runs < 1 or runs > 5:
         raise EngineError(
@@ -208,16 +222,62 @@ def run_test(
         )
     current = binding(test)
     before = fingerprint(test_inputs(test))
+    group = next_id(conn, "g")
+    results = _execute(conn, test, test.command, group, runs, "main", "run", current)
+    control = None
+    if test.control_command:
+        control_results = _execute(
+            conn, test, test.control_command, group, runs, "control", "control", current
+        )
+        control = _summarise_control(control_results, test.expect_exit)
+    after = fingerprint(test_inputs(test))
+    fingerprints = {
+        (item["exit_code"], item["stdout_sha256"], item["stderr_sha256"]) for item in results
+    }
+    all_passed = all(item["passed"] for item in results)
+    reproducible = len(fingerprints) == 1
+    stable = before == after
+    control_ok = control is None or bool(control["falsified"])
+    return {
+        "test": test.id,
+        "name": test.name,
+        "run_group": group,
+        "runs": results,
+        "control": control,
+        "binding": current,
+        "workspace_changed_during_runs": not stable,
+        "passed": all_passed and reproducible and stable and control_ok,
+        "reproducible": reproducible,
+        "control_declared": bool(test.control_command),
+        "control_falsified": control_ok,
+        "required_runs": MIN_BINDING_RUNS,
+        "verification_complete": (
+            runs >= MIN_BINDING_RUNS and all_passed and reproducible and stable and control_ok
+        ),
+    }
+
+
+def _execute(
+    conn: sqlite3.Connection,
+    test: KillTest,
+    command: str,
+    group: str,
+    runs: int,
+    role: str,
+    tag_prefix: str,
+    current: dict,
+) -> list:
+    """Execute one command `runs` times and persist every run under its role."""
     commit, dirty = git_state()
     runtime = environment()
-    group = next_id(conn, "g")
     results = []
     for index in range(runs):
-        outcome = _run_once(test.command, test.timeout_seconds)
+        outcome = _run_once(command, test.timeout_seconds)
         passed = (not outcome["timed_out"]) and outcome["exit_code"] == test.expect_exit
         results.append(
             {
-                "run_tag": f"run{index + 1}",
+                "run_tag": f"{tag_prefix}{index + 1}",
+                "role": role,
                 "started_at": utc_now(),
                 "duration_ms": outcome["duration_ms"],
                 "exit_code": outcome["exit_code"],
@@ -232,8 +292,8 @@ def run_test(
                 "INSERT INTO test_run(id, test_id, run_group, run_tag, started_at, duration_ms,"
                 " exit_code, passed, stdout_sha256, stderr_sha256, output_tail,"
                 " command_sha256, code_sha256, inputs_sha256, git_commit, git_dirty,"
-                " python_version, platform)"
-                " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                " python_version, platform, role)"
+                " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 (
                     next_id(conn, "u"),
                     test.id,
@@ -253,26 +313,22 @@ def run_test(
                     int(dirty),
                     runtime["python"],
                     runtime["platform"],
+                    role,
                 ),
             )
-    after = fingerprint(test_inputs(test))
+    return results
+
+
+def _summarise_control(results: list, expect_exit: int) -> dict:
+    """A control is falsified when every repetition fails the expectation identically."""
     fingerprints = {
         (item["exit_code"], item["stdout_sha256"], item["stderr_sha256"]) for item in results
     }
-    all_passed = all(item["passed"] for item in results)
-    reproducible = len(fingerprints) == 1
-    stable = before == after
     return {
-        "test": test.id,
-        "name": test.name,
-        "run_group": group,
         "runs": results,
-        "binding": current,
-        "workspace_changed_during_runs": not stable,
-        "passed": all_passed and reproducible and stable,
-        "reproducible": reproducible,
-        "required_runs": MIN_BINDING_RUNS,
-        "verification_complete": runs >= MIN_BINDING_RUNS and all_passed and reproducible and stable,
+        "reproducible": len(fingerprints) == 1,
+        "expected_exit": expect_exit,
+        "falsified": all(not item["passed"] for item in results) and len(fingerprints) == 1,
     }
 
 

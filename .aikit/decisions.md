@@ -193,3 +193,50 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Consequences**: A changed run is reported by identity rather than as an anonymous record. A
   contradiction visible under two questions is visible twice. Merging keeps the evidence chain
   attached. `outline` is honest about its own program's gate state.
+
+### ADR-017: Negative control in the kill test
+- **Date**: 2026-10-27
+- **Status**: Accepted
+- **Context**: `test verify` accepted a command that cannot fail, so a permanently green test was
+  indistinguishable from a real one. The reference project solved the same problem by measuring a
+  gate's base rate before trusting it.
+- **Decision**: `killtest.control_command` declares a negative control that must fail reproducibly.
+  Control runs are stored with `role='control'` in the same group; `verification_complete` requires
+  both sides. The control is part of the command binding. `EVID-008` warns when evidence-bearing
+  tests lack one; `EVID-009` is an error when a declared control never failed.
+- **Consequences**: `test verify` runs the command twice per side. Existing tests keep verifying but
+  warn until a control is added. A control proves falsifiability, not correctness, and the limits
+  block says so.
+
+### ADR-018: Screening states and a PRISMA projection
+- **Date**: 2026-10-27
+- **Status**: Accepted
+- **Context**: Sources had an evidence status but no record of whether they were ever screened, or
+  why they were left out.
+- **Decision**: Add `source.screening`, `screening_reason` and `screening_at` with the five lattice
+  states and a closed reason taxonomy. `source prisma` and the report compute counts, reasons and
+  the included fraction. A live claim citing an excluded source warns (`SCREEN-001`).
+- **Consequences**: New sources start as `identified`, which is accurate. An out-status always
+  records a reason (`other` by default) so an exclusion cannot look like an oversight.
+
+### ADR-019: Append-only event log for non-verdict actions
+- **Date**: 2026-10-27
+- **Status**: Accepted
+- **Context**: Verdicts and invalidations recorded themselves, but a source losing its status, a
+  merge, or a report generation left no ordered trail.
+- **Decision**: Add an `event` table and `engine/events.py`. Writers append inside their own
+  transaction; `db.migrate` is inserted inline during migration to avoid an import cycle. `events`
+  lists newest first with program and kind filters.
+- **Consequences**: The log cannot contain an event for a rolled-back action. It is append-only, so
+  correcting an earlier action means appending a new event, not editing one.
+
+### ADR-020: Verified backup, integrity gate, domain-separated digests and safe text
+- **Date**: 2026-10-27
+- **Status**: Accepted
+- **Context**: The engine could not verify or copy its own state, its digests shared one domain, and
+  untrusted claim text could break a Markdown table or inject a heading.
+- **Decision**: Add `db integrity` and `db backup` (backup API, verify, fsync, atomic rename, refuse
+  overwrite). Prefix every digest with its artifact kind and record the licence id and digest in
+  the manifest (schema 3). Render all untrusted text through `engine/markdown.py`.
+- **Consequences**: A report digest cannot collide with a graph digest, a licence change is drift,
+  and a claim can no longer alter document structure. Backup files are copies, not incrementals.

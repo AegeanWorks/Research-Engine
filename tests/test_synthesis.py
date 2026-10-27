@@ -6,6 +6,7 @@ import unittest
 
 from engine.claims import add_claim, link_to_question, set_verdict
 from engine.questions import add_question
+from engine.claims import add_claim
 from engine.synthesis import claim_detail, consensus, inventory, report, scorecard
 from tests.support import DatabaseCase, force_numeric
 
@@ -53,6 +54,27 @@ class SynthesisTests(DatabaseCase):
         text = claim_detail(self.conn, support)
         self.assertIn("Verdict history", text)
         self.assertIn("UNVERIFIED -> NUMERIC", text)
+
+    def test_untrusted_text_cannot_break_a_table(self) -> None:
+        research = self.add_research()
+        question = add_question(self.conn, research, "Hostile text?")
+        claim = add_claim(
+            self.conn, research,
+            "Row with | pipe\n## Injected heading\nand a newline\x00",
+            "assumption", basis="b",
+        )
+        link_to_question(self.conn, claim.id, question.id, "supports")
+        text = report(self.conn, research)
+        rows = [line for line in text.splitlines() if line.startswith(f"| {claim.id}")]
+        self.assertEqual(len(rows), 1)
+        self.assertIn("\\|", rows[0])
+        self.assertFalse(any(line.startswith("## Injected") for line in text.splitlines()))
+        score = scorecard(self.conn, research)
+        self.assertEqual(
+            len([line for line in score.splitlines() if line.startswith(f"| {claim.id}")]), 1
+        )
+        detail = claim_detail(self.conn, claim.id)
+        self.assertFalse(any(line.startswith("## Injected") for line in detail.splitlines()))
 
     def test_inventory_counts_every_table(self) -> None:
         self._question_with_opposition()

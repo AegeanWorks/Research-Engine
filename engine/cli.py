@@ -44,7 +44,10 @@ from engine.integrity import check, has_errors, render_json, render_markdown
 from engine.killtests import add_test, list_runs, list_tests, run_test, verify_test
 from engine.questions import add_question, close_question, get_question, list_questions
 from engine.researches import create_research, get_research, list_researches, research_counts
+from engine.screening import prisma_flow, set_screening
 from engine.sources import add_source, list_sources, set_source_status
+from engine.events import list_events
+from engine.maintenance import backup, integrity_check
 from engine.manifest import check_report, write_report
 from engine.merging import merge_claims
 from engine.synthesis import claim_detail, inventory, report, scorecard
@@ -106,6 +109,12 @@ def _build_parser() -> argparse.ArgumentParser:
     retract_s.add_argument("ref")
     retract_s.add_argument("--reason", required=True)
     retract_s.add_argument("--evidence", required=True)
+    screen_s = source_sub.add_parser("screen", help="record a screening decision")
+    screen_s.add_argument("ref")
+    screen_s.add_argument("--status", required=True)
+    screen_s.add_argument("--reason", default="")
+    prisma_s = source_sub.add_parser("prisma", help="show the screening flow")
+    prisma_s.add_argument("--research")
 
     claim = commands.add_parser("claim", help="manage claims and verdicts")
     claim_sub = claim.add_subparsers(dest="action", required=True)
@@ -183,6 +192,8 @@ def _build_parser() -> argparse.ArgumentParser:
     add_t.add_argument("--timeout", type=int, default=120)
     add_t.add_argument("--input", dest="inputs", action="append", default=[],
                        help="a file whose content the test depends on; repeatable")
+    add_t.add_argument("--control", dest="control_command", default="",
+                       help="a negative control that must fail for the test to be falsifiable")
     list_t = test_sub.add_parser("list", help="list kill tests")
     list_t.add_argument("--research")
     run_t = test_sub.add_parser("run", help="run a test one or more times")
@@ -228,6 +239,17 @@ def _build_parser() -> argparse.ArgumentParser:
     keystone_c.add_argument("--limit", type=int, default=10)
     expose_c = analysis_sub.add_parser("expose", help="what a claim would take down")
     expose_c.add_argument("ref")
+
+    db_c = commands.add_parser("db", help="database maintenance")
+    db_sub = db_c.add_subparsers(dest="action", required=True)
+    db_sub.add_parser("integrity", help="run SQLite integrity and foreign-key checks")
+    db_backup = db_sub.add_parser("backup", help="write a verified copy of the database")
+    db_backup.add_argument("path")
+
+    events_c = commands.add_parser("events", help="list recorded events, newest first")
+    events_c.add_argument("--research")
+    events_c.add_argument("--kind")
+    events_c.add_argument("--limit", type=int, default=50)
 
     diff_c = commands.add_parser("diff", help="compare two exported snapshots")
     diff_c.add_argument("old")
@@ -316,9 +338,23 @@ def _cmd_source(conn: sqlite3.Connection, args) -> int:
                 text += " (invalidated: " + ", ".join(item["cascade"]) + ")"
             text += "\n"
         return _emit(result, args.json, text)
+    if args.action == "screen":
+        record = set_screening(conn, args.ref, args.status, args.reason)
+        detail = f" ({record.screening_reason})" if record.screening_reason else ""
+        return _emit(record, args.json, f"{record.id} -> {record.screening}{detail}\n")
+    if args.action == "prisma":
+        flow = prisma_flow(conn, getattr(args, "research", None))
+        text = "".join(f"{key}: {value}\n" for key, value in flow["counts"].items())
+        if flow["reasons"]:
+            text += "reasons: " + ", ".join(
+                f"{name}={count}" for name, count in flow["reasons"].items()
+            ) + "\n"
+        text += f"included fraction: {flow['included_fraction']:.2%}\n"
+        return _emit(flow, args.json, text)
     records = list_sources(conn, args.research)
     text = "".join(
-        f"{s.id}  {s.year or '----'}  {s.status:<20} {s.title}\n" for s in records
+        f"{s.id}  {s.year or '----'}  {s.status:<20} {s.screening:<12} {s.title}\n"
+        for s in records
     ) or "no sources\n"
     return _emit(_records_payload(records), args.json, text)
 
@@ -407,6 +443,7 @@ def _cmd_test(conn: sqlite3.Connection, args) -> int:
             expect_exit=args.expect_exit,
             timeout_seconds=args.timeout,
             inputs=args.inputs,
+            control_command=args.control_command,
         )
         return _emit(record, args.json, f"{record.id} {record.name}\n")
     if args.action in ("run", "verify"):
@@ -415,6 +452,11 @@ def _cmd_test(conn: sqlite3.Connection, args) -> int:
             f"{result['test']} {'PASS' if result['passed'] else 'FAIL'} "
             f"(reproducible: {result['reproducible']}, group {result['run_group']})\n"
         )
+        if result["control_declared"]:
+            state = "falsified" if result["control_falsified"] else "DID NOT FAIL"
+            text += f"  control: {state}\n"
+        else:
+            text += "  control: none (vacuity not excluded)\n"
         if result["workspace_changed_during_runs"]:
             text += "  warning: the workspace changed while the test was running\n"
         for run in result["runs"]:
@@ -484,6 +526,29 @@ def main(argv: List[str] | None = None) -> int:
             if args.command == "brief":
                 view = brief(conn, args.ref, args.budget)
                 return _emit(view.to_dict(), args.json, view.text)
+            if args.command == "db":
+                if args.action == "integrity":
+                    result = integrity_check(conn)
+                    counts = "".join(
+                        f"  {key}: {value}\n" for key, value in result["counts"].items()
+                    )
+                    text = (
+                        f"integrity: {', '.join(result['integrity'])}\n"
+                        f"foreign keys: {len(result['foreign_key_violations'])} violation(s)\n"
+                        f"schema: {result['schema_version']}/{result['expected_schema_version']}\n"
+                        f"journal: {result['journal_mode']}\n" + counts
+                    )
+                    _emit(result, args.json, text)
+                    return 0 if result["ok"] else 1
+                result = backup(conn, Path(args.path))
+                text = f"backup: {result['path']} ({result['bytes']} bytes, verified)\n"
+                return _emit(result, args.json, text)
+            if args.command == "events":
+                records = list_events(conn, args.research, args.kind, args.limit)
+                text = "".join(
+                    f"{e.at}  {e.kind:<18} {e.subject:<14} {e.detail}\n" for e in records
+                ) or "no events\n"
+                return _emit(_records_payload(records), args.json, text)
             if args.command == "diff":
                 result = diff_files(Path(args.old), Path(args.new), semantic=not args.exact)
                 _emit(result, args.json, render_diff(result))

@@ -9,7 +9,14 @@ from pathlib import Path
 
 from engine.claims import add_claim
 from engine.errors import EngineError
-from engine.manifest import REPORT_SCHEMA, check_report, manifest_path, write_report
+from engine.manifest import (
+    LICENSE_ID,
+    REPORT_SCHEMA,
+    check_report,
+    license_block,
+    manifest_path,
+    write_report,
+)
 from engine.synthesis import LIMITS, report
 from tests.support import DatabaseCase
 
@@ -65,6 +72,25 @@ class ManifestTests(DatabaseCase):
         sidecar.write_text(json.dumps(stored), encoding="utf-8")
         with self.assertRaises(EngineError):
             check_report(self.conn, self.research, target)
+
+    def test_manifest_identifies_the_license(self) -> None:
+        target = self.directory / "report.md"
+        write_report(self.conn, self.research, target)
+        stored = json.loads(manifest_path(target).read_text(encoding="utf-8"))
+        self.assertEqual(stored["license"]["id"], LICENSE_ID)
+        self.assertEqual(len(stored["license"]["sha256"]), 64)
+        self.assertEqual(license_block()["sha256"], stored["license"]["sha256"])
+
+    def test_license_change_is_reported_as_drift(self) -> None:
+        target = self.directory / "report.md"
+        write_report(self.conn, self.research, target)
+        sidecar = manifest_path(target)
+        stored = json.loads(sidecar.read_text(encoding="utf-8"))
+        stored["license"]["sha256"] = "0" * 64
+        sidecar.write_text(json.dumps(stored), encoding="utf-8")
+        result = check_report(self.conn, self.research, target)
+        self.assertFalse(result["clean"])
+        self.assertTrue(any("license" in item for item in result["drift"]))
 
     def test_report_prints_its_limits(self) -> None:
         text = report(self.conn, self.research)

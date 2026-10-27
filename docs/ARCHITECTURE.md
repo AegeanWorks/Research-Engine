@@ -46,7 +46,8 @@ readable and gap-free without `AUTOINCREMENT` surprises.
 | `edge` | typed relation between claims/questions/hypotheses | append-only |
 | `hypothesis` | pre-registered prediction | outcome once |
 | `killtest` | executable command, declared inputs and target | append-only |
-| `test_run` | one process execution, its output hashes and binding | append-only |
+| `test_run` | one process execution, its output hashes, binding and role (`main`/`control`) | append-only |
+| `event` | non-verdict action trail | append-only |
 | `verdict` | `previous -> new` with evidence, actor and time | append-only |
 | `invalidation` | root, reason, and the JSON list of affected dependents | append-only |
 
@@ -69,6 +70,9 @@ them.
 10. Outcomes are dated after registration.
 11. An UNKNOWN claim carries the reason its evidence is missing, contributes zero consensus
     weight, and blocks the promotion of anything that depends on it without cascading.
+12. A test that produced verified evidence either declares a negative control that failed
+    reproducibly, or is flagged as unproven-falsifiable.
+13. A claim does not silently cite a source that was screened out of the review.
 
 ## Evidence Binding
 
@@ -157,6 +161,51 @@ and `report --check` refuses to invent one.
 - Network discovery inside the engine.
 - Automatic promotion from test results.
 - A formal proof checker. `PROVEN` records an evidence path, not a verified derivation.
+
+## Falsifiability and Screening
+
+`killtest.control_command` holds a negative control. `run_test` executes it in the same run group
+but under `role='control'`; the control must fail the expectation on every repetition with identical
+output. `verification_complete` requires the main command to pass twice and the control to fail
+twice. The binding hashes `command + "--control--" + control`, so editing either side retires the
+evidence. `EVID-008` warns when an evidence-bearing test has no control; `EVID-009` is an error when
+a declared control never failed.
+
+`source.screening` moves a source through `identified`, `screened_in`, `screened_out`, `included`
+and `excluded`, with a reason drawn from a closed taxonomy and defaulted to `other` when an
+out-status omits it. `prisma_flow` aggregates counts, reasons and the included fraction, and the
+report renders it as a table. A live claim citing an excluded source yields `SCREEN-001` (warning);
+retraction remains the hard error.
+
+## Event Log
+
+`event` is append-only: `id`, `at`, `research_id`, `kind`, `subject`, `detail`, `actor`. It records
+the actions verdicts do not: `source.status`, `source.screening`, `claim.merge`, `report.write` and
+`db.migrate`. Writers append inside their own transaction, so an event never exists for an action
+that rolled back. `events` reads newest first with optional program and kind filters.
+
+## Maintenance
+
+`db integrity` runs `PRAGMA integrity_check` and `PRAGMA foreign_key_check`, then reports schema
+version, journal mode and table counts; it exits 1 when either check fails. `db backup PATH` copies
+the live database through SQLite's backup API into a temporary file in the destination directory,
+verifies the copy, fsyncs it and only then renames it into place. An existing target is refused
+rather than overwritten.
+
+## Digests and Licence Identity
+
+`artifacts.digest(kind, payload)` hashes the artifact kind before the payload: `graph/1`,
+`content/1`, `report/1`, `license/1`. Two artifacts with identical bytes therefore get different
+digests, so a report digest cannot be confused with a graph digest. The manifest records the
+license id (`ASL-1.1`) and the digest of the normalized `LICENSE` text; `report --check` reports
+drift when the terms change.
+
+## Markdown Safety
+
+Claim text, quotes, locators and basis strings are untrusted. `engine/markdown.py` removes control
+and format characters, collapses whitespace to a single line, caps width, and escapes backslashes,
+pipes and backticks for table cells. Reports, scorecards, claim detail and token views all render
+through it, so a newline in a claim can no longer break a table row or inject a heading.
 
 ## Agent Views
 

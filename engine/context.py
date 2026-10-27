@@ -7,6 +7,8 @@ from dataclasses import dataclass
 from typing import List, Sequence, Tuple
 
 from engine.integrity import findings_for_research
+from engine.markdown import sanitize
+from engine.screening import prisma_flow
 from engine.killtests import list_runs
 from engine.models import CLAIM_STATUSES
 from engine.questions import list_questions
@@ -36,9 +38,8 @@ def estimate_tokens(text: str) -> int:
 
 
 def _clip(text: str, width: int) -> str:
-    """Shorten a single line without exceeding the width."""
-    flat = " ".join(str(text).split())
-    return flat if len(flat) <= width else flat[: width - 1].rstrip() + "~"
+    """Shorten one safe line without exceeding the width."""
+    return sanitize(text, width)
 
 
 def pack(lines: Sequence[str], budget: int) -> Tuple[List[str], int, int]:
@@ -98,6 +99,12 @@ def outline(conn: sqlite3.Connection, research_ref: str, budget: int = DEFAULT_B
         f" claims {counts['claim']} hypotheses {counts['hypothesis']} tests {counts['killtest']}",
     ]
     lines.extend(_status_counts(conn, research.id))
+    flow = prisma_flow(conn, research.id)
+    if flow["total"]:
+        lines.append(
+            f"  sources included {flow['included']}/{flow['total']}"
+            f" ({flow['included_fraction']:.0%})"
+        )
     for question in list_questions(conn, research.id):
         evidence = len(stance_claims(conn, question.id))
         lines.append(

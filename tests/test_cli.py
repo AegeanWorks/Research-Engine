@@ -30,7 +30,7 @@ class CliTests(unittest.TestCase):
     def test_init_and_demo(self) -> None:
         code, out, _ = self.run_cli("init")
         self.assertEqual(code, 0)
-        self.assertIn("schema 3", out)
+        self.assertIn("schema 4", out)
         code, out, _ = self.run_cli("--json", "demo")
         self.assertEqual(code, 0)
         payload = json.loads(out)
@@ -191,6 +191,58 @@ class CliTests(unittest.TestCase):
         code, out, _ = self.run_cli("claim", "context", "c_000002")
         self.assertEqual(code, 0)
         self.assertIn("CLAIM c_000002", out)
+
+
+    def test_screening_and_prisma(self) -> None:
+        self.run_cli("demo")
+        code, _, _ = self.run_cli("source", "screen", "s_000001", "--status", "included")
+        self.assertEqual(code, 0)
+        code, out, _ = self.run_cli("source", "prisma", "--research", "r_000001")
+        self.assertEqual(code, 0)
+        self.assertIn("included: 1", out)
+        code, _, err = self.run_cli(
+            "source", "screen", "s_000001", "--status", "excluded", "--reason", "because"
+        )
+        self.assertEqual(code, 1)
+        self.assertIn("Why:", err)
+
+    def test_events_are_listed(self) -> None:
+        self.run_cli("demo")
+        self.run_cli("source", "status", "s_000001", "--status", "expression_of_concern",
+                     "--note", "notice")
+        code, out, _ = self.run_cli("events", "--kind", "source.status")
+        self.assertEqual(code, 0)
+        self.assertIn("source.status", out)
+        self.assertIn("s_000001", out)
+
+    def test_db_integrity_and_backup(self) -> None:
+        self.run_cli("demo")
+        code, out, _ = self.run_cli("db", "integrity")
+        self.assertEqual(code, 0)
+        self.assertIn("integrity: ok", out)
+        target = self.dir / "backup.db"
+        code, out, _ = self.run_cli("db", "backup", str(target))
+        self.assertEqual(code, 0)
+        self.assertTrue(target.is_file())
+        self.assertIn("verified", out)
+
+    def test_negative_control_through_the_cli(self) -> None:
+        self.run_cli("demo")
+        main = self.dir / "m.py"
+        control = self.dir / "c.py"
+        main.write_text("print('value=1')\n", encoding="utf-8")
+        control.write_text("import sys\nprint('diverged')\nsys.exit(2)\n", encoding="utf-8")
+        code, out, _ = self.run_cli(
+            "test", "add", "r_000001", "--name", "With control",
+            "--command", f'"{sys.executable}" "{main}"',
+            "--control", f'"{sys.executable}" "{control}"',
+            "--claim", "c_000001",
+        )
+        self.assertEqual(code, 0)
+        test_id = out.split()[0]
+        code, out, _ = self.run_cli("test", "verify", test_id)
+        self.assertEqual(code, 0)
+        self.assertIn("control: falsified", out)
 
 
 if __name__ == "__main__":

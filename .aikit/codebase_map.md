@@ -6,11 +6,11 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `50`
-- **Total Classes**: `41`
-- **Total Top-Level Functions**: `143`
-- **Total Class Methods**: `215`
-- **Total Source Lines**: `6835`
+- **Total Python Modules**: `59`
+- **Total Classes**: `48`
+- **Total Top-Level Functions**: `164`
+- **Total Class Methods**: `267`
+- **Total Source Lines**: `8104`
 
 ---
 
@@ -50,10 +50,11 @@
 ### [`engine/artifacts.py`](engine/artifacts.py)
 > *Artifact I/O: timestamps, output digests and atomic file replacement.*
 
-**Size**: `37` lines (`1230` bytes)
+**Size**: `51` lines (`1755` bytes)
 
 **Functions:**
 - `def utc_now()` - *Return a second-resolution UTC timestamp in ISO-8601 form.*
+- `def digest(kind, payload)` - *Domain-separated digest: the artifact kind is hashed before the payload.*
 - `def sha256_text(value)` - *Hash extracted output so reproducibility is checked without storing it all.*
 - `def atomic_write_text(path, text)` - *Write UTF-8 text through a flushed temp file and an atomic replace.*
 
@@ -62,13 +63,13 @@
 ### [`engine/bundle.py`](engine/bundle.py)
 > *Portable JSONL export of the evidence graph, and a digest of its content.*
 
-**Size**: `173` lines (`5970` bytes)
+**Size**: `173` lines (`5983` bytes)
 
 **Functions:**
 - `def _rows(conn, table, research_id)`
 - `def export_records(conn, research_ref)` - *Return the ordered graph records and their per-table counts.*
 - `def content_records(records)` - *Semantic projection of a record set: run allocation artefacts are dropped.*
-- `def _digest(records)`
+- `def _digest(records, kind)`
 - `def graph_sha256(conn, research_ref)` - *Exact digest of every exported record, including run bookkeeping.*
 - `def content_sha256(conn, research_ref)` - *Digest of the graph's content, stable across a pure re-verification.*
 - `def export_jsonl(conn, path, research_ref)` - *Write the graph as deterministic JSONL lines, atomically.*
@@ -113,7 +114,7 @@
 ### [`engine/cli.py`](engine/cli.py)
 > *Command-line surface: one entry point for every engine mechanic.*
 
-**Size**: `574` lines (`28090` bytes)
+**Size**: `639` lines (`31707` bytes)
 
 **Functions:**
 - `def _build_parser()`
@@ -132,7 +133,7 @@
 ### [`engine/context.py`](engine/context.py)
 > *Token-budgeted views: the same graph, measured in tokens for an agent reader.*
 
-**Size**: `184` lines (`7270` bytes)
+**Size**: `191` lines (`7481` bytes)
 
 **Classes:**
 - `class View` - *A rendered, bounded view of one program.*
@@ -140,7 +141,7 @@
 
 **Functions:**
 - `def estimate_tokens(text)` - *A stable, provider-agnostic estimate: roughly four characters per token.*
-- `def _clip(text, width)` - *Shorten a single line without exceeding the width.*
+- `def _clip(text, width)` - *Shorten one safe line without exceeding the width.*
 - `def pack(lines, budget)` - *Fit lines into a budget, always keeping the first, and count what was dropped.*
 - `def _render(lines, budget)`
 - `def _status_counts(conn, research_id)`
@@ -153,10 +154,11 @@
 ### [`engine/database.py`](engine/database.py)
 > *SQLite connection, schema versioning and atomic transactions.*
 
-**Size**: `261` lines (`9423` bytes)
+**Size**: `309` lines (`11455` bytes)
 
 **Functions:**
 - `def connect(path)` - *Open a database with durability pragmas suitable for a state file.*
+- `def _ensure_indexes(conn)` - *Create indexes that depend on migrated columns; safe to run after every migration.*
 - `def _add_missing_columns(conn, version)` - *Apply the additive column migrations for one older schema version.*
 - `def initialize(conn)` - *Create the schema, migrate an older one, and refuse a future version.*
 - `def _count_unbound_numeric(conn)` - *Numeric claims whose promotion verdict predates evidence binding.*
@@ -168,7 +170,7 @@
 ### [`engine/demo.py`](engine/demo.py)
 > *A self-contained demonstration of every engine mechanic in under ten seconds.*
 
-**Size**: `143` lines (`5061` bytes)
+**Size**: `148` lines (`5231` bytes)
 
 **Functions:**
 - `def seed_demo(conn)` - *Create one synthetic program that exercises provenance, tests, and cascade.*
@@ -205,21 +207,39 @@
 
 ---
 
+### [`engine/events.py`](engine/events.py)
+> *Append-only event log for actions that are not verdicts.*
+
+**Size**: `97` lines (`2843` bytes)
+
+**Classes:**
+- `class Event`
+
+**Functions:**
+- `def _to_event(row)`
+- `def record(conn, kind, subject, detail, research_id, actor)` - *Append one event. Callers run inside their own write transaction.*
+- `def list_events(conn, research_ref, kind, limit)` - *Recent events, newest first, optionally filtered by program and kind.*
+- `def count(conn)` - *Total recorded events.*
+
+---
+
 ### [`engine/evidence.py`](engine/evidence.py)
 > *Evidence identity: which verified run groups are valid for a test right now.*
 
-**Size**: `104` lines (`3864` bytes)
+**Size**: `140` lines (`5331` bytes)
 
 **Functions:**
 - `def test_inputs(test)` - *The canonical declared input names of a test.*
 - `def binding(test)` - *The identity a run must carry to count as evidence now.*
-- `def _groups(conn, test_id, exact)` - *Verified groups for one test, newest first, optionally filtered by binding.*
-- `def verified_groups(conn, test_id)` - *Every historical run group that passed twice with identical output.*
-- `def current_verified_groups(conn, test)` - *Every group valid for the current code, inputs and command, newest first.*
+- `def _groups(conn, test_id, exact)` - *Verified main-role groups for one test, newest first, optionally binding-filtered.*
+- `def verified_groups(conn, test_id)` - *Every historical main-role group that passed twice with identical output.*
+- `def current_verified_groups(conn, test)` - *Every main-role group valid for the current code, inputs and command, newest first.*
 - `def current_verified_group(conn, test)` - *The newest group valid for the current binding, if any.*
+- `def control_state(conn, test, group)` - *Whether the declared control was falsified in one run group.*
 - `def _claim_tests(conn, claim_id)`
 - `def claim_groups(conn, claim_id)` - *Current verified groups across every test bound to a claim.*
 - `def claim_has_historical_evidence(conn, claim_id)` - *Whether any test bound to a claim ever produced a verified group.*
+- `def claim_tests(conn, claim_id)` - *Every test bound to a claim.*
 
 ---
 
@@ -241,7 +261,7 @@
 ### [`engine/integrity.py`](engine/integrity.py)
 > *Graph integrity: provenance, evidence paths, dependency acyclicity and stale dependents.*
 
-**Size**: `471` lines (`17810` bytes)
+**Size**: `524` lines (`19829` bytes)
 
 **Functions:**
 - `def _finding(code, severity, subject, message, fix)`
@@ -258,28 +278,42 @@
 ### [`engine/killtests.py`](engine/killtests.py)
 > *Executable kill tests: two agreeing runs, bound to code, inputs and command.*
 
-**Size**: `296` lines (`10712` bytes)
+**Size**: `352` lines (`12867` bytes)
 
 **Functions:**
 - `def _to_test(row)`
 - `def _to_run(row)`
-- `def add_test(conn, research_ref, name, command, claim_ref, hypothesis_ref, expect_exit, timeout_seconds, inputs)` - *Register an executable test bound to a claim, a hypothesis, and its inputs.*
+- `def add_test(conn, research_ref, name, command, claim_ref, hypothesis_ref, expect_exit, timeout_seconds, inputs, control_command)` - *Register an executable test bound to a claim, a hypothesis, its inputs and a control.*
 - `def get_test(conn, ref)` - *Fetch one test by identifier.*
 - `def list_tests(conn, research_ref)` - *List tests, optionally filtered by program.*
 - `def _terminate_tree(process)` - *Kill the process and its children without leaking a detached tree.*
 - `def _run_once(command, timeout_seconds)` - *Run one command in the project root and capture a deterministic fingerprint.*
-- `def run_test(conn, test_ref, runs)` - *Run a test one or more times, recording the code and input identity of each run.*
+- `def run_test(conn, test_ref, runs)` - *Run a test one or more times, plus its negative control, recording each run's identity.*
+- `def _execute(conn, test, command, group, runs, role, tag_prefix, current)` - *Execute one command `runs` times and persist every run under its role.*
+- `def _summarise_control(results, expect_exit)` - *A control is falsified when every repetition fails the expectation identically.*
 - `def verify_test(conn, test_ref)` - *Run a test twice in separate processes; disagreement or drift is a failure.*
 - `def list_runs(conn, test_ref, limit)` - *List recent runs, optionally for one test.*
+
+---
+
+### [`engine/maintenance.py`](engine/maintenance.py)
+> *Database maintenance: integrity verification and a crash-safe backup.*
+
+**Size**: `86` lines (`3212` bytes)
+
+**Functions:**
+- `def integrity_check(conn)` - *Run SQLite's own checks plus a few facts a reviewer wants before archiving.*
+- `def backup(conn, destination)` - *Copy the live database through SQLite's backup API and verify the copy.*
 
 ---
 
 ### [`engine/manifest.py`](engine/manifest.py)
 > *Generated-report manifests and drift detection.*
 
-**Size**: `136` lines (`5291` bytes)
+**Size**: `161` lines (`6205` bytes)
 
 **Functions:**
+- `def license_block()` - *Identify the terms the generated artifact is offered under, by id and text digest.*
 - `def manifest_path(report_path)` - *The sidecar path for a report, accepting a report or a manifest path.*
 - `def build_manifest(conn, research_ref, text)` - *Describe one generated report: schema, digests, counts, findings and limits.*
 - `def write_report(conn, research_ref, path)` - *Write the report and its manifest atomically; return both paths and the digests.*
@@ -288,10 +322,23 @@
 
 ---
 
+### [`engine/markdown.py`](engine/markdown.py)
+> *Markdown-safe rendering of untrusted text.*
+
+**Size**: `46` lines (`1727` bytes)
+
+**Functions:**
+- `def sanitize(text, width)` - *Collapse to one safe line: no control characters, no newlines, capped width.*
+- `def cell(text, width)` - *A Markdown table cell: sanitized, with pipe and backtick escaped.*
+- `def bullet(text, width)` - *One list or heading fragment: sanitized, with backticks escaped.*
+- `def code(text, width)` - *A fenced inline code fragment safe for a single-line context.*
+
+---
+
 ### [`engine/merging.py`](engine/merging.py)
 > *Claim merging: one survivor, every edge repointed, duplicates retired.*
 
-**Size**: `108` lines (`4073` bytes)
+**Size**: `117` lines (`4332` bytes)
 
 **Functions:**
 - `def merge_claims(conn, keep_ref, drop_refs, note, actor)` - *Keep one claim, repoint edges from the duplicates, and retire the duplicates.*
@@ -301,7 +348,7 @@
 ### [`engine/models.py`](engine/models.py)
 > *Frozen domain records and the engine's closed vocabularies.*
 
-**Size**: `146` lines (`2968` bytes)
+**Size**: `164` lines (`3434` bytes)
 
 **Classes:**
 - `class Research`
@@ -368,10 +415,22 @@
 
 ---
 
+### [`engine/screening.py`](engine/screening.py)
+> *Source screening and the PRISMA flow.*
+
+**Size**: `114` lines (`4319` bytes)
+
+**Functions:**
+- `def set_screening(conn, ref, status, reason, actor)` - *Record one screening decision; an out-status always carries a reason.*
+- `def prisma_flow(conn, research_ref)` - *Counts and exclusion reasons across the review phases.*
+- `def unscreened_sources(conn, research_ref)` - *Sources still in the identified state, oldest first.*
+
+---
+
 ### [`engine/sources.py`](engine/sources.py)
 > *Bibliographic sources: the only place literature text may enter the graph.*
 
-**Size**: `136` lines (`4709` bytes)
+**Size**: `145` lines (`4989` bytes)
 
 **Functions:**
 - `def _to_source(row)`
@@ -385,12 +444,13 @@
 ### [`engine/synthesis.py`](engine/synthesis.py)
 > *Evidence synthesis: weighted consensus, contradiction pairs, and generated reports.*
 
-**Size**: `248` lines (`10035` bytes)
+**Size**: `296` lines (`11608` bytes)
 
 **Functions:**
 - `def stance_claims(conn, question_id)`
 - `def consensus(conn, question_ref)` - *Confidence-weighted support minus contradiction in [-1, 1].*
 - `def _contradictions(conn, question_id)`
+- `def _provenance_cell(conn, row)`
 - `def report(conn, research_ref)` - *Render a full, reproducible research report from the graph.*
 - `def scorecard(conn, research_ref)` - *Render one line per claim, ordered by status then identifier.*
 - `def claim_detail(conn, claim_ref)` - *Render one claim with provenance, dependencies, verdicts and linked tests.*
@@ -449,7 +509,7 @@
 ### [`tests/test_audit_fixes.py`](tests/test_audit_fixes.py)
 > *Regression tests for defects found in the T-004 audit.*
 
-**Size**: `125` lines (`5697` bytes)
+**Size**: `126` lines (`5788` bytes)
 
 **Classes:**
 - `class RunIdentityTests`
@@ -524,7 +584,7 @@
 ### [`tests/test_cli.py`](tests/test_cli.py)
 > *The CLI surface: JSON output, exit codes and the error triad.*
 
-**Size**: `197` lines (`7491` bytes)
+**Size**: `249` lines (`9685` bytes)
 
 **Classes:**
 - `class CliTests`
@@ -545,6 +605,10 @@
   - Method `.test_analysis_commands()`
   - Method `.test_diff_command_exit_codes()`
   - Method `.test_claim_merge_and_context()`
+  - Method `.test_screening_and_prisma()`
+  - Method `.test_events_are_listed()`
+  - Method `.test_db_integrity_and_backup()`
+  - Method `.test_negative_control_through_the_cli()`
 
 ---
 
@@ -571,6 +635,26 @@
 
 ---
 
+### [`tests/test_controls.py`](tests/test_controls.py)
+> *Negative controls: a test must be able to fail before its pass is evidence.*
+
+**Size**: `111` lines (`4563` bytes)
+
+**Classes:**
+- `class ControlTests`
+  - Method `.setUp()`
+  - Method `._script(name, code)`
+  - Method `._test(control)`
+  - Method `.test_control_runs_are_stored_with_their_role()`
+  - Method `.test_a_control_that_passes_blocks_verification()`
+  - Method `.test_an_irreproducible_control_blocks_verification()`
+  - Method `.test_absence_of_a_control_is_reported_but_not_blocking()`
+  - Method `.test_editing_the_control_retires_the_evidence()`
+  - Method `.test_control_state_reports_absence_explicitly()`
+  - Method `.test_outline_counts_the_program_screening()`
+
+---
+
 ### [`tests/test_diffing.py`](tests/test_diffing.py)
 > *Snapshot diff: semantic by default, exact on request.*
 
@@ -592,7 +676,7 @@
 ### [`tests/test_docs.py`](tests/test_docs.py)
 > *Documentation and project memory stay discoverable and within budget.*
 
-**Size**: `71` lines (`2770` bytes)
+**Size**: `79` lines (`3095` bytes)
 
 **Classes:**
 - `class DocsTests`
@@ -602,6 +686,24 @@
   - Method `.test_readme_tree_names_real_modules()`
   - Method `.test_readme_documents_the_current_schema_and_gates()`
   - Method `.test_architecture_documents_binding_and_digests()`
+
+---
+
+### [`tests/test_events.py`](tests/test_events.py)
+> *Event log: append-only record of actions that are not verdicts.*
+
+**Size**: `97` lines (`4089` bytes)
+
+**Classes:**
+- `class EventTests`
+  - Method `.test_record_and_list_newest_first()`
+  - Method `.test_filters_by_kind_and_research()`
+  - Method `.test_detail_is_flattened()`
+  - Method `.test_source_status_is_recorded()`
+  - Method `.test_screening_is_recorded()`
+  - Method `.test_merge_is_recorded_once()`
+  - Method `.test_report_generation_is_recorded()`
+  - Method `.test_migration_records_an_event()`
 
 ---
 
@@ -695,10 +797,27 @@
 
 ---
 
+### [`tests/test_maintenance.py`](tests/test_maintenance.py)
+> *Database maintenance: integrity verification and verified backups.*
+
+**Size**: `81` lines (`3291` bytes)
+
+**Classes:**
+- `class MaintenanceTests`
+  - Method `.setUp()`
+  - Method `.test_integrity_reports_ok_and_counts()`
+  - Method `.test_integrity_detects_a_foreign_key_violation()`
+  - Method `.test_backup_produces_a_readable_copy()`
+  - Method `.test_backup_refuses_to_overwrite()`
+  - Method `.test_backup_leaves_no_temporary_file()`
+  - Method `.test_backup_of_a_database_with_events_copies_them()`
+
+---
+
 ### [`tests/test_manifest.py`](tests/test_manifest.py)
 > *Generated report manifests and drift detection.*
 
-**Size**: `117` lines (`4835` bytes)
+**Size**: `143` lines (`5903` bytes)
 
 **Classes:**
 - `class ManifestTests`
@@ -708,10 +827,33 @@
   - Method `.test_graph_change_is_reported_as_drift()`
   - Method `.test_missing_manifest_is_an_error()`
   - Method `.test_unknown_manifest_schema_is_refused()`
+  - Method `.test_manifest_identifies_the_license()`
+  - Method `.test_license_change_is_reported_as_drift()`
   - Method `.test_report_prints_its_limits()`
   - Method `.test_reverification_does_not_report_content_drift()`
   - Method `.test_strict_check_reports_record_churn()`
   - Method `.test_tampered_counts_are_reported()`
+
+---
+
+### [`tests/test_markdown.py`](tests/test_markdown.py)
+> *Untrusted text: control characters, newlines and table syntax must not escape a cell.*
+
+**Size**: `50` lines (`1645` bytes)
+
+**Classes:**
+- `class SanitizeTests`
+  - Method `.test_newlines_collapse()`
+  - Method `.test_control_characters_are_removed()`
+  - Method `.test_heading_injection_cannot_survive()`
+  - Method `.test_width_is_respected_and_marked()`
+  - Method `.test_zero_width_means_no_cap()`
+- `class CellTests`
+  - Method `.test_pipe_is_escaped()`
+  - Method `.test_backtick_is_escaped()`
+  - Method `.test_backslash_is_escaped_first()`
+  - Method `.test_cell_is_a_single_line()`
+  - Method `.test_bullet_and_code_are_single_line()`
 
 ---
 
@@ -818,6 +960,26 @@
 
 ---
 
+### [`tests/test_screening.py`](tests/test_screening.py)
+> *Screening decisions and the PRISMA flow.*
+
+**Size**: `85` lines (`3747` bytes)
+
+**Classes:**
+- `class ScreeningTests`
+  - Method `.setUp()`
+  - Method `.test_new_sources_are_identified()`
+  - Method `.test_vocabularies_are_closed()`
+  - Method `.test_out_status_defaults_to_other_reason()`
+  - Method `.test_reason_is_required_to_be_known()`
+  - Method `.test_reason_is_cleared_for_an_in_status()`
+  - Method `.test_unknown_status_and_repeat_are_refused()`
+  - Method `.test_prisma_counts_and_fraction()`
+  - Method `.test_excluded_source_citing_claim_warns()`
+  - Method `.test_included_source_does_not_warn()`
+
+---
+
 ### [`tests/test_sources_questions.py`](tests/test_sources_questions.py)
 > *Source identifiers and question lifecycle.*
 
@@ -854,7 +1016,7 @@
 ### [`tests/test_synthesis.py`](tests/test_synthesis.py)
 > *Consensus weighting and generated reports.*
 
-**Size**: `66` lines (`2834` bytes)
+**Size**: `88` lines (`3915` bytes)
 
 **Classes:**
 - `class SynthesisTests`
@@ -863,6 +1025,7 @@
   - Method `.test_report_contains_evidence_and_contradictions()`
   - Method `.test_scorecard_orders_failed_claims_first()`
   - Method `.test_claim_detail_shows_verdict_history()`
+  - Method `.test_untrusted_text_cannot_break_a_table()`
   - Method `.test_inventory_counts_every_table()`
 
 ---

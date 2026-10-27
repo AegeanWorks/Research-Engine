@@ -8,8 +8,9 @@ from typing import List, Optional
 from engine.database import next_id, transaction
 from engine.errors import EngineError, NotFound
 from engine.models import SOURCE_KINDS, SOURCE_STATUSES, Source
-from engine.researches import get_research
 from engine.artifacts import utc_now
+from engine.events import record as record_event
+from engine.researches import get_research
 
 
 def _to_source(row: sqlite3.Row) -> Source:
@@ -132,5 +133,13 @@ def set_source_status(
         conn.execute(
             "UPDATE source SET status = ?, status_note = ?, status_at = ? WHERE id = ?",
             (status, note.strip(), utc_now(), source.id),
+        )
+        record_event(
+            conn,
+            "source.status",
+            source.id,
+            f"{source.status} -> {status}: {note.strip()}",
+            research_id=source.research_id,
+            actor=actor,
         )
     return get_source(conn, source.id)

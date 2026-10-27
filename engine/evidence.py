@@ -34,19 +34,23 @@ def test_inputs(test: KillTest) -> Tuple[str, ...]:
 
 
 def binding(test: KillTest) -> Dict[str, str]:
-    """The identity a run must carry to count as evidence now."""
+    """The identity a run must carry to count as evidence now.
+
+    The negative control is part of the command identity: changing it changes what the test
+    proves, so old runs must stop counting.
+    """
     current = fingerprint(test_inputs(test))
     return {
-        "command_sha256": sha256_text(test.command),
+        "command_sha256": sha256_text(test.command + "\n--control--\n" + test.control_command),
         "code_sha256": current.code_sha256,
         "inputs_sha256": current.inputs_sha256,
     }
 
 
 def _groups(conn: sqlite3.Connection, test_id: str, exact: bool) -> List[str]:
-    """Verified groups for one test, newest first, optionally filtered by binding."""
+    """Verified main-role groups for one test, newest first, optionally binding-filtered."""
     sql = (
-        "SELECT run_group FROM test_run WHERE test_id = ?"
+        "SELECT run_group FROM test_run WHERE test_id = ? AND role = 'main'"
         + (" AND command_sha256 = ? AND code_sha256 = ? AND inputs_sha256 = ?" if exact else "")
         + _VERIFIED_GROUPING
         + " ORDER BY MAX(id) DESC"
@@ -67,12 +71,12 @@ def _groups(conn: sqlite3.Connection, test_id: str, exact: bool) -> List[str]:
 
 
 def verified_groups(conn: sqlite3.Connection, test_id: str) -> List[str]:
-    """Every historical run group that passed twice with identical output."""
+    """Every historical main-role group that passed twice with identical output."""
     return _groups(conn, test_id, exact=False)
 
 
 def current_verified_groups(conn: sqlite3.Connection, test: KillTest) -> List[str]:
-    """Every group valid for the current code, inputs and command, newest first."""
+    """Every main-role group valid for the current code, inputs and command, newest first."""
     return _groups(conn, test.id, exact=True)
 
 
@@ -80,6 +84,33 @@ def current_verified_group(conn: sqlite3.Connection, test: KillTest) -> Optional
     """The newest group valid for the current binding, if any."""
     groups = current_verified_groups(conn, test)
     return groups[0] if groups else None
+
+
+def control_state(conn: sqlite3.Connection, test: KillTest, group: str) -> dict:
+    """Whether the declared control was falsified in one run group.
+
+    `absent` means the test declares no control. `falsified` requires two or more control runs
+    that all fail the expectation and agree on their output.
+    """
+    if not test.control_command:
+        return {"declared": False, "group": group, "runs": 0, "falsified": False, "reproducible": False}
+    rows = conn.execute(
+        "SELECT exit_code, passed, stdout_sha256, stderr_sha256 FROM test_run"
+        " WHERE test_id = ? AND run_group = ? AND role = 'control' ORDER BY id",
+        (test.id, group),
+    ).fetchall()
+    fingerprints = {
+        (row["exit_code"], row["stdout_sha256"], row["stderr_sha256"]) for row in rows
+    }
+    return {
+        "declared": True,
+        "group": group,
+        "runs": len(rows),
+        "falsified": len(rows) >= MIN_BINDING_RUNS
+        and all(not bool(row["passed"]) for row in rows)
+        and len(fingerprints) == 1,
+        "reproducible": len(fingerprints) == 1,
+    }
 
 
 def _claim_tests(conn: sqlite3.Connection, claim_id: str) -> List[KillTest]:
@@ -102,3 +133,8 @@ def claim_groups(conn: sqlite3.Connection, claim_id: str) -> List[str]:
 def claim_has_historical_evidence(conn: sqlite3.Connection, claim_id: str) -> bool:
     """Whether any test bound to a claim ever produced a verified group."""
     return any(verified_groups(conn, test.id) for test in _claim_tests(conn, claim_id))
+
+
+def claim_tests(conn: sqlite3.Connection, claim_id: str) -> List[KillTest]:
+    """Every test bound to a claim."""
+    return _claim_tests(conn, claim_id)
