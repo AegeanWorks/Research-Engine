@@ -456,6 +456,21 @@ def check(conn: sqlite3.Connection) -> List[Finding]:
         )
 
     for row in conn.execute(
+        "SELECT DISTINCT o.claim_id AS claim_id FROM observation o WHERE o.voided = 0"
+        " AND NOT EXISTS (SELECT 1 FROM event e WHERE e.kind = 'claim.stats'"
+        " AND e.subject = o.claim_id) ORDER BY o.claim_id"
+    ):
+        findings.append(
+            _finding(
+                "OBS-001",
+                "warning",
+                str(row["claim_id"]),
+                "claim has recorded observations but no statistics run",
+                "run `analysis stats CLAIM --baseline ... --treatment ...` before citing numbers.",
+            )
+        )
+
+    for row in conn.execute(
         "SELECT r.id FROM research r WHERE NOT EXISTS ("
         " SELECT 1 FROM claim c WHERE c.research_id = r.id)"
     ):

@@ -10,7 +10,7 @@ from typing import Iterator
 from engine.artifacts import utc_now
 from engine.errors import EngineError
 
-SCHEMA_VERSION = 4
+SCHEMA_VERSION = 5
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS schema_meta (
@@ -134,6 +134,17 @@ CREATE TABLE IF NOT EXISTS verdict (
     at TEXT NOT NULL,
     evidence_group TEXT NOT NULL DEFAULT ''
 );
+CREATE TABLE IF NOT EXISTS observation (
+    id TEXT PRIMARY KEY,
+    research_id TEXT NOT NULL REFERENCES research(id),
+    claim_id TEXT NOT NULL REFERENCES claim(id),
+    group_label TEXT NOT NULL,
+    value REAL NOT NULL,
+    note TEXT NOT NULL DEFAULT '',
+    at TEXT NOT NULL,
+    voided INTEGER NOT NULL DEFAULT 0,
+    void_reason TEXT NOT NULL DEFAULT ''
+);
 CREATE TABLE IF NOT EXISTS event (
     id TEXT PRIMARY KEY,
     at TEXT NOT NULL,
@@ -159,6 +170,8 @@ CREATE INDEX IF NOT EXISTS idx_edge_src ON edge(src_kind, src_id);
 CREATE INDEX IF NOT EXISTS idx_run_test ON test_run(test_id);
 CREATE INDEX IF NOT EXISTS idx_verdict_subject ON verdict(subject_kind, subject_id);
 CREATE INDEX IF NOT EXISTS idx_event_research ON event(research_id, id);
+CREATE INDEX IF NOT EXISTS idx_observation_claim ON observation(claim_id, group_label);
+CREATE INDEX IF NOT EXISTS idx_observation_research ON observation(research_id);
 """
 
 

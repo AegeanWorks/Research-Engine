@@ -8,6 +8,11 @@ from typing import Dict, List, Sequence, Tuple
 
 from engine.cascade import dependents
 from engine.claims import get_claim
+from engine.database import transaction
+from engine.errors import EngineError
+from engine.events import record as record_event
+from engine.observations import group_values
+from engine.stats import ALPHA, DEFAULT_RESAMPLES, DEFAULT_SEED, compare_groups
 from engine.questions import list_questions
 from engine.researches import get_research
 from engine.synthesis import stance_claims
@@ -209,3 +214,65 @@ def expose(conn: sqlite3.Connection, claim_ref: str) -> dict:
         "dependents": [{"id": item, "depth": depth} for item, depth in downstream],
         "inbound": [dict(row) for row in inbound],
     }
+
+
+def claim_statistics(
+    conn: sqlite3.Connection,
+    claim_ref: str,
+    baseline: str,
+    treatment: str,
+    seed: int = DEFAULT_SEED,
+    resamples: int = DEFAULT_RESAMPLES,
+    actor: str = "agent",
+) -> dict:
+    """Compare two observation groups of a claim and record that the comparison happened."""
+    claim = get_claim(conn, claim_ref)
+    groups = group_values(conn, claim.id)
+    for label in (baseline, treatment):
+        if label not in groups:
+            available = ", ".join(sorted(groups)) or "none"
+            raise EngineError(
+                f"no observations in group {label!r} for {claim.id}",
+                "a comparison needs recorded values in both groups.",
+                f"add values with `observation add`, or choose one of: {available}.",
+            )
+    result = compare_groups(groups[baseline], groups[treatment], seed=seed, resamples=resamples)
+    result["claim"] = claim.id
+    result["baseline_label"] = baseline
+    result["treatment_label"] = treatment
+    detail = (
+        f"{baseline}->{treatment} n={result['baseline']['n']}/{result['treatment']['n']}"
+        f" d={result['cohens_d']:.3f} welch_p={result['welch']['p']:.4g}"
+        f" mwu_p={result['mann_whitney']['p']:.4g}"
+    )
+    with transaction(conn):
+        record_event(
+            conn,
+            "claim.stats",
+            claim.id,
+            detail,
+            research_id=claim.research_id,
+            actor=actor,
+        )
+    return result
+
+
+def observation_summary(conn: sqlite3.Connection, claim_ref: str) -> List[dict]:
+    """Per-group counts and basic summaries for one claim."""
+    claim = get_claim(conn, claim_ref)
+    rows = conn.execute(
+        "SELECT group_label, COUNT(*) AS n, MIN(value) AS low, MAX(value) AS high,"
+        " AVG(value) AS mean FROM observation WHERE claim_id = ? AND voided = 0"
+        " GROUP BY group_label ORDER BY group_label",
+        (claim.id,),
+    ).fetchall()
+    return [
+        {
+            "group": str(row["group_label"]),
+            "n": int(row["n"]),
+            "min": float(row["low"]),
+            "max": float(row["high"]),
+            "mean": float(row["mean"]),
+        }
+        for row in rows
+    ]

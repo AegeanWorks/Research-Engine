@@ -12,6 +12,7 @@ from typing import Callable, Dict, List
 
 from engine import __version__
 from engine.analysis import (
+    claim_statistics,
     contradictions,
     evidence_matrix,
     expose,
@@ -49,6 +50,11 @@ from engine.sources import add_source, list_sources, set_source_status
 from engine.events import list_events
 from engine.maintenance import backup, integrity_check
 from engine.manifest import check_report, write_report
+from engine.observations import (
+    add_observation,
+    list_observations,
+    void_observation,
+)
 from engine.merging import merge_claims
 from engine.synthesis import claim_detail, inventory, report, scorecard
 from engine.provenance import provenance
@@ -115,6 +121,21 @@ def _build_parser() -> argparse.ArgumentParser:
     screen_s.add_argument("--reason", default="")
     prisma_s = source_sub.add_parser("prisma", help="show the screening flow")
     prisma_s.add_argument("--research")
+
+    observation = commands.add_parser("observation", help="record and retire measurements")
+    observation_sub = observation.add_subparsers(dest="action", required=True)
+    add_o = observation_sub.add_parser("add", help="record one measurement")
+    add_o.add_argument("claim")
+    add_o.add_argument("--group", required=True)
+    add_o.add_argument("--value", type=float, required=True)
+    add_o.add_argument("--note", default="")
+    list_o = observation_sub.add_parser("list", help="list measurements of a claim")
+    list_o.add_argument("claim")
+    list_o.add_argument("--group")
+    list_o.add_argument("--include-voided", action="store_true")
+    void_o = observation_sub.add_parser("void", help="retire a measurement with a reason")
+    void_o.add_argument("ref")
+    void_o.add_argument("--reason", required=True)
 
     claim = commands.add_parser("claim", help="manage claims and verdicts")
     claim_sub = claim.add_subparsers(dest="action", required=True)
@@ -238,6 +259,12 @@ def _build_parser() -> argparse.ArgumentParser:
     keystone_c.add_argument("ref")
     keystone_c.add_argument("--limit", type=int, default=10)
     expose_c = analysis_sub.add_parser("expose", help="what a claim would take down")
+    stats_c = analysis_sub.add_parser("stats", help="compare two observation groups of a claim")
+    stats_c.add_argument("claim")
+    stats_c.add_argument("--baseline", required=True)
+    stats_c.add_argument("--treatment", required=True)
+    stats_c.add_argument("--seed", type=int, default=0)
+    stats_c.add_argument("--resamples", type=int, default=2000)
     expose_c.add_argument("ref")
 
     db_c = commands.add_parser("db", help="database maintenance")
@@ -356,6 +383,22 @@ def _cmd_source(conn: sqlite3.Connection, args) -> int:
         f"{s.id}  {s.year or '----'}  {s.status:<20} {s.screening:<12} {s.title}\n"
         for s in records
     ) or "no sources\n"
+    return _emit(_records_payload(records), args.json, text)
+
+
+def _cmd_observation(conn: sqlite3.Connection, args) -> int:
+    if args.action == "add":
+        record = add_observation(conn, args.claim, args.group, args.value, args.note)
+        return _emit(record, args.json, f"{record.id} {record.group_label}={record.value}\n")
+    if args.action == "void":
+        record = void_observation(conn, args.ref, args.reason)
+        return _emit(record, args.json, f"{record.id} voided\n")
+    records = list_observations(conn, args.claim, args.group, args.include_voided)
+    text = "".join(
+        f"{o.id}  {o.group_label:<12} {o.value:12.6g}  {o.at}"
+        + ("  VOIDED" if o.voided else "") + "\n"
+        for o in records
+    ) or "no observations\n"
     return _emit(_records_payload(records), args.json, text)
 
 
@@ -586,6 +629,28 @@ def main(argv: List[str] | None = None) -> int:
                         for item in result
                     ) or "no claims\n"
                     return _emit(result, args.json, text)
+                if args.action == "stats":
+                    result = claim_statistics(
+                        conn, args.claim, args.baseline, args.treatment,
+                        seed=args.seed, resamples=args.resamples,
+                    )
+                    text = (
+                        f"{result['claim']} {result['baseline_label']} -> {result['treatment_label']}"
+                        f"  n={result['baseline']['n']}/{result['treatment']['n']}\n"
+                        f"  difference {result['difference']:+.6g}"
+                        f"  d={result['cohens_d']:.3f}\n"
+                        f"  welch p={result['welch']['p']:.4g}"
+                        f"  mwu p={result['mann_whitney']['p']:.4g}"
+                        f" ({result['mann_whitney']['method']})\n"
+                        f"  bootstrap 95% [{result['bootstrap']['low']:+.6g},"
+                        f" {result['bootstrap']['high']:+.6g}]"
+                        f" seed={result['bootstrap']['seed']}\n"
+                        f"  significant={result['significant']}"
+                        f" agree={result['tests_agree']}\n"
+                    )
+                    for warning in result["warnings"]:
+                        text += f"  warning: {warning}\n"
+                    return _emit(result, args.json, text)
                 result = expose(conn, args.ref)
                 text = f"{result['claim']} [{result['status']}]\n"
                 for item in result["dependents"]:
@@ -629,6 +694,7 @@ def main(argv: List[str] | None = None) -> int:
                 "source": _cmd_source,
                 "claim": _cmd_claim,
                 "hypothesis": _cmd_hypothesis,
+                "observation": _cmd_observation,
                 "test": _cmd_test,
             }
             return handlers[args.command](conn, args)

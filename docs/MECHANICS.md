@@ -231,3 +231,21 @@ an existing target is refused. `event` records source status, screening, merges,
 and migrations, inside the writer's transaction.
 
 **Deliberately not copied.** The commercial key store, issuance workflow and web console.
+
+## 13. Deterministic comparison of repeated measurements (`N1-Engine`)
+
+**Mechanic.** The reference project turns repeated numeric series into a result envelope: means,
+standard deviations, effect size, a parametric test, a non-parametric cross-check, and a confidence
+interval, with per-item errors isolated so one bad metric does not abort the batch. It also guards
+against testing many metrics at once.
+
+**Rule here.** `observation add` records each value in a named group; `analysis stats` compares two
+groups with `engine/stats.py`: Cohen's d, Welch t with a beta-function p-value, Mann-Whitney U
+(exact for untied small samples, tie-corrected normal otherwise), and a seeded percentile bootstrap.
+The result states whether the two tests agree and carries explicit warnings for small groups,
+degenerate variance, the approximation, and disagreement. Every run is logged as `claim.stats` and
+`OBS-001` warns when observations exist without one.
+
+**Deliberately not copied.** The intervention/baseline domain model, the medical metrics, pandas,
+scipy, SQLAlchemy and PyQt. The port is stdlib-only and deterministic; the reference bootstrap is
+unseeded, which this project does not reproduce.

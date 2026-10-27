@@ -30,7 +30,7 @@ class CliTests(unittest.TestCase):
     def test_init_and_demo(self) -> None:
         code, out, _ = self.run_cli("init")
         self.assertEqual(code, 0)
-        self.assertIn("schema 4", out)
+        self.assertIn("schema 5", out)
         code, out, _ = self.run_cli("--json", "demo")
         self.assertEqual(code, 0)
         payload = json.loads(out)
@@ -243,6 +243,41 @@ class CliTests(unittest.TestCase):
         code, out, _ = self.run_cli("test", "verify", test_id)
         self.assertEqual(code, 0)
         self.assertIn("control: falsified", out)
+
+
+    def test_observations_and_statistics(self) -> None:
+        self.run_cli("demo")
+        for value in (1.2, 1.4, 1.1, 1.3):
+            code, _, _ = self.run_cli(
+                "observation", "add", "c_000003", "--group", "baseline", "--value", str(value)
+            )
+            self.assertEqual(code, 0)
+        for value in (1.9, 2.1, 2.0, 2.2):
+            self.run_cli("observation", "add", "c_000003", "--group", "treatment",
+                         "--value", str(value))
+        code, out, _ = self.run_cli("observation", "list", "c_000003", "--group", "baseline")
+        self.assertEqual(code, 0)
+        self.assertEqual(len(out.strip().splitlines()), 4)
+        code, out, _ = self.run_cli("--json", "analysis", "stats", "c_000003",
+                                    "--baseline", "baseline", "--treatment", "treatment",
+                                    "--resamples", "100")
+        self.assertEqual(code, 0)
+        payload = json.loads(out)
+        self.assertTrue(payload["significant"])
+        self.assertEqual(payload["baseline"]["n"], 4)
+        first = out.split('"claim"')[0]
+        code, out, _ = self.run_cli("observation", "void", "ob_000001", "--reason", "typo")
+        self.assertEqual(code, 0)
+        self.assertIn("voided", out)
+
+    def test_observation_errors_use_the_triad(self) -> None:
+        self.run_cli("demo")
+        code, _, err = self.run_cli(
+            "observation", "add", "c_000003", "--group", "baseline", "--value", "nan"
+        )
+        self.assertEqual(code, 1)
+        self.assertIn("Why:", err)
+        self.assertIn("Fix:", err)
 
 
 if __name__ == "__main__":

@@ -240,3 +240,18 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   the manifest (schema 3). Render all untrusted text through `engine/markdown.py`.
 - **Consequences**: A report digest cannot collide with a graph digest, a licence change is drift,
   and a claim can no longer alter document structure. Backup files are copies, not incrementals.
+
+### ADR-021: Observations and deterministic statistics
+- **Date**: 2026-10-27
+- **Status**: Accepted
+- **Context**: The engine could run a command and compare its output, but could not hold repeated
+  measurements or report an effect size. N1-Engine's statistics were the strongest unported
+  mechanic, but its implementation depends on pandas/scipy and has an unseeded bootstrap.
+- **Decision**: Add an append-only `observation` table (claim, group, finite value, note, void flag)
+  and a pure `engine/stats.py`. The statistics use only the standard library: regularized incomplete
+  beta for t p-values, dynamic-programming exact Mann-Whitney for untied samples up to 400
+  comparisons, tie-corrected normal otherwise, and a seeded bootstrap. `analysis stats` logs a
+  `claim.stats` event; `OBS-001` warns when observations lack one.
+- **Consequences**: Results are reproducible across machines for a fixed seed. A measurement is
+  retired by voiding, never by editing. The tests disclose their own assumptions instead of
+  presenting one p-value as the truth.

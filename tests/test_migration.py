@@ -165,5 +165,32 @@ class MigrationTests(unittest.TestCase):
         )
 
 
+    def test_observation_table_exists_after_migration(self) -> None:
+        path = self._old_database()
+        conn = connect(path)
+        self.addCleanup(conn.close)
+        initialize(conn)
+        tables = {
+            row["name"] for row in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")
+        }
+        self.assertIn("observation", tables)
+        columns = {row["name"] for row in conn.execute("PRAGMA table_info(observation)")}
+        self.assertTrue({"claim_id", "group_label", "value", "voided"} <= columns)
+
+    def test_version_four_database_gains_the_observation_table(self) -> None:
+        path = self._old_database()
+        conn = connect(path)
+        self.addCleanup(conn.close)
+        initialize(conn)
+        conn.execute("DROP TABLE observation")
+        conn.execute("UPDATE schema_meta SET version = 4")
+        report = initialize(conn)
+        self.assertEqual(report["migrated_from"], 4)
+        tables = {
+            row["name"] for row in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")
+        }
+        self.assertIn("observation", tables)
+
+
 if __name__ == "__main__":
     unittest.main()

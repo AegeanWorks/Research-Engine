@@ -6,11 +6,11 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `59`
-- **Total Classes**: `48`
-- **Total Top-Level Functions**: `164`
-- **Total Class Methods**: `267`
-- **Total Source Lines**: `8104`
+- **Total Python Modules**: `63`
+- **Total Classes**: `55`
+- **Total Top-Level Functions**: `186`
+- **Total Class Methods**: `305`
+- **Total Source Lines**: `9074`
 
 ---
 
@@ -33,7 +33,7 @@
 ### [`engine/analysis.py`](engine/analysis.py)
 > *Discovery and ranking over the graph: contradictions, coverage, keystones.*
 
-**Size**: `211` lines (`8493` bytes)
+**Size**: `278` lines (`10946` bytes)
 
 **Functions:**
 - `def keywords(text)` - *Content words of an assertion, lowercased and de-duplicated.*
@@ -44,6 +44,8 @@
 - `def evidence_matrix(conn, research_ref)` - *Sources x questions: how many claims each source contributes to each question.*
 - `def keystone_claims(conn, research_ref, limit)` - *Claims that the rest of the graph leans on, by transitive dependents and inbound edges.*
 - `def expose(conn, claim_ref)` - *What a claim would take down with it, plus what cites it.*
+- `def claim_statistics(conn, claim_ref, baseline, treatment, seed, resamples, actor)` - *Compare two observation groups of a claim and record that the comparison happened.*
+- `def observation_summary(conn, claim_ref)` - *Per-group counts and basic summaries for one claim.*
 
 ---
 
@@ -114,7 +116,7 @@
 ### [`engine/cli.py`](engine/cli.py)
 > *Command-line surface: one entry point for every engine mechanic.*
 
-**Size**: `639` lines (`31707` bytes)
+**Size**: `705` lines (`35149` bytes)
 
 **Functions:**
 - `def _build_parser()`
@@ -123,6 +125,7 @@
 - `def _cmd_research(conn, args)`
 - `def _cmd_question(conn, args)`
 - `def _cmd_source(conn, args)`
+- `def _cmd_observation(conn, args)`
 - `def _cmd_claim(conn, args)`
 - `def _cmd_hypothesis(conn, args)`
 - `def _cmd_test(conn, args)`
@@ -154,7 +157,7 @@
 ### [`engine/database.py`](engine/database.py)
 > *SQLite connection, schema versioning and atomic transactions.*
 
-**Size**: `309` lines (`11455` bytes)
+**Size**: `322` lines (`11990` bytes)
 
 **Functions:**
 - `def connect(path)` - *Open a database with durability pragmas suitable for a state file.*
@@ -261,7 +264,7 @@
 ### [`engine/integrity.py`](engine/integrity.py)
 > *Graph integrity: provenance, evidence paths, dependency acyclicity and stale dependents.*
 
-**Size**: `524` lines (`19829` bytes)
+**Size**: `539` lines (`20426` bytes)
 
 **Functions:**
 - `def _finding(code, severity, subject, message, fix)`
@@ -348,7 +351,7 @@
 ### [`engine/models.py`](engine/models.py)
 > *Frozen domain records and the engine's closed vocabularies.*
 
-**Size**: `164` lines (`3434` bytes)
+**Size**: `177` lines (`3632` bytes)
 
 **Classes:**
 - `class Research`
@@ -358,7 +361,23 @@
 - `class Hypothesis`
 - `class KillTest`
 - `class TestRun`
+- `class Observation`
 - `class Finding`
+
+---
+
+### [`engine/observations.py`](engine/observations.py)
+> *Recorded observations: the raw measurements a numeric claim is computed from.*
+
+**Size**: `153` lines (`5354` bytes)
+
+**Functions:**
+- `def _to_observation(row)`
+- `def add_observation(conn, claim_ref, group_label, value, note, at)` - *Record one measurement in a named group; non-finite values are refused.*
+- `def get_observation(conn, ref)` - *Fetch one observation by identifier.*
+- `def list_observations(conn, claim_ref, group_label, include_voided)` - *Observations of a claim, oldest first, excluding voided rows by default.*
+- `def void_observation(conn, ref, reason, actor)` - *Retire a measurement without deleting it; the reason stays in the record.*
+- `def group_values(conn, claim_ref)` - *Non-voided values per group, in insertion order.*
 
 ---
 
@@ -441,10 +460,32 @@
 
 ---
 
+### [`engine/stats.py`](engine/stats.py)
+> *Deterministic statistics for recorded observations.*
+
+**Size**: `309` lines (`11549` bytes)
+
+**Functions:**
+- `def sample_sd(values)` - *Sample standard deviation; zero for fewer than two values.*
+- `def cohens_d(baseline, treatment)` - *Standardized mean difference using the pooled standard deviation.*
+- `def _betacf(a, b, x)` - *Continued fraction for the incomplete beta function (modified Lentz).*
+- `def _betai(a, b, x)` - *Regularized incomplete beta I_x(a, b).*
+- `def t_two_sided_p(t, df)` - *Two-sided p-value for a t statistic with the given degrees of freedom.*
+- `def welch_t(baseline, treatment)` - *Welch's unequal-variance t test, with the zero-variance case handled explicitly.*
+- `def _ranks(values)` - *Average ranks for ties, returning the ranks and the tie-group sizes.*
+- `def _u_distribution(n1, n2)` - *Counts of the U statistic under the null, by dynamic programming.*
+- `def _exact_u_two_sided_p(u1, n1, n2)` - *Exact two-sided p for the U statistic when the sample is small and untied.*
+- `def mann_whitney(baseline, treatment)` - *Mann-Whitney U: exact for small untied samples, continuity-corrected asymptotic otherwise.*
+- `def bootstrap_ci(baseline, treatment, seed, resamples)` - *Percentile bootstrap interval for the difference in means, reproducibly seeded.*
+- `def linregress(xs, ys)` - *Least-squares slope, intercept, correlation and two-sided p for paired points.*
+- `def compare_groups(baseline, treatment, seed, resamples)` - *Compare two recorded groups and state the result, the agreement and the caveats.*
+
+---
+
 ### [`engine/synthesis.py`](engine/synthesis.py)
 > *Evidence synthesis: weighted consensus, contradiction pairs, and generated reports.*
 
-**Size**: `296` lines (`11608` bytes)
+**Size**: `317` lines (`12521` bytes)
 
 **Functions:**
 - `def stance_claims(conn, question_id)`
@@ -584,7 +625,7 @@
 ### [`tests/test_cli.py`](tests/test_cli.py)
 > *The CLI surface: JSON output, exit codes and the error triad.*
 
-**Size**: `249` lines (`9685` bytes)
+**Size**: `284` lines (`11290` bytes)
 
 **Classes:**
 - `class CliTests`
@@ -609,6 +650,8 @@
   - Method `.test_events_are_listed()`
   - Method `.test_db_integrity_and_backup()`
   - Method `.test_negative_control_through_the_cli()`
+  - Method `.test_observations_and_statistics()`
+  - Method `.test_observation_errors_use_the_triad()`
 
 ---
 
@@ -676,7 +719,7 @@
 ### [`tests/test_docs.py`](tests/test_docs.py)
 > *Documentation and project memory stay discoverable and within budget.*
 
-**Size**: `79` lines (`3095` bytes)
+**Size**: `84` lines (`3275` bytes)
 
 **Classes:**
 - `class DocsTests`
@@ -880,7 +923,7 @@
 ### [`tests/test_migration.py`](tests/test_migration.py)
 > *Schema migration: an older database is repaired, not rejected or wiped.*
 
-**Size**: `169` lines (`7404` bytes)
+**Size**: `196` lines (`8522` bytes)
 
 **Classes:**
 - `class MigrationTests`
@@ -893,6 +936,8 @@
   - Method `.test_verdict_gains_the_evidence_group_column()`
   - Method `.test_migration_reports_the_unbound_numeric_claims()`
   - Method `.test_version_two_database_gains_only_the_verdict_column()`
+  - Method `.test_observation_table_exists_after_migration()`
+  - Method `.test_version_four_database_gains_the_observation_table()`
 
 ---
 
@@ -906,6 +951,29 @@
   - Method `.test_status_vocabulary_is_closed()`
   - Method `.test_dependency_relations_are_explicit()`
   - Method `.test_claim_is_frozen()`
+
+---
+
+### [`tests/test_observations.py`](tests/test_observations.py)
+> *Observations: raw values, their voiding, and the statistics projection over them.*
+
+**Size**: `114` lines (`5288` bytes)
+
+**Classes:**
+- `class ObservationTests`
+  - Method `.setUp()`
+  - Method `.test_values_are_recorded_in_order()`
+  - Method `.test_non_finite_values_are_refused()`
+  - Method `.test_invalid_group_is_refused()`
+  - Method `.test_groups_are_lowercased()`
+  - Method `.test_void_retires_without_deleting()`
+  - Method `.test_void_requires_a_reason_and_happens_once()`
+  - Method `.test_void_is_logged()`
+  - Method `.test_statistics_compare_the_groups()`
+  - Method `.test_missing_group_lists_available_groups()`
+  - Method `.test_statistics_are_logged_and_clear_the_warning()`
+  - Method `.test_summary_and_detail()`
+  - Method `.test_voided_values_are_excluded_from_statistics()`
 
 ---
 
@@ -1010,6 +1078,41 @@
   - Method `.test_claims_are_left_alone_when_already_failed()`
   - Method `.test_retracted_source_is_clean_after_cascade()`
   - Method `.test_reinstatement_requires_a_note_and_keeps_claim_verdicts()`
+
+---
+
+### [`tests/test_stats.py`](tests/test_stats.py)
+> *Statistics: values checked against an independent implementation, behaviour checked here.*
+
+**Size**: `132` lines (`5151` bytes)
+
+**Classes:**
+- `class DistributionTests`
+  - Method `.test_sample_sd()`
+  - Method `.test_t_p_value_matches_reference()`
+  - Method `.test_t_p_value_edges()`
+- `class TestTests`
+  - Method `.test_welch_matches_reference()`
+  - Method `.test_welch_degenerate_group()`
+  - Method `.test_welch_zero_variance()`
+  - Method `.test_mann_whitney_exact_matches_reference()`
+  - Method `.test_mann_whitney_uses_asymptotic_with_ties()`
+  - Method `.test_mann_whitney_empty()`
+  - Method `.test_effect_size_matches_reference()`
+  - Method `.test_effect_size_needs_two_values_per_group()`
+- `class IntervalTests`
+  - Method `.test_bootstrap_is_seeded_and_reproducible()`
+  - Method `.test_bootstrap_brackets_the_difference()`
+  - Method `.test_bootstrap_empty()`
+- `class RegressionTests`
+  - Method `.test_linregress_matches_reference()`
+  - Method `.test_linregress_too_few_points()`
+  - Method `.test_linregress_flat_line()`
+- `class CompareTests`
+  - Method `.test_significant_difference_with_agreeing_tests()`
+  - Method `.test_small_groups_warn()`
+  - Method `.test_zero_variance_warns()`
+  - Method `.test_ties_are_disclosed()`
 
 ---
 

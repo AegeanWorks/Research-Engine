@@ -156,6 +156,19 @@ class TestRun:
 
 
 @dataclass(frozen=True)
+class Observation:
+    id: str
+    research_id: str
+    claim_id: str
+    group_label: str
+    value: float
+    note: str
+    at: str
+    voided: bool
+    void_reason: str
+
+
+@dataclass(frozen=True)
 class Finding:
     code: str
     severity: str

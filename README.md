@@ -40,9 +40,8 @@ A falsification-first research engine that turns questions into provenance-backe
 
 ## Why this is not "just lattice"
 
-`lattice` is a good evidence store: a provenance-first graph of papers, quote-backed claims and
-questions. It is not a research lifecycle. The engine borrows its strongest mechanic (a claim
-cannot exist without provenance) and adds the parts that decide what a claim is allowed to mean.
+`lattice` is a strong evidence store but not a research lifecycle. The engine borrows its
+provenance rule and adds what a claim is allowed to mean.
 
 | Reference | Mechanic adopted | What it becomes here |
 |---|---|---|
@@ -60,15 +59,14 @@ cannot exist without provenance) and adds the parts that decide what a claim is 
 | `lattice` | Evidence matrix and keystones | Source x question coverage, and the claims the rest of the graph leans on |
 | `lattice` | Screening and PRISMA flow | A source moves identified -> screened -> included or excluded, with a closed reason taxonomy and flow counts in the report |
 | `obezite-mekanizma-projesi` | Non-vacuity | A test without a negative control has not shown that it can fail; a declared control that passes is an error |
+| `N1-Engine` | Deterministic comparison | Recorded observations become mean, effect size, Welch t, exact/asymptotic Mann-Whitney and a seeded bootstrap interval, with disagreements and degenerate samples stated as warnings |
 | `aegean-licensing` | Domain-separated digests | Every digest hashes its artifact kind first, so a report digest can never equal a graph digest |
 | `aegean-licensing` | Pinned license identity | Every manifest records the license id and the digest of the licence text it was generated under |
 | `aegean-licensing-ops` | Verified backup and event log | `db integrity`, `db backup` and an append-only event trail cover the actions verdicts do not |
 | `PNN` (extended) | Explicit UNKNOWN | Missing evidence is a state, never a silent pass |
 
-The decision was **not** to fork all four projects. Three of them carry domain content and large
-pipelines that would drown a general engine. The engine takes the transferable *mechanics*,
-implements them clean-room on one standard-library SQLite graph, and leaves domain research as
-programs the engine can host.
+The engine takes the transferable *mechanics* clean-room onto one standard-library SQLite graph;
+domain content stays in the programs it hosts.
 
 ## How It Works
 
@@ -116,7 +114,8 @@ programs the engine can host.
     `identified`, `screened_in`/`screened_out` and `included`/`excluded`, with a reason from a
     closed taxonomy. `source prisma` and the report show the flow; a claim citing an excluded
     source warns (`SCREEN-001`).
-15. **Every non-verdict action is logged.** Source status changes, screening, merges, report
+15. **Measurements are recorded, not retyped.** `observation add` stores each value in a named group; `observation void` retires one with a reason. `analysis stats` compares two groups with a seeded bootstrap, reports whether the parametric and rank tests agree, and logs the run. A claim with observations but no statistics run warns (`OBS-001`).
+16. **Every non-verdict action is logged.** Source status changes, screening, merges, report
     generation and schema migration append to an event log; `events` lists it newest first.
     Verdicts keep their own append-only history.
 
@@ -159,6 +158,10 @@ python -m engine [--db PATH] source screen REF --status identified|screened_in|s
 python -m engine [--db PATH] source prisma [--research REF]
 python -m engine [--db PATH] source retract REF --reason TEXT --evidence TEXT
 
+python -m engine [--db PATH] observation add CLAIM --group LABEL --value F [--note TEXT]
+python -m engine [--db PATH] observation list CLAIM [--group LABEL] [--include-voided]
+python -m engine [--db PATH] observation void OBS --reason TEXT
+
 python -m engine [--db PATH] claim add RESEARCH --text TEXT --kind KIND [--source REF]
                         [--quote TEXT] [--locator TEXT] [--confidence C] [--kill-test TEXT]
                         [--basis TEXT] [--from CLAIM]...
@@ -194,6 +197,7 @@ python -m engine [--db PATH] analysis contradictions REF [--min-score S] [--unli
 python -m engine [--db PATH] analysis matrix REF
 python -m engine [--db PATH] analysis keystone REF [--limit N]
 python -m engine [--db PATH] analysis expose REF
+python -m engine [--db PATH] analysis stats CLAIM --baseline LABEL --treatment LABEL [--seed N] [--resamples N]
 python -m engine [--db PATH] diff OLD.jsonl NEW.jsonl [--exact]
 python -m engine [--db PATH] db integrity
 python -m engine [--db PATH] db backup PATH
@@ -228,6 +232,7 @@ present and 0 when only warnings remain. Domain errors print the `Error / Why / 
   empty programs (`EMPTY-001`);
 - a test that produced verified evidence without a negative control (`EVID-008`, warning) or
   whose declared control never failed (`EVID-009`, error);
+- a claim with observations but no statistics run (`OBS-001`, warning);
 - a live claim citing a source screened out of the review (`SCREEN-001`, warning);
 - a test still bound to a retired claim (`TEST-001`, warning);
 - an UNKNOWN claim with no recorded reason (`EVID-007`, warning).
@@ -236,10 +241,10 @@ Warnings are research hygiene; errors block a trustworthy report.
 
 ## Data Model
 
-One SQLite file (default `research.db`), schema version 4. Tables: `research`, `source`, `question`,
+One SQLite file (default `research.db`), schema version 5. Tables: `research`, `source`, `question`,
 `claim`, `edge`, `hypothesis`, `killtest`, `test_run`, `verdict`, `invalidation`, plus
 `schema_meta` and `counters`. Writes use `BEGIN IMMEDIATE`; WAL and `synchronous=FULL` are enabled
-for a durable state file. `verdict`, `test_run`, `event` and `invalidation` are append-only. An older
+for a durable state file. `verdict`, `test_run`, `event`, `observation` and `invalidation` are append-only (an observation is voided, never edited or deleted). An older
 database is migrated additively in place and the upgrade is announced with the number of numeric
 claims that need re-binding; a newer version is refused without modification.
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
@@ -299,36 +304,35 @@ research-engine/
 │   ├── merging.py            <- duplicate claim merge
 │   ├── models.py             <- frozen DTOs and closed vocabularies
 │   ├── provenance.py         <- code and input identity recorded with evidence
+│   ├── observations.py       <- recorded measurements per claim group
 │   ├── questions.py
 │   ├── researches.py
 │   ├── screening.py          <- screening decisions and PRISMA flow
 │   ├── sources.py
+│   ├── stats.py              <- deterministic tests, effect size, bootstrap
 │   └── synthesis.py          <- consensus, report, scorecard
 └── tests/                    <- regression shield
 ```
 
 ## Deliberate Limits
 
-- **No literature crawling.** The engine is a reasoning ledger, not a search engine. Sources are
-  registered explicitly; ingestion adapters are a separate concern.
-- **Single writer.** SQLite serialises writes by design; that is enough for one researcher or one
-  agent at a time.
-- **Consensus is a display heuristic.** The weighted score helps compare questions; it is not a
-  posterior probability and never changes a verdict. UNKNOWN contributes zero.
-- **Discovery is advisory.** `analysis` proposes contradictions and keystones; it never writes
-  an edge. Only an explicit `claim link` records a relation.
-- **A control proves falsifiability, not correctness.** A negative control shows the test can
-  fail; it does not show that the assertion is the right one.
-- **Screening is a local decision.** The engine records screening states and reasons; it does
-  not search databases or verify that an exclusion was correct.
-- **Views are summaries.** A token budget truncates lines; the omitted count is always shown so
-  a reader can tell a complete view from a clipped one. The anchor line is always kept, so a
-  budget smaller than that line yields a single over-budget line rather than an empty view.
-- **Human judgment stays in the loop.** Tests produce evidence; they do not auto-promote claims.
-- **Undeclared inputs are invisible.** Evidence is bound to the engine code and to `--input` paths.
-  A script that reads an undeclared file can change without invalidating its run; declare the file.
-  Globs are expanded deterministically and a directory is refused, so a declaration cannot
-  silently cover nothing.
+- **No literature crawling.** Sources are registered explicitly; ingestion is a separate concern.
+- **Single writer.** SQLite serialises writes; one researcher or agent at a time.
+- **Consensus is a display heuristic.** It is not a posterior and never changes a verdict;
+  UNKNOWN contributes zero.
+- **Discovery is advisory.** `analysis` proposes; only `claim link` records a relation.
+- **Statistics describe the recorded numbers, not the world.** Independence and
+  representativeness are assumed and unchecked.
+- **The rank test's method is stated.** Exact for untied small samples, tie-corrected
+  approximation otherwise.
+- **A control proves falsifiability, not correctness.** It shows the test can fail, not that the
+  assertion is right.
+- **Screening is local.** States and reasons are recorded; correctness is not verified.
+- **Views are summaries.** Omitted lines are always counted; the anchor line is always kept, so
+  a tiny budget yields one over-budget line rather than an empty view.
+- **Human judgment stays in the loop.** Tests produce evidence; they never auto-promote.
+- **Undeclared inputs are invisible.** Evidence binds the engine code and declared `--input` paths;
+  globs expand deterministically and directories are refused, but an undeclared read is unseen.
 
 ## 📜 License
 

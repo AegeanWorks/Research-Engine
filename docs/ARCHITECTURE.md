@@ -184,6 +184,28 @@ the actions verdicts do not: `source.status`, `source.screening`, `claim.merge`,
 `db.migrate`. Writers append inside their own transaction, so an event never exists for an action
 that rolled back. `events` reads newest first with optional program and kind filters.
 
+## Observations and Statistics
+
+`observation` stores one measurement per row: claim, group label, finite numeric value, note,
+timestamp, and a `voided` flag with a reason. Rows are never edited or deleted; a wrong measurement
+is voided so the record keeps its history. `analysis stats` compares two groups through
+`engine/stats.py`, which is pure and stdlib-only:
+
+| Quantity | Method | Notes |
+|---|---|---|
+| location/spread | sample mean, sample SD | – |
+| effect size | Cohen's d, pooled SD | 0 when the pooled SD is 0 |
+| parametric | Welch t, Satterthwaite df | zero-variance groups handled explicitly |
+| p-value | regularized incomplete beta | matches reference values to 1e-10 |
+| rank test | Mann-Whitney U | exact DP for untied n1·n2 ≤ 400, tie-corrected normal otherwise |
+| interval | percentile bootstrap, seeded | the seed and resample count are recorded |
+| trend | least squares, t-based p | needs ≥ 3 points |
+
+`compare_groups` returns the numbers, `tests_agree`, `significant`, and warnings: fewer than three
+observations, degenerate zero variance, the asymptotic rank method, and parametric/rank
+disagreement at alpha 0.05. A run appends a `claim.stats` event; a claim with live observations and
+no such event warns as `OBS-001`.
+
 ## Maintenance
 
 `db integrity` runs `PRAGMA integrity_check` and `PRAGMA foreign_key_check`, then reports schema

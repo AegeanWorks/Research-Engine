@@ -1,34 +1,17 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "T-006-cross-project-mechanics",
+    "task_id": "T-007-observations-stats",
     "last_phase": "phase 4",
     "active_phase": 5,
     "status": "completed",
-    "updated_at": 1793094532.7792177,
+    "updated_at": 1793098540.251437,
     "owner": "kilo:research-engine",
     "started_by": "kilo:research-engine",
     "continuations": [],
-    "completed_at": 1793094532.928018
+    "completed_at": 1793098540.4079034
   },
   "checkpoints": [
-    {
-      "task_id": "T-001-core-engine",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/6] Core engine: SQLite provenance graph, epistemic ledger, executable kill tests, cascade invalidation",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793079774.9345958,
-      "timestamp_str": "2026-10-27 08:42:54",
-      "agent": "kilo:research-engine",
-      "impact_assessment": {
-        "why": "Unify the four reference mechanics into one auditable research engine instead of maintaining four disconnected research codebases",
-        "benefits": "One provenance-first store; falsification-first verdicts; pre-registered hypotheses; executable gates; transitive invalidation; stdlib-only reproducibility",
-        "risks": "contract: new schema and CLI are unproven; dependency: stdlib only, so no external graph libraries; concurrency: single-writer SQLite with atomic replace; state: append-only verdict history must survive cascade",
-        "mitigation": "Failing-first tests per module, frozen DTOs, additive schema migration, single-writer transactions with fsync, and a check gate that refuses inconsistent graphs"
-      }
-    },
     {
       "task_id": "T-001-core-engine",
       "phase": "phase 4",
@@ -238,6 +221,44 @@
       "status": "completed",
       "timestamp": 1793094532.9280198,
       "timestamp_str": "2026-10-27 12:48:52",
+      "agent": "kilo:research-engine"
+    },
+    {
+      "task_id": "T-007-observations-stats",
+      "phase": "phase 2",
+      "phase_num": 2,
+      "description": "[1/2] Adopt N1-Engine's measurement analysis: append-only observations, deterministic stdlib statistics, seeded bootstrap, exact/asymptotic rank test, OBS-001",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793098499.3310254,
+      "timestamp_str": "2026-10-27 13:54:59",
+      "agent": "kilo:research-engine",
+      "impact_assessment": {
+        "why": "The strongest unported mechanic was turning repeated measurements into an effect size and interval; the engine could only hash a command's output",
+        "benefits": "Numeric claims can rest on recorded values; results are reproducible for a fixed seed; assumptions and test disagreement are disclosed",
+        "risks": "contract: schema v5 adds observation; dependency: stdlib only; concurrency: single-writer; state: voiding must preserve the record and the migration must add the table to v1-v4 databases",
+        "mitigation": "Values checked against an independent implementation, exact/asymptotic methods tested, void semantics tested, and v4->v5 migration covered"
+      }
+    },
+    {
+      "task_id": "T-007-observations-stats",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[2/2] Observations and statistics delivered: append-only observation table, observation add/list/void, analysis stats with Cohen's d, Welch t, exact/asymptotic Mann-Whitney and seeded bootstrap, claim.stats event, OBS-001 warning; schema v5; 272 tests pass; 4/4 AIKit gates pass; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793098540.251437,
+      "timestamp_str": "2026-10-27 13:55:40",
+      "agent": "kilo:research-engine"
+    },
+    {
+      "task_id": "T-007-observations-stats",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'T-007-observations-stats' completed successfully.",
+      "status": "completed",
+      "timestamp": 1793098540.407905,
+      "timestamp_str": "2026-10-27 13:55:40",
       "agent": "kilo:research-engine"
     }
   ]

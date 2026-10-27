@@ -272,6 +272,27 @@ def claim_detail(conn: sqlite3.Connection, claim_ref: str) -> str:
             f"- {row['at']} {row['previous_status']} -> {row['status']}{bound}: "
             f"{bullet(row['evidence'], 300)}"
         )
+    lines.extend(["", "## Observations", ""])
+    groups = conn.execute(
+        "SELECT group_label, COUNT(*) AS n, MIN(value) AS low, MAX(value) AS high,"
+        " AVG(value) AS mean FROM observation WHERE claim_id = ? AND voided = 0"
+        " GROUP BY group_label ORDER BY group_label",
+        (claim.id,),
+    ).fetchall()
+    if not groups:
+        lines.append("_No observations recorded._")
+    for group in groups:
+        lines.append(
+            f"- {cell(group['group_label'])}: n={group['n']} min={group['low']:.4g}"
+            f" max={group['high']:.4g} mean={group['mean']:.4g}"
+        )
+    stats_runs = conn.execute(
+        "SELECT at, detail FROM event WHERE kind = 'claim.stats' AND subject = ? ORDER BY id DESC",
+        (claim.id,),
+    ).fetchall()
+    for row in stats_runs[:1]:
+        lines.append(f"- last statistics run {row['at']}: {bullet(row['detail'], 200)}")
+
     lines.extend(["", "## Edges", ""])
     edges = conn.execute(
         "SELECT * FROM edge WHERE (src_kind = 'claim' AND src_id = ?)"
@@ -291,6 +312,6 @@ def inventory(conn: sqlite3.Connection) -> Dict[str, int]:
     """Return engine-wide counts used by the CLI overview."""
     tables = (
         "research", "source", "question", "claim", "hypothesis",
-        "killtest", "test_run", "verdict", "event",
+        "killtest", "test_run", "verdict", "observation", "event",
     )
     return {table: conn.execute(f"SELECT COUNT(*) AS n FROM {table}").fetchone()["n"] for table in tables}
