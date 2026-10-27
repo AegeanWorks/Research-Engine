@@ -23,6 +23,8 @@ _ORDER = (
     "test_run",
     "verdict",
     "invalidation",
+    "observation",
+    "event",
 )
 
 
@@ -77,6 +79,10 @@ def _rows(conn: sqlite3.Connection, table: str, research_id: str | None) -> List
             for row in conn.execute("SELECT * FROM invalidation ORDER BY id")
             if str(row["root_id"]) in members
         ]
+    if table in ("observation", "event"):
+        return conn.execute(
+            f"SELECT * FROM {table} WHERE research_id = ? ORDER BY id", (research_id,)
+        ).fetchall()
     raise ValueError(f"unknown bundle table: {table}")
 
 
@@ -102,6 +108,16 @@ def export_records(
 _VOLATILE_RUN_FIELDS = frozenset(
     {"id", "run_group", "started_at", "duration_ms", "output_tail"}
 )
+
+
+def evidence_records(records: List[dict]) -> List[dict]:
+    """Drop the audit log from the digest input.
+
+    Events are consequences of state changes that are already hashed, and `report.write` is created
+    while a manifest is being produced; hashing it would make the manifest reference itself and
+    would make every regeneration look like a content change. Events stay in the export.
+    """
+    return [record for record in records if record.get("type") != "event"]
 
 
 def content_records(records: List[dict]) -> List[dict]:
@@ -140,15 +156,15 @@ def _digest(records: List[dict], kind: str) -> str:
 
 
 def graph_sha256(conn: sqlite3.Connection, research_ref: str | None = None) -> str:
-    """Exact digest of every exported record, including run bookkeeping."""
+    """Exact digest of every evidence record, including run bookkeeping; excludes the audit log."""
     records, _ = export_records(conn, research_ref)
-    return _digest(records, "graph/1")
+    return _digest(evidence_records(records), "graph/1")
 
 
 def content_sha256(conn: sqlite3.Connection, research_ref: str | None = None) -> str:
     """Digest of the graph's content, stable across a pure re-verification."""
     records, _ = export_records(conn, research_ref)
-    return _digest(content_records(records), "content/1")
+    return _digest(content_records(evidence_records(records)), "content/1")
 
 
 def export_jsonl(

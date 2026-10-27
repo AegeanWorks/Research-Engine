@@ -7,7 +7,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from engine.bundle import export_jsonl
+from engine.bundle import content_sha256, export_jsonl, export_records, graph_sha256
 from engine.claims import add_claim
 from engine.researches import create_research
 from tests.support import DatabaseCase
@@ -45,6 +45,44 @@ class BundleTests(DatabaseCase):
         self.path.write_text("stale", encoding="utf-8")
         export_jsonl(self.conn, self.path)
         self.assertNotEqual(self.path.read_text(encoding="utf-8"), "stale")
+
+
+    def test_export_includes_observations_and_events(self) -> None:
+        from engine.claims import add_claim
+        from engine.events import record
+        from engine.observations import add_observation
+
+        research = self.add_research()
+        claim = add_claim(self.conn, research, "A.", "assumption", basis="a")
+        add_observation(self.conn, claim.id, "baseline", 1.5)
+        record(self.conn, "test.event", claim.id, "detail", research_id=research)
+        export_jsonl(self.conn, self.path, research)
+        types = {json.loads(line)["type"] for line in self.path.read_text(encoding="utf-8").splitlines()}
+        self.assertIn("observation", types)
+        self.assertIn("event", types)
+
+    def test_observation_changes_the_digests(self) -> None:
+        from engine.claims import add_claim
+        from engine.observations import add_observation
+
+        research = self.add_research()
+        claim = add_claim(self.conn, research, "A.", "assumption", basis="a")
+        before = (graph_sha256(self.conn, research), content_sha256(self.conn, research))
+        add_observation(self.conn, claim.id, "baseline", 1.5)
+        after = (graph_sha256(self.conn, research), content_sha256(self.conn, research))
+        self.assertNotEqual(before[0], after[0])
+        self.assertNotEqual(before[1], after[1])
+
+    def test_generation_events_do_not_change_the_digests(self) -> None:
+        from engine.claims import add_claim
+        from engine.events import record
+
+        research = self.add_research()
+        claim = add_claim(self.conn, research, "A.", "assumption", basis="a")
+        before = (graph_sha256(self.conn, research), content_sha256(self.conn, research))
+        record(self.conn, "report.write", claim.id, "generated", research_id=research)
+        after = (graph_sha256(self.conn, research), content_sha256(self.conn, research))
+        self.assertEqual(before, after)
 
 
 if __name__ == "__main__":

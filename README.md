@@ -242,12 +242,13 @@ Warnings are research hygiene; errors block a trustworthy report.
 
 ## Data Model
 
-One SQLite file (default `research.db`), schema version 5. Tables: `research`, `source`, `question`,
-`claim`, `edge`, `hypothesis`, `killtest`, `test_run`, `verdict`, `invalidation`, plus
-`schema_meta` and `counters`. Writes use `BEGIN IMMEDIATE`; WAL and `synchronous=FULL` are enabled
-for a durable state file. `verdict`, `test_run`, `event`, `observation` and `invalidation` are append-only (an observation is voided, never edited or deleted). An older
-database is migrated additively in place and the upgrade is announced with the number of numeric
-claims that need re-binding; a newer version is refused without modification.
+One SQLite file (default `research.db`), schema version 5. Tables: `research`, `source`,
+`question`, `claim`, `edge`, `hypothesis`, `killtest`, `test_run`, `verdict`, `invalidation`,
+`observation`, `event`, plus `schema_meta` and `counters`. Writes use `BEGIN IMMEDIATE`; WAL and
+`synchronous=FULL` are enabled for a durable state file. `verdict`, `test_run`, `event`,
+`observation` and `invalidation` are append-only (an observation is voided, never edited or
+deleted). `export` includes observations and the event log; the manifest digests cover evidence
+records and exclude the log.
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Non-Negotiables
@@ -312,7 +313,7 @@ research-engine/
 │   ├── sources.py
 │   ├── stats.py              <- deterministic tests, effect size, bootstrap
 │   └── synthesis.py          <- consensus, report, scorecard
-└── tests/                    <- regression shield
+└── tests/                    <- regression shield plus a full golden run
 ```
 
 ## Deliberate Limits

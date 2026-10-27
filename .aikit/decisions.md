@@ -255,3 +255,19 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Consequences**: Results are reproducible across machines for a fixed seed. A measurement is
   retired by voiding, never by editing. The tests disclose their own assumptions instead of
   presenting one p-value as the truth.
+
+### ADR-022: Scoped reports, complete exports, and a golden run
+- **Date**: 2026-10-27
+- **Status**: Accepted
+- **Context**: Review found three composition defects. A report included every program's findings,
+  so an unrelated program could dirty a committed report and its digest. Snapshots and manifest
+  digests silently omitted observations and events. No test exercised the command surface as a
+  sequence.
+- **Decision**: Reports and manifests compute findings with `findings_for_research`. `export`
+  includes `observation` and `event`, and their rows participate in drift: a new observation changes
+  both digests. The audit log is excluded from the digests because events follow hashed state and
+  `report.write` is created during manifest generation; including it would make the manifest
+  self-referential. `tests/test_golden.py` drives every command in one sequence and asserts state.
+- **Consequences**: A report is true for its own program only. Adding a measurement invalidates a
+  committed report until it is regenerated; writing a report does not. The golden run is the gate
+  that catches interface drift between otherwise passing modules.

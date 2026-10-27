@@ -1,64 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "T-007-observations-stats",
+    "task_id": "T-008-scope-and-golden",
     "last_phase": "phase 4",
     "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1793098945.68257,
+    "updated_at": 1793112258.0239246,
     "owner": "kilo:research-engine",
     "started_by": "kilo:research-engine",
     "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "T-001-core-engine",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'T-001-core-engine' completed successfully.",
-      "status": "completed",
-      "timestamp": 1793080816.0773368,
-      "timestamp_str": "2026-10-27 09:00:16",
-      "agent": "kilo:research-engine"
-    },
-    {
-      "task_id": "T-002-provenance-v2",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/6] Schema v2: run provenance, stale-evidence gate, source retraction, report manifest with drift check",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793082936.165106,
-      "timestamp_str": "2026-10-27 09:35:36",
-      "agent": "kilo:research-engine",
-      "impact_assessment": {
-        "why": "Verification probes proved two agreeing runs still pass after the tested code, inputs or command change, and reports have no drift check",
-        "benefits": "Evidence is bound to code+inputs+command; retracted sources cascade; generated reports are verifiable artifacts",
-        "risks": "contract: test_run/killtest/source columns change and schema becomes v2; dependency: none beyond stdlib git CLI; concurrency: single-writer migration inside one transaction; state: v1 databases must migrate without data loss and future versions must be refused",
-        "mitigation": "Failing-first tests for migration, binding and drift; additive ALTER TABLE migration with row preservation; fingerprint scope limited to engine code plus declared inputs to avoid README-driven false invalidation"
-      }
-    },
-    {
-      "task_id": "T-002-provenance-v2",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[6/6] Schema v2 delivered: evidence bound to code+inputs+command, EVID-005 stale gate, source retraction cascade, report manifests with drift check; 108 tests pass; demo gate has no findings; 4/4 AIKit gates pass; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793083987.7389612,
-      "timestamp_str": "2026-10-27 09:53:07",
-      "agent": "kilo:research-engine"
-    },
-    {
-      "task_id": "T-002-provenance-v2",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'T-002-provenance-v2' completed successfully.",
-      "status": "completed",
-      "timestamp": 1793083994.5519412,
-      "timestamp_str": "2026-10-27 09:53:14",
-      "agent": "kilo:research-engine"
-    },
     {
       "task_id": "T-003-binding-hardening",
       "phase": "phase 2",
@@ -258,6 +210,48 @@
       "status": "in_progress",
       "timestamp": 1793098945.68257,
       "timestamp_str": "2026-10-27 14:02:25",
+      "agent": "kilo:research-engine"
+    },
+    {
+      "task_id": "T-008-scope-and-golden",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[1/1] Composition review: report/manifest findings scoped per program, export and digests include observations and events (log excluded from digests), golden run covering every command; 284 tests pass; 4/4 gates pass; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793112121.7410688,
+      "timestamp_str": "2026-10-27 17:42:01",
+      "agent": "kilo:research-engine"
+    },
+    {
+      "task_id": "T-007-observations-stats",
+      "phase": "superseded",
+      "phase_num": 4,
+      "description": "Superseded by 'T-008-scope-and-golden' without --complete or --reset",
+      "status": "superseded",
+      "timestamp": 1793112121.7410688,
+      "timestamp_str": "2026-10-27 17:42:01",
+      "agent": "kilo:research-engine"
+    },
+    {
+      "task_id": "T-008-scope-and-golden",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'T-008-scope-and-golden' completed successfully.",
+      "status": "completed",
+      "timestamp": 1793112121.9051108,
+      "timestamp_str": "2026-10-27 17:42:01",
+      "agent": "kilo:research-engine"
+    },
+    {
+      "task_id": "T-008-scope-and-golden",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[1/1] Composition review complete: report/manifest findings scoped per program, export and digests include observations (audit log exported but excluded from digests), golden run covers every command; 284 tests pass; 4/4 gates pass; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793112258.0239246,
+      "timestamp_str": "2026-10-27 17:44:18",
       "agent": "kilo:research-engine"
     }
   ]

@@ -6,11 +6,11 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `63`
-- **Total Classes**: `55`
-- **Total Top-Level Functions**: `187`
-- **Total Class Methods**: `310`
-- **Total Source Lines**: `9183`
+- **Total Python Modules**: `64`
+- **Total Classes**: `56`
+- **Total Top-Level Functions**: `188`
+- **Total Class Methods**: `320`
+- **Total Source Lines**: `9440`
 
 ---
 
@@ -66,14 +66,15 @@
 ### [`engine/bundle.py`](engine/bundle.py)
 > *Portable JSONL export of the evidence graph, and a digest of its content.*
 
-**Size**: `173` lines (`5983` bytes)
+**Size**: `189` lines (`6731` bytes)
 
 **Functions:**
 - `def _rows(conn, table, research_id)`
 - `def export_records(conn, research_ref)` - *Return the ordered graph records and their per-table counts.*
+- `def evidence_records(records)` - *Drop the audit log from the digest input.*
 - `def content_records(records)` - *Semantic projection of a record set: run allocation artefacts are dropped.*
 - `def _digest(records, kind)`
-- `def graph_sha256(conn, research_ref)` - *Exact digest of every exported record, including run bookkeeping.*
+- `def graph_sha256(conn, research_ref)` - *Exact digest of every evidence record, including run bookkeeping; excludes the audit log.*
 - `def content_sha256(conn, research_ref)` - *Digest of the graph's content, stable across a pure re-verification.*
 - `def export_jsonl(conn, path, research_ref)` - *Write the graph as deterministic JSONL lines, atomically.*
 
@@ -314,7 +315,7 @@
 ### [`engine/manifest.py`](engine/manifest.py)
 > *Generated-report manifests and drift detection.*
 
-**Size**: `161` lines (`6205` bytes)
+**Size**: `161` lines (`6250` bytes)
 
 **Functions:**
 - `def license_block()` - *Identify the terms the generated artifact is offered under, by id and text digest.*
@@ -486,7 +487,7 @@
 ### [`engine/synthesis.py`](engine/synthesis.py)
 > *Evidence synthesis: weighted consensus, contradiction pairs, and generated reports.*
 
-**Size**: `317` lines (`12521` bytes)
+**Size**: `317` lines (`12566` bytes)
 
 **Functions:**
 - `def stance_claims(conn, question_id)`
@@ -573,7 +574,7 @@
 ### [`tests/test_bundle.py`](tests/test_bundle.py)
 > *JSONL export is complete, scoped and deterministic in order.*
 
-**Size**: `51` lines (`1954` bytes)
+**Size**: `89` lines (`3914` bytes)
 
 **Classes:**
 - `class BundleTests`
@@ -581,6 +582,9 @@
   - Method `.test_export_writes_meta_first_and_every_record()`
   - Method `.test_scoped_export_excludes_other_programs()`
   - Method `.test_export_replaces_the_file_atomically()`
+  - Method `.test_export_includes_observations_and_events()`
+  - Method `.test_observation_changes_the_digests()`
+  - Method `.test_generation_events_do_not_change_the_digests()`
 
 ---
 
@@ -752,6 +756,20 @@
 
 ---
 
+### [`tests/test_golden.py`](tests/test_golden.py)
+> *Golden run: the whole command surface, end to end, in a fresh database.*
+
+**Size**: `164` lines (`8063` bytes)
+
+**Classes:**
+- `class GoldenRunTests`
+  - Method `.setUp()`
+  - Method `.run_cli(*args)`
+  - Method `.must(*args)`
+  - Method `.test_every_command_composes()`
+
+---
+
 ### [`tests/test_hypotheses.py`](tests/test_hypotheses.py)
 > *Pre-registration precedes outcomes and cards carry the falsification criterion.*
 
@@ -862,7 +880,7 @@
 ### [`tests/test_manifest.py`](tests/test_manifest.py)
 > *Generated report manifests and drift detection.*
 
-**Size**: `143` lines (`5903` bytes)
+**Size**: `171` lines (`7216` bytes)
 
 **Classes:**
 - `class ManifestTests`
@@ -878,6 +896,8 @@
   - Method `.test_reverification_does_not_report_content_drift()`
   - Method `.test_strict_check_reports_record_churn()`
   - Method `.test_tampered_counts_are_reported()`
+  - Method `.test_another_program_does_not_dirty_a_committed_report()`
+  - Method `.test_strict_check_passes_right_after_generation()`
 
 ---
 
@@ -1125,7 +1145,7 @@
 ### [`tests/test_synthesis.py`](tests/test_synthesis.py)
 > *Consensus weighting and generated reports.*
 
-**Size**: `88` lines (`3915` bytes)
+**Size**: `99` lines (`4482` bytes)
 
 **Classes:**
 - `class SynthesisTests`
@@ -1136,5 +1156,6 @@
   - Method `.test_claim_detail_shows_verdict_history()`
   - Method `.test_untrusted_text_cannot_break_a_table()`
   - Method `.test_inventory_counts_every_table()`
+  - Method `.test_report_excludes_another_programs_findings()`
 
 ---

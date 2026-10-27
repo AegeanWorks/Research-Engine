@@ -84,5 +84,16 @@ class SynthesisTests(DatabaseCase):
         self.assertEqual(counts["question"], 1)
 
 
+    def test_report_excludes_another_programs_findings(self) -> None:
+        research = self.add_research("Own program")
+        add_claim(self.conn, research, "Own claim.", "assumption", basis="a")
+        other = self.add_research("Other program")
+        broken = add_claim(self.conn, other, "Foreign claim.", "assumption", basis="b")
+        self.conn.execute("UPDATE claim SET kind = 'empirical' WHERE id = ?", (broken.id,))
+        text = report(self.conn, research)
+        self.assertNotIn("Foreign claim", text)
+        self.assertNotIn("PROV-001", text)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -6,7 +6,7 @@ import sqlite3
 from typing import Dict, List, Tuple
 
 from engine.claims import get_claim
-from engine.integrity import check
+from engine.integrity import findings_for_research
 from engine.markdown import bullet, cell, code, sanitize
 from engine.questions import list_questions
 from engine.researches import get_research, research_counts
@@ -78,7 +78,7 @@ def report(conn: sqlite3.Connection, research_ref: str) -> str:
     """Render a full, reproducible research report from the graph."""
     research = get_research(conn, research_ref)
     counts = research_counts(conn, research.id)
-    findings = check(conn)
+    findings = findings_for_research(conn, research.id)
     lines = [
         f"# {sanitize(research.title, 200)}",
         "",

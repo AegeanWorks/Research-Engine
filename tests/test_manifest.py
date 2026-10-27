@@ -139,5 +139,33 @@ class ManifestTests(DatabaseCase):
         self.assertTrue(any("counts" in item for item in result["drift"]))
 
 
+    def test_another_program_does_not_dirty_a_committed_report(self) -> None:
+        from engine.demo import seed_demo
+        from engine.researches import create_research
+        from engine.claims import add_claim
+
+        demo = seed_demo(self.conn)
+        target = self.directory / "scoped.md"
+        write_report(self.conn, demo["research"], target)
+        other = create_research(self.conn, "Unrelated")
+        add_claim(self.conn, other.id, "Broken elsewhere.", "assumption", basis="a")
+        self.conn.execute(
+            "UPDATE claim SET kind = 'empirical' WHERE research_id = ?", (other.id,)
+        )
+        result = check_report(self.conn, demo["research"], target)
+        self.assertTrue(result["clean"], result["drift"])
+        text = target.read_text(encoding="utf-8")
+        self.assertNotIn("Broken elsewhere", text)
+        stored = json.loads(manifest_path(target).read_text(encoding="utf-8"))
+        self.assertEqual(stored["findings"], {"errors": 0, "warnings": 0})
+
+
+    def test_strict_check_passes_right_after_generation(self) -> None:
+        target = self.directory / "strict.md"
+        write_report(self.conn, self.research, target)
+        result = check_report(self.conn, self.research, target, strict=True)
+        self.assertTrue(result["clean"], result["drift"])
+
+
 if __name__ == "__main__":
     unittest.main()

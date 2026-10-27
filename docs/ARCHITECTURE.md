@@ -126,7 +126,10 @@ Two digests exist because one is not enough:
 - `content_sha256` hashes a projection where `test_run` rows lose `id`, `run_group`, `started_at`,
   `duration_ms` and `output_tail` and are de-duplicated. It is stable across a pure
   re-verification and changes when a claim, verdict, source or run fingerprint changes.
-- `graph_sha256` hashes every exported record exactly, so any recorded run changes it.
+- `graph_sha256` hashes every exported evidence record exactly, so any recorded run changes it.
+The audit log is exported but excluded from both digests: events are consequences of hashed
+state, and `report.write` is created while the manifest is produced, so including it would make
+the manifest reference itself.
 
 `report --check PATH` compares content, the rendered text and the counts, and exits 1 on drift.
 `--strict` additionally compares `graph_sha256`, which is the right check at release time.
@@ -222,6 +225,22 @@ digests, so a report digest cannot be confused with a graph digest. The manifest
 license id (`ASL-1.1`) and the digest of the normalized `LICENSE` text; `report --check` reports
 drift when the terms change.
 
+## Report Scope
+
+A report is a statement about one program. `synthesis.report` and `manifest.build_manifest` use
+`integrity.findings_for_research`, so another program's findings neither appear in the text nor in
+the manifest counts. Before this, a clean program's committed report could be dirtied — and its
+digest changed — by an unrelated program's error.
+
+## Golden Run
+
+`tests/test_golden.py` drives the entire CLI surface in a fresh database: program, question, source,
+screening, empirical and derived claims, question links, pre-registration, observations, statistics,
+trend, a controlled kill test, a numeric verdict, every view and analysis command, report plus
+manifest plus drift check, two exports and a diff, integrity, backup, events, the gate, a cascade and
+a merge. It asserts exit codes and the resulting state, so a command that composes badly fails
+once, not only when its module is unit-tested.
+
 ## Markdown Safety
 
 Claim text, quotes, locators and basis strings are untrusted. `engine/markdown.py` removes control
@@ -261,9 +280,9 @@ so the ranking matches what a collapse would actually do.
 
 ## Snapshots and Merges
 
-`engine/diffing.py` compares two exports. The default comparison is semantic: it reuses
-`bundle.content_records`, so re-verifying an unchanged test is not a difference; `--exact` compares
-run bookkeeping too. Records are matched by `(type, id)`, so a renamed field is a change and a
+`engine/diffing.py` compares two exports, which now include observations and the event log. The
+default comparison is semantic: it reuses `bundle.content_records`, so re-verifying an unchanged
+test is not a difference; `--exact` compares run bookkeeping too. Records are matched by `(type, id)`, so a renamed field is a change and a
 reordering is not. Projected runs carry the identity `run:<test>:<run_tag>`: stable across a
 re-verification, distinct across a test's two runs, and changed in place when a run's content
 changes. The CLI exits 1 when the snapshots differ.

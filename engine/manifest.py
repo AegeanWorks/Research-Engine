@@ -11,7 +11,7 @@ from engine import __version__
 from engine.artifacts import atomic_write_text, digest, utc_now
 from engine.bundle import content_sha256, graph_sha256
 from engine.errors import EngineError
-from engine.integrity import check
+from engine.integrity import findings_for_research
 from engine.researches import get_research, research_counts
 from engine.synthesis import LIMITS, report
 
@@ -42,7 +42,7 @@ def manifest_path(report_path: Path) -> Path:
 def build_manifest(conn: sqlite3.Connection, research_ref: str, text: str) -> dict:
     """Describe one generated report: schema, digests, counts, findings and limits."""
     research = get_research(conn, research_ref)
-    findings = check(conn)
+    findings = findings_for_research(conn, research.id)
     return {
         "schema": REPORT_SCHEMA,
         "engine": __version__,
