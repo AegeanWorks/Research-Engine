@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import hmac
 import json
 import sqlite3
 from pathlib import Path
@@ -10,6 +11,7 @@ from typing import List, Set, Tuple
 
 from engine.artifacts import atomic_write_text, digest, utc_now
 from engine.database import SCHEMA_VERSION
+from engine.errors import EngineError
 from engine.researches import get_research
 
 _ORDER = (
@@ -180,6 +182,8 @@ def export_jsonl(
                 "engine": "research-engine",
                 "exported_at": utc_now(),
                 "research": research_ref or "all",
+                "records": sum(counts.values()),
+                "export_digest": _digest(records, "export/1"),
             },
             sort_keys=True,
         )
@@ -187,3 +191,62 @@ def export_jsonl(
     lines.extend(json.dumps(record, sort_keys=True) for record in records)
     atomic_write_text(Path(path), "\n".join(lines) + "\n")
     return counts
+
+
+def verify_export(path: Path) -> dict:
+    """Check a snapshot against the digest it carries in its own meta line.
+
+    The export digest covers every record, including the audit log: it answers "is this file
+    intact?", while the manifest's content digest answers "has the evidence changed?". A legacy
+    export without a digest is refused rather than trusted.
+    """
+    source = Path(path)
+    if not source.is_file():
+        raise EngineError(
+            f"snapshot not found: {source}",
+            "there is no file to verify.",
+            "create one with `export PATH --research REF`.",
+        )
+    records = []
+    meta = None
+    for number, line in enumerate(source.read_text(encoding="utf-8").splitlines(), start=1):
+        if not line.strip():
+            continue
+        try:
+            record = json.loads(line)
+        except ValueError as error:
+            raise EngineError(
+                f"snapshot line {number} is not valid JSON: {source}",
+                f"{error}",
+                "re-export the snapshot with this engine version.",
+            ) from error
+        if record.get("type") == "meta":
+            meta = record
+            continue
+        records.append(record)
+    if meta is None:
+        raise EngineError(
+            f"snapshot has no meta line: {source}",
+            "a verifiable export starts with a meta record.",
+            "re-export the snapshot with this engine version.",
+        )
+    recorded = str(meta.get("export_digest") or "")
+    if not recorded:
+        raise EngineError(
+            f"snapshot carries no digest: {source}",
+            "this export predates self-verification, so its contents cannot be proven intact.",
+            "re-export the snapshot with this engine version.",
+        )
+    actual = _digest(records, "export/1")
+    recorded_count = meta.get("records")
+    return {
+        "path": str(source),
+        "ok": hmac.compare_digest(recorded, actual),
+        "digest": actual,
+        "recorded_digest": recorded,
+        "records": len(records),
+        "recorded_records": recorded_count,
+        "counts_match": recorded_count is None or int(recorded_count) == len(records),
+        "research": meta.get("research"),
+        "exported_at": meta.get("exported_at"),
+    }

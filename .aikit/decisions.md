@@ -271,3 +271,18 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Consequences**: A report is true for its own program only. Adding a measurement invalidates a
   committed report until it is regenerated; writing a report does not. The golden run is the gate
   that catches interface drift between otherwise passing modules.
+
+### ADR-023: Self-verifying exports and reported measurements
+- **Date**: 2026-10-27
+- **Status**: Accepted
+- **Context**: Snapshots could be compared but not verified: nothing in the file said whether it had
+  been altered, and a legacy snapshot was indistinguishable from an intact one. The report also
+  omitted the measurements that `observation` now stores.
+- **Decision**: Export meta carries `export_digest` over every record (including the audit log) and
+  a record count; `export --check` recomputes both and exits 1 on mismatch, while a digest-less
+  export is refused. This digest is separate from the manifest's, which excludes the log and tracks
+  evidence drift. The report gains a measurements table and the last statistics or trend run per
+  claim.
+- **Consequences**: An export is self-describing and tamper-evident. A file edited with a text
+  editor fails verification; a legacy file must be re-exported before it can be trusted. The report
+  now shows the numbers a claim rests on, not just its verdict.

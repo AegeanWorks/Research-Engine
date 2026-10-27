@@ -215,7 +215,8 @@ screening UI.
 can never collide; the licence text is normalized and pinned by SHA-256.
 
 **Rule here.** `artifacts.digest(kind, payload)` prefixes every digest with its artifact kind
-(`graph/1`, `content/1`, `report/1`, `license/1`). Manifest schema 3 records the license id and the
+(`export/1`, `graph/1`, `content/1`, `report/1`, `license/1`). An export carries its own digest
+and record count, so `export --check` proves the file intact without a sidecar. Manifest schema 3 records the license id and the
 digest of the normalized `LICENSE` file, and `report --check` treats a terms change as drift.
 
 **Deliberately not copied.** The certificate schema, HMAC signing and the revocation register;

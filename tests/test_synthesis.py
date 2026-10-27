@@ -95,5 +95,22 @@ class SynthesisTests(DatabaseCase):
         self.assertNotIn("PROV-001", text)
 
 
+    def test_report_lists_measurements_and_the_last_run(self) -> None:
+        from engine.analysis import claim_statistics
+        from engine.observations import add_observation
+
+        research = self.add_research()
+        claim = add_claim(self.conn, research, "Measured.", "assumption", basis="a")
+        for value in (1.0, 1.2, 1.4):
+            add_observation(self.conn, claim.id, "baseline", value)
+        for value in (2.0, 2.2, 2.4):
+            add_observation(self.conn, claim.id, "treatment", value)
+        claim_statistics(self.conn, claim.id, "baseline", "treatment", resamples=50)
+        text = report(self.conn, research)
+        self.assertIn("## Measurements", text)
+        self.assertIn("| baseline | 3 |", text)
+        self.assertIn("last claim.stats", text)
+
+
 if __name__ == "__main__":
     unittest.main()

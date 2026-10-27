@@ -57,12 +57,12 @@ provenance rule and adds what a claim is allowed to mean.
 | `lattice` | Token-budgeted views | `outline`, `brief` and `claim context` render the graph under a token budget and state exactly how many lines were omitted |
 | `lattice` | Contradiction discovery | Pairs supporting and contradicting claims inside one question, ranked by confidence and keyword overlap, with an opt-in unlinked proposal mode |
 | `lattice` | Evidence matrix and keystones | Source x question coverage, and the claims the rest of the graph leans on |
-| `lattice` | Screening and PRISMA flow | A source moves identified -> screened -> included or excluded, with a closed reason taxonomy and flow counts in the report |
-| `obezite-mekanizma-projesi` | Non-vacuity | A test without a negative control has not shown that it can fail; a declared control that passes is an error |
-| `N1-Engine` | Deterministic comparison | Observations become effect size, Welch t, exact/asymptotic Mann-Whitney and a seeded bootstrap, with caveats stated |
+| `lattice` | Screening and PRISMA flow | Sources move through screening states with closed reasons and flow counts |
+| `obezite-mekanizma-projesi` | Non-vacuity | A test without a control has not shown it can fail; a passing control is an error |
+| `N1-Engine` | Deterministic comparison | Observations become effect size, Welch t, rank test and seeded bootstrap, with caveats |
 | `aegean-licensing` | Domain-separated digests | Every digest hashes its artifact kind first, so a report digest can never equal a graph digest |
 | `aegean-licensing` | Pinned license identity | Every manifest records the license id and the digest of the licence text it was generated under |
-| `aegean-licensing-ops` | Verified backup and event log | `db integrity`, `db backup` and an append-only event trail cover the actions verdicts do not |
+| `aegean-licensing-ops` | Verified backup and event log | `db integrity`, `db backup`, append-only events |
 | `PNN` (extended) | Explicit UNKNOWN | Missing evidence is a state, never a silent pass |
 
 The engine takes the transferable *mechanics* clean-room onto one standard-library SQLite graph;
@@ -95,7 +95,8 @@ domain content stays in the programs it hosts.
    contradictions, gaps and audit findings from the graph. `report --out` also writes a manifest
    with a content digest, an exact record digest, the report digest, counts, findings and limits.
    `report --check` compares content, so re-verifying an unchanged test is not drift; `--strict`
-   also compares the exact records and reports that churn. No number in a report is hand-written.
+   compares exact records. The report lists the recorded measurements. An export carries its own
+   digest, so `export --check` proves a snapshot intact. No number in a report is hand-written.
 9. **Sources can be retired.** `source status` records an expression of concern; `source retract`
    retires every claim that cites the source and cascades to their dependents.
 10. **Missing evidence is explicit.** `claim verdict --status UNKNOWN` records that the evidence
@@ -204,7 +205,7 @@ python -m engine [--db PATH] db integrity
 python -m engine [--db PATH] db backup PATH
 python -m engine [--db PATH] events [--research REF] [--kind K] [--limit N]
 python -m engine [--db PATH] scorecard REF
-python -m engine [--db PATH] export PATH [--research REF]
+python -m engine [--db PATH] export PATH [--research REF] [--check]
 ```
 
 `--json` prints stable machine-readable payloads. `check` exits 1 when any error-level finding is

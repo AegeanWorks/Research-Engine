@@ -225,6 +225,13 @@ digests, so a report digest cannot be confused with a graph digest. The manifest
 license id (`ASL-1.1`) and the digest of the normalized `LICENSE` text; `report --check` reports
 drift when the terms change.
 
+## Snapshot Integrity
+
+An export's meta record carries `export_digest` over every record including the audit log, plus a
+record count. `export --check PATH` recomputes both; a mismatch exits 1, a legacy export without a
+digest is refused rather than trusted. This answers "is this file intact?"; the manifest's content
+digest answers "has the evidence changed?" and deliberately excludes the log.
+
 ## Report Scope
 
 A report is a statement about one program. `synthesis.report` and `manifest.build_manifest` use

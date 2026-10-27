@@ -7,9 +7,16 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from engine.bundle import content_sha256, export_jsonl, export_records, graph_sha256
+from engine.bundle import (
+    content_sha256,
+    export_jsonl,
+    export_records,
+    graph_sha256,
+    verify_export,
+)
 from engine.claims import add_claim
 from engine.researches import create_research
+from engine.errors import EngineError
 from tests.support import DatabaseCase
 
 
@@ -83,6 +90,47 @@ class BundleTests(DatabaseCase):
         record(self.conn, "report.write", claim.id, "generated", research_id=research)
         after = (graph_sha256(self.conn, research), content_sha256(self.conn, research))
         self.assertEqual(before, after)
+
+
+    def test_export_verifies_its_own_digest(self) -> None:
+        self.add_research()
+        export_jsonl(self.conn, self.path)
+        result = verify_export(self.path)
+        self.assertTrue(result["ok"], result)
+        self.assertTrue(result["counts_match"])
+        self.assertEqual(result["records"], 1)
+
+    def test_a_tampered_record_is_detected(self) -> None:
+        self.add_research()
+        export_jsonl(self.conn, self.path)
+        lines = self.path.read_text(encoding="utf-8").splitlines()
+        lines[1] = lines[1].replace("Test research", "Altered research")
+        self.path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        result = verify_export(self.path)
+        self.assertFalse(result["ok"])
+
+    def test_a_legacy_export_without_a_digest_is_refused(self) -> None:
+        self.add_research()
+        export_jsonl(self.conn, self.path)
+        lines = self.path.read_text(encoding="utf-8").splitlines()
+        meta = json.loads(lines[0])
+        meta.pop("export_digest")
+        lines[0] = json.dumps(meta, sort_keys=True)
+        self.path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        with self.assertRaises(EngineError):
+            verify_export(self.path)
+
+    def test_a_count_mismatch_is_reported(self) -> None:
+        self.add_research()
+        export_jsonl(self.conn, self.path)
+        lines = self.path.read_text(encoding="utf-8").splitlines()
+        meta = json.loads(lines[0])
+        meta["records"] = 999
+        lines[0] = json.dumps(meta, sort_keys=True)
+        self.path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        result = verify_export(self.path)
+        self.assertTrue(result["ok"])
+        self.assertFalse(result["counts_match"])
 
 
 if __name__ == "__main__":

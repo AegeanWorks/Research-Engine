@@ -1,71 +1,17 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "T-008-scope-and-golden",
+    "task_id": "T-009-artifact-parity",
     "last_phase": "phase 4",
-    "active_phase": 4,
-    "status": "in_progress",
-    "updated_at": 1793112258.0239246,
+    "active_phase": 5,
+    "status": "completed",
+    "updated_at": 1793115803.1601632,
     "owner": "kilo:research-engine",
     "started_by": "kilo:research-engine",
-    "continuations": []
+    "continuations": [],
+    "completed_at": 1793115803.315487
   },
   "checkpoints": [
-    {
-      "task_id": "T-003-binding-hardening",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/6] Binding and promotion hardening: typed input hashing, normalized content digest, evidence_group, promotion requires verified evidence",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793087155.8595371,
-      "timestamp_str": "2026-10-27 10:45:55",
-      "agent": "kilo:research-engine",
-      "impact_assessment": {
-        "why": "Probes proved directory/glob inputs hash nothing, a file containing 'missing' collides with an absent file, report --check false-alarms on every re-verify, and a NUMERIC claim can ride on evidence from a changed command",
-        "benefits": "Declared inputs actually bind; drift detects content not run allocation; promotions cite a specific verified group; the write path matches the gate",
-        "risks": "contract: verdict gains evidence_group and manifest gains content_sha256; dependency: none; concurrency: promotion and verification stay separate transactions; state: schema v3 migration must preserve v1/v2 rows and old verdicts must stay readable",
-        "mitigation": "Failing-first tests per defect, additive migration with a notice, typed digest markers, deterministic glob expansion, and a --strict escape hatch for exact-record digests"
-      }
-    },
-    {
-      "task_id": "T-003-binding-hardening",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[6/6] Hardening delivered: typed glob-aware input binding, semantic vs strict report digests, evidence_group promotion gate with EVID-006, migration notice, import cycles broken via engine/evidence.py; 134 tests pass; 4/4 AIKit gates pass; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793088908.2128634,
-      "timestamp_str": "2026-10-27 11:15:08",
-      "agent": "kilo:research-engine"
-    },
-    {
-      "task_id": "T-003-binding-hardening",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'T-003-binding-hardening' completed successfully.",
-      "status": "completed",
-      "timestamp": 1793088908.3645911,
-      "timestamp_str": "2026-10-27 11:15:08",
-      "agent": "kilo:research-engine"
-    },
-    {
-      "task_id": "T-004-analysis-views",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/6] Analysis and agent views: token-budgeted outline/brief, contradiction discovery, evidence matrix, snapshot diff, UNKNOWN evidence state, claim merge",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793089503.6736298,
-      "timestamp_str": "2026-10-27 11:25:03",
-      "agent": "kilo:research-engine",
-      "impact_assessment": {
-        "why": "The engine can audit a graph but cannot be read by an agent within a token budget, cannot surface unlinked contradictions, and cannot compare two snapshots",
-        "benefits": "Agents get bounded, deterministic views; contradictions are discoverable rather than only recorded; UNKNOWN stops missing data from counting as evidence; snapshots become comparable",
-        "risks": "contract: CLAIM_STATUSES gains UNKNOWN and consensus weights change; dependency: stdlib only; concurrency: read-only analysis; state: merge rewrites edges and must preserve verdict history",
-        "mitigation": "Closed-vocabulary tests, deterministic ordering, explicit omitted counts, merge recorded as a verdict plus edges, and integrity codes for unresolved UNKNOWN"
-      }
-    },
     {
       "task_id": "T-004-analysis-views",
       "phase": "phase 4",
@@ -252,6 +198,54 @@
       "status": "in_progress",
       "timestamp": 1793112258.0239246,
       "timestamp_str": "2026-10-27 17:44:18",
+      "agent": "kilo:research-engine"
+    },
+    {
+      "task_id": "T-009-artifact-parity",
+      "phase": "phase 2",
+      "phase_num": 2,
+      "description": "[1/3] Artifact and report parity: self-verifying export, measurements section in reports, ledger hygiene",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793114592.2442923,
+      "timestamp_str": "2026-10-27 18:23:12",
+      "agent": "kilo:research-engine",
+      "impact_assessment": {
+        "why": "The export has no integrity check of its own and reports omit the measurements that now exist; the last two tasks also left ledger warnings",
+        "benefits": "A snapshot can prove it is intact without a sidecar; reports show the recorded measurements and the last statistics run; ledger reflects reality",
+        "risks": "contract: export meta gains digests; dependency: none; concurrency: read-only verification; state: existing exports lack the digest and must be refused with a clear message, not silently accepted",
+        "mitigation": "Golden-vector test for the digest, tamper test for the check, and explicit error for a legacy export"
+      }
+    },
+    {
+      "task_id": "T-008-scope-and-golden",
+      "phase": "superseded",
+      "phase_num": 4,
+      "description": "Superseded by 'T-009-artifact-parity' without --complete or --reset",
+      "status": "superseded",
+      "timestamp": 1793114592.2442923,
+      "timestamp_str": "2026-10-27 18:23:12",
+      "agent": "kilo:research-engine"
+    },
+    {
+      "task_id": "T-009-artifact-parity",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[3/3] Artifact parity delivered: export carries export_digest + count and export --check verifies or refuses legacy files, reports list measurements and the last stats/trend run; 290 tests pass; 4/4 gates pass; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793115803.1601632,
+      "timestamp_str": "2026-10-27 18:43:23",
+      "agent": "kilo:research-engine"
+    },
+    {
+      "task_id": "T-009-artifact-parity",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'T-009-artifact-parity' completed successfully.",
+      "status": "completed",
+      "timestamp": 1793115803.3154883,
+      "timestamp_str": "2026-10-27 18:43:23",
       "agent": "kilo:research-engine"
     }
   ]

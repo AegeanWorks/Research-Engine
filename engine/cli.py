@@ -20,7 +20,7 @@ from engine.analysis import (
     keystone_claims,
     unlinked_contradictions,
 )
-from engine.bundle import export_jsonl
+from engine.bundle import export_jsonl, verify_export
 from engine.cascade import invalidate, preview, retract_source
 from engine.claims import (
     add_claim,
@@ -292,6 +292,8 @@ def _build_parser() -> argparse.ArgumentParser:
     export_c = commands.add_parser("export", help="export the graph as JSONL")
     export_c.add_argument("path")
     export_c.add_argument("--research")
+    export_c.add_argument("--check", action="store_true",
+                          help="verify an existing snapshot instead of writing one")
     return parser
 
 
@@ -699,6 +701,17 @@ def main(argv: List[str] | None = None) -> int:
             if args.command == "scorecard":
                 return _emit({"scorecard": scorecard(conn, args.ref)}, args.json, scorecard(conn, args.ref))
             if args.command == "export":
+                if args.check:
+                    result = verify_export(Path(args.path))
+                    text = (
+                        f"intact: {result['ok']} ({result['path']})\n"
+                        f"  records: {result['records']}\n"
+                        f"  digest: {result['digest'][:16]}\n"
+                    )
+                    if not result["counts_match"]:
+                        text += f"  count mismatch: meta says {result['recorded_records']}\n"
+                    _emit(result, args.json, text)
+                    return 0 if result["ok"] and result["counts_match"] else 1
                 counts = export_jsonl(conn, Path(args.path), args.research)
                 text = f"exported {sum(counts.values())} records to {args.path}\n"
                 return _emit(counts, args.json, text)

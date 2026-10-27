@@ -200,6 +200,37 @@ def report(conn: sqlite3.Connection, research_ref: str) -> str:
             )
         lines.append("")
 
+    lines.extend(["## Measurements", ""])
+    measured = conn.execute(
+        "SELECT claim_id, group_label, COUNT(*) AS n, AVG(value) AS mean,"
+        " MIN(value) AS low, MAX(value) AS high FROM observation"
+        " WHERE research_id = ? AND voided = 0"
+        " GROUP BY claim_id, group_label ORDER BY claim_id, group_label",
+        (research.id,),
+    ).fetchall()
+    if not measured:
+        lines.append("_No observations recorded._")
+    else:
+        lines.extend(["| Claim | Group | n | min | mean | max |", "|---|---|---|---|---|---|"])
+        for row in measured:
+            lines.append(
+                f"| {row['claim_id']} | {cell(row['group_label'], 40)} | {row['n']} | "
+                f"{float(row['low']):.4g} | {float(row['mean']):.4g} | {float(row['high']):.4g} |"
+            )
+        latest_runs = conn.execute(
+            "SELECT subject, kind, at, detail FROM event"
+            " WHERE research_id = ? AND kind IN ('claim.stats', 'claim.trend') ORDER BY id",
+            (research.id,),
+        ).fetchall()
+        seen = {}
+        for row in latest_runs:
+            seen[str(row["subject"])] = row
+        for claim_id, row in sorted(seen.items()):
+            lines.append(
+                f"- {claim_id} last {row['kind']} at {row['at']}: {bullet(row['detail'], 200)}"
+            )
+        lines.append("")
+
     lines.extend(["## Audit", ""])
     if not findings:
         lines.append("_No integrity findings._")

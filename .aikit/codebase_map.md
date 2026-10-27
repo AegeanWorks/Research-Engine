@@ -8,9 +8,9 @@
 ## 📊 Codebase Metrics
 - **Total Python Modules**: `64`
 - **Total Classes**: `56`
-- **Total Top-Level Functions**: `188`
-- **Total Class Methods**: `320`
-- **Total Source Lines**: `9440`
+- **Total Top-Level Functions**: `189`
+- **Total Class Methods**: `326`
+- **Total Source Lines**: `9627`
 
 ---
 
@@ -66,7 +66,7 @@
 ### [`engine/bundle.py`](engine/bundle.py)
 > *Portable JSONL export of the evidence graph, and a digest of its content.*
 
-**Size**: `189` lines (`6731` bytes)
+**Size**: `252` lines (`9172` bytes)
 
 **Functions:**
 - `def _rows(conn, table, research_id)`
@@ -77,6 +77,7 @@
 - `def graph_sha256(conn, research_ref)` - *Exact digest of every evidence record, including run bookkeeping; excludes the audit log.*
 - `def content_sha256(conn, research_ref)` - *Digest of the graph's content, stable across a pure re-verification.*
 - `def export_jsonl(conn, path, research_ref)` - *Write the graph as deterministic JSONL lines, atomically.*
+- `def verify_export(path)` - *Check a snapshot against the digest it carries in its own meta line.*
 
 ---
 
@@ -118,7 +119,7 @@
 ### [`engine/cli.py`](engine/cli.py)
 > *Command-line surface: one entry point for every engine mechanic.*
 
-**Size**: `719` lines (`35890` bytes)
+**Size**: `732` lines (`36659` bytes)
 
 **Functions:**
 - `def _build_parser()`
@@ -487,7 +488,7 @@
 ### [`engine/synthesis.py`](engine/synthesis.py)
 > *Evidence synthesis: weighted consensus, contradiction pairs, and generated reports.*
 
-**Size**: `317` lines (`12566` bytes)
+**Size**: `348` lines (`13919` bytes)
 
 **Functions:**
 - `def stance_claims(conn, question_id)`
@@ -574,7 +575,7 @@
 ### [`tests/test_bundle.py`](tests/test_bundle.py)
 > *JSONL export is complete, scoped and deterministic in order.*
 
-**Size**: `89` lines (`3914` bytes)
+**Size**: `137` lines (`5732` bytes)
 
 **Classes:**
 - `class BundleTests`
@@ -585,6 +586,10 @@
   - Method `.test_export_includes_observations_and_events()`
   - Method `.test_observation_changes_the_digests()`
   - Method `.test_generation_events_do_not_change_the_digests()`
+  - Method `.test_export_verifies_its_own_digest()`
+  - Method `.test_a_tampered_record_is_detected()`
+  - Method `.test_a_legacy_export_without_a_digest_is_refused()`
+  - Method `.test_a_count_mismatch_is_reported()`
 
 ---
 
@@ -630,7 +635,7 @@
 ### [`tests/test_cli.py`](tests/test_cli.py)
 > *The CLI surface: JSON output, exit codes and the error triad.*
 
-**Size**: `297` lines (`11859` bytes)
+**Size**: `312` lines (`12517` bytes)
 
 **Classes:**
 - `class CliTests`
@@ -658,6 +663,7 @@
   - Method `.test_observations_and_statistics()`
   - Method `.test_observation_errors_use_the_triad()`
   - Method `.test_analysis_trend()`
+  - Method `.test_export_check_detects_tampering()`
 
 ---
 
@@ -1145,7 +1151,7 @@
 ### [`tests/test_synthesis.py`](tests/test_synthesis.py)
 > *Consensus weighting and generated reports.*
 
-**Size**: `99` lines (`4482` bytes)
+**Size**: `116` lines (`5273` bytes)
 
 **Classes:**
 - `class SynthesisTests`
@@ -1157,5 +1163,6 @@
   - Method `.test_untrusted_text_cannot_break_a_table()`
   - Method `.test_inventory_counts_every_table()`
   - Method `.test_report_excludes_another_programs_findings()`
+  - Method `.test_report_lists_measurements_and_the_last_run()`
 
 ---

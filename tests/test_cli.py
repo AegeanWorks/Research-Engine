@@ -293,5 +293,20 @@ class CliTests(unittest.TestCase):
         self.assertIn("Why:", err)
 
 
+    def test_export_check_detects_tampering(self) -> None:
+        self.run_cli("demo")
+        target = self.dir / "snap.jsonl"
+        self.run_cli("export", str(target))
+        code, out, _ = self.run_cli("export", str(target), "--check")
+        self.assertEqual(code, 0)
+        self.assertIn("intact: True", out)
+        lines = target.read_text(encoding="utf-8").splitlines()
+        lines[1] = lines[1].replace("Demo", "Altered")
+        target.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        code, out, _ = self.run_cli("export", str(target), "--check")
+        self.assertEqual(code, 1)
+        self.assertIn("intact: False", out)
+
+
 if __name__ == "__main__":
     unittest.main()
