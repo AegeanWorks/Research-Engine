@@ -304,3 +304,19 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Consequences**: A late-added control no longer breaks the gate. Label case never matters.
   Comparisons must be between two distinct groups. Analysis is flagged as stale when data changes,
   with a documented one-second resolution limit.
+
+### ADR-025: Review fixes for diff identity, export trust and finding scope
+- **Date**: 2026-10-27
+- **Status**: Accepted
+- **Context**: A review of six pushes found three defects. Semantic diff keyed projected runs by
+  `(test, run_tag)`, so several run groups shared a key and the index overwrote all but one; a
+  changed run could be masked. `export --check` ignored the meta schema and raised `ValueError` on a
+  non-numeric record count instead of reporting it. `PRE-001` used the verdict id as its subject, so
+  a program-scoped report never showed it.
+- **Decision**: `_index` keeps colliding semantic records as a sorted list, so any change in any
+  group is visible. Export verification reports `schema`/`schema_supported`, handles an unparsable
+  count as a mismatch, and the CLI exits 1 for an unsupported schema. `PRE-001` is attributed to its
+  hypothesis and names the verdict in the message.
+- **Consequences**: A snapshot diff cannot hide a group's change behind another group's identical
+  run. A snapshot from another schema is refused rather than trusted by accident. Scoped reports
+  now include pre-registration ordering violations.

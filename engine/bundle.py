@@ -239,6 +239,11 @@ def verify_export(path: Path) -> dict:
         )
     actual = _digest(records, "export/1")
     recorded_count = meta.get("records")
+    try:
+        counts_match = recorded_count is None or int(recorded_count) == len(records)
+    except (TypeError, ValueError):
+        counts_match = False
+    schema = meta.get("schema")
     return {
         "path": str(source),
         "ok": hmac.compare_digest(recorded, actual),
@@ -246,7 +251,9 @@ def verify_export(path: Path) -> dict:
         "recorded_digest": recorded,
         "records": len(records),
         "recorded_records": recorded_count,
-        "counts_match": recorded_count is None or int(recorded_count) == len(records),
+        "counts_match": counts_match,
+        "schema": schema,
+        "schema_supported": schema == SCHEMA_VERSION,
         "research": meta.get("research"),
         "exported_at": meta.get("exported_at"),
     }

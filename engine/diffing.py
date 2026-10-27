@@ -53,13 +53,23 @@ def _strip(record: dict) -> dict:
     return {key: value for key, value in record.items() if key not in VOLATILE_FIELDS}
 
 
-def _index(records: List[dict], semantic: bool) -> Dict[Tuple[str, str], dict]:
-    """Index records by type and identity, optionally collapsing run churn."""
+def _index(records: List[dict], semantic: bool) -> Dict[Tuple[str, str], object]:
+    """Index records by type and identity, optionally collapsing run churn.
+
+    A semantic run id is `(test, run_tag)`, so several run groups can share one id. They are kept
+    as a sorted list rather than overwritten: overwriting would let the last record hide a change
+    in an earlier one.
+    """
     if semantic:
         records = content_records(records)
-    index: Dict[Tuple[str, str], dict] = {}
+    buckets: Dict[Tuple[str, str], List[dict]] = {}
     for record in records:
-        index[_key(record)] = _strip(record)
+        buckets.setdefault(_key(record), []).append(_strip(record))
+    index: Dict[Tuple[str, str], object] = {}
+    for key, values in buckets.items():
+        index[key] = values[0] if len(values) == 1 else sorted(
+            values, key=lambda value: json.dumps(value, sort_keys=True)
+        )
     return index
 
 

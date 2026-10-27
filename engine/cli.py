@@ -712,13 +712,19 @@ def main(argv: List[str] | None = None) -> int:
                     result = verify_export(Path(args.path))
                     text = (
                         f"intact: {result['ok']} ({result['path']})\n"
+                        f"  schema: {result['schema']}"
+                        f"{'' if result['schema_supported'] else ' (unsupported)'}\n"
                         f"  records: {result['records']}\n"
                         f"  digest: {result['digest'][:16]}\n"
                     )
                     if not result["counts_match"]:
                         text += f"  count mismatch: meta says {result['recorded_records']}\n"
                     _emit(result, args.json, text)
-                    return 0 if result["ok"] and result["counts_match"] else 1
+                    return 0 if (
+                        result["ok"]
+                        and result["counts_match"]
+                        and result["schema_supported"]
+                    ) else 1
                 counts = export_jsonl(conn, Path(args.path), args.research)
                 text = f"exported {sum(counts.values())} records to {args.path}\n"
                 return _emit(counts, args.json, text)

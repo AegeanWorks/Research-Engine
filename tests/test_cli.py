@@ -317,5 +317,19 @@ class CliTests(unittest.TestCase):
         self.assertIn("cannot be combined", err)
 
 
+    def test_export_check_fails_on_an_unsupported_schema(self) -> None:
+        self.run_cli("demo")
+        target = self.dir / "snap.jsonl"
+        self.run_cli("export", str(target))
+        lines = target.read_text(encoding="utf-8").splitlines()
+        meta = json.loads(lines[0])
+        meta["schema"] = 99
+        lines[0] = json.dumps(meta, sort_keys=True)
+        target.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        code, out, _ = self.run_cli("export", str(target), "--check")
+        self.assertEqual(code, 1)
+        self.assertIn("unsupported", out)
+
+
 if __name__ == "__main__":
     unittest.main()

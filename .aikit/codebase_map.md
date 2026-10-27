@@ -9,8 +9,8 @@
 - **Total Python Modules**: `64`
 - **Total Classes**: `56`
 - **Total Top-Level Functions**: `189`
-- **Total Class Methods**: `336`
-- **Total Source Lines**: `9768`
+- **Total Class Methods**: `341`
+- **Total Source Lines**: `9877`
 
 ---
 
@@ -66,7 +66,7 @@
 ### [`engine/bundle.py`](engine/bundle.py)
 > *Portable JSONL export of the evidence graph, and a digest of its content.*
 
-**Size**: `252` lines (`9172` bytes)
+**Size**: `259` lines (`9394` bytes)
 
 **Functions:**
 - `def _rows(conn, table, research_id)`
@@ -119,7 +119,7 @@
 ### [`engine/cli.py`](engine/cli.py)
 > *Command-line surface: one entry point for every engine mechanic.*
 
-**Size**: `739` lines (`37037` bytes)
+**Size**: `745` lines (`37306` bytes)
 
 **Functions:**
 - `def _build_parser()`
@@ -186,7 +186,7 @@
 ### [`engine/diffing.py`](engine/diffing.py)
 > *Snapshot comparison: what changed between two exported graphs.*
 
-**Size**: `107` lines (`3954` bytes)
+**Size**: `117` lines (`4444` bytes)
 
 **Functions:**
 - `def load_jsonl(path)` - *Read an export, dropping its meta line; a malformed file is refused.*
@@ -267,7 +267,7 @@
 ### [`engine/integrity.py`](engine/integrity.py)
 > *Graph integrity: provenance, evidence paths, dependency acyclicity and stale dependents.*
 
-**Size**: `573` lines (`21667` bytes)
+**Size**: `574` lines (`21725` bytes)
 
 **Functions:**
 - `def _finding(code, severity, subject, message, fix)`
@@ -575,7 +575,7 @@
 ### [`tests/test_bundle.py`](tests/test_bundle.py)
 > *JSONL export is complete, scoped and deterministic in order.*
 
-**Size**: `137` lines (`5732` bytes)
+**Size**: `163` lines (`6841` bytes)
 
 **Classes:**
 - `class BundleTests`
@@ -590,6 +590,8 @@
   - Method `.test_a_tampered_record_is_detected()`
   - Method `.test_a_legacy_export_without_a_digest_is_refused()`
   - Method `.test_a_count_mismatch_is_reported()`
+  - Method `.test_an_unsupported_schema_is_reported_not_trusted()`
+  - Method `.test_a_non_numeric_record_count_is_handled()`
 
 ---
 
@@ -635,7 +637,7 @@
 ### [`tests/test_cli.py`](tests/test_cli.py)
 > *The CLI surface: JSON output, exit codes and the error triad.*
 
-**Size**: `321` lines (`12879` bytes)
+**Size**: `335` lines (`13462` bytes)
 
 **Classes:**
 - `class CliTests`
@@ -665,6 +667,7 @@
   - Method `.test_analysis_trend()`
   - Method `.test_export_check_detects_tampering()`
   - Method `.test_export_check_refuses_a_research_filter()`
+  - Method `.test_export_check_fails_on_an_unsupported_schema()`
 
 ---
 
@@ -715,7 +718,7 @@
 ### [`tests/test_diffing.py`](tests/test_diffing.py)
 > *Snapshot diff: semantic by default, exact on request.*
 
-**Size**: `94` lines (`3582` bytes)
+**Size**: `113` lines (`4477` bytes)
 
 **Classes:**
 - `class DiffTests`
@@ -727,6 +730,7 @@
   - Method `.test_missing_snapshot_is_reported()`
   - Method `.test_malformed_snapshot_is_reported()`
   - Method `.test_render_lists_each_change()`
+  - Method `.test_a_second_run_with_the_same_identity_cannot_mask_a_change()`
 
 ---
 
@@ -814,7 +818,7 @@
 ### [`tests/test_integrity.py`](tests/test_integrity.py)
 > *Every integrity rule must detect the corruption it names.*
 
-**Size**: `239` lines (`10824` bytes)
+**Size**: `265` lines (`11975` bytes)
 
 **Classes:**
 - `class IntegrityTests`
@@ -840,6 +844,7 @@
   - Method `.test_unknown_without_a_reason_warns()`
   - Method `.test_unknown_is_not_a_failure_state()`
   - Method `.test_promotion_is_blocked_by_an_unknown_premise()`
+  - Method `.test_out_of_order_hypothesis_outcome_is_scoped_to_its_hypothesis()`
 
 **Functions:**
 - `def codes(findings)`

@@ -231,8 +231,9 @@ drift when the terms change.
 ## Snapshot Integrity
 
 An export's meta record carries `export_digest` over every record including the audit log, plus a
-record count. `export --check PATH` recomputes both; a mismatch exits 1, a legacy export without a
-digest is refused rather than trusted. This answers "is this file intact?"; the manifest's content
+record count and the schema version. `export --check PATH` recomputes the digest and count; a
+mismatch exits 1, a legacy export without a digest is refused rather than trusted, and a file
+written by an unsupported schema is reported rather than accepted. This answers "is this file intact?"; the manifest's content
 digest answers "has the evidence changed?" and deliberately excludes the log.
 
 ## Report Scope
@@ -295,7 +296,9 @@ default comparison is semantic: it reuses `bundle.content_records`, so re-verify
 test is not a difference; `--exact` compares run bookkeeping too. Records are matched by `(type, id)`, so a renamed field is a change and a
 reordering is not. Projected runs carry the identity `run:<test>:<run_tag>`: stable across a
 re-verification, distinct across a test's two runs, and changed in place when a run's content
-changes. The CLI exits 1 when the snapshots differ.
+changes. When several run groups share that identity, their projections are compared as a
+sorted list, never overwritten, so one group cannot hide another's change. The CLI exits 1 when
+the snapshots differ.
 
 `engine/merging.py` keeps one live claim, repoints every edge that touched a duplicate (dropping
 edges that would become self-loops), repoints bound kill tests to the survivor, deletes the

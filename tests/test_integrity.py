@@ -7,7 +7,13 @@ import unittest
 from engine.claims import add_claim, get_claim, link_claims, link_to_question, set_verdict
 from engine.errors import EngineError
 from engine.hypotheses import add_hypothesis
-from engine.integrity import check, has_errors, render_json, render_markdown
+from engine.integrity import (
+    check,
+    findings_for_research,
+    has_errors,
+    render_json,
+    render_markdown,
+)
 from engine.questions import add_question
 from engine.researches import create_research
 from tests.support import DatabaseCase, force_numeric
@@ -233,6 +239,26 @@ class IntegrityTests(DatabaseCase):
         set_verdict(self.conn, root.id, "UNKNOWN", "data missing")
         with self.assertRaises(EngineError):
             set_verdict(self.conn, derived.id, "PROVEN", "an argument")
+
+
+    def test_out_of_order_hypothesis_outcome_is_scoped_to_its_hypothesis(self) -> None:
+        research = self.add_research()
+        self.conn.execute(
+            "INSERT INTO hypothesis(id, research_id, statement, criterion, confidence,"
+            " registered_at, status, outcome_note, updated_at) VALUES ('h_1', ?, 's', 'c', 0.5,"
+            " '2999-01-01T00:00:00+00:00', 'PREREGISTERED', '', 'now')",
+            (research,),
+        )
+        self.conn.execute(
+            "INSERT INTO verdict(id, subject_kind, subject_id, status, previous_status, evidence,"
+            " note, actor, at, evidence_group) VALUES ('v_1', 'hypothesis', 'h_1', 'REFUTED',"
+            " 'PREREGISTERED', 'e', '', 'a', '2000-01-01T00:00:00+00:00', '')"
+        )
+        findings = [item for item in check(self.conn) if item.code == "PRE-001"]
+        self.assertEqual([item.subject for item in findings], ["h_1"])
+        scoped = [item for item in findings_for_research(self.conn, research)
+                  if item.code == "PRE-001"]
+        self.assertEqual([item.subject for item in scoped], ["h_1"])
 
 
 if __name__ == "__main__":

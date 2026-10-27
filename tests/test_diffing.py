@@ -90,5 +90,24 @@ class DiffTests(DatabaseCase):
         self.assertIn("- claim:c_1", text)
 
 
+    def test_a_second_run_with_the_same_identity_cannot_mask_a_change(self) -> None:
+        base = {
+            "type": "test_run", "test_id": "t_1", "run_tag": "run1", "exit_code": 0,
+            "passed": 1, "stderr_sha256": "b", "command_sha256": "c", "code_sha256": "d",
+            "inputs_sha256": "e", "git_commit": "f", "git_dirty": 0, "python_version": "3",
+            "platform": "p", "run_group": "g", "started_at": "s", "duration_ms": 1,
+            "output_tail": "x",
+        }
+
+        def record(name: str, digest: str) -> dict:
+            return dict(base, id=name, stdout_sha256=digest)
+
+        old = [record("u1", "a"), record("u2", "z")]
+        new = [record("u3", "a"), record("u4", "x"), record("u5", "z")]
+        result = diff_records(old, new, semantic=True)
+        self.assertFalse(result["identical"])
+        self.assertEqual(result["counts"]["changed"], 1)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -442,15 +442,16 @@ def check(conn: sqlite3.Connection) -> List[Finding]:
         )
 
     for row in conn.execute(
-        "SELECT v.id, v.at, h.registered_at FROM verdict v JOIN hypothesis h"
-        " ON h.id = v.subject_id WHERE v.subject_kind = 'hypothesis' AND v.at < h.registered_at"
+        "SELECT v.id, v.at, h.id AS hypothesis_id, h.registered_at FROM verdict v"
+        " JOIN hypothesis h ON h.id = v.subject_id"
+        " WHERE v.subject_kind = 'hypothesis' AND v.at < h.registered_at"
     ):
         findings.append(
             _finding(
                 "PRE-001",
                 "error",
-                str(row["id"]),
-                "hypothesis outcome is dated before its registration",
+                str(row["hypothesis_id"]),
+                f"hypothesis outcome {row['id']} is dated before its registration",
                 "restore the chronological record; pre-registration must precede the outcome.",
             )
         )

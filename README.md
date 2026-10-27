@@ -96,7 +96,8 @@ domain content stays in the programs it hosts.
    with a content digest, an exact record digest, the report digest, counts, findings and limits.
    `report --check` compares content, so re-verifying an unchanged test is not drift; `--strict`
    compares exact records. The report lists the recorded measurements. An export carries its own
-   digest, so `export --check` proves a snapshot intact. No number in a report is hand-written.
+   digest, so `export --check` proves a snapshot intact, and refuses a schema this build does
+   not read. No number in a report is hand-written.
 9. **Sources can be retired.** `source status` records an expression of concern; `source retract`
    retires every claim that cites the source and cascades to their dependents.
 10. **Missing evidence is explicit.** `claim verdict --status UNKNOWN` records that the evidence

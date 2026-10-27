@@ -133,5 +133,31 @@ class BundleTests(DatabaseCase):
         self.assertFalse(result["counts_match"])
 
 
+    def test_an_unsupported_schema_is_reported_not_trusted(self) -> None:
+        self.add_research()
+        export_jsonl(self.conn, self.path)
+        lines = self.path.read_text(encoding="utf-8").splitlines()
+        meta = json.loads(lines[0])
+        meta["schema"] = 99
+        lines[0] = json.dumps(meta, sort_keys=True)
+        self.path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        result = verify_export(self.path)
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["schema"], 99)
+        self.assertFalse(result["schema_supported"])
+
+    def test_a_non_numeric_record_count_is_handled(self) -> None:
+        self.add_research()
+        export_jsonl(self.conn, self.path)
+        lines = self.path.read_text(encoding="utf-8").splitlines()
+        meta = json.loads(lines[0])
+        meta["records"] = "many"
+        lines[0] = json.dumps(meta, sort_keys=True)
+        self.path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        result = verify_export(self.path)
+        self.assertTrue(result["ok"])
+        self.assertFalse(result["counts_match"])
+
+
 if __name__ == "__main__":
     unittest.main()
