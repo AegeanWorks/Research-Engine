@@ -4,11 +4,65 @@
   "test_command": "python -m unittest discover -s tests -t .",
   "topics": [
     "aikit",
-    "research",
     "knowledge-graph",
-    "reproducibility"
+    "reproducibility",
+    "research",
+    "science",
+    "source-available",
+    "aegeanworks",
+    "cli",
+    "data-science",
+    "developer-tools",
+    "falsification",
+    "provenance",
+    "software",
+    "auditable",
+    "research-tools",
+    "open-science",
+    "reproducible-research",
+    "research-automation",
+    "scientific-method",
+    "epistemology"
   ],
   "gates": {},
   "ui_required": false,
-  "created": "2026-10-27"
+  "created": "2026-10-27",
+  "has_ui": false,
+  "ui_kind": "cli",
+  "ui_evidence": [],
+  "ui_checked_at": "2026-10-28",
+  "ui_source": "detected",
+  "topics_source": "ai:kilo:2026-10-27",
+  "topics_reviewed_at": "2026-10-28",
+  "topics_choice": [
+    "aegeanworks",
+    "software",
+    "cli",
+    "data-science",
+    "falsification",
+    "provenance",
+    "developer-tools"
+  ],
+  "topics_choice_round2": [
+    "research-tools",
+    "reproducibility",
+    "knowledge-graph",
+    "falsification",
+    "provenance",
+    "auditable",
+    "science"
+  ],
+  "topics_choice_round3": [
+    "research-tools",
+    "auditable",
+    "provenance",
+    "falsification",
+    "open-science"
+  ],
+  "topics_choice_round4": [
+    "research-automation",
+    "scientific-method",
+    "reproducible-research",
+    "open-science"
+  ]
 }
