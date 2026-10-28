@@ -4,6 +4,7 @@
   "test_command": "python -m unittest discover -s tests -t .",
   "topics": [
     "aikit",
+    "aikit-integrated",
     "source-available",
     "aegean-science-license",
     "research",
@@ -21,8 +22,7 @@
     "research-tools",
     "open-science",
     "reproducible-research",
-    "research-automation",
-    "scientific-method"
+    "research-automation"
   ],
   "gates": {},
   "ui_required": false,
