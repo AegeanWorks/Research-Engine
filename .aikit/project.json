@@ -4,25 +4,25 @@
   "test_command": "python -m unittest discover -s tests -t .",
   "topics": [
     "aikit",
+    "source-available",
+    "aegean-science-license",
+    "research",
+    "commercial-license",
     "knowledge-graph",
     "reproducibility",
-    "research",
     "science",
-    "source-available",
     "aegeanworks",
     "cli",
     "data-science",
     "developer-tools",
     "falsification",
     "provenance",
-    "software",
     "auditable",
     "research-tools",
     "open-science",
     "reproducible-research",
     "research-automation",
-    "scientific-method",
-    "epistemology"
+    "scientific-method"
   ],
   "gates": {},
   "ui_required": false,
@@ -64,5 +64,11 @@
     "scientific-method",
     "reproducible-research",
     "open-science"
+  ],
+  "license_topics": [
+    "source-available",
+    "aegean-science-license",
+    "research",
+    "commercial-license"
   ]
 }
