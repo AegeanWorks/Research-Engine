@@ -5,53 +5,48 @@
   "has_ui": false,
   "ui_kind": "cli",
   "palette": [
-    "#0b1220",
-    "#1e293b",
-    "#f472b6",
-    "#f8fafc"
+    "#0f0b07",
+    "#2b1d0e",
+    "#f97316",
+    "#fde68a"
   ],
+  "motif": "flask",
+  "layout": "editorial",
   "assets": {
     "logo": {
       "path": "assets/logo.svg",
       "status": "approved",
       "commit": "",
-      "generated_at": "2026-10-28T08:02:48",
+      "generated_at": "2026-10-28T08:47:14",
       "review": {
         "status": "approved",
         "reviewer": "subagent:vision-review",
         "method": "vision",
-        "notes": "RE monogram in pink, dark navy, subtitle readable.",
-        "score": 93,
-        "reviewed_at": "2026-10-28T08:10:44"
+        "notes": "RE flask, science-relevant",
+        "score": 89,
+        "reviewed_at": "2026-10-28T08:58:22"
       }
     },
     "social_preview": {
       "path": "assets/social-preview.svg",
       "status": "approved",
       "commit": "",
-      "generated_at": "2026-10-28T08:02:48",
+      "generated_at": "2026-10-28T08:47:14",
       "review": {
         "status": "approved",
         "reviewer": "subagent:vision-review",
         "method": "vision",
-        "notes": "RE icon, title, research engine description, CLI tag.",
-        "score": 93,
-        "reviewed_at": "2026-10-28T08:10:44"
+        "notes": "Consistent template, legible",
+        "score": 89,
+        "reviewed_at": "2026-10-28T08:58:22"
       }
     },
     "social_preview_png": {
       "path": "assets/social-preview.png",
-      "status": "approved",
+      "status": "pending_review",
       "commit": "",
-      "generated_at": "2026-10-28T08:02:49",
-      "review": {
-        "status": "approved",
-        "reviewer": "subagent:vision-review",
-        "method": "structural",
-        "notes": "Rendered from the approved 1280x640 social SVG; exact dimensions verified.",
-        "score": null,
-        "reviewed_at": "2026-10-28T08:17:15"
-      }
+      "generated_at": "2026-10-28T08:47:15",
+      "review": null
     }
   },
   "screenshots": []
