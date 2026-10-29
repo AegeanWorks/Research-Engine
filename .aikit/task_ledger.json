@@ -5,39 +5,12 @@
     "last_phase": "phase 4",
     "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1793301223.4404154,
+    "updated_at": 1793301744.90547,
     "owner": "opencode:research-engine",
     "started_by": "opencode:research-engine",
     "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "T-010-review-fixes",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'T-010-review-fixes' completed successfully.",
-      "status": "completed",
-      "timestamp": 1793117119.7227502,
-      "timestamp_str": "2026-10-27 19:05:19",
-      "agent": "kilo:research-engine"
-    },
-    {
-      "task_id": "T-011-six-push-review",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/2] Review six pushes: fix semantic diff masking, export schema/count trust, and PRE-001 finding scope",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793118121.5634832,
-      "timestamp_str": "2026-10-27 19:22:01",
-      "agent": "kilo:research-engine",
-      "impact_assessment": {
-        "why": "A code review found a diff that could hide a changed run, an export check that trusted an unknown schema and crashed on a bad count, and a finding excluded from scoped reports",
-        "benefits": "Diffs cannot mask, snapshots are refused when the schema is unknown, and pre-registration violations appear in their program's report",
-        "risks": "contract: export verification result gains schema fields; dependency: none; concurrency: read-only; state: none",
-        "mitigation": "Regression test per defect, full suite and gates before commit"
-      }
-    },
     {
       "task_id": "T-011-six-push-review",
       "phase": "phase 4",
@@ -257,6 +230,34 @@
       "status": "in_progress",
       "timestamp": 1793301223.4404154,
       "timestamp_str": "2026-10-29 22:13:43",
+      "agent": "opencode:research-engine"
+    },
+    {
+      "task_id": "T-012-evidence-integrity",
+      "phase": "planning",
+      "phase_num": 2,
+      "description": "[3/6] Claim revisions: schema 7 revision_of/superseded_by, claim revise/history, edges repointed to the head, old claim kept as history",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793301318.525838,
+      "timestamp_str": "2026-10-29 22:15:18",
+      "agent": "opencode:research-engine",
+      "impact_assessment": {
+        "why": "Claim text is immutable, so a refined claim either becomes a silently contradicting second claim or leaves a stale statement in the graph",
+        "benefits": "A revision chain keeps the old text and verdict history visible while the head carries the live edges; reports and lists hide superseded heads by default",
+        "risks": "contract: three additive claim columns and schema 7; dependency: stdlib only; concurrency: single-writer transaction; state: edges move to the head, tests stay on the old claim and warn",
+        "mitigation": "Failing-first tests for chain creation, provenance refusal, edge repointing, list/history views and migration; full suite and 4/4 gates before commit"
+      }
+    },
+    {
+      "task_id": "T-012-evidence-integrity",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[3/6] Claim revisions delivered: schema 7 revision links, claim revise/history, edges move to the head, superseded heads hidden, REV-001/REV-002 warnings; 342 tests pass; 4/4 gates pass; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793301744.90547,
+      "timestamp_str": "2026-10-29 22:22:24",
       "agent": "opencode:research-engine"
     }
   ]

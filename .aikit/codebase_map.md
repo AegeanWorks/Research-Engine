@@ -6,11 +6,11 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `68`
-- **Total Classes**: `59`
-- **Total Top-Level Functions**: `206`
-- **Total Class Methods**: `372`
-- **Total Source Lines**: `10659`
+- **Total Python Modules**: `69`
+- **Total Classes**: `60`
+- **Total Top-Level Functions**: `208`
+- **Total Class Methods**: `384`
+- **Total Source Lines**: `11042`
 
 ---
 
@@ -33,7 +33,7 @@
 ### [`engine/analysis.py`](engine/analysis.py)
 > *Discovery and ranking over the graph: contradictions, coverage, keystones.*
 
-**Size**: `349` lines (`13422` bytes)
+**Size**: `350` lines (`13459` bytes)
 
 **Functions:**
 - `def keywords(text)` - *Content words of an assertion, lowercased and de-duplicated.*
@@ -111,14 +111,16 @@
 ### [`engine/claims.py`](engine/claims.py)
 > *Claims: the unit of knowledge, with provenance and an append-only verdict history.*
 
-**Size**: `389` lines (`15157` bytes)
+**Size**: `512` lines (`19566` bytes)
 
 **Functions:**
 - `def _to_claim(row)`
 - `def _validate_confidence(value)`
-- `def add_claim(conn, research_ref, text, kind, source_ref, quote, locator, confidence, kill_test, basis, prerequisites)` - *Record a claim; empirical claims must carry a verbatim quote and a locator.*
+- `def add_claim(conn, research_ref, text, kind, source_ref, quote, locator, confidence, kill_test, basis, prerequisites, revision_of, revision_reason)` - *Record a claim; empirical claims must carry a verbatim quote and a locator.*
 - `def get_claim(conn, ref)` - *Fetch one claim by identifier.*
-- `def list_claims(conn, research_ref, status)` - *List claims, optionally filtered by program and verdict.*
+- `def list_claims(conn, research_ref, status, include_superseded)` - *List claims, optionally filtered by program and verdict; hide superseded heads by default.*
+- `def revision_chain(conn, ref)` - *The full revision chain, oldest first, with a cycle guard.*
+- `def revise_claim(conn, ref, text, reason, source_ref, quote, locator, confidence, kill_test, basis, prerequisites, actor)` - *Append a revised claim, mark the old one superseded, and move its edges to the head.*
 - `def current_groups_for_claim(conn, claim_id)` - *Verified run groups, bound to the current code and inputs, for a claim's tests.*
 - `def set_verdict(conn, claim_ref, status, evidence, note, actor, evidence_group)` - *Append a verdict; promotion needs a kill test, evidence, and current numeric proof.*
 - `def prerequisites(conn, claim_id)` - *Return the claims this claim structurally depends on.*
@@ -133,7 +135,7 @@
 ### [`engine/cli.py`](engine/cli.py)
 > *Command-line surface: one entry point for every engine mechanic.*
 
-**Size**: `770` lines (`38480` bytes)
+**Size**: `814` lines (`40332` bytes)
 
 **Functions:**
 - `def _build_parser()`
@@ -153,7 +155,7 @@
 ### [`engine/context.py`](engine/context.py)
 > *Token-budgeted views: the same graph, measured in tokens for an agent reader.*
 
-**Size**: `191` lines (`7481` bytes)
+**Size**: `192` lines (`7522` bytes)
 
 **Classes:**
 - `class View` - *A rendered, bounded view of one program.*
@@ -174,7 +176,7 @@
 ### [`engine/database.py`](engine/database.py)
 > *SQLite connection, schema versioning and atomic transactions.*
 
-**Size**: `345` lines (`13015` bytes)
+**Size**: `356` lines (`13430` bytes)
 
 **Functions:**
 - `def connect(path)` - *Open a database with durability pragmas suitable for a state file.*
@@ -300,7 +302,7 @@
 ### [`engine/integrity.py`](engine/integrity.py)
 > *Graph integrity: provenance, evidence paths, dependency acyclicity and stale dependents.*
 
-**Size**: `623` lines (`23606` bytes)
+**Size**: `653` lines (`24792` bytes)
 
 **Functions:**
 - `def _finding(code, severity, subject, message, fix)`
@@ -379,7 +381,7 @@
 ### [`engine/merging.py`](engine/merging.py)
 > *Claim merging: one survivor, every edge repointed, duplicates retired.*
 
-**Size**: `117` lines (`4332` bytes)
+**Size**: `129` lines (`4918` bytes)
 
 **Functions:**
 - `def merge_claims(conn, keep_ref, drop_refs, note, actor)` - *Keep one claim, repoint edges from the duplicates, and retire the duplicates.*
@@ -389,7 +391,7 @@
 ### [`engine/models.py`](engine/models.py)
 > *Frozen domain records and the engine's closed vocabularies.*
 
-**Size**: `201` lines (`4265` bytes)
+**Size**: `204` lines (`4373` bytes)
 
 **Classes:**
 - `class Research`
@@ -525,7 +527,7 @@
 ### [`engine/synthesis.py`](engine/synthesis.py)
 > *Evidence synthesis: weighted consensus, contradiction pairs, and generated reports.*
 
-**Size**: `348` lines (`13919` bytes)
+**Size**: `352` lines (`14141` bytes)
 
 **Functions:**
 - `def stance_claims(conn, question_id)`
@@ -701,7 +703,7 @@
 ### [`tests/test_cli.py`](tests/test_cli.py)
 > *The CLI surface: JSON output, exit codes and the error triad.*
 
-**Size**: `335` lines (`13462` bytes)
+**Size**: `355` lines (`14383` bytes)
 
 **Classes:**
 - `class CliTests`
@@ -722,6 +724,7 @@
   - Method `.test_analysis_commands()`
   - Method `.test_diff_command_exit_codes()`
   - Method `.test_claim_merge_and_context()`
+  - Method `.test_claim_revision_commands()`
   - Method `.test_screening_and_prisma()`
   - Method `.test_events_are_listed()`
   - Method `.test_db_integrity_and_backup()`
@@ -1043,7 +1046,7 @@
 ### [`tests/test_migration.py`](tests/test_migration.py)
 > *Schema migration: an older database is repaired, not rejected or wiped.*
 
-**Size**: `223` lines (`9599` bytes)
+**Size**: `231` lines (`9968` bytes)
 
 **Classes:**
 - `class MigrationTests`
@@ -1051,6 +1054,7 @@
   - Method `.test_version_one_database_is_migrated_in_place()`
   - Method `.test_existing_rows_are_preserved()`
   - Method `.test_migration_creates_the_attempt_table()`
+  - Method `.test_migration_adds_the_claim_revision_columns()`
   - Method `.test_migration_is_idempotent()`
   - Method `.test_future_version_is_refused_without_changes()`
   - Method `.test_future_version_is_refused_before_creating_tables()`
@@ -1159,6 +1163,26 @@
   - Method `.test_invalid_slug_is_refused()`
   - Method `.test_missing_program_is_reported()`
   - Method `.test_counts_include_open_questions()`
+
+---
+
+### [`tests/test_revisions.py`](tests/test_revisions.py)
+> *Claim revisions: the head carries the edges, the old claim stays as history.*
+
+**Size**: `126` lines (`4338` bytes)
+
+**Classes:**
+- `class RevisionTests`
+  - Method `.setUp()`
+  - Method `._revise(**overrides)`
+  - Method `.test_revision_marks_the_old_claim_and_starts_unverified()`
+  - Method `.test_default_list_hides_superseded_and_history_includes_it()`
+  - Method `.test_revision_chain_is_oldest_first()`
+  - Method `.test_edges_move_to_the_head()`
+  - Method `.test_an_empirical_revision_still_needs_a_quote()`
+  - Method `.test_a_revision_needs_a_reason()`
+  - Method `.test_a_superseded_claim_cannot_be_revised_again()`
+  - Method `.test_a_test_on_a_superseded_claim_warns()`
 
 ---
 

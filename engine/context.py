@@ -81,7 +81,8 @@ def _status_counts(conn: sqlite3.Connection, research_id: str) -> List[str]:
     lines = []
     for status in CLAIM_STATUSES:
         row = conn.execute(
-            "SELECT COUNT(*) AS n FROM claim WHERE research_id = ? AND status = ?",
+            "SELECT COUNT(*) AS n FROM claim WHERE research_id = ? AND status = ?"
+            " AND superseded_by IS NULL",
             (research_id, status),
         ).fetchone()
         if row["n"]:

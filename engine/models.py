@@ -103,6 +103,9 @@ class Claim:
     confidence: float
     created_at: str
     updated_at: str
+    revision_of: Optional[str] = None
+    superseded_by: Optional[str] = None
+    revision_reason: str = ""
 
 
 @dataclass(frozen=True)

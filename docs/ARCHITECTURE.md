@@ -42,7 +42,7 @@ readable and gap-free without `AUTOINCREMENT` surprises.
 | `research` | program boundary | title/scope by hand; never deleted by the engine |
 | `source` | bibliographic provenance | metadata and evidence status (`active`, `expression_of_concern`, `retracted`) |
 | `question` | collection point for evidence | status (open/closed) |
-| `claim` | assertion + provenance + verdict | status via append-only verdicts |
+| `claim` | assertion + provenance + verdict, with revision links | status via append-only verdicts; text via a new revision row |
 | `edge` | typed relation between claims/questions/hypotheses | append-only |
 | `hypothesis` | pre-registered prediction | outcome once |
 | `killtest` | executable command, declared inputs and target | append-only |
@@ -109,14 +109,24 @@ a new attempt, but a later `completed` attempt cannot displace an earlier `subje
 Legacy run groups with no attempt row keep the pre-v6 any-current-group behaviour until they are
 re-run.
 
+## Revisions
+
+`claim revise` appends a new claim row and sets `revision_of` on it and `superseded_by` on the old
+row. The new row starts `UNVERIFIED`; verdicts are never copied, because old evidence supports the
+old text, not the new one. Edges are repointed to the new head, tests are not: a test remains bound
+to the old claim and integrity reports `REV-002` until it is deliberately rebound. `REV-001` catches
+a dependency edge that still points at a superseded claim. `claim list` hides superseded rows by
+default; `claim history` renders the chain oldest first.
+
 ## Schema Versions
 
 `initialize` creates missing tables, then migrates an older `schema_meta.version` additively and
 raises the version, returning a report with the starting version and how many numeric claims lost
 their binding. `CREATE TABLE IF NOT EXISTS` alone would leave an older table without its new
 columns, so `_add_missing_columns` inspects `PRAGMA table_info` and adds each missing column inside
-the same transaction. Version 6 adds the `test_attempt` table; existing run groups are not
-backfilled and remain on the legacy path until they are re-run. Each version step is separate, so
+the same transaction. Version 6 adds the `test_attempt` table; version 7 adds the claim revision
+columns. Existing run groups are not backfilled and remain on the legacy path until they are
+re-run; existing claims are revision heads with empty links. Each version step is separate, so
 a version-1 database passes through the version-2 step and then the version-3 step. A version
 newer than the build is refused without modification, and the migration preserves existing rows,
 including legacy runs whose binding columns are empty.

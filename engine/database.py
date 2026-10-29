@@ -10,7 +10,7 @@ from typing import Iterator
 from engine.artifacts import utc_now
 from engine.errors import EngineError
 
-SCHEMA_VERSION = 6
+SCHEMA_VERSION = 7
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS schema_meta (
@@ -64,7 +64,10 @@ CREATE TABLE IF NOT EXISTS claim (
     status TEXT NOT NULL,
     confidence REAL NOT NULL,
     created_at TEXT NOT NULL,
-    updated_at TEXT NOT NULL
+    updated_at TEXT NOT NULL,
+    revision_of TEXT REFERENCES claim(id),
+    superseded_by TEXT,
+    revision_reason TEXT NOT NULL DEFAULT ''
 );
 CREATE TABLE IF NOT EXISTS edge (
     id TEXT PRIMARY KEY,
@@ -226,12 +229,20 @@ _MIGRATIONS = {
         ("killtest", "control_command", "TEXT NOT NULL DEFAULT ''"),
         ("test_run", "role", "TEXT NOT NULL DEFAULT 'main'"),
     ),
+    6: (
+        ("claim", "revision_of", "TEXT REFERENCES claim(id)"),
+        ("claim", "superseded_by", "TEXT"),
+        ("claim", "revision_reason", "TEXT NOT NULL DEFAULT ''"),
+    ),
 }
 
 
 def _ensure_indexes(conn: sqlite3.Connection) -> None:
     """Create indexes that depend on migrated columns; safe to run after every migration."""
     conn.execute("CREATE INDEX IF NOT EXISTS idx_source_screening ON source(screening)")
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_claim_head ON claim(research_id, superseded_by)"
+    )
 
 
 def _add_missing_columns(conn: sqlite3.Connection, version: int) -> None:

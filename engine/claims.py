@@ -7,6 +7,7 @@ from typing import Iterable, List, Optional, Sequence
 
 from engine.database import next_id, transaction
 from engine.errors import EngineError, NotFound
+from engine.events import record as record_event
 from engine.models import (
     CLAIM_CLAIM_RELATIONS,
     CLAIM_KINDS,
@@ -49,6 +50,8 @@ def add_claim(
     kill_test: str = "",
     basis: str = "",
     prerequisites: Sequence[str] = (),
+    revision_of: Optional[str] = None,
+    revision_reason: str = "",
 ) -> Claim:
     """Record a claim; empirical claims must carry a verbatim quote and a locator."""
     research = get_research(conn, research_ref)
@@ -126,11 +129,13 @@ def add_claim(
             confidence=confidence,
             created_at=stamp,
             updated_at=stamp,
+            revision_of=revision_of,
+            revision_reason=revision_reason.strip(),
         )
         conn.execute(
             "INSERT INTO claim(id, research_id, source_id, text, quote, locator, kind, basis,"
-            " kill_test, status, confidence, created_at, updated_at)"
-            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            " kill_test, status, confidence, created_at, updated_at, revision_of,"
+            " revision_reason) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
                 record.id,
                 record.research_id,
@@ -145,6 +150,8 @@ def add_claim(
                 record.confidence,
                 record.created_at,
                 record.updated_at,
+                record.revision_of,
+                record.revision_reason,
             ),
         )
         for prereq in prereq_claims:
@@ -164,8 +171,9 @@ def list_claims(
     conn: sqlite3.Connection,
     research_ref: str | None = None,
     status: str | None = None,
+    include_superseded: bool = False,
 ) -> List[Claim]:
-    """List claims, optionally filtered by program and verdict."""
+    """List claims, optionally filtered by program and verdict; hide superseded heads by default."""
     clauses: List[str] = []
     params: List[object] = []
     if research_ref:
@@ -180,9 +188,124 @@ def list_claims(
             )
         clauses.append("status = ?")
         params.append(status)
+    if not include_superseded:
+        clauses.append("superseded_by IS NULL")
     where = f" WHERE {' AND '.join(clauses)}" if clauses else ""
     rows = conn.execute(f"SELECT * FROM claim{where} ORDER BY id", params).fetchall()
     return [_to_claim(row) for row in rows]
+
+
+def revision_chain(conn: sqlite3.Connection, ref: str) -> List[Claim]:
+    """The full revision chain, oldest first, with a cycle guard."""
+    claim = get_claim(conn, ref)
+    chain = [claim]
+    seen = {claim.id}
+    while chain[0].revision_of:
+        parent = get_claim(conn, chain[0].revision_of)
+        if parent.id in seen:
+            raise EngineError(
+                "claim revision cycle",
+                f"the chain revisits {parent.id}, so it cannot be ordered.",
+                "repair the revision links before rendering the history.",
+            )
+        chain.insert(0, parent)
+        seen.add(parent.id)
+    while chain[-1].superseded_by:
+        child = get_claim(conn, chain[-1].superseded_by)
+        if child.id in seen:
+            raise EngineError(
+                "claim revision cycle",
+                f"the chain revisits {child.id}, so it cannot be ordered.",
+                "repair the revision links before rendering the history.",
+            )
+        chain.append(child)
+        seen.add(child.id)
+    return chain
+
+
+def revise_claim(
+    conn: sqlite3.Connection,
+    ref: str,
+    text: str,
+    reason: str,
+    source_ref: Optional[str] = None,
+    quote: str = "",
+    locator: str = "",
+    confidence: float = 0.5,
+    kill_test: str = "",
+    basis: str = "",
+    prerequisites: Sequence[str] = (),
+    actor: str = "agent",
+) -> Claim:
+    """Append a revised claim, mark the old one superseded, and move its edges to the head.
+
+    The new claim starts UNVERIFIED: old verdicts stay on the old claim and are never inherited.
+    Tests stay bound to the old claim and are reported by REV-002 until deliberately rebound.
+    """
+    old = get_claim(conn, ref)
+    if old.superseded_by:
+        raise EngineError(
+            f"claim {old.id} is already superseded by {old.superseded_by}",
+            "a revision chain has one head; revise the head instead.",
+            f"run `claim revise {old.superseded_by}` or inspect `claim history {old.id}`.",
+        )
+    if not reason.strip():
+        raise EngineError(
+            "revision has no reason",
+            "a later reader must know why the assertion changed.",
+            "pass --reason with the new evidence or narrowing.",
+        )
+    with transaction(conn):
+        new = add_claim(
+            conn,
+            old.research_id,
+            text,
+            old.kind,
+            source_ref=source_ref,
+            quote=quote,
+            locator=locator,
+            confidence=confidence,
+            kill_test=kill_test,
+            basis=basis,
+            prerequisites=prerequisites,
+            revision_of=old.id,
+            revision_reason=reason,
+        )
+        rows = conn.execute(
+            "SELECT * FROM edge WHERE (src_kind = 'claim' AND src_id = ?)"
+            " OR (dst_kind = 'claim' AND dst_id = ?) ORDER BY id",
+            (old.id, old.id),
+        ).fetchall()
+        for row in rows:
+            src_id = new.id if str(row["src_id"]) == old.id else str(row["src_id"])
+            dst_id = new.id if str(row["dst_id"]) == old.id else str(row["dst_id"])
+            if src_id == dst_id:
+                continue
+            record_edge(
+                conn,
+                str(row["src_kind"]),
+                src_id,
+                str(row["dst_kind"]),
+                dst_id,
+                str(row["rel"]),
+            )
+        conn.execute(
+            "DELETE FROM edge WHERE (src_kind = 'claim' AND src_id = ?)"
+            " OR (dst_kind = 'claim' AND dst_id = ?)",
+            (old.id, old.id),
+        )
+        conn.execute(
+            "UPDATE claim SET superseded_by = ? WHERE id = ?", (new.id, old.id)
+        )
+        record_event(
+            conn,
+            "claim.revise",
+            new.id,
+            f"{old.id} -> {new.id}: {reason.strip()}",
+            research_id=old.research_id,
+            actor=actor,
+        )
+    return get_claim(conn, new.id)
 
 
 def current_groups_for_claim(conn: sqlite3.Connection, claim_id: str) -> List[str]:

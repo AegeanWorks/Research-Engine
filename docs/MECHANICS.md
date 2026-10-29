@@ -82,6 +82,20 @@ dated before registration. `hypothesis card` renders the K13-style card.
 **Deliberately not copied.** Turkish-language domain files, the chunked claim register, and the
 project's intervention boundaries. Only the pre-registration discipline moved.
 
+## 4b. Claim revisions (extension of the same discipline)
+
+**Gap found.** Claim text was immutable. Refining an assertion forced either a second, silently
+contradicting claim or a stale statement that no longer matched the evidence.
+
+**Rule here.** `claim revise` appends a new claim row, sets `revision_of` on the new row and
+`superseded_by` on the old one, and moves the old claim's edges to the new head. The new claim
+starts `UNVERIFIED`; verdicts are never inherited. Tests stay on the old claim and integrity
+reports `REV-002` until they are deliberately rebound; `REV-001` catches a dependency edge that
+still points at a superseded claim. `claim history` renders the chain. An empirical revision still
+needs a source, quote and locator, and every revision needs a reason.
+
+**Deliberately not copied.** Editing a claim row in place or carrying the old verdict forward.
+
 ## 5. Transitive cascade invalidation (`obezite-mekanizma-projesi`)
 
 **Mechanic.** When an invalid claim is cited without qualification, everything built on it is

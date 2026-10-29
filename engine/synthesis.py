@@ -253,7 +253,8 @@ def scorecard(conn: sqlite3.Connection, research_ref: str) -> str:
         ("FALSIFIED", "INVALIDATED", "RETRACTED", "UNVERIFIED", "UNKNOWN", "NUMERIC", "PROVEN")
     )}
     rows = conn.execute(
-        "SELECT * FROM claim WHERE research_id = ? ORDER BY id", (research.id,)
+        "SELECT * FROM claim WHERE research_id = ? AND superseded_by IS NULL ORDER BY id",
+        (research.id,),
     ).fetchall()
     ranked = sorted(rows, key=lambda row: (order.get(str(row["status"]), 99), str(row["id"])))
     lines = [
@@ -280,6 +281,9 @@ def claim_detail(conn: sqlite3.Connection, claim_ref: str) -> str:
         "",
         f"- research: {claim.research_id}",
         f"- kind: {claim.kind}",
+        f"- revision of: {claim.revision_of or '-'}",
+        f"- superseded by: {claim.superseded_by or '-'}",
+        f"- revision reason: {bullet(claim.revision_reason, 300) or '-'}",
         f"- status: {claim.status}",
         f"- confidence: {claim.confidence:.2f}",
         f"- kill test: {bullet(claim.kill_test, 300) or '-'}",

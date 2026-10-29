@@ -356,3 +356,21 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   run or a control that does not fail is replaceable only with a recorded reason. Existing
   databases migrate without a backfill; their historical runs remain readable and keep the legacy
   promotion path.
+
+### ADR-028: Claim revisions without inherited evidence
+- **Date**: 2026-10-29
+- **Status**: Accepted
+- **Context**: `claim.text` was immutable. Refining a claim forced a second, silently contradicting
+  claim or left a stale statement in the graph. The OpenSpec-style delta chain was the candidate
+  mechanic, but its blueprint proposed lowercase `superseded`/`active` statuses that would break
+  the closed uppercase `CLAIM_STATUSES` vocabulary used by consensus, integrity and cascade.
+- **Decision**: Bump the schema to 7 and add `revision_of`, `superseded_by` and `revision_reason`
+  to `claim`. `claim revise` inserts a new claim through the normal provenance rules, sets the
+  links, and moves edges from the old claim to the new head in one transaction. The new claim
+  starts `UNVERIFIED`; old verdicts are never copied. Tests stay on the old claim and raise
+  `REV-002`; `REV-001` catches a dependency edge still pointing at a superseded claim. `claim list`
+  hides superseded rows unless `--history` is passed, and `claim history` renders the chain.
+- **Consequences**: A refinement keeps the old text, provenance and verdict history auditable while
+  the graph uses one head. The status machine is unchanged. A superseded claim cannot be revised
+  again or merged; the head is the only live target. Existing claims migrate as heads with empty
+  links.

@@ -444,6 +444,36 @@ def check(conn: sqlite3.Connection) -> List[Finding]:
         )
 
     for row in conn.execute(
+        "SELECT e.id, e.src_id, e.dst_id FROM edge e JOIN claim c ON c.id = e.dst_id"
+        " WHERE e.src_kind = 'claim' AND e.dst_kind = 'claim'"
+        " AND e.rel IN ('derived_from', 'depends_on') AND c.superseded_by IS NOT NULL"
+        " ORDER BY e.id"
+    ):
+        findings.append(
+            _finding(
+                "REV-001",
+                "warning",
+                str(row["src_id"]),
+                f"dependent still points at superseded claim {row['dst_id']}",
+                "re-link the dependent to the revision head, or record why the old link stands.",
+            )
+        )
+
+    for row in conn.execute(
+        "SELECT t.id, t.claim_id FROM killtest t JOIN claim c ON c.id = t.claim_id"
+        " WHERE c.superseded_by IS NOT NULL ORDER BY t.id"
+    ):
+        findings.append(
+            _finding(
+                "REV-002",
+                "warning",
+                str(row["id"]),
+                f"test targets superseded claim {row['claim_id']}",
+                "bind the test to the revision head, or record why the old test is kept.",
+            )
+        )
+
+    for row in conn.execute(
         "SELECT q.* FROM question q WHERE q.status = 'open' AND NOT EXISTS ("
         " SELECT 1 FROM edge e WHERE e.dst_kind = 'question' AND e.dst_id = q.id"
         " AND e.src_kind = 'claim' AND e.rel IN ('supports', 'contradicts', 'answers'))"
@@ -459,7 +489,7 @@ def check(conn: sqlite3.Connection) -> List[Finding]:
         )
 
     for row in conn.execute(
-        "SELECT c.* FROM claim c WHERE NOT EXISTS ("
+        "SELECT c.* FROM claim c WHERE c.superseded_by IS NULL AND NOT EXISTS ("
         " SELECT 1 FROM edge e WHERE e.src_kind = 'claim' AND e.src_id = c.id"
         " AND e.dst_kind = 'question')"
     ):
@@ -475,7 +505,7 @@ def check(conn: sqlite3.Connection) -> List[Finding]:
 
     for row in conn.execute(
         "SELECT research_id, text, COUNT(*) AS n FROM claim"
-        " WHERE status NOT IN ('RETRACTED', 'INVALIDATED')"
+        " WHERE status NOT IN ('RETRACTED', 'INVALIDATED') AND superseded_by IS NULL"
         " GROUP BY research_id, text HAVING n > 1"
     ):
         findings.append(

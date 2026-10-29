@@ -30,7 +30,7 @@ class CliTests(unittest.TestCase):
     def test_init_and_demo(self) -> None:
         code, out, _ = self.run_cli("init")
         self.assertEqual(code, 0)
-        self.assertIn("schema 6", out)
+        self.assertIn("schema 7", out)
         code, out, _ = self.run_cli("--json", "demo")
         self.assertEqual(code, 0)
         payload = json.loads(out)
@@ -192,6 +192,26 @@ class CliTests(unittest.TestCase):
         self.assertEqual(code, 0)
         self.assertIn("CLAIM c_000002", out)
 
+
+    def test_claim_revision_commands(self) -> None:
+        self.run_cli("demo")
+        code, out, _ = self.run_cli(
+            "claim", "revise", "c_000001", "--text", "Narrower claim.",
+            "--reason", "narrowed to the tested subgroup", "--source", "s_000001",
+            "--quote", "Narrower claim in the tested subgroup.", "--locator", "p.2",
+        )
+        self.assertEqual(code, 0)
+        self.assertIn("revised", out)
+        code, out, _ = self.run_cli("claim", "history", "c_000001")
+        self.assertEqual(code, 0)
+        self.assertIn("c_000001", out)
+        self.assertIn("head", out)
+        _, default_list, _ = self.run_cli("claim", "list", "--research", "r_000001")
+        self.assertNotIn("c_000001", default_list)
+        _, history_list, _ = self.run_cli(
+            "claim", "list", "--research", "r_000001", "--history"
+        )
+        self.assertIn("c_000001", history_list)
 
     def test_screening_and_prisma(self) -> None:
         self.run_cli("demo")

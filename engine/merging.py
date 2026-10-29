@@ -38,6 +38,12 @@ def merge_claims(
             "a merge must keep a live claim, not a retired one.",
             "choose the claim that remains part of the argument as the survivor.",
         )
+    if keep.superseded_by:
+        raise EngineError(
+            f"survivor {keep.id} is superseded by {keep.superseded_by}",
+            "a merge must keep the current revision head.",
+            "choose the head of the revision chain as the survivor.",
+        )
     for claim in drops:
         if claim.id == keep.id:
             raise EngineError(
@@ -56,6 +62,12 @@ def merge_claims(
                 f"claim {claim.id} is already {claim.status}",
                 "a retired claim has no live edges to repoint.",
                 "choose a live duplicate.",
+            )
+        if claim.superseded_by:
+            raise EngineError(
+                f"claim {claim.id} is superseded by {claim.superseded_by}",
+                "a superseded claim is already history; merge the current head instead.",
+                "choose a live duplicate from the current revision chain.",
             )
     moved: List[str] = []
     retired: List[str] = []

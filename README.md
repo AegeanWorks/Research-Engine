@@ -35,32 +35,10 @@ A falsification-first research engine for provenance-backed claims, executable k
 ## Why this is not "just lattice"
 
 `lattice` is a strong evidence store but not a research lifecycle. The engine borrows its
-provenance rule and adds what a claim is allowed to mean.
-
-| Reference | Mechanic adopted | What it becomes here |
-|---|---|---|
-| `lattice` | Provenance-first claim graph | Every empirical claim stores a source, an exact quote and a locator; questions collect supporting and contradicting claims |
-| `fluid-universe` | Falsification-first claim ledger | Closed verdict vocabulary, a required kill test, negative results kept, every number regenerated from recorded evidence |
-| `fluid-universe` | Two-run independent verification | `test verify` runs a command twice in separate processes and refuses a NUMERIC verdict when the runs disagree |
-| `obezite-mekanizma-projesi` | Pre-registration (K13) | A hypothesis must be registered with a verification criterion before an outcome exists |
-| `obezite-mekanizma-projesi` | Transitive cascade invalidation | Retracting or falsifying a premise invalidates every dependent claim in one transaction |
-| `PNN` | Executable phase gates and golden run | One `check` gate audits the whole graph; `demo` is a deterministic golden path; generated reports carry a manifest with digests and limits |
-| `fluid-universe` (extended) | Stale-evidence rejection | Every run records the engine code, declared inputs and command hash; a NUMERIC claim is only current while a verified run matches them |
-| `obezite-mekanizma-projesi` (extended) | Source verification | A source can be marked under concern or retracted; retraction retires every claim that cites it |
-| `lattice` (extended) | Snapshot tooling | Report manifests and JSONL digests make drift detectable |
-| `lattice` | Token-budgeted views | `outline`, `brief` and `claim context` render the graph under a token budget and state exactly how many lines were omitted |
-| `lattice` | Contradiction discovery | Pairs supporting and contradicting claims inside one question, ranked by confidence and keyword overlap, with an opt-in unlinked proposal mode |
-| `lattice` | Evidence matrix and keystones | Source x question coverage, and the claims the rest of the graph leans on |
-| `lattice` | Screening and PRISMA flow | Sources move through screening states with closed reasons and flow counts |
-| `obezite-mekanizma-projesi` | Non-vacuity | A test without a control has not shown it can fail; a passing control is an error |
-| `N1-Engine` | Deterministic comparison | Observations become effect size, Welch t, rank test and seeded bootstrap, with caveats |
-| `aegean-licensing` | Domain-separated digests | Every digest hashes its artifact kind first, so a report digest can never equal a graph digest |
-| `aegean-licensing` | Pinned license identity | Every manifest records the license id and the digest of the licence text it was generated under |
-| `aegean-licensing-ops` | Verified backup and event log | `db integrity`, `db backup`, append-only events |
-| `PNN` (extended) | Explicit UNKNOWN | Missing evidence is a state, never a silent pass |
-
-The engine takes the transferable *mechanics* clean-room onto one standard-library SQLite graph;
-domain content stays in the programs it hosts.
+provenance rule and adds what a claim is allowed to mean. The clean-room mechanics come from
+`lattice`, `fluid-universe`, `obezite-mekanizma-projesi`, `PNN`, `N1-Engine` and
+`aegean-licensing`; [docs/MECHANICS.md](docs/MECHANICS.md) records each adopted rule and what was
+deliberately not copied. Domain content stays in the programs the engine hosts.
 
 ## How It Works
 
@@ -99,9 +77,10 @@ domain content stays in the programs it hosts.
 11. **The graph is readable under a budget.** `outline` gives one line per question, hypothesis
     and test; `brief` gives the strongest support and contradiction per question; `claim context`
     gives one claim with provenance, premises and history. Each states its omitted line count.
-12. **Duplicates merge instead of accumulating.** `claim merge KEEP DUP...` repoints every edge
-    and every bound test to the survivor and records each duplicate as RETRACTED with the
-    survivor as its evidence.
+12. **Duplicates merge; refinements revise.** `claim merge KEEP DUP...` repoints every edge and
+    bound test to the survivor and records each duplicate as RETRACTED. `claim revise` appends a
+    revision, marks the old claim superseded and moves its edges to the new head; old verdicts stay
+    visible through `claim history`, and the new claim starts untested.
 13. **A test must be able to fail.** `test add --control CMD` declares a negative control that
     must fail reproducibly. A test that has produced verified evidence without a control is a
     warning (`EVID-008`); a declared control that does not fail is an error (`EVID-009`).
@@ -160,7 +139,11 @@ python -m engine [--db PATH] observation void OBS --reason TEXT
 python -m engine [--db PATH] claim add RESEARCH --text TEXT --kind KIND [--source REF]
                         [--quote TEXT] [--locator TEXT] [--confidence C] [--kill-test TEXT]
                         [--basis TEXT] [--from CLAIM]...
-python -m engine [--db PATH] claim list [--research REF] [--status STATUS]
+python -m engine [--db PATH] claim list [--research REF] [--status STATUS] [--history]
+python -m engine [--db PATH] claim revise REF --text TEXT --reason TEXT [--source REF]
+                        [--quote TEXT] [--locator TEXT] [--confidence C] [--kill-test TEXT]
+                        [--basis TEXT] [--from CLAIM]...
+python -m engine [--db PATH] claim history REF
 python -m engine [--db PATH] claim show REF
 python -m engine [--db PATH] claim link SRC DST --rel REL
 python -m engine [--db PATH] claim link-question CLAIM QUESTION --stance STANCE
@@ -234,20 +217,22 @@ present and 0 when only warnings remain. Domain errors print the `Error / Why / 
 - observations with no statistics run, or changed after the last one (`OBS-001`,
   warning);
 - a live claim citing a source screened out of the review (`SCREEN-001`, warning);
-- a test still bound to a retired claim (`TEST-001`, warning);
+- a test still bound to a retired claim (`TEST-001`, warning), to a superseded claim
+  (`REV-002`, warning), or a dependent still pointing at a superseded claim (`REV-001`, warning);
 - an UNKNOWN claim with no recorded reason (`EVID-007`, warning).
 
 Warnings are research hygiene; errors block a trustworthy report.
 
 ## Data Model
 
-One SQLite file (default `research.db`), schema version 6. Tables: `research`, `source`,
+One SQLite file (default `research.db`), schema version 7. Tables: `research`, `source`,
 `question`, `claim`, `edge`, `hypothesis`, `killtest`, `test_run`, `test_attempt`, `verdict`,
-`invalidation`, `observation`, `event`, plus `schema_meta` and `counters`. Writes use
-`BEGIN IMMEDIATE`; WAL and `synchronous=FULL` are enabled for a durable state file. `verdict`,
-`test_run`, `test_attempt`, `event`, `observation` and `invalidation` are append-only (an
-observation is voided, never edited or deleted). `export` includes attempts, observations and the
-event log; the manifest digests cover evidence records and exclude the log.
+`invalidation`, `observation`, `event`, plus `schema_meta` and `counters`. `claim` carries
+`revision_of`, `superseded_by` and `revision_reason`; a revision is a new row, never an edit.
+Writes use `BEGIN IMMEDIATE`; WAL and `synchronous=FULL` are enabled for a durable state file.
+`verdict`, `test_run`, `test_attempt`, `event`, `observation` and `invalidation` are append-only
+(an observation is voided, never edited or deleted). `export` includes attempts, observations and
+the event log; the manifest digests cover evidence records and exclude the log.
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Non-Negotiables
@@ -263,6 +248,7 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 - A retracted source retires the claims that cite it; a live claim citing one is an error.
 - A committed report is only valid alongside its manifest, and `report --check` must stay clean.
 - Negative results are kept. Corrections are new verdicts, never silent edits.
+- A claim revision is a new row and starts untested; old verdicts are never inherited.
 - A failed premise invalidates its dependents; a report with `CASCADE-001` is not trustworthy.
 - Reports and scorecards are generated from the graph. Do not hand-write their numbers.
 - The engine is standard library only and makes no network calls. Sources are registered explicitly.

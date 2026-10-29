@@ -111,6 +111,14 @@ class MigrationTests(unittest.TestCase):
         }
         self.assertIn("test_attempt", tables)
 
+    def test_migration_adds_the_claim_revision_columns(self) -> None:
+        path = self._old_database()
+        conn = connect(path)
+        self.addCleanup(conn.close)
+        initialize(conn)
+        columns = {row["name"] for row in conn.execute("PRAGMA table_info(claim)")}
+        self.assertTrue({"revision_of", "superseded_by", "revision_reason"} <= columns)
+
     def test_migration_is_idempotent(self) -> None:
         path = self._old_database()
         conn = connect(path)

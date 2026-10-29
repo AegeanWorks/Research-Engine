@@ -29,6 +29,8 @@ from engine.claims import (
     link_claims,
     link_to_question,
     list_claims,
+    revise_claim,
+    revision_chain,
     set_verdict,
 )
 from engine.context import DEFAULT_BUDGET, brief, claim_brief, outline
@@ -155,6 +157,21 @@ def _build_parser() -> argparse.ArgumentParser:
     list_c = claim_sub.add_parser("list", help="list claims")
     list_c.add_argument("--research")
     list_c.add_argument("--status")
+    list_c.add_argument("--history", action="store_true",
+                        help="include superseded revisions")
+    revise_c = claim_sub.add_parser("revise", help="append a revision and supersede the old claim")
+    revise_c.add_argument("ref")
+    revise_c.add_argument("--text", required=True)
+    revise_c.add_argument("--reason", required=True)
+    revise_c.add_argument("--source")
+    revise_c.add_argument("--quote", default="")
+    revise_c.add_argument("--locator", default="")
+    revise_c.add_argument("--confidence", type=float, default=0.5)
+    revise_c.add_argument("--kill-test", default="")
+    revise_c.add_argument("--basis", default="")
+    revise_c.add_argument("--from", dest="prerequisites", action="append", default=[])
+    history_c = claim_sub.add_parser("history", help="show one claim's revision chain")
+    history_c.add_argument("ref")
     show_c = claim_sub.add_parser("show", help="show one claim in full")
     show_c.add_argument("ref")
     link_c = claim_sub.add_parser("link", help="link two claims")
@@ -428,6 +445,33 @@ def _cmd_claim(conn: sqlite3.Connection, args) -> int:
             prerequisites=args.prerequisites,
         )
         return _emit(record, args.json, f"{record.id} {record.status} {record.text}\n")
+    if args.action == "revise":
+        record = revise_claim(
+            conn,
+            args.ref,
+            args.text,
+            args.reason,
+            source_ref=args.source,
+            quote=args.quote,
+            locator=args.locator,
+            confidence=args.confidence,
+            kill_test=args.kill_test,
+            basis=args.basis,
+            prerequisites=args.prerequisites,
+        )
+        return _emit(
+            record,
+            args.json,
+            f"{args.ref} -> {record.id} (revised; {args.ref} superseded)\n",
+        )
+    if args.action == "history":
+        records = revision_chain(conn, args.ref)
+        text = "".join(
+            f"{claim.id}  {claim.status:<11} {'superseded' if claim.superseded_by else 'head'}"
+            f"  {claim.text}\n"
+            for claim in records
+        )
+        return _emit(_records_payload(records), args.json, text)
     if args.action == "show":
         return _emit(get_claim(conn, args.ref), args.json, claim_detail(conn, args.ref))
     if args.action == "link":
@@ -458,7 +502,7 @@ def _cmd_claim(conn: sqlite3.Connection, args) -> int:
         for item in result["affected"]:
             text += f"  {item['id']} depth {item['depth']} ({item['previous_status']} -> INVALIDATED)\n"
         return _emit(result, args.json, text)
-    records = list_claims(conn, args.research, args.status)
+    records = list_claims(conn, args.research, args.status, include_superseded=args.history)
     text = "".join(
         f"{c.id}  {c.status:<11} {c.confidence:.2f}  {c.text}\n" for c in records
     ) or "no claims\n"

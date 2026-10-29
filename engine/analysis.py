@@ -179,7 +179,8 @@ def keystone_claims(conn: sqlite3.Connection, research_ref: str, limit: int = 10
     """Claims that the rest of the graph leans on, by transitive dependents and inbound edges."""
     research = get_research(conn, research_ref)
     rows = conn.execute(
-        "SELECT id, status, confidence, text FROM claim WHERE research_id = ? ORDER BY id",
+        "SELECT id, status, confidence, text FROM claim WHERE research_id = ?"
+        " AND superseded_by IS NULL ORDER BY id",
         (research.id,),
     ).fetchall()
     inbound: Dict[str, int] = {}
