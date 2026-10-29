@@ -7,15 +7,18 @@ import unittest
 from engine.claims import (
     add_claim,
     get_claim,
+    link_claims,
     link_to_question,
     list_claims,
     list_edges,
     revise_claim,
     revision_chain,
+    set_verdict,
 )
 from engine.errors import EngineError
 from engine.integrity import check
 from engine.killtests import add_test
+from engine.observations import add_observation
 from engine.questions import add_question
 from tests.support import DatabaseCase
 
@@ -120,6 +123,48 @@ class RevisionTests(DatabaseCase):
         self._revise()
         findings = [item for item in check(self.conn) if item.code == "REV-002"]
         self.assertEqual([item.subject for item in findings], [test.id])
+
+    def test_a_superseded_claim_refuses_a_new_verdict(self) -> None:
+        new = self._revise()
+        with self.assertRaises(EngineError):
+            set_verdict(self.conn, self.old.id, "PROVEN", "a proof")
+        self.assertEqual(get_claim(self.conn, self.old.id).status, "UNVERIFIED")
+        self.assertEqual(new.status, "UNVERIFIED")
+
+    def test_a_superseded_claim_refuses_a_new_observation(self) -> None:
+        self._revise()
+        with self.assertRaises(EngineError):
+            add_observation(self.conn, self.old.id, "baseline", 1.0)
+
+    def test_a_superseded_claim_refuses_a_new_test(self) -> None:
+        self._revise()
+        with self.assertRaises(EngineError):
+            add_test(
+                self.conn,
+                self.research,
+                "Late probe",
+                'python -c "print(1)"',
+                claim_ref=self.old.id,
+            )
+
+    def test_a_superseded_claim_refuses_a_new_prerequisite(self) -> None:
+        self._revise()
+        with self.assertRaises(EngineError):
+            add_claim(
+                self.conn,
+                self.research,
+                "Derived from history.",
+                "derived",
+                basis="a",
+                prerequisites=[self.old.id],
+            )
+
+    def test_a_superseded_claim_refuses_new_links(self) -> None:
+        new = self._revise()
+        with self.assertRaises(EngineError):
+            link_claims(self.conn, self.old.id, new.id, "related")
+        with self.assertRaises(EngineError):
+            link_to_question(self.conn, self.old.id, self.question.id, "supports")
 
 
 if __name__ == "__main__":

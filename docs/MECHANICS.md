@@ -95,7 +95,8 @@ reports `REV-002` until they are deliberately rebound; `REV-001` catches a depen
 still points at a superseded claim. `claim history` renders the chain. An empirical revision still
 needs a source, quote and locator, and every revision needs a reason. A failed claim is terminal
 for promotion: `set_verdict` refuses `FALSIFIED`/`RETRACTED`/`INVALIDATED` -> promoted, so a
-revival is a revision rather than an overwritten failure.
+revival is a revision rather than an overwritten failure. New verdicts, observations, tests, edges
+and prerequisites are refused on a superseded claim; the head is the only live target.
 
 **Deliberately not copied.** Editing a claim row in place or carrying the old verdict forward.
 

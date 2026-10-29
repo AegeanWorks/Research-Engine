@@ -1,61 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "T-013-integrity-guards",
+    "task_id": "T-014-superseded-readonly",
     "last_phase": "phase 4",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1793307442.977135,
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1793308443.088614,
     "owner": "opencode:research-engine",
     "started_by": "opencode:research-engine",
-    "continuations": [],
-    "completed_at": 1793307510.179483
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "reforge:run-1",
-      "phase": "reforge stage 8",
-      "phase_num": 3,
-      "description": "Reforge stage 8: run stopped at stage 8; resume it with `reforge resume`",
-      "files_affected": [],
-      "status": "suspended",
-      "timestamp": 1793293983.808209,
-      "timestamp_str": "2026-10-29 20:13:03",
-      "agent": "opencode"
-    },
-    {
-      "task_id": "reforge:run-1",
-      "phase": "reforge stage 8",
-      "phase_num": 3,
-      "description": "Reforge stage 8: run resumed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793295027.3609314,
-      "timestamp_str": "2026-10-29 20:30:27",
-      "agent": "opencode"
-    },
-    {
-      "task_id": "reforge:run-1",
-      "phase": "reforge stage 9",
-      "phase_num": 3,
-      "description": "Reforge stage 9: window 26, 4 commit(s), 6 file(s) reviewed (unreviewed), 0 finding(s), 0 repaired",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793295048.693127,
-      "timestamp_str": "2026-10-29 20:30:48",
-      "agent": "opencode"
-    },
-    {
-      "task_id": "reforge:run-1",
-      "phase": "reforge stage 9",
-      "phase_num": 3,
-      "description": "Reforge stage 9: run stopped at stage 9; resume it with `reforge resume`",
-      "files_affected": [],
-      "status": "suspended",
-      "timestamp": 1793295073.635994,
-      "timestamp_str": "2026-10-29 20:31:13",
-      "agent": "opencode"
-    },
     {
       "task_id": "T-012-evidence-integrity",
       "phase": "planning",
@@ -270,6 +225,56 @@
       "status": "completed",
       "timestamp": 1793307510.1794844,
       "timestamp_str": "2026-10-29 23:58:30",
+      "agent": "opencode:research-engine"
+    },
+    {
+      "task_id": "reforge:run-1",
+      "phase": "reforge stage 9",
+      "phase_num": 3,
+      "description": "Reforge stage 9: run resumed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793307615.1720734,
+      "timestamp_str": "2026-10-30 00:00:15",
+      "agent": "opencode"
+    },
+    {
+      "task_id": "reforge:run-1",
+      "phase": "reforge stage 10",
+      "phase_num": 3,
+      "description": "Reforge stage 10: window 30, 10 commit(s), 34 file(s) reviewed (unreviewed), 0 finding(s), 0 repaired",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793307651.5550733,
+      "timestamp_str": "2026-10-30 00:00:51",
+      "agent": "opencode"
+    },
+    {
+      "task_id": "T-014-superseded-readonly",
+      "phase": "planning",
+      "phase_num": 2,
+      "description": "[1/1] Refuse new evidence and edges on superseded claims",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793308439.5086083,
+      "timestamp_str": "2026-10-30 00:13:59",
+      "agent": "opencode:research-engine",
+      "impact_assessment": {
+        "why": "A superseded claim could still receive a verdict, observation, test, edge or prerequisite, creating evidence that looked live but was attached to history",
+        "benefits": "The revision head is the only live target; history stays readable through claim history",
+        "risks": "contract: new refusals on five write paths; dependency: stdlib only; concurrency: single writer; state: no schema change",
+        "mitigation": "Failing-first tests for every write path; full suite and 4/4 gates before commit"
+      }
+    },
+    {
+      "task_id": "T-014-superseded-readonly",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[1/1] Superseded claims are read-only: verdict, observation, test, edge and prerequisite writes now refuse history; 376 tests pass; 4/4 gates pass; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793308443.088614,
+      "timestamp_str": "2026-10-30 00:14:03",
       "agent": "opencode:research-engine"
     }
   ]

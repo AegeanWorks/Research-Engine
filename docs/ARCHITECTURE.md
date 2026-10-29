@@ -120,7 +120,8 @@ row. The new row starts `UNVERIFIED`; verdicts are never copied, because old evi
 old text, not the new one. Edges are repointed to the new head, tests are not: a test remains bound
 to the old claim and integrity reports `REV-002` until it is deliberately rebound. `REV-001` catches
 a dependency edge that still points at a superseded claim. `claim list` hides superseded rows by
-default; `claim history` renders the chain oldest first.
+default; `claim history` renders the chain oldest first. A superseded claim refuses new verdicts,
+observations, tests, edges and prerequisites; only the head is live.
 
 ## Schema Versions
 

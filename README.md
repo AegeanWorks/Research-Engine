@@ -267,12 +267,12 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 - A retracted source retires the claims that cite it; a live claim citing one is an error.
 - A committed report is only valid alongside its manifest, and `report --check` must stay clean.
 - Negative results are kept; corrections are new verdicts.
-- A claim revision starts untested; old verdicts are never inherited.
-- A failed claim requires a revision to be revived; it cannot be promoted in place.
+- A revision starts untested; verdicts are not inherited.
+- A failed claim is revived only by a revision.
+- A superseded claim accepts no new verdict, measurement, test, edge or premise.
 - A comparison across different protocols, instruments or units is refused unless explicitly
   allowed.
-- A self-reported measurement is not independent evidence; it is listed separately and needs a
-  caveat to compare.
+- A self-reported measurement is listed separately and needs a caveat to compare.
 - A failed premise invalidates its dependents; a report with `CASCADE-001` is not trustworthy.
 - Reports and scorecards are generated from the graph.
 - The engine is standard library only and makes no network calls. Sources are explicit.

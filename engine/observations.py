@@ -55,6 +55,12 @@ def add_observation(
     them. An unprovenanced record is accepted for legacy data and warned by `OBS-002`.
     """
     claim = get_claim(conn, claim_ref)
+    if claim.superseded_by:
+        raise EngineError(
+            f"claim {claim.id} is superseded by {claim.superseded_by}",
+            "a measurement on history cannot support the live graph.",
+            f"record the measurement on {claim.superseded_by}, the current head.",
+        )
     label = group_label.strip().lower()
     if not label:
         raise EngineError(

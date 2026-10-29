@@ -113,6 +113,12 @@ def add_claim(
                 "dependency edges cannot cross program boundaries.",
                 "link claims from the same program.",
             )
+        if prereq.superseded_by:
+            raise EngineError(
+                f"prerequisite {prereq.id} is superseded by {prereq.superseded_by}",
+                "a new claim must depend on the current head, not on history.",
+                f"use {prereq.superseded_by} as the prerequisite.",
+            )
     with transaction(conn):
         stamp = utc_now()
         record = Claim(
@@ -326,6 +332,12 @@ def set_verdict(
 ) -> Claim:
     """Append a verdict; promotion needs a kill test, evidence, and current numeric proof."""
     claim = get_claim(conn, claim_ref)
+    if claim.superseded_by:
+        raise EngineError(
+            f"claim {claim.id} is superseded by {claim.superseded_by}",
+            "a verdict on history cannot change the live graph.",
+            f"record the verdict on the head with `claim verdict {claim.superseded_by} ...`.",
+        )
     if status not in CLAIM_STATUSES:
         raise EngineError(
             f"unknown status: {status}",
@@ -440,6 +452,13 @@ def link_claims(
         )
     src = get_claim(conn, src_ref)
     dst = get_claim(conn, dst_ref)
+    for claim in (src, dst):
+        if claim.superseded_by:
+            raise EngineError(
+                f"claim {claim.id} is superseded by {claim.superseded_by}",
+                "an edge to history cannot change the live graph.",
+                f"use {claim.superseded_by}, the current head.",
+            )
     if src.id == dst.id:
         raise EngineError("self edge refused", "a claim cannot relate to itself.", "choose another target.")
     if src.research_id != dst.research_id:
@@ -503,6 +522,12 @@ def link_to_question(
         )
     claim = get_claim(conn, claim_ref)
     question = get_question(conn, question_ref)
+    if claim.superseded_by:
+        raise EngineError(
+            f"claim {claim.id} is superseded by {claim.superseded_by}",
+            "a question link to history cannot change the live graph.",
+            f"use {claim.superseded_by}, the current head.",
+        )
     if claim.research_id != question.research_id:
         raise EngineError(
             "claim and question belong to different research programs",

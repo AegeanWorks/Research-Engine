@@ -9,8 +9,8 @@
 - **Total Python Modules**: `71`
 - **Total Classes**: `62`
 - **Total Top-Level Functions**: `218`
-- **Total Class Methods**: `416`
-- **Total Source Lines**: `12177`
+- **Total Class Methods**: `421`
+- **Total Source Lines**: `12259`
 
 ---
 
@@ -113,7 +113,7 @@
 ### [`engine/claims.py`](engine/claims.py)
 > *Claims: the unit of knowledge, with provenance and an append-only verdict history.*
 
-**Size**: `518` lines (`19939` bytes)
+**Size**: `543` lines (`21133` bytes)
 
 **Functions:**
 - `def _to_claim(row)`
@@ -326,7 +326,7 @@
 ### [`engine/killtests.py`](engine/killtests.py)
 > *Executable kill tests: two agreeing runs, bound to code, inputs and command.*
 
-**Size**: `382` lines (`14042` bytes)
+**Size**: `388` lines (`14354` bytes)
 
 **Functions:**
 - `def _to_test(row)`
@@ -418,7 +418,7 @@
 ### [`engine/observations.py`](engine/observations.py)
 > *Recorded observations: the raw measurements a numeric claim is computed from.*
 
-**Size**: `307` lines (`11243` bytes)
+**Size**: `313` lines (`11534` bytes)
 
 **Functions:**
 - `def _to_observation(row)`
@@ -1231,7 +1231,7 @@
 ### [`tests/test_revisions.py`](tests/test_revisions.py)
 > *Claim revisions: the head carries the edges, the old claim stays as history.*
 
-**Size**: `126` lines (`4338` bytes)
+**Size**: `171` lines (`6027` bytes)
 
 **Classes:**
 - `class RevisionTests`
@@ -1245,6 +1245,11 @@
   - Method `.test_a_revision_needs_a_reason()`
   - Method `.test_a_superseded_claim_cannot_be_revised_again()`
   - Method `.test_a_test_on_a_superseded_claim_warns()`
+  - Method `.test_a_superseded_claim_refuses_a_new_verdict()`
+  - Method `.test_a_superseded_claim_refuses_a_new_observation()`
+  - Method `.test_a_superseded_claim_refuses_a_new_test()`
+  - Method `.test_a_superseded_claim_refuses_a_new_prerequisite()`
+  - Method `.test_a_superseded_claim_refuses_new_links()`
 
 ---
 

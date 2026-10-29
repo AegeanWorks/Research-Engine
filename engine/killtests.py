@@ -74,6 +74,12 @@ def add_test(
     claim_id = None
     if claim_ref:
         claim = get_claim(conn, claim_ref)
+        if claim.superseded_by:
+            raise EngineError(
+                f"claim {claim.id} is superseded by {claim.superseded_by}",
+                "a test on history cannot produce evidence for the live graph.",
+                f"bind the test to {claim.superseded_by}, the current head.",
+            )
         if claim.research_id != research.id:
             raise EngineError(
                 "claim belongs to another research program",

@@ -451,3 +451,15 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Consequences**: The bypass is visible in `check` and reports, while legitimate new tests remain
   possible. A future rule could require a recorded independence reason; that would be a new
   contract and is not part of this change.
+
+### ADR-034: Superseded Claims Are Read-Only
+- **Date**: 2026-10-30
+- **Status**: Accepted
+- **Context**: Revisions moved edges to the head but left the old claim addressable. A verdict,
+  observation, test, edge or prerequisite could still be attached to the superseded row, creating
+  evidence that looks live but is not on the current assertion.
+- **Decision**: Refuse a new verdict, observation, test, outgoing or incoming edge, or prerequisite
+  link on a claim with `superseded_by` set. The head is the only live target; history remains
+  readable through `claim history` and the old verdict trail.
+- **Consequences**: The live graph has one target per assertion. A caller that names the old id
+  gets the Error/Why/Fix triad naming the head. No schema change is needed.
