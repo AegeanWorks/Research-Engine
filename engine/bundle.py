@@ -220,7 +220,7 @@ def verify_export(path: Path) -> dict:
                 f"{error}",
                 "re-export the snapshot with this engine version.",
             ) from error
-        if record.get("type") == "meta":
+        if isinstance(record, dict) and record.get("type") == "meta":
             meta = record
             continue
         records.append(record)
@@ -246,7 +246,7 @@ def verify_export(path: Path) -> dict:
     schema = meta.get("schema")
     return {
         "path": str(source),
-        "ok": hmac.compare_digest(recorded, actual),
+        "ok": recorded.isascii() and hmac.compare_digest(recorded, actual),
         "digest": actual,
         "recorded_digest": recorded,
         "records": len(records),

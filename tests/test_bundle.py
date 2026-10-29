@@ -132,6 +132,28 @@ class BundleTests(DatabaseCase):
         self.assertTrue(result["ok"])
         self.assertFalse(result["counts_match"])
 
+    def test_a_non_ascii_digest_is_reported_not_crashed(self) -> None:
+        self.add_research()
+        export_jsonl(self.conn, self.path)
+        lines = self.path.read_text(encoding="utf-8").splitlines()
+        meta = json.loads(lines[0])
+        meta["export_digest"] = "é"
+        lines[0] = json.dumps(meta, sort_keys=True)
+        self.path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        result = verify_export(self.path)
+        self.assertFalse(result["ok"])
+        self.assertTrue(result["counts_match"])
+
+    def test_a_non_object_line_is_reported_not_crashed(self) -> None:
+        self.add_research()
+        export_jsonl(self.conn, self.path)
+        lines = self.path.read_text(encoding="utf-8").splitlines()
+        lines.insert(1, "[1, 2]")
+        self.path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        result = verify_export(self.path)
+        self.assertFalse(result["ok"])
+        self.assertFalse(result["counts_match"])
+
 
     def test_an_unsupported_schema_is_reported_not_trusted(self) -> None:
         self.add_research()
