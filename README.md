@@ -1,38 +1,29 @@
 # Research Engine
 
 <!-- aegean:media:start -->
-<p align="center"><img src="assets/social-preview.png" alt="Research-Engine social preview" width="100%"></p>
+<p align="center"><img src="assets/social-preview.png" alt="Research Engine preview" width="100%"></p>
 <p align="center"><a href="LICENSE"><img src="https://img.shields.io/badge/license-ASL--1.1-1c7ed6" alt="License"></a> <a href="https://github.com/AegeanWorks/AIKit"><img src="https://img.shields.io/badge/AIKit-integrated-6f42c1" alt="AIKit Integrated"></a></p>
 <!-- aegean:media:end -->
 
-
-A falsification-first research engine that turns questions into provenance-backed claims, executable kill tests, and auditable verdicts.
+A falsification-first research engine for provenance-backed claims, executable kill tests and auditable verdicts.
 
 ## ⚡ 30-Second Cold-Start Quick Reference
 
-- **Runtime Prerequisites**: Python 3.10 or newer. Standard library only: no network calls, no third-party packages.
+- **Runtime Prerequisites**: Python 3.10+; standard library only, no network or third-party packages.
 - **Canonical Regression Shield Gate**:
   ```bash
   python -m unittest discover -s tests -t .
   ```
-- **Try every mechanic in under 10 seconds** (from this folder):
+- **Try every mechanic in 10 seconds**:
   ```bash
   python -m engine demo
   python -m engine check
   python -m engine report r_000001
   ```
-  `demo` builds a synthetic program with a source quote, a derived claim, a pre-registered
-  hypothesis, a two-run kill test, a numeric verdict, and a transitive collapse. It is clearly
-  labelled synthetic and makes no scientific claim.
-- **Start a real program**:
-  ```bash
-  python -m engine research add "My research" --scope "What this program is allowed to conclude"
-  python -m engine question add r_000001 "Does mechanism M drive outcome O?"
-  python -m engine source add r_000001 --title "Paper title" --year 2026 --doi 10.1000/example
-  python -m engine claim add r_000001 --kind empirical --text "M covaries with O." \
-    --source s_000001 --quote "exact source sentence" --locator "Results, paragraph 2" \
-    --kill-test "A replicate where M rises and O falls."
-  ```
+  `demo` builds a labelled synthetic program (quote, claim, hypothesis, kill test, verdict,
+  collapse) and makes no scientific claim.
+- **Start a real program**: see [Commands](#commands) for `research`, `question`, `source` and
+  `claim add`.
 
 ### 🛠️ AIKit Commands (run from the AIKit folder)
 | Role | Command |
