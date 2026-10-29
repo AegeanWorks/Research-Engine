@@ -16,34 +16,6 @@
       "task_id": "T-012-evidence-integrity",
       "phase": "phase 4",
       "phase_num": 4,
-      "description": "[1/6] Baseline gate repaired and EVID-010 delivered: README tree includes assets and information.py, stale codebase map refreshed; EVID-010 warns on question-restating, duplicate and stopword-only quotes; 319 tests pass; 4/4 gates pass; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793299381.4165761,
-      "timestamp_str": "2026-10-29 21:43:01",
-      "agent": "opencode:research-engine"
-    },
-    {
-      "task_id": "T-012-evidence-integrity",
-      "phase": "planning",
-      "phase_num": 2,
-      "description": "[2/6] Attempt authority: schema v6 test_attempt ledger, earliest non-replaceable attempt selects the NUMERIC evidence group",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793299794.9277377,
-      "timestamp_str": "2026-10-29 21:49:54",
-      "agent": "opencode:research-engine",
-      "impact_assessment": {
-        "why": "The current evidence path accepts any current verified group, so a later pass can displace an earlier subject failure and reopen retry-until-pass",
-        "benefits": "Every execution is an attempt; the earliest non-replaceable attempt is authoritative; attempt history is visible, exported and checked",
-        "risks": "contract: new test_attempt table and schema 6; dependency: stdlib only; concurrency: single-writer transactions; state: legacy runs without an attempt row keep the old any-current-group behaviour",
-        "mitigation": "Failing-first tests for authority selection, run classification and migration; full suite and 4/4 gates before commit"
-      }
-    },
-    {
-      "task_id": "T-012-evidence-integrity",
-      "phase": "phase 4",
-      "phase_num": 4,
       "description": "[2/6] Attempt authority delivered: schema 6 test_attempt ledger, earliest non-replaceable attempt selects the NUMERIC group, test attempts command, legacy fallback; 332 tests pass; 4/4 gates pass; checklists: passed",
       "files_affected": [],
       "status": "in_progress",
@@ -270,6 +242,28 @@
       "timestamp": 1793308505.5989645,
       "timestamp_str": "2026-10-30 00:15:05",
       "agent": "opencode:research-engine"
+    },
+    {
+      "task_id": "reforge:run-1",
+      "phase": "reforge stage 11",
+      "phase_num": 3,
+      "description": "Reforge stage 11: window 33, 2 commit(s), 9 file(s) reviewed (unreviewed), 0 finding(s), 0 repaired",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793308575.887926,
+      "timestamp_str": "2026-10-30 00:16:15",
+      "agent": "opencode"
+    },
+    {
+      "task_id": "reforge:run-1",
+      "phase": "reforge stage 11",
+      "phase_num": 3,
+      "description": "Reforge stage 11: run stopped at stage 11; resume it with `reforge resume`",
+      "files_affected": [],
+      "status": "suspended",
+      "timestamp": 1793308605.4645162,
+      "timestamp_str": "2026-10-30 00:16:45",
+      "agent": "opencode"
     }
   ]
 }
