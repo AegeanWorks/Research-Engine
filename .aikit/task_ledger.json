@@ -3,31 +3,15 @@
   "active_task": {
     "task_id": "T-014-superseded-readonly",
     "last_phase": "phase 4",
-    "active_phase": 4,
-    "status": "in_progress",
+    "active_phase": 5,
+    "status": "completed",
     "updated_at": 1793308443.088614,
     "owner": "opencode:research-engine",
     "started_by": "opencode:research-engine",
-    "continuations": []
+    "continuations": [],
+    "completed_at": 1793308505.5989633
   },
   "checkpoints": [
-    {
-      "task_id": "T-012-evidence-integrity",
-      "phase": "planning",
-      "phase_num": 2,
-      "description": "[1/6] Baseline gate repair and EVID-010 trivial-evidence warning",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793298997.1381204,
-      "timestamp_str": "2026-10-29 21:36:37",
-      "agent": "opencode:research-engine",
-      "impact_assessment": {
-        "why": "The deep review found five real research-engine gaps; the project gate is also red on pre-existing README and codebase-map drift, so the first milestone repairs the baseline and ships the cheapest evidence-quality warning",
-        "benefits": "A green Phase 4 baseline; EVID-010 warns when a quote restates a linked question, duplicates another quote, or carries no content terms, before that quote is treated as support",
-        "risks": "contract: adds one warning code and no status change; dependency: stdlib only; concurrency: integrity reads only; state: no schema change in this milestone",
-        "mitigation": "Failing-first pure and integrity tests, absence tests for legitimate distinct quotes, full suite and 4/4 gates before any commit; later milestones get their own checkpoints"
-      }
-    },
     {
       "task_id": "T-012-evidence-integrity",
       "phase": "phase 4",
@@ -275,6 +259,16 @@
       "status": "in_progress",
       "timestamp": 1793308443.088614,
       "timestamp_str": "2026-10-30 00:14:03",
+      "agent": "opencode:research-engine"
+    },
+    {
+      "task_id": "T-014-superseded-readonly",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'T-014-superseded-readonly' completed successfully.",
+      "status": "completed",
+      "timestamp": 1793308505.5989645,
+      "timestamp_str": "2026-10-30 00:15:05",
       "agent": "opencode:research-engine"
     }
   ]
