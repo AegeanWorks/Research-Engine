@@ -13,145 +13,6 @@
   },
   "checkpoints": [
     {
-      "task_id": "T-006-cross-project-mechanics",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[2/2] Cross-project mechanics delivered: negative-control kill tests (EVID-008/009), screening + PRISMA (SCREEN-001), append-only event log, db integrity + verified backup, safe markdown rendering, domain-separated digests, licence identity in manifest; schema v4; 235 tests pass; 4/4 AIKit gates pass; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793094532.7792177,
-      "timestamp_str": "2026-10-27 12:48:52",
-      "agent": "kilo:research-engine"
-    },
-    {
-      "task_id": "T-006-cross-project-mechanics",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'T-006-cross-project-mechanics' completed successfully.",
-      "status": "completed",
-      "timestamp": 1793094532.9280198,
-      "timestamp_str": "2026-10-27 12:48:52",
-      "agent": "kilo:research-engine"
-    },
-    {
-      "task_id": "T-007-observations-stats",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/2] Adopt N1-Engine's measurement analysis: append-only observations, deterministic stdlib statistics, seeded bootstrap, exact/asymptotic rank test, OBS-001",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793098499.3310254,
-      "timestamp_str": "2026-10-27 13:54:59",
-      "agent": "kilo:research-engine",
-      "impact_assessment": {
-        "why": "The strongest unported mechanic was turning repeated measurements into an effect size and interval; the engine could only hash a command's output",
-        "benefits": "Numeric claims can rest on recorded values; results are reproducible for a fixed seed; assumptions and test disagreement are disclosed",
-        "risks": "contract: schema v5 adds observation; dependency: stdlib only; concurrency: single-writer; state: voiding must preserve the record and the migration must add the table to v1-v4 databases",
-        "mitigation": "Values checked against an independent implementation, exact/asymptotic methods tested, void semantics tested, and v4->v5 migration covered"
-      }
-    },
-    {
-      "task_id": "T-007-observations-stats",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[2/2] Observations and statistics delivered: append-only observation table, observation add/list/void, analysis stats with Cohen's d, Welch t, exact/asymptotic Mann-Whitney and seeded bootstrap, claim.stats event, OBS-001 warning; schema v5; 272 tests pass; 4/4 AIKit gates pass; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793098540.251437,
-      "timestamp_str": "2026-10-27 13:55:40",
-      "agent": "kilo:research-engine"
-    },
-    {
-      "task_id": "T-007-observations-stats",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'T-007-observations-stats' completed successfully.",
-      "status": "completed",
-      "timestamp": 1793098540.407905,
-      "timestamp_str": "2026-10-27 13:55:40",
-      "agent": "kilo:research-engine"
-    },
-    {
-      "task_id": "T-007-observations-stats",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[2/2] Trend and multiple-comparison guard added: analysis trend with least-squares slope/p and a short-series warning, uncorrected-pairwise warning for >2 groups; 277 tests pass; 4/4 gates pass; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793098945.68257,
-      "timestamp_str": "2026-10-27 14:02:25",
-      "agent": "kilo:research-engine"
-    },
-    {
-      "task_id": "T-008-scope-and-golden",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[1/1] Composition review: report/manifest findings scoped per program, export and digests include observations and events (log excluded from digests), golden run covering every command; 284 tests pass; 4/4 gates pass; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793112121.7410688,
-      "timestamp_str": "2026-10-27 17:42:01",
-      "agent": "kilo:research-engine"
-    },
-    {
-      "task_id": "T-007-observations-stats",
-      "phase": "superseded",
-      "phase_num": 4,
-      "description": "Superseded by 'T-008-scope-and-golden' without --complete or --reset",
-      "status": "superseded",
-      "timestamp": 1793112121.7410688,
-      "timestamp_str": "2026-10-27 17:42:01",
-      "agent": "kilo:research-engine"
-    },
-    {
-      "task_id": "T-008-scope-and-golden",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'T-008-scope-and-golden' completed successfully.",
-      "status": "completed",
-      "timestamp": 1793112121.9051108,
-      "timestamp_str": "2026-10-27 17:42:01",
-      "agent": "kilo:research-engine"
-    },
-    {
-      "task_id": "T-008-scope-and-golden",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[1/1] Composition review complete: report/manifest findings scoped per program, export and digests include observations (audit log exported but excluded from digests), golden run covers every command; 284 tests pass; 4/4 gates pass; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793112258.0239246,
-      "timestamp_str": "2026-10-27 17:44:18",
-      "agent": "kilo:research-engine"
-    },
-    {
-      "task_id": "T-009-artifact-parity",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/3] Artifact and report parity: self-verifying export, measurements section in reports, ledger hygiene",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793114592.2442923,
-      "timestamp_str": "2026-10-27 18:23:12",
-      "agent": "kilo:research-engine",
-      "impact_assessment": {
-        "why": "The export has no integrity check of its own and reports omit the measurements that now exist; the last two tasks also left ledger warnings",
-        "benefits": "A snapshot can prove it is intact without a sidecar; reports show the recorded measurements and the last statistics run; ledger reflects reality",
-        "risks": "contract: export meta gains digests; dependency: none; concurrency: read-only verification; state: existing exports lack the digest and must be refused with a clear message, not silently accepted",
-        "mitigation": "Golden-vector test for the digest, tamper test for the check, and explicit error for a legacy export"
-      }
-    },
-    {
-      "task_id": "T-008-scope-and-golden",
-      "phase": "superseded",
-      "phase_num": 4,
-      "description": "Superseded by 'T-009-artifact-parity' without --complete or --reset",
-      "status": "superseded",
-      "timestamp": 1793114592.2442923,
-      "timestamp_str": "2026-10-27 18:23:12",
-      "agent": "kilo:research-engine"
-    },
-    {
       "task_id": "T-009-artifact-parity",
       "phase": "phase 4",
       "phase_num": 4,
@@ -247,6 +108,150 @@
       "timestamp": 1793118121.9381068,
       "timestamp_str": "2026-10-27 19:22:01",
       "agent": "kilo:research-engine"
+    },
+    {
+      "task_id": "reforge:run-1",
+      "phase": "reforge stage 1",
+      "phase_num": 3,
+      "description": "Reforge stage 1: window 3, 3 commit(s), 2 file(s) reviewed (unreviewed), 0 finding(s), 0 repaired",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793292612.524003,
+      "timestamp_str": "2026-10-29 19:50:12",
+      "agent": "opencode"
+    },
+    {
+      "task_id": "reforge:run-1",
+      "phase": "reforge stage 2",
+      "phase_num": 3,
+      "description": "Reforge stage 2: window 6, 3 commit(s), 2 file(s) reviewed (unreviewed), 0 finding(s), 0 repaired, 1 binary not analysed",
+      "files_affected": [
+        "assets/social-preview.png"
+      ],
+      "status": "in_progress",
+      "timestamp": 1793292672.3308318,
+      "timestamp_str": "2026-10-29 19:51:12",
+      "agent": "opencode"
+    },
+    {
+      "task_id": "reforge:run-1",
+      "phase": "reforge stage 3",
+      "phase_num": 3,
+      "description": "Reforge stage 3: window 9, 3 commit(s), 2 file(s) reviewed (unreviewed), 0 finding(s), 0 repaired, 5 binary not analysed",
+      "files_affected": [
+        "assets/artwork.jpg",
+        "assets/logo.jpg",
+        "assets/logo.png",
+        "assets/social-preview.jpg",
+        "assets/social-preview.png"
+      ],
+      "status": "in_progress",
+      "timestamp": 1793292719.3523483,
+      "timestamp_str": "2026-10-29 19:51:59",
+      "agent": "opencode"
+    },
+    {
+      "task_id": "reforge:run-1",
+      "phase": "reforge stage 4",
+      "phase_num": 3,
+      "description": "Reforge stage 4: window 12, 3 commit(s), 3 file(s) reviewed (unreviewed), 0 finding(s), 0 repaired, 1 binary not analysed",
+      "files_affected": [
+        "assets/social-preview.png"
+      ],
+      "status": "in_progress",
+      "timestamp": 1793292749.0849583,
+      "timestamp_str": "2026-10-29 19:52:29",
+      "agent": "opencode"
+    },
+    {
+      "task_id": "reforge:run-1",
+      "phase": "reforge stage 5",
+      "phase_num": 3,
+      "description": "Reforge stage 5: window 15, 3 commit(s), 21 file(s) reviewed (unreviewed), 0 finding(s), 0 repaired, 1 binary not analysed",
+      "files_affected": [
+        "assets/social-preview.png"
+      ],
+      "status": "in_progress",
+      "timestamp": 1793292783.474879,
+      "timestamp_str": "2026-10-29 19:53:03",
+      "agent": "opencode"
+    },
+    {
+      "task_id": "reforge:run-1",
+      "phase": "reforge stage 6",
+      "phase_num": 3,
+      "description": "Reforge stage 6: window 18, 3 commit(s), 17 file(s) reviewed (unreviewed), 0 finding(s), 0 repaired",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793293334.1991951,
+      "timestamp_str": "2026-10-29 20:02:14",
+      "agent": "opencode"
+    },
+    {
+      "task_id": "reforge:run-1",
+      "phase": "reforge stage 7",
+      "phase_num": 3,
+      "description": "Reforge stage 7: window 21, 3 commit(s), 72 file(s) reviewed (unreviewed), 0 finding(s), 0 repaired",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793293655.521952,
+      "timestamp_str": "2026-10-29 20:07:35",
+      "agent": "opencode"
+    },
+    {
+      "task_id": "reforge:run-1",
+      "phase": "reforge stage 8",
+      "phase_num": 3,
+      "description": "Reforge stage 8: window 22, 1 commit(s), 10 file(s) reviewed (unreviewed), 0 finding(s), 0 repaired",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793293932.9896169,
+      "timestamp_str": "2026-10-29 20:12:12",
+      "agent": "opencode"
+    },
+    {
+      "task_id": "reforge:run-1",
+      "phase": "reforge stage 8",
+      "phase_num": 3,
+      "description": "Reforge stage 8: run stopped at stage 8; resume it with `reforge resume`",
+      "files_affected": [],
+      "status": "suspended",
+      "timestamp": 1793293983.808209,
+      "timestamp_str": "2026-10-29 20:13:03",
+      "agent": "opencode"
+    },
+    {
+      "task_id": "reforge:run-1",
+      "phase": "reforge stage 8",
+      "phase_num": 3,
+      "description": "Reforge stage 8: run resumed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793295027.3609314,
+      "timestamp_str": "2026-10-29 20:30:27",
+      "agent": "opencode"
+    },
+    {
+      "task_id": "reforge:run-1",
+      "phase": "reforge stage 9",
+      "phase_num": 3,
+      "description": "Reforge stage 9: window 26, 4 commit(s), 6 file(s) reviewed (unreviewed), 0 finding(s), 0 repaired",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793295048.693127,
+      "timestamp_str": "2026-10-29 20:30:48",
+      "agent": "opencode"
+    },
+    {
+      "task_id": "reforge:run-1",
+      "phase": "reforge stage 9",
+      "phase_num": 3,
+      "description": "Reforge stage 9: run stopped at stage 9; resume it with `reforge resume`",
+      "files_affected": [],
+      "status": "suspended",
+      "timestamp": 1793295073.635994,
+      "timestamp_str": "2026-10-29 20:31:13",
+      "agent": "opencode"
     }
   ]
 }
