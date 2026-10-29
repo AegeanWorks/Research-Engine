@@ -6,6 +6,7 @@ import json
 import sqlite3
 from typing import Dict, Iterable, List
 
+from engine import information
 from engine.evidence import (
     control_state,
     current_verified_groups,
@@ -70,6 +71,53 @@ def _cycles(conn: sqlite3.Connection) -> List[List[str]]:
         if state.get(node, 0) == 0:
             visit(node)
     return found
+
+
+def _quote_quality(conn: sqlite3.Connection) -> List[Finding]:
+    """Warn when a live quote restates a question, duplicates another quote, or is empty.
+
+    Only text that is already stored is inspected: the quote and the linked question. The
+    source body is not stored, so this is deliberately narrower than a corpus weight.
+    """
+    rows = conn.execute(
+        "SELECT id, research_id, quote FROM claim"
+        " WHERE trim(quote) <> '' AND status NOT IN ('RETRACTED', 'INVALIDATED')"
+        " ORDER BY id"
+    ).fetchall()
+    quotes_by_research: Dict[str, List[sqlite3.Row]] = {}
+    for row in rows:
+        quotes_by_research.setdefault(str(row["research_id"]), []).append(row)
+    questions_by_claim: Dict[str, List[str]] = {}
+    for row in conn.execute(
+        "SELECT e.src_id, q.text FROM edge e JOIN question q ON q.id = e.dst_id"
+        " WHERE e.src_kind = 'claim' AND e.dst_kind = 'question'"
+    ):
+        questions_by_claim.setdefault(str(row["src_id"]), []).append(str(row["text"]))
+
+    findings: List[Finding] = []
+    for row in rows:
+        claim_id = str(row["id"])
+        others = [
+            str(other["quote"])
+            for other in quotes_by_research[str(row["research_id"])]
+            if str(other["id"]) != claim_id
+        ]
+        classes = information.quote_classes(
+            str(row["quote"]), questions_by_claim.get(claim_id, ()), others
+        )
+        if not classes:
+            continue
+        findings.append(
+            _finding(
+                "EVID-010",
+                "warning",
+                claim_id,
+                "claim quote is information-poor: " + ", ".join(classes),
+                "quote a passage that adds information beyond the question, or record why the"
+                " repetition is necessary.",
+            )
+        )
+    return findings
 
 
 def check(conn: sqlite3.Connection) -> List[Finding]:
@@ -504,6 +552,8 @@ def check(conn: sqlite3.Connection) -> List[Finding]:
                 "re-run `analysis stats CLAIM --baseline ... --treatment ...` before citing numbers.",
             )
         )
+
+    findings.extend(_quote_quality(conn))
 
     for row in conn.execute(
         "SELECT r.id FROM research r WHERE NOT EXISTS ("

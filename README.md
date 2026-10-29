@@ -89,10 +89,9 @@ domain content stays in the programs it hosts.
 8. **Reports are generated and verifiable.** `report` and `scorecard` compute consensus,
    contradictions, gaps and audit findings from the graph. `report --out` also writes a manifest
    with a content digest, an exact record digest, the report digest, counts, findings and limits.
-   `report --check` compares content, so re-verifying an unchanged test is not drift; `--strict`
-   compares exact records. The report lists the recorded measurements. An export carries its own
-   digest, so `export --check` proves a snapshot intact, and refuses a schema this build does
-   not read. No number in a report is hand-written.
+   `report --check` compares content; `--strict` compares exact records. An export carries its own
+   digest, so `export --check` proves a snapshot intact and refuses an unread schema. No number is
+   hand-written.
 9. **Sources can be retired.** `source status` records an expression of concern; `source retract`
    retires every claim that cites the source and cascades to their dependents.
 10. **Missing evidence is explicit.** `claim verdict --status UNKNOWN` records that the evidence
@@ -111,7 +110,7 @@ domain content stays in the programs it hosts.
     `identified`, `screened_in`/`screened_out` and `included`/`excluded`, with a reason from a
     closed taxonomy. `source prisma` and the report show the flow; a claim citing an excluded
     source warns (`SCREEN-001`).
-15. **Measurements are recorded, not retyped.** `observation add` stores each value in a named group; `observation void` retires one with a reason. `analysis stats` compares two groups with a seeded bootstrap, reports whether the parametric and rank tests agree, and logs the run. A claim with observations but no statistics run warns (`OBS-001`).
+15. **Measurements are recorded, not retyped.** `observation add` stores each value in a named group; `observation void` retires one with a reason. `analysis stats` compares two groups with a seeded bootstrap, reports whether the tests agree, and logs the run. A claim with observations but no statistics run warns (`OBS-001`).
 16. **Every non-verdict action is logged.** Source status changes, screening, merges, report
     generation and schema migration append to an event log; `events` lists it newest first.
     Verdicts keep their own append-only history.
@@ -230,6 +229,8 @@ present and 0 when only warnings remain. Domain errors print the `Error / Why / 
   empty programs (`EMPTY-001`);
 - a test that produced verified evidence without a negative control (`EVID-008`, warning) or
   whose declared control never failed (`EVID-009`, error);
+- a live quote that restates a linked question, duplicates another live quote, or has no content
+  terms (`EVID-010`, warning);
 - observations with no statistics run, or changed after the last one (`OBS-001`,
   warning);
 - a live claim citing a source screened out of the review (`SCREEN-001`, warning);
@@ -270,6 +271,7 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 research-engine/
 ├── .aikit/                   <- project memory: ledger, decisions, guidelines
 ├── .gitignore
+├── assets/                   <- logo and social preview images
 ├── ASSETS.md                 <- data and asset manifest
 ├── COMMERCIAL.md
 ├── LICENSE                   <- Aegean Science License 1.1 (ASL-1.1)
@@ -296,6 +298,7 @@ research-engine/
 │   ├── errors.py             <- Error / Why / Fix
 │   ├── evidence.py           <- run binding and current verified groups
 │   ├── hypotheses.py         <- pre-registration and outcomes
+│   ├── information.py        <- cheap quote information checks
 │   ├── integrity.py          <- the check gate
 │   ├── killtests.py          <- executable tests, binding and two-run verification
 │   ├── maintenance.py        <- integrity check and verified backup
@@ -321,12 +324,10 @@ research-engine/
 - **Consensus is a display heuristic.** It is not a posterior and never changes a verdict;
   UNKNOWN contributes zero.
 - **Discovery is advisory.** `analysis` proposes; only `claim link` records a relation.
-- **Statistics describe the recorded numbers, not the world.** Independence and
-  representativeness are assumed and unchecked.
+- **Statistics describe the recorded numbers, not the world.** Independence is assumed.
 - **The rank test's method is stated.** Exact for untied small samples, tie-corrected
   approximation otherwise.
-- **Multiple comparisons are flagged, not corrected.** A pairwise test among more than two
-  groups warns; p-values are not adjusted.
+- **Multiple comparisons are flagged, not corrected.** P-values are not adjusted.
 - **A control proves falsifiability, not correctness.** It shows the test can fail, not that the
   assertion is right.
 - **Screening is local.** States and reasons are recorded; correctness is not verified.
@@ -334,7 +335,7 @@ research-engine/
   a tiny budget yields one over-budget line rather than an empty view.
 - **Human judgment stays in the loop.** Tests produce evidence; they never auto-promote.
 - **Undeclared inputs are invisible.** Evidence binds the engine code and declared `--input` paths;
-  globs expand deterministically and directories are refused, but an undeclared read is unseen.
+  an undeclared read is unseen.
 
 <!-- aegean:brand-assets:start -->
 ## 🎨 Brand Assets

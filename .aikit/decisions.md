@@ -320,3 +320,18 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Consequences**: A snapshot diff cannot hide a group's change behind another group's identical
   run. A snapshot from another schema is refused rather than trusted by accident. Scoped reports
   now include pre-registration ordering violations.
+
+### ADR-026: Information-poor quote warning
+- **Date**: 2026-10-29
+- **Status**: Accepted
+- **Context**: The engine stores a quote and a locator, not the source body. A quote can restate a
+  linked question, duplicate another claim's quote, or contain only stopwords and still satisfy the
+  presence-only provenance rule. The full frequency/entropy weight model needs a corpus the engine
+  does not store, so it cannot be implemented as written.
+- **Decision**: Add `engine/information.py` with normalization, question-restatement,
+  duplicate-quote and stopword-only checks. `integrity.check` emits `EVID-010` as a warning for
+  live claims with quotes. The check is text-only, runs on stored data, does not gate promotion and
+  does not add a numeric weight.
+- **Consequences**: Obvious echo and duplicate quotes are visible in `check` and reports as
+  warnings, never errors. A legitimate repeated quote needs a recorded reason but is not blocked.
+  The weight threshold remains deferred until a source-body store exists.

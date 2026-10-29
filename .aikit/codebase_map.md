@@ -6,11 +6,11 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `64`
-- **Total Classes**: `56`
-- **Total Top-Level Functions**: `189`
-- **Total Class Methods**: `341`
-- **Total Source Lines**: `9877`
+- **Total Python Modules**: `66`
+- **Total Classes**: `57`
+- **Total Top-Level Functions**: `196`
+- **Total Class Methods**: `355`
+- **Total Source Lines**: `10145`
 
 ---
 
@@ -66,7 +66,7 @@
 ### [`engine/bundle.py`](engine/bundle.py)
 > *Portable JSONL export of the evidence graph, and a digest of its content.*
 
-**Size**: `259` lines (`9394` bytes)
+**Size**: `259` lines (`9446` bytes)
 
 **Functions:**
 - `def _rows(conn, table, research_id)`
@@ -160,7 +160,7 @@
 ### [`engine/database.py`](engine/database.py)
 > *SQLite connection, schema versioning and atomic transactions.*
 
-**Size**: `322` lines (`11990` bytes)
+**Size**: `333` lines (`12592` bytes)
 
 **Functions:**
 - `def connect(path)` - *Open a database with durability pragmas suitable for a state file.*
@@ -264,15 +264,31 @@
 
 ---
 
+### [`engine/information.py`](engine/information.py)
+> *Cheap information-quality checks over stored claim quotes.*
+
+**Size**: `62` lines (`2271` bytes)
+
+**Functions:**
+- `def normalize(text)` - *Fold case and punctuation so two quotes compare on their words.*
+- `def content_terms(text)` - *Words that carry information, excluding the small English stopword set.*
+- `def restates_question(quote, questions)` - *Whether the quote is a substring of a question it is supposed to answer.*
+- `def duplicate_quote(quote, other_quotes)` - *Whether the same quote already supports another claim in the same program.*
+- `def stopword_only(quote)` - *Whether the quote has no content terms at all.*
+- `def quote_classes(quote, questions, other_quotes)` - *Return the stable, additive information classes of one quote.*
+
+---
+
 ### [`engine/integrity.py`](engine/integrity.py)
 > *Graph integrity: provenance, evidence paths, dependency acyclicity and stale dependents.*
 
-**Size**: `574` lines (`21725` bytes)
+**Size**: `624` lines (`23640` bytes)
 
 **Functions:**
 - `def _finding(code, severity, subject, message, fix)`
 - `def _entity(conn, kind, ref)`
 - `def _cycles(conn)`
+- `def _quote_quality(conn)` - *Warn when a live quote restates a question, duplicates another quote, or is empty.*
 - `def check(conn)` - *Return every integrity finding; an empty list means the graph is coherent.*
 - `def has_errors(findings)` - *Return True when at least one finding blocks a verdict.*
 - `def render_markdown(findings)` - *Render findings as a compact audit table.*
@@ -575,7 +591,7 @@
 ### [`tests/test_bundle.py`](tests/test_bundle.py)
 > *JSONL export is complete, scoped and deterministic in order.*
 
-**Size**: `163` lines (`6841` bytes)
+**Size**: `185` lines (`7822` bytes)
 
 **Classes:**
 - `class BundleTests`
@@ -590,6 +606,8 @@
   - Method `.test_a_tampered_record_is_detected()`
   - Method `.test_a_legacy_export_without_a_digest_is_refused()`
   - Method `.test_a_count_mismatch_is_reported()`
+  - Method `.test_a_non_ascii_digest_is_reported_not_crashed()`
+  - Method `.test_a_non_object_line_is_reported_not_crashed()`
   - Method `.test_an_unsupported_schema_is_reported_not_trusted()`
   - Method `.test_a_non_numeric_record_count_is_handled()`
 
@@ -796,6 +814,23 @@
 
 ---
 
+### [`tests/test_information.py`](tests/test_information.py)
+> *Cheap information-quality checks over stored claim quotes.*
+
+**Size**: `57` lines (`2046` bytes)
+
+**Classes:**
+- `class InformationTests`
+  - Method `.test_normalize_folds_case_and_punctuation()`
+  - Method `.test_restates_question_exact_and_substring()`
+  - Method `.test_restates_question_needs_two_content_terms()`
+  - Method `.test_duplicate_quote_is_case_and_punctuation_insensitive()`
+  - Method `.test_stopword_only_quote_has_no_content_terms()`
+  - Method `.test_quote_classes_are_stable_and_additive()`
+  - Method `.test_distinct_quote_has_no_classes()`
+
+---
+
 ### [`tests/test_inputs.py`](tests/test_inputs.py)
 > *Declared inputs: glob expansion, directory refusal, absence and collision safety.*
 
@@ -818,13 +853,17 @@
 ### [`tests/test_integrity.py`](tests/test_integrity.py)
 > *Every integrity rule must detect the corruption it names.*
 
-**Size**: `265` lines (`11975` bytes)
+**Size**: `318` lines (`14414` bytes)
 
 **Classes:**
 - `class IntegrityTests`
   - Method `._clean_program()`
   - Method `.test_clean_program_has_no_errors()`
   - Method `.test_missing_provenance_is_detected()`
+  - Method `.test_quote_restating_a_question_warns()`
+  - Method `.test_duplicate_quote_warns()`
+  - Method `.test_stopword_only_quote_warns()`
+  - Method `.test_distinct_quote_does_not_warn()`
   - Method `.test_source_without_identifier_is_detected()`
   - Method `.test_promoted_claim_needs_kill_test()`
   - Method `.test_numeric_claim_needs_two_run_test()`
@@ -958,7 +997,7 @@
 ### [`tests/test_migration.py`](tests/test_migration.py)
 > *Schema migration: an older database is repaired, not rejected or wiped.*
 
-**Size**: `196` lines (`8522` bytes)
+**Size**: `209` lines (`9096` bytes)
 
 **Classes:**
 - `class MigrationTests`
@@ -967,6 +1006,7 @@
   - Method `.test_existing_rows_are_preserved()`
   - Method `.test_migration_is_idempotent()`
   - Method `.test_future_version_is_refused_without_changes()`
+  - Method `.test_future_version_is_refused_before_creating_tables()`
   - Method `.test_fresh_database_declares_the_current_version()`
   - Method `.test_verdict_gains_the_evidence_group_column()`
   - Method `.test_migration_reports_the_unbound_numeric_claims()`

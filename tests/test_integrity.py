@@ -47,6 +47,59 @@ class IntegrityTests(DatabaseCase):
         self.conn.execute("UPDATE claim SET quote = '' WHERE id = ?", (claim,))
         self.assertIn("PROV-001", codes(check(self.conn)))
 
+    def test_quote_restating_a_question_warns(self) -> None:
+        research = self.add_research()
+        question = add_question(self.conn, research, "Does the mechanism hold?")
+        source = self.add_source(research)
+        claim = add_claim(
+            self.conn,
+            research,
+            "The mechanism holds.",
+            "empirical",
+            source_ref=source,
+            quote="Does the mechanism hold?",
+            locator="p.1",
+            kill_test="A counterexample.",
+        )
+        link_to_question(self.conn, claim.id, question.id, "supports")
+        findings = [item for item in check(self.conn) if item.code == "EVID-010"]
+        self.assertEqual([item.subject for item in findings], [claim.id])
+        self.assertEqual(findings[0].severity, "warning")
+
+    def test_duplicate_quote_warns(self) -> None:
+        research = self.add_research()
+        source = self.add_source(research)
+        first = add_claim(
+            self.conn, research, "First reading.", "empirical", source_ref=source,
+            quote="S rose with O.", locator="p.1", kill_test="A replicate.",
+        )
+        second = add_claim(
+            self.conn, research, "Second reading.", "empirical", source_ref=source,
+            quote="s rose with o", locator="p.2", kill_test="A replicate.",
+        )
+        findings = [item for item in check(self.conn) if item.code == "EVID-010"]
+        self.assertEqual(sorted(item.subject for item in findings), sorted([first.id, second.id]))
+
+    def test_stopword_only_quote_warns(self) -> None:
+        research = self.add_research()
+        source = self.add_source(research)
+        claim = add_claim(
+            self.conn, research, "Something happened.", "empirical", source_ref=source,
+            quote="the of and", locator="p.1", kill_test="A counterexample.",
+        )
+        findings = [item for item in check(self.conn) if item.code == "EVID-010"]
+        self.assertEqual([item.subject for item in findings], [claim.id])
+
+    def test_distinct_quote_does_not_warn(self) -> None:
+        research = self.add_research()
+        source = self.add_source(research)
+        add_claim(
+            self.conn, research, "Signal S rose with O.", "empirical", source_ref=source,
+            quote="S rose with O in the synthetic cohort.", locator="p.1",
+            kill_test="A replicate.",
+        )
+        self.assertNotIn("EVID-010", codes(check(self.conn)))
+
     def test_source_without_identifier_is_detected(self) -> None:
         research = self.add_research()
         source = self.add_source(research)

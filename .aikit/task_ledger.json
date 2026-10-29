@@ -1,38 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "T-011-six-push-review",
+    "task_id": "T-012-evidence-integrity",
     "last_phase": "phase 4",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1793118121.7410154,
-    "owner": "kilo:research-engine",
-    "started_by": "kilo:research-engine",
-    "continuations": [],
-    "completed_at": 1793118121.9381053
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1793299381.4165761,
+    "owner": "opencode:research-engine",
+    "started_by": "opencode:research-engine",
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "T-009-artifact-parity",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[3/3] Artifact parity delivered: export carries export_digest + count and export --check verifies or refuses legacy files, reports list measurements and the last stats/trend run; 290 tests pass; 4/4 gates pass; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793115803.1601632,
-      "timestamp_str": "2026-10-27 18:43:23",
-      "agent": "kilo:research-engine"
-    },
-    {
-      "task_id": "T-009-artifact-parity",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'T-009-artifact-parity' completed successfully.",
-      "status": "completed",
-      "timestamp": 1793115803.3154883,
-      "timestamp_str": "2026-10-27 18:43:23",
-      "agent": "kilo:research-engine"
-    },
     {
       "task_id": "T-010-review-fixes",
       "phase": "phase 2",
@@ -252,6 +230,34 @@
       "timestamp": 1793295073.635994,
       "timestamp_str": "2026-10-29 20:31:13",
       "agent": "opencode"
+    },
+    {
+      "task_id": "T-012-evidence-integrity",
+      "phase": "planning",
+      "phase_num": 2,
+      "description": "[1/6] Baseline gate repair and EVID-010 trivial-evidence warning",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793298997.1381204,
+      "timestamp_str": "2026-10-29 21:36:37",
+      "agent": "opencode:research-engine",
+      "impact_assessment": {
+        "why": "The deep review found five real research-engine gaps; the project gate is also red on pre-existing README and codebase-map drift, so the first milestone repairs the baseline and ships the cheapest evidence-quality warning",
+        "benefits": "A green Phase 4 baseline; EVID-010 warns when a quote restates a linked question, duplicates another quote, or carries no content terms, before that quote is treated as support",
+        "risks": "contract: adds one warning code and no status change; dependency: stdlib only; concurrency: integrity reads only; state: no schema change in this milestone",
+        "mitigation": "Failing-first pure and integrity tests, absence tests for legitimate distinct quotes, full suite and 4/4 gates before any commit; later milestones get their own checkpoints"
+      }
+    },
+    {
+      "task_id": "T-012-evidence-integrity",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[1/6] Baseline gate repaired and EVID-010 delivered: README tree includes assets and information.py, stale codebase map refreshed; EVID-010 warns on question-restating, duplicate and stopword-only quotes; 319 tests pass; 4/4 gates pass; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793299381.4165761,
+      "timestamp_str": "2026-10-29 21:43:01",
+      "agent": "opencode:research-engine"
     }
   ]
 }
