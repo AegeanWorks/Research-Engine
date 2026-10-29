@@ -474,6 +474,27 @@ def check(conn: sqlite3.Connection) -> List[Finding]:
         )
 
     for row in conn.execute(
+        "SELECT later.id AS test_id, later.claim_id, earlier.id AS failed_test"
+        " FROM killtest later"
+        " JOIN killtest earlier ON earlier.claim_id = later.claim_id"
+        " AND earlier.id != later.id"
+        " JOIN test_attempt failed ON failed.test_id = earlier.id"
+        " AND failed.outcome = 'subject_failed'"
+        " WHERE later.created_at > failed.created_at"
+        " GROUP BY later.id ORDER BY later.id"
+    ):
+        findings.append(
+            _finding(
+                "TEST-002",
+                "warning",
+                str(row["test_id"]),
+                f"test was created after {row['failed_test']} failed on the same claim",
+                "record why this is an independent test rather than a retry, or use the"
+                " authoritative attempt.",
+            )
+        )
+
+    for row in conn.execute(
         "SELECT q.* FROM question q WHERE q.status = 'open' AND NOT EXISTS ("
         " SELECT 1 FROM edge e WHERE e.dst_kind = 'question' AND e.dst_id = q.id"
         " AND e.src_kind = 'claim' AND e.rel IN ('supports', 'contradicts', 'answers'))"

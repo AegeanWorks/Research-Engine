@@ -76,6 +76,8 @@ them.
 12. A test that produced verified evidence either declares a negative control that failed
     reproducibly, or is flagged as unproven-falsifiable.
 13. A claim does not silently cite a source that was screened out of the review.
+14. A failed claim is revived only by a revision, never by an in-place promotion.
+15. A test created after a sibling subject failure is flagged `TEST-002`.
 
 ## Evidence Binding
 

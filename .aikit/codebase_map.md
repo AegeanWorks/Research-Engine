@@ -9,8 +9,8 @@
 - **Total Python Modules**: `71`
 - **Total Classes**: `62`
 - **Total Top-Level Functions**: `218`
-- **Total Class Methods**: `413`
-- **Total Source Lines**: `12102`
+- **Total Class Methods**: `416`
+- **Total Source Lines**: `12177`
 
 ---
 
@@ -113,7 +113,7 @@
 ### [`engine/claims.py`](engine/claims.py)
 > *Claims: the unit of knowledge, with provenance and an append-only verdict history.*
 
-**Size**: `512` lines (`19566` bytes)
+**Size**: `518` lines (`19939` bytes)
 
 **Functions:**
 - `def _to_claim(row)`
@@ -308,7 +308,7 @@
 ### [`engine/integrity.py`](engine/integrity.py)
 > *Graph integrity: provenance, evidence paths, dependency acyclicity and stale dependents.*
 
-**Size**: `696` lines (`26350` bytes)
+**Size**: `717` lines (`27207` bytes)
 
 **Functions:**
 - `def _finding(code, severity, subject, message, fix)`
@@ -612,7 +612,7 @@
 ### [`tests/test_attempts.py`](tests/test_attempts.py)
 > *Attempt authority: the earliest non-replaceable attempt wins.*
 
-**Size**: `184` lines (`7462` bytes)
+**Size**: `209` lines (`8355` bytes)
 
 **Classes:**
 - `class AttemptAuthorityTests`
@@ -631,6 +631,7 @@
   - Method `.test_real_subject_failure_records_an_attempt_and_blocks()`
   - Method `.test_single_run_is_indeterminate()`
   - Method `.test_control_that_does_not_fail_is_indeterminate()`
+  - Method `.test_a_new_test_after_a_subject_failure_warns()`
 
 ---
 
@@ -700,7 +701,7 @@
 ### [`tests/test_claims.py`](tests/test_claims.py)
 > *Provenance requirements and the append-only verdict lifecycle.*
 
-**Size**: `139` lines (`5802` bytes)
+**Size**: `162` lines (`6975` bytes)
 
 **Classes:**
 - `class ClaimTests`
@@ -717,6 +718,8 @@
   - Method `.test_promotion_blocked_by_failed_premise()`
   - Method `.test_links_are_typed_and_directional()`
   - Method `.test_list_filters_by_status()`
+  - Method `.test_failed_claim_cannot_be_promoted_in_place()`
+  - Method `.test_failed_claim_can_move_to_another_failed_status()`
 
 ---
 

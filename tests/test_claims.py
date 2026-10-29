@@ -134,6 +134,29 @@ class ClaimTests(DatabaseCase):
         set_verdict(self.conn, claim, "FALSIFIED", "replicate failed")
         self.assertEqual(len(list_claims(self.conn, research, "UNVERIFIED")), 0)
 
+    def test_failed_claim_cannot_be_promoted_in_place(self) -> None:
+        research = self.add_research()
+        claim = add_claim(
+            self.conn, research, "Signal S rose.", "assumption",
+            kill_test="A replicate in which S falls.",
+        )
+        set_verdict(self.conn, claim.id, "PROVEN", "a proof")
+        set_verdict(self.conn, claim.id, "FALSIFIED", "the replicate failed")
+        with self.assertRaises(EngineError) as caught:
+            set_verdict(self.conn, claim.id, "PROVEN", "a new proof")
+        self.assertIn("cannot be revived", str(caught.exception))
+        self.assertEqual(get_claim(self.conn, claim.id).status, "FALSIFIED")
+
+    def test_failed_claim_can_move_to_another_failed_status(self) -> None:
+        research = self.add_research()
+        claim = add_claim(
+            self.conn, research, "Signal S rose.", "assumption",
+            kill_test="A replicate in which S falls.",
+        )
+        set_verdict(self.conn, claim.id, "FALSIFIED", "the replicate failed")
+        retired = set_verdict(self.conn, claim.id, "RETRACTED", "withdrawn after the failure")
+        self.assertEqual(retired.status, "RETRACTED")
+
 
 if __name__ == "__main__":
     unittest.main()

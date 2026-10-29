@@ -1,39 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "T-012-evidence-integrity",
+    "task_id": "T-013-integrity-guards",
     "last_phase": "phase 4",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1793303541.9934866,
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1793307442.977135,
     "owner": "opencode:research-engine",
     "started_by": "opencode:research-engine",
-    "continuations": [],
-    "completed_at": 1793303628.5883176
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "reforge:run-1",
-      "phase": "reforge stage 6",
-      "phase_num": 3,
-      "description": "Reforge stage 6: window 18, 3 commit(s), 17 file(s) reviewed (unreviewed), 0 finding(s), 0 repaired",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793293334.1991951,
-      "timestamp_str": "2026-10-29 20:02:14",
-      "agent": "opencode"
-    },
-    {
-      "task_id": "reforge:run-1",
-      "phase": "reforge stage 7",
-      "phase_num": 3,
-      "description": "Reforge stage 7: window 21, 3 commit(s), 72 file(s) reviewed (unreviewed), 0 finding(s), 0 repaired",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793293655.521952,
-      "timestamp_str": "2026-10-29 20:07:35",
-      "agent": "opencode"
-    },
     {
       "task_id": "reforge:run-1",
       "phase": "reforge stage 8",
@@ -265,6 +242,34 @@
       "status": "completed",
       "timestamp": 1793303628.588319,
       "timestamp_str": "2026-10-29 22:53:48",
+      "agent": "opencode:research-engine"
+    },
+    {
+      "task_id": "T-013-integrity-guards",
+      "phase": "planning",
+      "phase_num": 2,
+      "description": "[1/2] Verdict reversal guard and suspicious-test warning",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793307137.863615,
+      "timestamp_str": "2026-10-29 23:52:17",
+      "agent": "opencode:research-engine",
+      "impact_assessment": {
+        "why": "A failed claim can be promoted in place, and a new test created after a subject failure bypasses attempt authority",
+        "benefits": "A failed claim needs a revision to be revived; a test created after a sibling failure is visible as TEST-002",
+        "risks": "contract: one transition guard and one warning code; dependency: stdlib only; concurrency: single writer; state: no schema change",
+        "mitigation": "Failing-first transition and warning tests; full suite and 4/4 gates before commit"
+      }
+    },
+    {
+      "task_id": "T-013-integrity-guards",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[2/2] Integrity guards delivered: failed claims cannot be promoted in place; TEST-002 warns on a new test after a sibling subject failure; 371 tests pass; 4/4 gates pass; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793307442.977135,
+      "timestamp_str": "2026-10-29 23:57:22",
       "agent": "opencode:research-engine"
     }
   ]

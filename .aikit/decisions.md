@@ -424,3 +424,30 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Consequences**: Self-reported numbers stay available for diagnosis but cannot silently support
   an independent comparison. The operator must state the class; the engine does not infer it from
   a path. Legacy observations are unclassified and warn rather than being retroactively labelled.
+
+### ADR-032: Failed Claims Are Revived Only by Revision
+- **Date**: 2026-10-29
+- **Status**: Accepted
+- **Context**: `set_verdict` allowed a claim to move from `FALSIFIED`, `RETRACTED` or `INVALIDATED`
+  back to `PROVEN` or `NUMERIC`. The verdict history kept the failure, but the latest status won,
+  so a negative result could be overwritten in place.
+- **Decision**: Refuse any transition from a failed status (`FALSIFIED`, `RETRACTED`,
+  `INVALIDATED`) to a non-failed status. A failed claim may still move to another failed status to
+  correct the label. Reviving the assertion requires `claim revise`, which creates a new head that
+  starts `UNVERIFIED`.
+- **Consequences**: A failure stays a failure in the live graph; the new attempt is a new claim
+  with its own evidence and verdict history. The status vocabulary is unchanged, and deliberate
+  corrections remain possible through a revision.
+
+### ADR-033: New Test After a Sibling Failure Is Visible
+- **Date**: 2026-10-29
+- **Status**: Accepted
+- **Context**: Attempt authority is per test. Creating a new test after a failed attempt on the
+  same claim is a new evidence path, but it can also be a way to bypass the authoritative failure
+  without recording why the new test is independent.
+- **Decision**: Add `TEST-002` as a warning when a test's `created_at` is later than a
+  `subject_failed` attempt of another test on the same claim. The warning names both tests; it does
+  not block the new test or promotion.
+- **Consequences**: The bypass is visible in `check` and reports, while legitimate new tests remain
+  possible. A future rule could require a recorded independence reason; that would be a new
+  contract and is not part of this change.

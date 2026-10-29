@@ -338,6 +338,12 @@ def set_verdict(
             "a verdict must change the recorded state.",
             "choose a different status, or inspect the claim's verdict history.",
         )
+    if claim.status in FAILED_STATUSES and status not in FAILED_STATUSES:
+        raise EngineError(
+            f"claim {claim.id} is {claim.status} and cannot be revived in place",
+            "the failure is negative evidence; overwriting it with a promotion would erase it.",
+            "run `claim revise` to create a new head, then promote the revision.",
+        )
     if status in PROMOTED_STATUSES or status in ("FALSIFIED", "RETRACTED", "INVALIDATED"):
         if not evidence.strip():
             raise EngineError(

@@ -15,6 +15,7 @@ from engine.evidence import (
     claim_authority_blocked,
     claim_groups,
 )
+from engine.integrity import check
 from engine.killtests import add_test, run_test, verify_test
 from tests.support import DatabaseCase
 
@@ -178,6 +179,30 @@ class AttemptAuthorityTests(DatabaseCase):
         result = verify_test(self.conn, test.id)
         self.assertEqual(result["attempt"]["outcome"], "indeterminate")
         self.assertEqual(result["attempt"]["reason"], "control_not_falsified")
+
+    def test_a_new_test_after_a_subject_failure_warns(self) -> None:
+        failed = add_test(
+            self.conn,
+            self.research,
+            "Fails twice",
+            'python -c "raise SystemExit(3)"',
+            claim_ref=self.claim.id,
+        )
+        verify_test(self.conn, failed.id)
+        later = add_test(
+            self.conn,
+            self.research,
+            "Later probe",
+            'python -c "print(1)"',
+            claim_ref=self.claim.id,
+        )
+        with transaction(self.conn):
+            self.conn.execute(
+                "UPDATE killtest SET created_at = ? WHERE id = ?",
+                ("2099-01-01T00:00:00+00:00", later.id),
+            )
+        findings = [item for item in check(self.conn) if item.code == "TEST-002"]
+        self.assertEqual([item.subject for item in findings], [later.id])
 
 
 if __name__ == "__main__":

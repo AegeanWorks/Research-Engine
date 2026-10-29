@@ -92,7 +92,7 @@ deliberately not copied. Domain content stays in the programs the engine hosts.
 16. **Every non-verdict action is logged.** Source status changes, screening, merges, report
     generation and schema migration append to an event log with a per-program sequence and an
     optional parent, so `events --tree` and `events --path` can render the causal chain. Verdicts
-    keep their own append-only history.
+    keep history.
 
 ## Verdict Vocabulary
 
@@ -234,6 +234,7 @@ present and 0 when only warnings remain. Domain errors print the `Error / Why / 
 - a live claim citing a source screened out of the review (`SCREEN-001`, warning);
 - a test still bound to a retired claim (`TEST-001`, warning), to a superseded claim
   (`REV-002`, warning), or a dependent still pointing at a superseded claim (`REV-001`, warning);
+- a test created after another test on the same claim failed (`TEST-002`, warning);
 - an UNKNOWN claim with no recorded reason (`EVID-007`, warning).
 
 Warnings are research hygiene; errors block a trustworthy report.
@@ -265,15 +266,16 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
   evidence is an error, not a pass.
 - A retracted source retires the claims that cite it; a live claim citing one is an error.
 - A committed report is only valid alongside its manifest, and `report --check` must stay clean.
-- Negative results are kept. Corrections are new verdicts, never silent edits.
-- A claim revision is a new row and starts untested; old verdicts are never inherited.
+- Negative results are kept; corrections are new verdicts.
+- A claim revision starts untested; old verdicts are never inherited.
+- A failed claim requires a revision to be revived; it cannot be promoted in place.
 - A comparison across different protocols, instruments or units is refused unless explicitly
   allowed.
 - A self-reported measurement is not independent evidence; it is listed separately and needs a
   caveat to compare.
 - A failed premise invalidates its dependents; a report with `CASCADE-001` is not trustworthy.
-- Reports and scorecards are generated from the graph. Do not hand-write their numbers.
-- The engine is standard library only and makes no network calls. Sources are registered explicitly.
+- Reports and scorecards are generated from the graph.
+- The engine is standard library only and makes no network calls. Sources are explicit.
 
 ## What's Inside
 
@@ -331,8 +333,8 @@ research-engine/
 
 ## Deliberate Limits
 
-- **No literature crawling.** Sources are registered explicitly; ingestion is a separate concern.
-- **Single writer.** SQLite serialises writes; one researcher or agent at a time.
+- **No literature crawling.** Sources are registered explicitly.
+- **Single writer.** One researcher or agent at a time.
 - **Consensus is a display heuristic.** It is not a posterior and never changes a verdict;
   UNKNOWN contributes zero.
 - **Discovery is advisory.** `analysis` proposes; only `claim link` records a relation.

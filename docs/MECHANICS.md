@@ -64,8 +64,9 @@ the log but does not constrain the verdict.
 `indeterminate` are replaceable, and each needs a recorded reason. The earliest non-replaceable
 attempt bound to the current command, code and inputs is authoritative. A later `completed`
 attempt cannot displace an earlier `subject_failed` attempt, and `set_verdict` refuses a NUMERIC
-promotion that cites anything else. Legacy run groups without an attempt row keep the old
-any-current-group behaviour until they are re-run.
+promotion that cites anything else. `TEST-002` warns when a new test is created after a sibling
+test on the same claim failed, so the new evidence path is visible rather than silent. Legacy run
+groups without an attempt row keep the old any-current-group behaviour until they are re-run.
 
 **Deliberately not copied.** A separate hash-chained attempt file; SQLite's append-only rows and
 the existing run binding are the ledger.
@@ -92,7 +93,9 @@ contradicting claim or a stale statement that no longer matched the evidence.
 starts `UNVERIFIED`; verdicts are never inherited. Tests stay on the old claim and integrity
 reports `REV-002` until they are deliberately rebound; `REV-001` catches a dependency edge that
 still points at a superseded claim. `claim history` renders the chain. An empirical revision still
-needs a source, quote and locator, and every revision needs a reason.
+needs a source, quote and locator, and every revision needs a reason. A failed claim is terminal
+for promotion: `set_verdict` refuses `FALSIFIED`/`RETRACTED`/`INVALIDATED` -> promoted, so a
+revival is a revision rather than an overwritten failure.
 
 **Deliberately not copied.** Editing a claim row in place or carrying the old verdict forward.
 
