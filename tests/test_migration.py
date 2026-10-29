@@ -120,6 +120,19 @@ class MigrationTests(unittest.TestCase):
             SCHEMA_VERSION + 1,
         )
 
+    def test_future_version_is_refused_before_creating_tables(self) -> None:
+        conn = connect(":memory:")
+        self.addCleanup(conn.close)
+        conn.execute("CREATE TABLE schema_meta(version INTEGER NOT NULL)")
+        conn.execute("INSERT INTO schema_meta VALUES (?)", (SCHEMA_VERSION + 1,))
+        with self.assertRaises(EngineError):
+            initialize(conn)
+        tables = {
+            row["name"]
+            for row in conn.execute("SELECT name FROM sqlite_master WHERE type = 'table'")
+        }
+        self.assertEqual(tables, {"schema_meta"})
+
     def test_fresh_database_declares_the_current_version(self) -> None:
         conn = connect(":memory:")
         self.addCleanup(conn.close)

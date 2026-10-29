@@ -236,6 +236,17 @@ def initialize(conn: sqlite3.Connection) -> dict | None:
     Returns a migration report when an older database was upgraded, otherwise None, so a caller
     can tell the operator that upgrading changed what the gate will accept.
     """
+    existing = None
+    if conn.execute(
+        "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'schema_meta'"
+    ).fetchone() is not None:
+        existing = conn.execute("SELECT version FROM schema_meta").fetchone()
+    if existing is not None and int(existing["version"]) > SCHEMA_VERSION:
+        raise EngineError(
+            f"database schema version {int(existing['version'])} is newer than this build",
+            f"this build reads schema version {SCHEMA_VERSION} only.",
+            "use the engine version that wrote this database, or start a new database file.",
+        )
     conn.executescript(_SCHEMA)
     with transaction(conn):
         row = conn.execute("SELECT version FROM schema_meta").fetchone()
