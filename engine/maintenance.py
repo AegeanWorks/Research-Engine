@@ -24,6 +24,7 @@ def integrity_check(conn: sqlite3.Connection) -> dict:
     for table in (
         "research", "source", "question", "claim", "hypothesis", "killtest",
         "test_run", "test_attempt", "verdict", "invalidation", "event",
+        "observation", "protocol",
     ):
         counts[table] = int(
             conn.execute(f"SELECT COUNT(*) AS n FROM {table}").fetchone()["n"]

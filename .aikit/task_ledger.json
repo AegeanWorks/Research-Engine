@@ -5,33 +5,12 @@
     "last_phase": "phase 4",
     "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1793301744.90547,
+    "updated_at": 1793302278.1218705,
     "owner": "opencode:research-engine",
     "started_by": "opencode:research-engine",
     "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "T-011-six-push-review",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[2/2] Fixes delivered: colliding semantic runs indexed as a sorted list, export --check reports schema and handles bad counts (exit 1 on unsupported), PRE-001 attributed to its hypothesis; 305 tests pass; 4/4 gates pass; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793118121.7410154,
-      "timestamp_str": "2026-10-27 19:22:01",
-      "agent": "kilo:research-engine"
-    },
-    {
-      "task_id": "T-011-six-push-review",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'T-011-six-push-review' completed successfully.",
-      "status": "completed",
-      "timestamp": 1793118121.9381068,
-      "timestamp_str": "2026-10-27 19:22:01",
-      "agent": "kilo:research-engine"
-    },
     {
       "task_id": "reforge:run-1",
       "phase": "reforge stage 1",
@@ -258,6 +237,34 @@
       "status": "in_progress",
       "timestamp": 1793301744.90547,
       "timestamp_str": "2026-10-29 22:22:24",
+      "agent": "opencode:research-engine"
+    },
+    {
+      "task_id": "T-012-evidence-integrity",
+      "phase": "planning",
+      "phase_num": 2,
+      "description": "[4/6] Measurement provenance and protocol comparability: schema 8 observation provenance, protocol registry, stats comparability gate, OBS-002",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793301840.648442,
+      "timestamp_str": "2026-10-29 22:24:00",
+      "agent": "opencode:research-engine",
+      "impact_assessment": {
+        "why": "Observations store only claim/group/value, so a number cannot be traced to the instrument, rater or protocol that produced it, and two accuracy numbers can be compared silently",
+        "benefits": "Every new measurement can carry instrument, rater, protocol, sample size, aggregation and unit; stats refuses cross-protocol or cross-instrument comparisons unless explicitly allowed with a caveat",
+        "risks": "contract: observation columns and a protocol table, schema 8; dependency: stdlib only; concurrency: single-writer transactions; state: legacy observations remain readable and warn OBS-002",
+        "mitigation": "Failing-first validation, comparability and migration tests; full suite and 4/4 gates before commit"
+      }
+    },
+    {
+      "task_id": "T-012-evidence-integrity",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[4/6] Measurement provenance delivered: schema 8 observation provenance, immutable protocol registry, comparability gate with --allow-incomparable, report provenance columns, OBS-002; 356 tests pass; 4/4 gates pass; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793302278.1218705,
+      "timestamp_str": "2026-10-29 22:31:18",
       "agent": "opencode:research-engine"
     }
   ]

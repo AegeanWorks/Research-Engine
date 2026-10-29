@@ -48,6 +48,8 @@ readable and gap-free without `AUTOINCREMENT` surprises.
 | `killtest` | executable command, declared inputs and target | append-only |
 | `test_run` | one process execution, its output hashes, binding and role (`main`/`control`) | append-only |
 | `test_attempt` | one verification invocation: sequence, run group, outcome and reason | append-only |
+| `protocol` | immutable measurement procedure | append-only |
+| `observation` | one measurement with instrument, rater, protocol and unit | append-only; voided, never edited |
 | `event` | non-verdict action trail | append-only |
 | `verdict` | `previous -> new` with evidence, actor and time | append-only |
 | `invalidation` | root, reason, and the JSON list of affected dependents | append-only |
@@ -125,8 +127,9 @@ raises the version, returning a report with the starting version and how many nu
 their binding. `CREATE TABLE IF NOT EXISTS` alone would leave an older table without its new
 columns, so `_add_missing_columns` inspects `PRAGMA table_info` and adds each missing column inside
 the same transaction. Version 6 adds the `test_attempt` table; version 7 adds the claim revision
-columns. Existing run groups are not backfilled and remain on the legacy path until they are
-re-run; existing claims are revision heads with empty links. Each version step is separate, so
+columns; version 8 adds the `protocol` table and the observation provenance columns. Existing run
+groups are not backfilled and remain on the legacy path until they are re-run; existing claims are
+revision heads with empty links; existing observations are legacy rows and warn `OBS-002`. Each version step is separate, so
 a version-1 database passes through the version-2 step and then the version-3 step. A version
 newer than the build is refused without modification, and the migration preserves existing rows,
 including legacy runs whose binding columns are empty.
@@ -207,9 +210,14 @@ that rolled back. `events` reads newest first with optional program and kind fil
 ## Observations and Statistics
 
 `observation` stores one measurement per row: claim, group label, finite numeric value, note,
-timestamp, and a `voided` flag with a reason. Rows are never edited or deleted; a wrong measurement
-is voided so the record keeps its history. `analysis stats` compares two groups through
-`engine/stats.py`, which is pure and stdlib-only:
+timestamp, and a `voided` flag with a reason. A provenanced row also carries the instrument
+(kind, id, digest), rater (kind, id, version), protocol id, sample size, aggregation and unit.
+Provenance is all-or-nothing: pass the whole set or none. `protocol` is an immutable registry of
+named measurement procedures; an unregistered id is refused. `analysis stats` refuses to compare
+groups with different protocol ids, instruments, raters or units unless `--allow-incomparable` is
+explicit, and then records the caveat. A legacy observation without provenance warns `OBS-002`.
+Rows are never edited or deleted; a wrong measurement is voided so the record keeps its history.
+`analysis stats` compares two groups through `engine/stats.py`, which is pure and stdlib-only:
 
 | Quantity | Method | Notes |
 |---|---|---|

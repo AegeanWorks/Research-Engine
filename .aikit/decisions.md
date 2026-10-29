@@ -374,3 +374,20 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   the graph uses one head. The status machine is unchanged. A superseded claim cannot be revised
   again or merged; the head is the only live target. Existing claims migrate as heads with empty
   links.
+
+### ADR-029: Measurement provenance and protocol comparability
+- **Date**: 2026-10-29
+- **Status**: Accepted
+- **Context**: `observation` stored a value and a group label, so a number could not be traced to
+  the instrument, rater or procedure that produced it. Two numbers called "accuracy" could be
+  compared even when one measured top-1 accuracy and the other an end-to-end judge score. The
+  source idea's separate `measurement` table would have duplicated the observation value.
+- **Decision**: Bump the schema to 8 and add the immutable `protocol` table plus observation
+  provenance columns: instrument kind/id/digest, rater kind/id/version, protocol id, sample size,
+  aggregation and unit. Provenance is all-or-nothing on insert; an unprovenanced record is legacy
+  and warns `OBS-002`. `analysis stats` refuses to compare groups with different protocols,
+  instruments, raters or units unless `--allow-incomparable` is explicit, and records the caveat
+  in the result. The report prints protocol, unit and instrument beside each measurement.
+- **Consequences**: A numeric comparison now names the procedure it compares. The protocol id is
+  immutable, so changing a procedure requires a new id. Legacy observations remain readable but
+  are visibly unverified; comparisons involving them warn rather than silently passing.

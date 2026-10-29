@@ -203,7 +203,10 @@ def report(conn: sqlite3.Connection, research_ref: str) -> str:
     lines.extend(["## Measurements", ""])
     measured = conn.execute(
         "SELECT claim_id, group_label, COUNT(*) AS n, AVG(value) AS mean,"
-        " MIN(value) AS low, MAX(value) AS high FROM observation"
+        " MIN(value) AS low, MAX(value) AS high,"
+        " GROUP_CONCAT(DISTINCT protocol_id) AS protocols,"
+        " GROUP_CONCAT(DISTINCT unit) AS units,"
+        " GROUP_CONCAT(DISTINCT instrument_id) AS instruments FROM observation"
         " WHERE research_id = ? AND voided = 0"
         " GROUP BY claim_id, group_label ORDER BY claim_id, group_label",
         (research.id,),
@@ -211,11 +214,18 @@ def report(conn: sqlite3.Connection, research_ref: str) -> str:
     if not measured:
         lines.append("_No observations recorded._")
     else:
-        lines.extend(["| Claim | Group | n | min | mean | max |", "|---|---|---|---|---|---|"])
+        lines.extend(
+            [
+                "| Claim | Group | n | min | mean | max | Protocol | Unit | Instrument |",
+                "|---|---|---|---|---|---|---|---|---|",
+            ]
+        )
         for row in measured:
             lines.append(
                 f"| {row['claim_id']} | {cell(row['group_label'], 40)} | {row['n']} | "
-                f"{float(row['low']):.4g} | {float(row['mean']):.4g} | {float(row['high']):.4g} |"
+                f"{float(row['low']):.4g} | {float(row['mean']):.4g} | {float(row['high']):.4g} | "
+                f"{cell(row['protocols'] or '-', 40)} | {cell(row['units'] or '-', 20)} | "
+                f"{cell(row['instruments'] or '-', 40)} |"
             )
         latest_runs = conn.execute(
             "SELECT subject, kind, at, detail FROM event"
@@ -347,6 +357,6 @@ def inventory(conn: sqlite3.Connection) -> Dict[str, int]:
     """Return engine-wide counts used by the CLI overview."""
     tables = (
         "research", "source", "question", "claim", "hypothesis",
-        "killtest", "test_run", "verdict", "observation", "event",
+        "killtest", "test_run", "test_attempt", "verdict", "observation", "protocol", "event",
     )
     return {table: conn.execute(f"SELECT COUNT(*) AS n FROM {table}").fetchone()["n"] for table in tables}

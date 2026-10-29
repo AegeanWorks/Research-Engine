@@ -10,7 +10,7 @@ from typing import Iterator
 from engine.artifacts import utc_now
 from engine.errors import EngineError
 
-SCHEMA_VERSION = 7
+SCHEMA_VERSION = 8
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS schema_meta (
@@ -157,7 +157,25 @@ CREATE TABLE IF NOT EXISTS observation (
     note TEXT NOT NULL DEFAULT '',
     at TEXT NOT NULL,
     voided INTEGER NOT NULL DEFAULT 0,
-    void_reason TEXT NOT NULL DEFAULT ''
+    void_reason TEXT NOT NULL DEFAULT '',
+    instrument_kind TEXT NOT NULL DEFAULT '',
+    instrument_id TEXT NOT NULL DEFAULT '',
+    instrument_digest TEXT NOT NULL DEFAULT '',
+    rater_kind TEXT NOT NULL DEFAULT '',
+    rater_id TEXT NOT NULL DEFAULT '',
+    rater_version TEXT NOT NULL DEFAULT '',
+    protocol_id TEXT NOT NULL DEFAULT '',
+    sample_size INTEGER NOT NULL DEFAULT 1,
+    aggregation TEXT NOT NULL DEFAULT 'raw',
+    unit TEXT NOT NULL DEFAULT ''
+);
+CREATE TABLE IF NOT EXISTS protocol (
+    id TEXT PRIMARY KEY,
+    measures TEXT NOT NULL,
+    includes_generation INTEGER NOT NULL DEFAULT 0,
+    includes_judge INTEGER NOT NULL DEFAULT 0,
+    doc_digest TEXT NOT NULL DEFAULT '',
+    registered_at TEXT NOT NULL
 );
 CREATE TABLE IF NOT EXISTS event (
     id TEXT PRIMARY KEY,
@@ -234,6 +252,18 @@ _MIGRATIONS = {
         ("claim", "superseded_by", "TEXT"),
         ("claim", "revision_reason", "TEXT NOT NULL DEFAULT ''"),
     ),
+    7: (
+        ("observation", "instrument_kind", "TEXT NOT NULL DEFAULT ''"),
+        ("observation", "instrument_id", "TEXT NOT NULL DEFAULT ''"),
+        ("observation", "instrument_digest", "TEXT NOT NULL DEFAULT ''"),
+        ("observation", "rater_kind", "TEXT NOT NULL DEFAULT ''"),
+        ("observation", "rater_id", "TEXT NOT NULL DEFAULT ''"),
+        ("observation", "rater_version", "TEXT NOT NULL DEFAULT ''"),
+        ("observation", "protocol_id", "TEXT NOT NULL DEFAULT ''"),
+        ("observation", "sample_size", "INTEGER NOT NULL DEFAULT 1"),
+        ("observation", "aggregation", "TEXT NOT NULL DEFAULT 'raw'"),
+        ("observation", "unit", "TEXT NOT NULL DEFAULT ''"),
+    ),
 }
 
 
@@ -242,6 +272,9 @@ def _ensure_indexes(conn: sqlite3.Connection) -> None:
     conn.execute("CREATE INDEX IF NOT EXISTS idx_source_screening ON source(screening)")
     conn.execute(
         "CREATE INDEX IF NOT EXISTS idx_claim_head ON claim(research_id, superseded_by)"
+    )
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_observation_protocol ON observation(protocol_id)"
     )
 
 

@@ -11,7 +11,13 @@ from engine.claims import get_claim
 from engine.database import next_id, transaction
 from engine.errors import EngineError, NotFound
 from engine.events import record as record_event
-from engine.models import Observation
+from engine.models import (
+    AGGREGATIONS,
+    INSTRUMENT_KINDS,
+    RATER_KINDS,
+    Observation,
+)
+from engine.protocols import get_protocol
 
 
 def _to_observation(row: sqlite3.Row) -> Observation:
@@ -27,8 +33,22 @@ def add_observation(
     value: float,
     note: str = "",
     at: Optional[str] = None,
+    instrument_kind: str = "",
+    instrument_id: str = "",
+    instrument_digest: str = "",
+    rater_kind: str = "",
+    rater_id: str = "",
+    rater_version: str = "",
+    protocol_id: str = "",
+    sample_size: int = 1,
+    aggregation: str = "raw",
+    unit: str = "",
 ) -> Observation:
-    """Record one measurement in a named group; non-finite values are refused."""
+    """Record one measurement in a named group; non-finite values are refused.
+
+    Provenance is all-or-nothing: pass the instrument, rater and protocol together, or none of
+    them. An unprovenanced record is accepted for legacy data and warned by `OBS-002`.
+    """
     claim = get_claim(conn, claim_ref)
     label = group_label.strip().lower()
     if not label:
@@ -50,6 +70,85 @@ def add_observation(
             "NaN and infinity cannot enter a mean or an interval.",
             "record the missing value as an observation note instead, or omit it.",
         )
+    provenance = (
+        instrument_kind,
+        instrument_id,
+        instrument_digest,
+        rater_kind,
+        rater_id,
+        rater_version,
+        protocol_id,
+    )
+    has_provenance = any(str(item).strip() for item in provenance)
+    if has_provenance:
+        missing = [
+            name
+            for name, item in zip(
+                (
+                    "instrument_kind",
+                    "instrument_id",
+                    "instrument_digest",
+                    "rater_kind",
+                    "rater_id",
+                    "rater_version",
+                    "protocol_id",
+                ),
+                provenance,
+            )
+            if not str(item).strip()
+        ]
+        if missing:
+            raise EngineError(
+                "measurement provenance is incomplete",
+                "missing: " + ", ".join(missing) + ".",
+                "pass the instrument, rater and protocol together, or none of them.",
+            )
+        instrument_kind = instrument_kind.strip().lower()
+        rater_kind = rater_kind.strip().lower()
+        if instrument_kind not in INSTRUMENT_KINDS:
+            raise EngineError(
+                f"unknown instrument kind: {instrument_kind}",
+                f"allowed kinds are {', '.join(INSTRUMENT_KINDS)}.",
+                "pass one of the listed kinds.",
+            )
+        if rater_kind not in RATER_KINDS:
+            raise EngineError(
+                f"unknown rater kind: {rater_kind}",
+                f"allowed kinds are {', '.join(RATER_KINDS)}.",
+                "pass one of the listed kinds.",
+            )
+        protocol_id = protocol_id.strip().lower()
+        get_protocol(conn, protocol_id)
+    else:
+        instrument_kind = ""
+        instrument_id = ""
+        instrument_digest = ""
+        rater_kind = ""
+        rater_id = ""
+        rater_version = ""
+        protocol_id = ""
+    try:
+        sample_size = int(sample_size)
+    except (TypeError, ValueError):
+        raise EngineError(
+            f"sample size is not an integer: {sample_size}",
+            "sample size is the number of observations behind an aggregate.",
+            "pass --sample-size with a positive integer.",
+        )
+    if sample_size < 1:
+        raise EngineError(
+            f"sample size must be positive: {sample_size}",
+            "an aggregate over zero observations has no value.",
+            "pass --sample-size 1 or more.",
+        )
+    aggregation = aggregation.strip().lower() or "raw"
+    if aggregation not in AGGREGATIONS:
+        raise EngineError(
+            f"unknown aggregation: {aggregation}",
+            f"allowed aggregations are {', '.join(AGGREGATIONS)}.",
+            "pass one of the listed aggregations.",
+        )
+    unit = unit.strip()
     with transaction(conn):
         record = Observation(
             id=next_id(conn, "ob"),
@@ -61,10 +160,22 @@ def add_observation(
             at=(at or utc_now()).strip(),
             voided=False,
             void_reason="",
+            instrument_kind=instrument_kind,
+            instrument_id=instrument_id.strip(),
+            instrument_digest=instrument_digest.strip(),
+            rater_kind=rater_kind,
+            rater_id=rater_id.strip(),
+            rater_version=rater_version.strip(),
+            protocol_id=protocol_id,
+            sample_size=sample_size,
+            aggregation=aggregation,
+            unit=unit,
         )
         conn.execute(
             "INSERT INTO observation(id, research_id, claim_id, group_label, value, note, at,"
-            " voided, void_reason) VALUES (?, ?, ?, ?, ?, ?, ?, 0, '')",
+            " voided, void_reason, instrument_kind, instrument_id, instrument_digest,"
+            " rater_kind, rater_id, rater_version, protocol_id, sample_size, aggregation, unit)"
+            " VALUES (?, ?, ?, ?, ?, ?, ?, 0, '', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
                 record.id,
                 record.research_id,
@@ -73,6 +184,16 @@ def add_observation(
                 record.value,
                 record.note,
                 record.at,
+                record.instrument_kind,
+                record.instrument_id,
+                record.instrument_digest,
+                record.rater_kind,
+                record.rater_id,
+                record.rater_version,
+                record.protocol_id,
+                record.sample_size,
+                record.aggregation,
+                record.unit,
             ),
         )
     return record

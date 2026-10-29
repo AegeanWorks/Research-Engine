@@ -282,6 +282,13 @@ with fewer than ten resamples. `analysis trend` fits a least-squares slope over 
 refuses to pretend when there are fewer than three points. Every run is logged as `claim.stats`
 or `claim.trend`, and `OBS-001` warns when observations exist without a statistics run.
 
+**Extension: measurement provenance.** An observation may carry the instrument (kind, id,
+digest), rater (kind, id, version), protocol id, sample size, aggregation and unit. The protocol is
+an immutable registry entry. `analysis stats` refuses to compare different protocols,
+instruments, raters or units unless `--allow-incomparable` is explicit; a legacy row without
+provenance warns `OBS-002`. This makes "the metric improved" a claim about a named procedure, not
+a bare number.
+
 **Deliberately not copied.** The intervention/baseline domain model, the medical metrics, pandas,
 scipy, SQLAlchemy and PyQt. The port is stdlib-only and deterministic; the reference bootstrap is
 unseeded, which this project does not reproduce.

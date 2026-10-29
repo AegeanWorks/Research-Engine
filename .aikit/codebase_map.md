@@ -6,11 +6,11 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `69`
-- **Total Classes**: `60`
-- **Total Top-Level Functions**: `208`
-- **Total Class Methods**: `384`
-- **Total Source Lines**: `11042`
+- **Total Python Modules**: `71`
+- **Total Classes**: `62`
+- **Total Top-Level Functions**: `215`
+- **Total Class Methods**: `401`
+- **Total Source Lines**: `11709`
 
 ---
 
@@ -33,7 +33,7 @@
 ### [`engine/analysis.py`](engine/analysis.py)
 > *Discovery and ranking over the graph: contradictions, coverage, keystones.*
 
-**Size**: `350` lines (`13459` bytes)
+**Size**: `462` lines (`18713` bytes)
 
 **Functions:**
 - `def keywords(text)` - *Content words of an assertion, lowercased and de-duplicated.*
@@ -44,7 +44,9 @@
 - `def evidence_matrix(conn, research_ref)` - *Sources x questions: how many claims each source contributes to each question.*
 - `def keystone_claims(conn, research_ref, limit)` - *Claims that the rest of the graph leans on, by transitive dependents and inbound edges.*
 - `def expose(conn, claim_ref)` - *What a claim would take down with it, plus what cites it.*
-- `def claim_statistics(conn, claim_ref, baseline, treatment, seed, resamples, actor)` - *Compare two observation groups of a claim and record that the comparison happened.*
+- `def _group_provenance(conn, claim_id, label)` - *Protocols, instruments and units recorded for one observation group.*
+- `def _comparability(baseline, treatment, allow_incomparable)` - *Whether two groups measure the same quantity under the same procedure.*
+- `def claim_statistics(conn, claim_ref, baseline, treatment, seed, resamples, allow_incomparable, actor)` - *Compare two observation groups of a claim and record that the comparison happened.*
 - `def observation_summary(conn, claim_ref)` - *Per-group counts and basic summaries for one claim.*
 - `def claim_trend(conn, claim_ref, group, actor)` - *Fit a least-squares trend over a group's observations in recording order.*
 
@@ -80,7 +82,7 @@
 ### [`engine/bundle.py`](engine/bundle.py)
 > *Portable JSONL export of the evidence graph, and a digest of its content.*
 
-**Size**: `281` lines (`10303` bytes)
+**Size**: `284` lines (`10424` bytes)
 
 **Functions:**
 - `def _rows(conn, table, research_id)`
@@ -135,7 +137,7 @@
 ### [`engine/cli.py`](engine/cli.py)
 > *Command-line surface: one entry point for every engine mechanic.*
 
-**Size**: `814` lines (`40332` bytes)
+**Size**: `876` lines (`43076` bytes)
 
 **Functions:**
 - `def _build_parser()`
@@ -144,6 +146,7 @@
 - `def _cmd_research(conn, args)`
 - `def _cmd_question(conn, args)`
 - `def _cmd_source(conn, args)`
+- `def _cmd_protocol(conn, args)`
 - `def _cmd_observation(conn, args)`
 - `def _cmd_claim(conn, args)`
 - `def _cmd_hypothesis(conn, args)`
@@ -176,7 +179,7 @@
 ### [`engine/database.py`](engine/database.py)
 > *SQLite connection, schema versioning and atomic transactions.*
 
-**Size**: `356` lines (`13430` bytes)
+**Size**: `389` lines (`14942` bytes)
 
 **Functions:**
 - `def connect(path)` - *Open a database with durability pragmas suitable for a state file.*
@@ -302,7 +305,7 @@
 ### [`engine/integrity.py`](engine/integrity.py)
 > *Graph integrity: provenance, evidence paths, dependency acyclicity and stale dependents.*
 
-**Size**: `653` lines (`24792` bytes)
+**Size**: `668` lines (`25346` bytes)
 
 **Functions:**
 - `def _finding(code, severity, subject, message, fix)`
@@ -342,7 +345,7 @@
 ### [`engine/maintenance.py`](engine/maintenance.py)
 > *Database maintenance: integrity verification and a crash-safe backup.*
 
-**Size**: `86` lines (`3228` bytes)
+**Size**: `87` lines (`3263` bytes)
 
 **Functions:**
 - `def integrity_check(conn)` - *Run SQLite's own checks plus a few facts a reviewer wants before archiving.*
@@ -391,7 +394,7 @@
 ### [`engine/models.py`](engine/models.py)
 > *Frozen domain records and the engine's closed vocabularies.*
 
-**Size**: `204` lines (`4373` bytes)
+**Size**: `227` lines (`4993` bytes)
 
 **Classes:**
 - `class Research`
@@ -404,6 +407,7 @@
 - `class Attempt`
   - Method `.to_dict()`
 - `class Observation`
+- `class Protocol`
 - `class Finding`
 
 ---
@@ -411,15 +415,28 @@
 ### [`engine/observations.py`](engine/observations.py)
 > *Recorded observations: the raw measurements a numeric claim is computed from.*
 
-**Size**: `153` lines (`5354` bytes)
+**Size**: `274` lines (`9676` bytes)
 
 **Functions:**
 - `def _to_observation(row)`
-- `def add_observation(conn, claim_ref, group_label, value, note, at)` - *Record one measurement in a named group; non-finite values are refused.*
+- `def add_observation(conn, claim_ref, group_label, value, note, at, instrument_kind, instrument_id, instrument_digest, rater_kind, rater_id, rater_version, protocol_id, sample_size, aggregation, unit)` - *Record one measurement in a named group; non-finite values are refused.*
 - `def get_observation(conn, ref)` - *Fetch one observation by identifier.*
 - `def list_observations(conn, claim_ref, group_label, include_voided)` - *Observations of a claim, oldest first, excluding voided rows by default.*
 - `def void_observation(conn, ref, reason, actor)` - *Retire a measurement without deleting it; the reason stays in the record.*
 - `def group_values(conn, claim_ref)` - *Non-voided values per group, in insertion order.*
+
+---
+
+### [`engine/protocols.py`](engine/protocols.py)
+> *Measurement protocol registry.*
+
+**Size**: `114` lines (`4066` bytes)
+
+**Functions:**
+- `def _to_protocol(row)`
+- `def register_protocol(conn, protocol_id, measures, includes_generation, includes_judge, doc_digest, actor)` - *Register an immutable protocol id; re-registering the same id is refused.*
+- `def get_protocol(conn, ref)` - *Fetch one registered protocol by id.*
+- `def list_protocols(conn)` - *Every registered protocol, oldest id first.*
 
 ---
 
@@ -527,7 +544,7 @@
 ### [`engine/synthesis.py`](engine/synthesis.py)
 > *Evidence synthesis: weighted consensus, contradiction pairs, and generated reports.*
 
-**Size**: `352` lines (`14141` bytes)
+**Size**: `362` lines (`14606` bytes)
 
 **Functions:**
 - `def stance_claims(conn, question_id)`
@@ -1023,6 +1040,31 @@
 
 ---
 
+### [`tests/test_measurements.py`](tests/test_measurements.py)
+> *Measurement provenance and protocol comparability.*
+
+**Size**: `140` lines (`6124` bytes)
+
+**Classes:**
+- `class MeasurementTests`
+  - Method `.setUp()`
+  - Method `._kwargs(protocol, instrument, digest, unit)`
+  - Method `._add(group, value, **overrides)`
+  - Method `.test_protocol_registration_is_immutable()`
+  - Method `.test_observation_round_trips_provenance()`
+  - Method `.test_incomplete_provenance_is_refused()`
+  - Method `.test_unknown_protocol_is_refused()`
+  - Method `.test_unknown_aggregation_is_refused()`
+  - Method `.test_legacy_observation_warns()`
+  - Method `.test_same_protocol_is_comparable()`
+  - Method `.test_different_protocols_are_refused()`
+  - Method `.test_incomparable_can_be_allowed_with_a_warning()`
+  - Method `.test_different_instruments_are_refused()`
+  - Method `.test_different_units_are_refused()`
+  - Method `.test_mixed_provenance_in_one_group_is_refused()`
+
+---
+
 ### [`tests/test_merging.py`](tests/test_merging.py)
 > *Merging duplicates: survivor, repointed edges, retired duplicates, history kept.*
 
@@ -1046,7 +1088,7 @@
 ### [`tests/test_migration.py`](tests/test_migration.py)
 > *Schema migration: an older database is repaired, not rejected or wiped.*
 
-**Size**: `231` lines (`9968` bytes)
+**Size**: `264` lines (`11036` bytes)
 
 **Classes:**
 - `class MigrationTests`
@@ -1055,6 +1097,8 @@
   - Method `.test_existing_rows_are_preserved()`
   - Method `.test_migration_creates_the_attempt_table()`
   - Method `.test_migration_adds_the_claim_revision_columns()`
+  - Method `.test_migration_adds_observation_provenance_columns()`
+  - Method `.test_migration_creates_the_protocol_table()`
   - Method `.test_migration_is_idempotent()`
   - Method `.test_future_version_is_refused_without_changes()`
   - Method `.test_future_version_is_refused_before_creating_tables()`

@@ -48,6 +48,7 @@ from engine.hypotheses import (
 from engine.integrity import check, has_errors, render_json, render_markdown
 from engine.killtests import add_test, list_runs, list_tests, run_test, verify_test
 from engine.questions import add_question, close_question, get_question, list_questions
+from engine.protocols import list_protocols, register_protocol
 from engine.researches import create_research, get_research, list_researches, research_counts
 from engine.screening import prisma_flow, set_screening
 from engine.sources import add_source, list_sources, set_source_status
@@ -126,6 +127,16 @@ def _build_parser() -> argparse.ArgumentParser:
     prisma_s = source_sub.add_parser("prisma", help="show the screening flow")
     prisma_s.add_argument("--research")
 
+    protocol = commands.add_parser("protocol", help="manage measurement protocols")
+    protocol_sub = protocol.add_subparsers(dest="action", required=True)
+    add_p = protocol_sub.add_parser("add", help="register an immutable protocol id")
+    add_p.add_argument("--id", required=True)
+    add_p.add_argument("--measures", required=True)
+    add_p.add_argument("--includes-generation", action="store_true")
+    add_p.add_argument("--includes-judge", action="store_true")
+    add_p.add_argument("--doc-digest", default="")
+    protocol_sub.add_parser("list", help="list registered protocols")
+
     observation = commands.add_parser("observation", help="record and retire measurements")
     observation_sub = observation.add_subparsers(dest="action", required=True)
     add_o = observation_sub.add_parser("add", help="record one measurement")
@@ -133,6 +144,16 @@ def _build_parser() -> argparse.ArgumentParser:
     add_o.add_argument("--group", required=True)
     add_o.add_argument("--value", type=float, required=True)
     add_o.add_argument("--note", default="")
+    add_o.add_argument("--instrument-kind", default="")
+    add_o.add_argument("--instrument-id", default="")
+    add_o.add_argument("--instrument-digest", default="")
+    add_o.add_argument("--rater-kind", default="")
+    add_o.add_argument("--rater-id", default="")
+    add_o.add_argument("--rater-version", default="")
+    add_o.add_argument("--protocol", dest="protocol_id", default="")
+    add_o.add_argument("--sample-size", type=int, default=1)
+    add_o.add_argument("--aggregation", default="raw")
+    add_o.add_argument("--unit", default="")
     list_o = observation_sub.add_parser("list", help="list measurements of a claim")
     list_o.add_argument("claim")
     list_o.add_argument("--group")
@@ -287,6 +308,8 @@ def _build_parser() -> argparse.ArgumentParser:
     stats_c.add_argument("--treatment", required=True)
     stats_c.add_argument("--seed", type=int, default=0)
     stats_c.add_argument("--resamples", type=int, default=2000)
+    stats_c.add_argument("--allow-incomparable", action="store_true",
+                         help="compare different protocols/instruments with a recorded caveat")
     trend_c = analysis_sub.add_parser("trend", help="fit a trend over one observation group")
     trend_c.add_argument("claim")
     trend_c.add_argument("--group", required=True)
@@ -413,16 +436,53 @@ def _cmd_source(conn: sqlite3.Connection, args) -> int:
     return _emit(_records_payload(records), args.json, text)
 
 
+def _cmd_protocol(conn: sqlite3.Connection, args) -> int:
+    if args.action == "add":
+        record = register_protocol(
+            conn,
+            args.id,
+            args.measures,
+            includes_generation=args.includes_generation,
+            includes_judge=args.includes_judge,
+            doc_digest=args.doc_digest,
+        )
+        return _emit(record, args.json, f"{record.id} {record.measures}\n")
+    records = list_protocols(conn)
+    text = "".join(
+        f"{p.id}  generation={int(p.includes_generation)} judge={int(p.includes_judge)}"
+        f"  {p.measures}\n"
+        for p in records
+    ) or "no protocols\n"
+    return _emit(_records_payload(records), args.json, text)
+
+
 def _cmd_observation(conn: sqlite3.Connection, args) -> int:
     if args.action == "add":
-        record = add_observation(conn, args.claim, args.group, args.value, args.note)
+        record = add_observation(
+            conn,
+            args.claim,
+            args.group,
+            args.value,
+            args.note,
+            instrument_kind=args.instrument_kind,
+            instrument_id=args.instrument_id,
+            instrument_digest=args.instrument_digest,
+            rater_kind=args.rater_kind,
+            rater_id=args.rater_id,
+            rater_version=args.rater_version,
+            protocol_id=args.protocol_id,
+            sample_size=args.sample_size,
+            aggregation=args.aggregation,
+            unit=args.unit,
+        )
         return _emit(record, args.json, f"{record.id} {record.group_label}={record.value}\n")
     if args.action == "void":
         record = void_observation(conn, args.ref, args.reason)
         return _emit(record, args.json, f"{record.id} voided\n")
     records = list_observations(conn, args.claim, args.group, args.include_voided)
     text = "".join(
-        f"{o.id}  {o.group_label:<12} {o.value:12.6g}  {o.at}"
+        f"{o.id}  {o.group_label:<12} {o.value:12.6g}  {o.unit or '-'}"
+        f"  {o.protocol_id or '-'}  {o.at}"
         + ("  VOIDED" if o.voided else "") + "\n"
         for o in records
     ) or "no observations\n"
@@ -718,6 +778,7 @@ def main(argv: List[str] | None = None) -> int:
                     result = claim_statistics(
                         conn, args.claim, args.baseline, args.treatment,
                         seed=args.seed, resamples=args.resamples,
+                        allow_incomparable=args.allow_incomparable,
                     )
                     text = (
                         f"{result['claim']} {result['baseline_label']} -> {result['treatment_label']}"
@@ -803,6 +864,7 @@ def main(argv: List[str] | None = None) -> int:
                 "source": _cmd_source,
                 "claim": _cmd_claim,
                 "hypothesis": _cmd_hypothesis,
+                "protocol": _cmd_protocol,
                 "observation": _cmd_observation,
                 "test": _cmd_test,
             }

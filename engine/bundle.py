@@ -16,6 +16,7 @@ from engine.researches import get_research
 
 _ORDER = (
     "research",
+    "protocol",
     "source",
     "question",
     "claim",
@@ -36,6 +37,8 @@ def _rows(conn: sqlite3.Connection, table: str, research_id: str | None) -> List
         return conn.execute(f"SELECT * FROM {table} ORDER BY id").fetchall()
     if table == "research":
         return conn.execute("SELECT * FROM research WHERE id = ?", (research_id,)).fetchall()
+    if table == "protocol":
+        return conn.execute("SELECT * FROM protocol ORDER BY id").fetchall()
     if table in ("source", "question", "claim", "hypothesis", "killtest"):
         return conn.execute(
             f"SELECT * FROM {table} WHERE research_id = ? ORDER BY id", (research_id,)

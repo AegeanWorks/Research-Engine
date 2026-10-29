@@ -119,6 +119,39 @@ class MigrationTests(unittest.TestCase):
         columns = {row["name"] for row in conn.execute("PRAGMA table_info(claim)")}
         self.assertTrue({"revision_of", "superseded_by", "revision_reason"} <= columns)
 
+    def test_migration_adds_observation_provenance_columns(self) -> None:
+        path = self._old_database()
+        conn = connect(path)
+        self.addCleanup(conn.close)
+        initialize(conn)
+        columns = {row["name"] for row in conn.execute("PRAGMA table_info(observation)")}
+        self.assertTrue(
+            {
+                "instrument_kind",
+                "instrument_id",
+                "instrument_digest",
+                "rater_kind",
+                "rater_id",
+                "rater_version",
+                "protocol_id",
+                "sample_size",
+                "aggregation",
+                "unit",
+            }
+            <= columns
+        )
+
+    def test_migration_creates_the_protocol_table(self) -> None:
+        path = self._old_database()
+        conn = connect(path)
+        self.addCleanup(conn.close)
+        initialize(conn)
+        tables = {
+            row["name"]
+            for row in conn.execute("SELECT name FROM sqlite_master WHERE type = 'table'")
+        }
+        self.assertIn("protocol", tables)
+
     def test_migration_is_idempotent(self) -> None:
         path = self._old_database()
         conn = connect(path)

@@ -582,6 +582,21 @@ def check(conn: sqlite3.Connection) -> List[Finding]:
             )
         )
 
+    for row in conn.execute(
+        "SELECT id, claim_id FROM observation WHERE voided = 0"
+        " AND (trim(instrument_id) = '' OR trim(rater_id) = '' OR trim(protocol_id) = '')"
+        " ORDER BY id"
+    ):
+        findings.append(
+            _finding(
+                "OBS-002",
+                "warning",
+                str(row["id"]),
+                f"observation for {row['claim_id']} has no measurement provenance",
+                "record the instrument, rater and protocol together, or keep it as legacy data.",
+            )
+        )
+
     findings.extend(_quote_quality(conn))
 
     for row in conn.execute(

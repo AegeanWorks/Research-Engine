@@ -16,6 +16,9 @@ CLAIM_STATUSES = (
 )
 ATTEMPT_OUTCOMES = ("completed", "subject_failed", "infra_failed", "indeterminate")
 REPLACEABLE_ATTEMPT_OUTCOMES = ("infra_failed", "indeterminate")
+INSTRUMENT_KINDS = ("rubric", "script", "assay", "survey", "sensor", "other")
+RATER_KINDS = ("human", "llm", "automated", "none")
+AGGREGATIONS = ("raw", "mean", "median", "p95", "sum")
 PROMOTED_STATUSES = ("PROVEN", "NUMERIC")
 FAILED_STATUSES = ("FALSIFIED", "RETRACTED", "INVALIDATED")
 NON_SUPPORTING_STATUSES = FAILED_STATUSES + ("UNKNOWN",)
@@ -193,6 +196,26 @@ class Observation:
     at: str
     voided: bool
     void_reason: str
+    instrument_kind: str = ""
+    instrument_id: str = ""
+    instrument_digest: str = ""
+    rater_kind: str = ""
+    rater_id: str = ""
+    rater_version: str = ""
+    protocol_id: str = ""
+    sample_size: int = 1
+    aggregation: str = "raw"
+    unit: str = ""
+
+
+@dataclass(frozen=True)
+class Protocol:
+    id: str
+    measures: str
+    includes_generation: bool
+    includes_judge: bool
+    doc_digest: str
+    registered_at: str
 
 
 @dataclass(frozen=True)

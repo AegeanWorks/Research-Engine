@@ -224,6 +224,92 @@ def expose(conn: sqlite3.Connection, claim_ref: str) -> dict:
     }
 
 
+def _group_provenance(conn: sqlite3.Connection, claim_id: str, label: str) -> dict:
+    """Protocols, instruments and units recorded for one observation group."""
+    rows = conn.execute(
+        "SELECT protocol_id, instrument_id, instrument_digest, rater_id, rater_version, unit"
+        " FROM observation WHERE claim_id = ? AND group_label = ? AND voided = 0 ORDER BY id",
+        (claim_id, label),
+    ).fetchall()
+    protocols = sorted({str(row["protocol_id"]) for row in rows if str(row["protocol_id"]).strip()})
+    instruments = sorted(
+        {
+            (
+                str(row["instrument_id"]),
+                str(row["instrument_digest"]),
+                str(row["rater_id"]),
+                str(row["rater_version"]),
+            )
+            for row in rows
+            if str(row["instrument_id"]).strip() or str(row["rater_id"]).strip()
+        }
+    )
+    units = sorted({str(row["unit"]) for row in rows if str(row["unit"]).strip()})
+    missing = any(not str(row["protocol_id"]).strip() for row in rows)
+    return {
+        "protocols": protocols,
+        "instruments": instruments,
+        "units": units,
+        "missing": missing,
+    }
+
+
+def _comparability(
+    baseline: dict, treatment: dict, allow_incomparable: bool
+) -> tuple[bool, str, dict]:
+    """Whether two groups measure the same quantity under the same procedure."""
+    if baseline["protocols"] and baseline["missing"]:
+        raise EngineError(
+            "baseline group mixes provenanced and unprovenanced observations",
+            "a group with some protocol records and some legacy rows cannot be compared.",
+            "void the legacy rows or record their provenance before comparing.",
+        )
+    if treatment["protocols"] and treatment["missing"]:
+        raise EngineError(
+            "treatment group mixes provenanced and unprovenanced observations",
+            "a group with some protocol records and some legacy rows cannot be compared.",
+            "void the legacy rows or record their provenance before comparing.",
+        )
+    baseline_protocol = baseline["protocols"][0] if baseline["protocols"] else ""
+    treatment_protocol = treatment["protocols"][0] if treatment["protocols"] else ""
+    reason = ""
+    if len(baseline["protocols"]) > 1 or len(treatment["protocols"]) > 1:
+        reason = "a group records more than one protocol"
+    elif baseline_protocol and treatment_protocol and baseline_protocol != treatment_protocol:
+        reason = f"different protocols: {baseline_protocol} vs {treatment_protocol}"
+    elif len(baseline["instruments"]) > 1 or len(treatment["instruments"]) > 1:
+        reason = "a group records more than one instrument or rater"
+    elif (
+        baseline["instruments"]
+        and treatment["instruments"]
+        and baseline["instruments"] != treatment["instruments"]
+    ):
+        reason = "same protocol, different instrument or rater"
+    elif (
+        baseline["units"]
+        and treatment["units"]
+        and baseline["units"] != treatment["units"]
+    ):
+        reason = f"different units: {', '.join(baseline['units'])} vs {', '.join(treatment['units'])}"
+    if reason and not allow_incomparable:
+        raise EngineError(
+            f"measurements are not comparable: {reason}",
+            "a delta between different protocols, instruments or units is not the same quantity.",
+            "record comparable measurements, or pass --allow-incomparable with a stated caveat.",
+        )
+    comparable = not reason
+    details = {
+        "comparable": comparable,
+        "reason": reason or "same protocol, instrument and unit",
+        "baseline_protocol": baseline_protocol,
+        "treatment_protocol": treatment_protocol,
+        "baseline_unit": baseline["units"][0] if len(baseline["units"]) == 1 else "",
+        "treatment_unit": treatment["units"][0] if len(treatment["units"]) == 1 else "",
+        "unprovenanced": not baseline_protocol or not treatment_protocol,
+    }
+    return comparable, reason, details
+
+
 def claim_statistics(
     conn: sqlite3.Connection,
     claim_ref: str,
@@ -231,6 +317,7 @@ def claim_statistics(
     treatment: str,
     seed: int = DEFAULT_SEED,
     resamples: int = DEFAULT_RESAMPLES,
+    allow_incomparable: bool = False,
     actor: str = "agent",
 ) -> dict:
     """Compare two observation groups of a claim and record that the comparison happened."""
@@ -258,7 +345,19 @@ def claim_statistics(
                 "a comparison needs recorded values in both groups.",
                 f"add values with `observation add`, or choose one of: {available}.",
             )
+    comparable, reason, details = _comparability(
+        _group_provenance(conn, claim.id, baseline),
+        _group_provenance(conn, claim.id, treatment),
+        allow_incomparable,
+    )
     result = compare_groups(groups[baseline], groups[treatment], seed=seed, resamples=resamples)
+    result["comparability"] = details
+    if not comparable:
+        result["warnings"].append(f"incomparable comparison allowed: {reason}")
+    elif details["unprovenanced"]:
+        result["warnings"].append(
+            "one or both groups have no measurement provenance; the comparison is unverified"
+        )
     if len(groups) > 2:
         result["warnings"].append(
             f"{len(groups)} groups recorded; this single pairwise test is uncorrected"
@@ -271,6 +370,11 @@ def claim_statistics(
         f" d={result['cohens_d']:.3f} welch_p={result['welch']['p']:.4g}"
         f" mwu_p={result['mann_whitney']['p']:.4g}"
     )
+    if details["baseline_protocol"] or details["treatment_protocol"]:
+        detail += (
+            f" protocol={details['baseline_protocol'] or '-'}"
+            f"/{details['treatment_protocol'] or '-'}"
+        )
     with transaction(conn):
         record_event(
             conn,
@@ -288,7 +392,10 @@ def observation_summary(conn: sqlite3.Connection, claim_ref: str) -> List[dict]:
     claim = get_claim(conn, claim_ref)
     rows = conn.execute(
         "SELECT group_label, COUNT(*) AS n, MIN(value) AS low, MAX(value) AS high,"
-        " AVG(value) AS mean FROM observation WHERE claim_id = ? AND voided = 0"
+        " AVG(value) AS mean, GROUP_CONCAT(DISTINCT protocol_id) AS protocols,"
+        " GROUP_CONCAT(DISTINCT unit) AS units,"
+        " GROUP_CONCAT(DISTINCT instrument_id) AS instruments"
+        " FROM observation WHERE claim_id = ? AND voided = 0"
         " GROUP BY group_label ORDER BY group_label",
         (claim.id,),
     ).fetchall()
@@ -299,6 +406,11 @@ def observation_summary(conn: sqlite3.Connection, claim_ref: str) -> List[dict]:
             "min": float(row["low"]),
             "max": float(row["high"]),
             "mean": float(row["mean"]),
+            "protocols": [item for item in str(row["protocols"] or "").split(",") if item],
+            "units": [item for item in str(row["units"] or "").split(",") if item],
+            "instruments": [
+                item for item in str(row["instruments"] or "").split(",") if item
+            ],
         }
         for row in rows
     ]
