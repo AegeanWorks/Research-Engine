@@ -152,6 +152,14 @@ class MigrationTests(unittest.TestCase):
         }
         self.assertIn("protocol", tables)
 
+    def test_migration_adds_event_nesting_columns(self) -> None:
+        path = self._old_database()
+        conn = connect(path)
+        self.addCleanup(conn.close)
+        initialize(conn)
+        columns = {row["name"] for row in conn.execute("PRAGMA table_info(event)")}
+        self.assertTrue({"seq", "root_id", "parent_id"} <= columns)
+
     def test_migration_is_idempotent(self) -> None:
         path = self._old_database()
         conn = connect(path)

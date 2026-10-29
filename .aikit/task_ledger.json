@@ -5,36 +5,12 @@
     "last_phase": "phase 4",
     "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1793302278.1218705,
+    "updated_at": 1793302645.6874359,
     "owner": "opencode:research-engine",
     "started_by": "opencode:research-engine",
     "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "reforge:run-1",
-      "phase": "reforge stage 1",
-      "phase_num": 3,
-      "description": "Reforge stage 1: window 3, 3 commit(s), 2 file(s) reviewed (unreviewed), 0 finding(s), 0 repaired",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793292612.524003,
-      "timestamp_str": "2026-10-29 19:50:12",
-      "agent": "opencode"
-    },
-    {
-      "task_id": "reforge:run-1",
-      "phase": "reforge stage 2",
-      "phase_num": 3,
-      "description": "Reforge stage 2: window 6, 3 commit(s), 2 file(s) reviewed (unreviewed), 0 finding(s), 0 repaired, 1 binary not analysed",
-      "files_affected": [
-        "assets/social-preview.png"
-      ],
-      "status": "in_progress",
-      "timestamp": 1793292672.3308318,
-      "timestamp_str": "2026-10-29 19:51:12",
-      "agent": "opencode"
-    },
     {
       "task_id": "reforge:run-1",
       "phase": "reforge stage 3",
@@ -265,6 +241,34 @@
       "status": "in_progress",
       "timestamp": 1793302278.1218705,
       "timestamp_str": "2026-10-29 22:31:18",
+      "agent": "opencode:research-engine"
+    },
+    {
+      "task_id": "T-012-evidence-integrity",
+      "phase": "planning",
+      "phase_num": 2,
+      "description": "[5/6] Nested event provenance: schema 9 seq/root_id/parent_id, event tree and path, same-program parent validation",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793302354.5110598,
+      "timestamp_str": "2026-10-29 22:32:34",
+      "agent": "opencode:research-engine",
+      "impact_assessment": {
+        "why": "The event log is flat, so a reviewer cannot see which action caused a cascade, merge or report write",
+        "benefits": "Every new event carries a per-program sequence and a root/parent link; events tree and events path render the causal chain",
+        "risks": "contract: three event columns and schema 9; dependency: stdlib only; concurrency: sequence allocated inside the writer transaction; state: legacy events default to root-less seq 0",
+        "mitigation": "Failing-first nesting, orphan, cross-program and CLI tests; full suite and 4/4 gates before commit"
+      }
+    },
+    {
+      "task_id": "T-012-evidence-integrity",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[5/6] Nested event provenance delivered: schema 9 seq/root_id/parent_id, events tree/path, same-program parent validation, legacy event fallback; 362 tests pass; 4/4 gates pass; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793302645.6874359,
+      "timestamp_str": "2026-10-29 22:37:25",
       "agent": "opencode:research-engine"
     }
   ]

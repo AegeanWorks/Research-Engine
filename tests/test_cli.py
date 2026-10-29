@@ -30,7 +30,7 @@ class CliTests(unittest.TestCase):
     def test_init_and_demo(self) -> None:
         code, out, _ = self.run_cli("init")
         self.assertEqual(code, 0)
-        self.assertIn("schema 8", out)
+        self.assertIn("schema 9", out)
         code, out, _ = self.run_cli("--json", "demo")
         self.assertEqual(code, 0)
         payload = json.loads(out)
@@ -234,6 +234,25 @@ class CliTests(unittest.TestCase):
         self.assertEqual(code, 0)
         self.assertIn("source.status", out)
         self.assertIn("s_000001", out)
+
+    def test_event_tree_and_path(self) -> None:
+        self.run_cli("demo")
+        from engine.database import connect
+        from engine.events import record
+
+        conn = connect(self.db)
+        self.addCleanup(conn.close)
+        root = record(conn, "nested.root", "root", research_id="r_000001")
+        child = record(conn, "nested.child", "child", research_id="r_000001",
+                       parent_id=root.id)
+        conn.close()
+        code, out, _ = self.run_cli("events", "--tree", root.id)
+        self.assertEqual(code, 0)
+        self.assertIn("nested.child", out)
+        code, out, _ = self.run_cli("events", "--path", child.id)
+        self.assertEqual(code, 0)
+        self.assertIn("nested.root", out)
+        self.assertIn("nested.child", out)
 
     def test_db_integrity_and_backup(self) -> None:
         self.run_cli("demo")

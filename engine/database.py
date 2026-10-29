@@ -10,7 +10,7 @@ from typing import Iterator
 from engine.artifacts import utc_now
 from engine.errors import EngineError
 
-SCHEMA_VERSION = 8
+SCHEMA_VERSION = 9
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS schema_meta (
@@ -184,7 +184,10 @@ CREATE TABLE IF NOT EXISTS event (
     kind TEXT NOT NULL,
     subject TEXT NOT NULL,
     detail TEXT NOT NULL DEFAULT '',
-    actor TEXT NOT NULL DEFAULT 'agent'
+    actor TEXT NOT NULL DEFAULT 'agent',
+    seq INTEGER NOT NULL DEFAULT 0,
+    root_id TEXT NOT NULL DEFAULT '',
+    parent_id TEXT NOT NULL DEFAULT ''
 );
 CREATE TABLE IF NOT EXISTS invalidation (
     id TEXT PRIMARY KEY,
@@ -264,6 +267,11 @@ _MIGRATIONS = {
         ("observation", "aggregation", "TEXT NOT NULL DEFAULT 'raw'"),
         ("observation", "unit", "TEXT NOT NULL DEFAULT ''"),
     ),
+    8: (
+        ("event", "seq", "INTEGER NOT NULL DEFAULT 0"),
+        ("event", "root_id", "TEXT NOT NULL DEFAULT ''"),
+        ("event", "parent_id", "TEXT NOT NULL DEFAULT ''"),
+    ),
 }
 
 
@@ -275,6 +283,9 @@ def _ensure_indexes(conn: sqlite3.Connection) -> None:
     )
     conn.execute(
         "CREATE INDEX IF NOT EXISTS idx_observation_protocol ON observation(protocol_id)"
+    )
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_event_root ON event(root_id, seq)"
     )
 
 

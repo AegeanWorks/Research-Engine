@@ -90,8 +90,9 @@ deliberately not copied. Domain content stays in the programs the engine hosts.
     source warns (`SCREEN-001`).
 15. **Measurements are recorded, not retyped.** `observation add` stores each value in a named group; with `--instrument-*`, `--rater-*` and `--protocol` it also stores what produced the number, and `analysis stats` refuses to compare different protocols, instruments or units unless `--allow-incomparable` is explicit. `observation void` retires one with a reason. A claim with observations but no statistics run warns (`OBS-001`), and an unprovenanced observation warns (`OBS-002`).
 16. **Every non-verdict action is logged.** Source status changes, screening, merges, report
-    generation and schema migration append to an event log; `events` lists it newest first.
-    Verdicts keep their own append-only history.
+    generation and schema migration append to an event log with a per-program sequence and an
+    optional parent, so `events --tree` and `events --path` can render the causal chain. Verdicts
+    keep their own append-only history.
 
 ## Verdict Vocabulary
 
@@ -189,6 +190,8 @@ python -m engine [--db PATH] diff OLD.jsonl NEW.jsonl [--exact]
 python -m engine [--db PATH] db integrity
 python -m engine [--db PATH] db backup PATH
 python -m engine [--db PATH] events [--research REF] [--kind K] [--limit N]
+python -m engine [--db PATH] events --tree ROOT
+python -m engine [--db PATH] events --path EVENT
 python -m engine [--db PATH] scorecard REF
 python -m engine [--db PATH] export PATH [--research REF] [--check]
 ```
@@ -233,16 +236,16 @@ Warnings are research hygiene; errors block a trustworthy report.
 
 ## Data Model
 
-One SQLite file (default `research.db`), schema version 8. Tables: `research`, `source`,
+One SQLite file (default `research.db`), schema version 9. Tables: `research`, `source`,
 `question`, `claim`, `edge`, `hypothesis`, `killtest`, `test_run`, `test_attempt`, `verdict`,
 `invalidation`, `observation`, `protocol`, `event`, plus `schema_meta` and `counters`. `claim`
 carries `revision_of`, `superseded_by` and `revision_reason`; a revision is a new row, never an
 edit. `observation` carries the instrument, rater, protocol, sample size, aggregation and unit
-recorded with the value. Writes use `BEGIN IMMEDIATE`; WAL and `synchronous=FULL` are enabled for
-a durable state file. `verdict`, `test_run`, `test_attempt`, `event`, `observation` and
-`invalidation` are append-only (an observation is voided, never edited or deleted). `export`
-includes attempts, observations, protocols and the event log; the manifest digests cover evidence
-records and exclude the log.
+recorded with the value. `event` carries a per-program `seq`, `root_id` and `parent_id`. Writes
+use `BEGIN IMMEDIATE`; WAL and `synchronous=FULL` are enabled for a durable state file. `verdict`,
+`test_run`, `test_attempt`, `event`, `observation` and `invalidation` are append-only (an
+observation is voided, never edited or deleted). `export` includes attempts, observations,
+protocols and the event log; the manifest digests cover evidence records and exclude the log.
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Non-Negotiables

@@ -52,7 +52,7 @@ from engine.protocols import list_protocols, register_protocol
 from engine.researches import create_research, get_research, list_researches, research_counts
 from engine.screening import prisma_flow, set_screening
 from engine.sources import add_source, list_sources, set_source_status
-from engine.events import list_events
+from engine.events import event_path, event_tree, list_events
 from engine.maintenance import backup, integrity_check
 from engine.manifest import check_report, write_report
 from engine.observations import (
@@ -325,6 +325,9 @@ def _build_parser() -> argparse.ArgumentParser:
     events_c.add_argument("--research")
     events_c.add_argument("--kind")
     events_c.add_argument("--limit", type=int, default=50)
+    event_view = events_c.add_mutually_exclusive_group()
+    event_view.add_argument("--tree", metavar="ROOT", help="render a causal tree from a root event")
+    event_view.add_argument("--path", metavar="EVENT", help="render the root-to-event chain")
 
     diff_c = commands.add_parser("diff", help="compare two exported snapshots")
     diff_c.add_argument("old")
@@ -722,6 +725,26 @@ def main(argv: List[str] | None = None) -> int:
                 text = f"backup: {result['path']} ({result['bytes']} bytes, verified)\n"
                 return _emit(result, args.json, text)
             if args.command == "events":
+                if args.tree:
+                    tree = event_tree(conn, args.tree)
+                    text = "".join(
+                        "  " * item["depth"]
+                        + f"{item['event'].id} seq {item['event'].seq} {item['event'].kind}"
+                        + f" {item['event'].subject} {item['event'].detail}\n"
+                        for item in tree
+                    )
+                    payload = [
+                        {"depth": item["depth"], "event": asdict(item["event"])}
+                        for item in tree
+                    ]
+                    return _emit(payload, args.json, text)
+                if args.path:
+                    chain = event_path(conn, args.path)
+                    text = "".join(
+                        f"{event.id} seq {event.seq} {event.kind} {event.subject}\n"
+                        for event in chain
+                    )
+                    return _emit(_records_payload(chain), args.json, text)
                 records = list_events(conn, args.research, args.kind, args.limit)
                 text = "".join(
                     f"{e.at}  {e.kind:<18} {e.subject:<14} {e.detail}\n" for e in records

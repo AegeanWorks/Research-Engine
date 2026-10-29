@@ -7,7 +7,8 @@ import unittest
 from pathlib import Path
 
 from engine.claims import add_claim
-from engine.events import count, list_events, record
+from engine.errors import EngineError
+from engine.events import count, event_path, event_tree, list_events, record
 from engine.manifest import write_report
 from engine.merging import merge_claims
 from engine.screening import set_screening
@@ -33,6 +34,42 @@ class EventTests(DatabaseCase):
     def test_detail_is_flattened(self) -> None:
         event = record(self.conn, "x", "s", "line one\nline two\x00")
         self.assertEqual(event.detail, "line one line two")
+
+    def test_nested_events_form_a_tree_and_path(self) -> None:
+        research = self.add_research()
+        root = record(self.conn, "root", "a", research_id=research)
+        child = record(self.conn, "child", "b", research_id=research, parent_id=root.id)
+        grand = record(self.conn, "grand", "c", research_id=research, parent_id=child.id)
+        self.assertEqual([root.seq, child.seq, grand.seq], [1, 2, 3])
+        self.assertEqual(child.root_id, root.id)
+        self.assertEqual(grand.root_id, root.id)
+        tree = event_tree(self.conn, root.id)
+        self.assertEqual(
+            [(item["depth"], item["event"].id) for item in tree],
+            [(0, root.id), (1, child.id), (2, grand.id)],
+        )
+        self.assertEqual(
+            [event.id for event in event_path(self.conn, grand.id)],
+            [root.id, child.id, grand.id],
+        )
+
+    def test_orphan_parent_is_refused(self) -> None:
+        with self.assertRaises(EngineError):
+            record(self.conn, "child", "b", parent_id="ev_999999")
+
+    def test_cross_program_parent_is_refused(self) -> None:
+        first = self.add_research("First")
+        second = self.add_research("Second")
+        root = record(self.conn, "root", "a", research_id=first)
+        with self.assertRaises(EngineError):
+            record(self.conn, "child", "b", research_id=second, parent_id=root.id)
+
+    def test_tree_rejects_a_non_root(self) -> None:
+        research = self.add_research()
+        root = record(self.conn, "root", "a", research_id=research)
+        child = record(self.conn, "child", "b", research_id=research, parent_id=root.id)
+        with self.assertRaises(EngineError):
+            event_tree(self.conn, child.id)
 
     def test_source_status_is_recorded(self) -> None:
         research = self.add_research()

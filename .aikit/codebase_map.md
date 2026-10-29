@@ -8,9 +8,9 @@
 ## 📊 Codebase Metrics
 - **Total Python Modules**: `71`
 - **Total Classes**: `62`
-- **Total Top-Level Functions**: `215`
-- **Total Class Methods**: `401`
-- **Total Source Lines**: `11709`
+- **Total Top-Level Functions**: `218`
+- **Total Class Methods**: `407`
+- **Total Source Lines**: `11906`
 
 ---
 
@@ -137,7 +137,7 @@
 ### [`engine/cli.py`](engine/cli.py)
 > *Command-line surface: one entry point for every engine mechanic.*
 
-**Size**: `876` lines (`43076` bytes)
+**Size**: `899` lines (`44335` bytes)
 
 **Functions:**
 - `def _build_parser()`
@@ -179,7 +179,7 @@
 ### [`engine/database.py`](engine/database.py)
 > *SQLite connection, schema versioning and atomic transactions.*
 
-**Size**: `389` lines (`14942` bytes)
+**Size**: `400` lines (`15345` bytes)
 
 **Functions:**
 - `def connect(path)` - *Open a database with durability pragmas suitable for a state file.*
@@ -235,16 +235,19 @@
 ### [`engine/events.py`](engine/events.py)
 > *Append-only event log for actions that are not verdicts.*
 
-**Size**: `97` lines (`2843` bytes)
+**Size**: `196` lines (`6579` bytes)
 
 **Classes:**
 - `class Event`
 
 **Functions:**
 - `def _to_event(row)`
-- `def record(conn, kind, subject, detail, research_id, actor)` - *Append one event. Callers run inside their own write transaction.*
+- `def record(conn, kind, subject, detail, research_id, actor, parent_id)` - *Append one event. Callers run inside their own write transaction.*
 - `def list_events(conn, research_ref, kind, limit)` - *Recent events, newest first, optionally filtered by program and kind.*
 - `def count(conn)` - *Total recorded events.*
+- `def _one_event(conn, ref)`
+- `def event_path(conn, ref)` - *The causal chain from the root event to one event, root first.*
+- `def event_tree(conn, ref)` - *A root event and its descendants, breadth-first with a depth per event.*
 
 ---
 
@@ -720,7 +723,7 @@
 ### [`tests/test_cli.py`](tests/test_cli.py)
 > *The CLI surface: JSON output, exit codes and the error triad.*
 
-**Size**: `355` lines (`14383` bytes)
+**Size**: `374` lines (`15158` bytes)
 
 **Classes:**
 - `class CliTests`
@@ -744,6 +747,7 @@
   - Method `.test_claim_revision_commands()`
   - Method `.test_screening_and_prisma()`
   - Method `.test_events_are_listed()`
+  - Method `.test_event_tree_and_path()`
   - Method `.test_db_integrity_and_backup()`
   - Method `.test_negative_control_through_the_cli()`
   - Method `.test_observations_and_statistics()`
@@ -837,13 +841,17 @@
 ### [`tests/test_events.py`](tests/test_events.py)
 > *Event log: append-only record of actions that are not verdicts.*
 
-**Size**: `97` lines (`4089` bytes)
+**Size**: `134` lines (`5869` bytes)
 
 **Classes:**
 - `class EventTests`
   - Method `.test_record_and_list_newest_first()`
   - Method `.test_filters_by_kind_and_research()`
   - Method `.test_detail_is_flattened()`
+  - Method `.test_nested_events_form_a_tree_and_path()`
+  - Method `.test_orphan_parent_is_refused()`
+  - Method `.test_cross_program_parent_is_refused()`
+  - Method `.test_tree_rejects_a_non_root()`
   - Method `.test_source_status_is_recorded()`
   - Method `.test_screening_is_recorded()`
   - Method `.test_merge_is_recorded_once()`
@@ -1088,7 +1096,7 @@
 ### [`tests/test_migration.py`](tests/test_migration.py)
 > *Schema migration: an older database is repaired, not rejected or wiped.*
 
-**Size**: `264` lines (`11036` bytes)
+**Size**: `272` lines (`11380` bytes)
 
 **Classes:**
 - `class MigrationTests`
@@ -1099,6 +1107,7 @@
   - Method `.test_migration_adds_the_claim_revision_columns()`
   - Method `.test_migration_adds_observation_provenance_columns()`
   - Method `.test_migration_creates_the_protocol_table()`
+  - Method `.test_migration_adds_event_nesting_columns()`
   - Method `.test_migration_is_idempotent()`
   - Method `.test_future_version_is_refused_without_changes()`
   - Method `.test_future_version_is_refused_before_creating_tables()`

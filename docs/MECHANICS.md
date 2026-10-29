@@ -260,8 +260,9 @@ those belong to licence issuance, not to evidence.
 into place atomically; every mutation leaves an audit trail.
 
 **Rule here.** `db backup` uses `sqlite3.Connection.backup`, verifies the copy, fsyncs and renames;
-an existing target is refused. `event` records source status, screening, merges, report generation
-and migrations, inside the writer's transaction.
+an existing target is refused. `event` records source status, screening, merges, revisions, report
+generation and migrations, inside the writer's transaction. Each event also carries a per-program
+sequence and an optional parent; `events --tree` and `events --path` render the causal chain.
 
 **Deliberately not copied.** The commercial key store, issuance workflow and web console.
 

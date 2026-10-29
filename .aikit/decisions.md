@@ -391,3 +391,18 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Consequences**: A numeric comparison now names the procedure it compares. The protocol id is
   immutable, so changing a procedure requires a new id. Legacy observations remain readable but
   are visibly unverified; comparisons involving them warn rather than silently passing.
+
+### ADR-030: Nested event provenance
+- **Date**: 2026-10-29
+- **Status**: Accepted
+- **Context**: The event log was flat, so a reviewer could see that a merge, cascade or report
+  write happened but not which action caused it. The source mechanic used a per-program sequence
+  plus root and parent ids to turn the log into a causal tree.
+- **Decision**: Bump the schema to 9 and add `seq`, `root_id` and `parent_id` to `event`. `record`
+  allocates the next per-program sequence inside the writer transaction; a parent must already
+  exist in the same program, and the child inherits its root. A root event points at itself.
+  `events --tree ROOT` renders the descendants breadth-first and `events --path EVENT` renders the
+  root-to-event chain. Legacy events keep `seq` 0 and no root.
+- **Consequences**: New events can be audited as a cause tree without a second store. A parent
+  that crosses a program boundary or does not exist is refused. The flat `events` listing remains
+  the default, so existing scripts are unaffected.

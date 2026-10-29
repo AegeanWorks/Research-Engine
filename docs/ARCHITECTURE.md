@@ -127,9 +127,10 @@ raises the version, returning a report with the starting version and how many nu
 their binding. `CREATE TABLE IF NOT EXISTS` alone would leave an older table without its new
 columns, so `_add_missing_columns` inspects `PRAGMA table_info` and adds each missing column inside
 the same transaction. Version 6 adds the `test_attempt` table; version 7 adds the claim revision
-columns; version 8 adds the `protocol` table and the observation provenance columns. Existing run
-groups are not backfilled and remain on the legacy path until they are re-run; existing claims are
-revision heads with empty links; existing observations are legacy rows and warn `OBS-002`. Each version step is separate, so
+columns; version 8 adds the `protocol` table and the observation provenance columns; version 9
+adds the event sequence and causal links. Existing run groups are not backfilled and remain on the
+legacy path until they are re-run; existing claims are revision heads with empty links; existing
+observations are legacy rows and warn `OBS-002`; existing events keep `seq` 0 and no root. Each version step is separate, so
 a version-1 database passes through the version-2 step and then the version-3 step. A version
 newer than the build is refused without modification, and the migration preserves existing rows,
 including legacy runs whose binding columns are empty.
@@ -202,10 +203,13 @@ retraction remains the hard error.
 
 ## Event Log
 
-`event` is append-only: `id`, `at`, `research_id`, `kind`, `subject`, `detail`, `actor`. It records
-the actions verdicts do not: `source.status`, `source.screening`, `claim.merge`, `report.write` and
-`db.migrate`. Writers append inside their own transaction, so an event never exists for an action
-that rolled back. `events` reads newest first with optional program and kind filters.
+`event` is append-only: `id`, `at`, `research_id`, `kind`, `subject`, `detail`, `actor`, `seq`,
+`root_id` and `parent_id`. It records the actions verdicts do not: `source.status`,
+`source.screening`, `claim.merge`, `claim.revise`, `report.write` and `db.migrate`. Writers append
+inside their own transaction, so an event never exists for an action that rolled back. A parent
+must already exist in the same program; the child inherits the parent's root and gets the next
+per-program sequence. `events` reads newest first, `events --tree` renders a root and its
+descendants breadth-first, and `events --path` renders one root-to-event chain.
 
 ## Observations and Statistics
 
