@@ -206,27 +206,46 @@ def report(conn: sqlite3.Connection, research_ref: str) -> str:
         " MIN(value) AS low, MAX(value) AS high,"
         " GROUP_CONCAT(DISTINCT protocol_id) AS protocols,"
         " GROUP_CONCAT(DISTINCT unit) AS units,"
-        " GROUP_CONCAT(DISTINCT instrument_id) AS instruments FROM observation"
+        " GROUP_CONCAT(DISTINCT instrument_id) AS instruments,"
+        " GROUP_CONCAT(DISTINCT provenance_class) AS classes FROM observation"
         " WHERE research_id = ? AND voided = 0"
         " GROUP BY claim_id, group_label ORDER BY claim_id, group_label",
         (research.id,),
     ).fetchall()
+    main_rows = [
+        row for row in measured if "self_reported" not in str(row["classes"] or "")
+    ]
+    self_rows = [
+        row for row in measured if "self_reported" in str(row["classes"] or "")
+    ]
     if not measured:
         lines.append("_No observations recorded._")
     else:
-        lines.extend(
-            [
-                "| Claim | Group | n | min | mean | max | Protocol | Unit | Instrument |",
-                "|---|---|---|---|---|---|---|---|---|",
-            ]
+        header = (
+            "| Claim | Group | n | min | mean | max | Protocol | Unit | Instrument | Class |",
+            "|---|---|---|---|---|---|---|---|---|---|",
         )
-        for row in measured:
-            lines.append(
-                f"| {row['claim_id']} | {cell(row['group_label'], 40)} | {row['n']} | "
-                f"{float(row['low']):.4g} | {float(row['mean']):.4g} | {float(row['high']):.4g} | "
-                f"{cell(row['protocols'] or '-', 40)} | {cell(row['units'] or '-', 20)} | "
-                f"{cell(row['instruments'] or '-', 40)} |"
-            )
+        if main_rows:
+            lines.extend(header)
+            for row in main_rows:
+                lines.append(
+                    f"| {row['claim_id']} | {cell(row['group_label'], 40)} | {row['n']} | "
+                    f"{float(row['low']):.4g} | {float(row['mean']):.4g} | "
+                    f"{float(row['high']):.4g} | {cell(row['protocols'] or '-', 40)} | "
+                    f"{cell(row['units'] or '-', 20)} | "
+                    f"{cell(row['instruments'] or '-', 40)} | {row['classes'] or '-'} |"
+                )
+        if self_rows:
+            lines.extend(["", "### Self-reported measurements", ""])
+            lines.extend(header)
+            for row in self_rows:
+                lines.append(
+                    f"| {row['claim_id']} | {cell(row['group_label'], 40)} | {row['n']} | "
+                    f"{float(row['low']):.4g} | {float(row['mean']):.4g} | "
+                    f"{float(row['high']):.4g} | {cell(row['protocols'] or '-', 40)} | "
+                    f"{cell(row['units'] or '-', 20)} | "
+                    f"{cell(row['instruments'] or '-', 40)} | {row['classes']} |"
+                )
         latest_runs = conn.execute(
             "SELECT subject, kind, at, detail FROM event"
             " WHERE research_id = ? AND kind IN ('claim.stats', 'claim.trend') ORDER BY id",

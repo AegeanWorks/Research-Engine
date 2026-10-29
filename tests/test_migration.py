@@ -137,6 +137,9 @@ class MigrationTests(unittest.TestCase):
                 "sample_size",
                 "aggregation",
                 "unit",
+                "provenance_class",
+                "producer_path",
+                "producer_digest",
             }
             <= columns
         )

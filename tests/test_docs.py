@@ -59,7 +59,7 @@ class DocsTests(unittest.TestCase):
 
     def test_readme_documents_the_current_schema_and_gates(self) -> None:
         text = (ROOT / "README.md").read_text(encoding="utf-8")
-        self.assertIn("schema version 9", text)
+        self.assertIn("schema version 10", text)
         for code in ("EVID-005", "EVID-006", "EVID-008", "EVID-009", "PROV-003", "SCREEN-001",
                      "TEST-001", "OBS-001"):
             self.assertIn(code, text)

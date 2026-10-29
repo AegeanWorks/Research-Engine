@@ -290,6 +290,12 @@ instruments, raters or units unless `--allow-incomparable` is explicit; a legacy
 provenance warns `OBS-002`. This makes "the metric improved" a claim about a named procedure, not
 a bare number.
 
+**Extension: self-produced metrics.** `provenance_class` marks a measurement `independent`,
+`self_reported` or `unclassified`; a self-reported value must name its `producer_path`. Reports
+list self-reported measurements separately. A comparison involving one is refused unless
+`--allow-self-reported` is explicit, so a system cannot quietly cite its own generator as
+independent evidence.
+
 **Deliberately not copied.** The intervention/baseline domain model, the medical metrics, pandas,
 scipy, SQLAlchemy and PyQt. The port is stdlib-only and deterministic; the reference bootstrap is
 unseeded, which this project does not reproduce.

@@ -10,7 +10,7 @@ from typing import Iterator
 from engine.artifacts import utc_now
 from engine.errors import EngineError
 
-SCHEMA_VERSION = 9
+SCHEMA_VERSION = 10
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS schema_meta (
@@ -167,7 +167,10 @@ CREATE TABLE IF NOT EXISTS observation (
     protocol_id TEXT NOT NULL DEFAULT '',
     sample_size INTEGER NOT NULL DEFAULT 1,
     aggregation TEXT NOT NULL DEFAULT 'raw',
-    unit TEXT NOT NULL DEFAULT ''
+    unit TEXT NOT NULL DEFAULT '',
+    provenance_class TEXT NOT NULL DEFAULT 'unclassified',
+    producer_path TEXT NOT NULL DEFAULT '',
+    producer_digest TEXT NOT NULL DEFAULT ''
 );
 CREATE TABLE IF NOT EXISTS protocol (
     id TEXT PRIMARY KEY,
@@ -271,6 +274,11 @@ _MIGRATIONS = {
         ("event", "seq", "INTEGER NOT NULL DEFAULT 0"),
         ("event", "root_id", "TEXT NOT NULL DEFAULT ''"),
         ("event", "parent_id", "TEXT NOT NULL DEFAULT ''"),
+    ),
+    9: (
+        ("observation", "provenance_class", "TEXT NOT NULL DEFAULT 'unclassified'"),
+        ("observation", "producer_path", "TEXT NOT NULL DEFAULT ''"),
+        ("observation", "producer_digest", "TEXT NOT NULL DEFAULT ''"),
     ),
 }
 

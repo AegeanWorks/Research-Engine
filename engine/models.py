@@ -19,6 +19,7 @@ REPLACEABLE_ATTEMPT_OUTCOMES = ("infra_failed", "indeterminate")
 INSTRUMENT_KINDS = ("rubric", "script", "assay", "survey", "sensor", "other")
 RATER_KINDS = ("human", "llm", "automated", "none")
 AGGREGATIONS = ("raw", "mean", "median", "p95", "sum")
+PROVENANCE_CLASSES = ("independent", "self_reported", "unclassified")
 PROMOTED_STATUSES = ("PROVEN", "NUMERIC")
 FAILED_STATUSES = ("FALSIFIED", "RETRACTED", "INVALIDATED")
 NON_SUPPORTING_STATUSES = FAILED_STATUSES + ("UNKNOWN",)
@@ -206,6 +207,9 @@ class Observation:
     sample_size: int = 1
     aggregation: str = "raw"
     unit: str = ""
+    provenance_class: str = "unclassified"
+    producer_path: str = ""
+    producer_digest: str = ""
 
 
 @dataclass(frozen=True)

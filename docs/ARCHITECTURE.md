@@ -128,9 +128,10 @@ their binding. `CREATE TABLE IF NOT EXISTS` alone would leave an older table wit
 columns, so `_add_missing_columns` inspects `PRAGMA table_info` and adds each missing column inside
 the same transaction. Version 6 adds the `test_attempt` table; version 7 adds the claim revision
 columns; version 8 adds the `protocol` table and the observation provenance columns; version 9
-adds the event sequence and causal links. Existing run groups are not backfilled and remain on the
-legacy path until they are re-run; existing claims are revision heads with empty links; existing
-observations are legacy rows and warn `OBS-002`; existing events keep `seq` 0 and no root. Each version step is separate, so
+adds the event sequence and causal links; version 10 adds the observation provenance class and
+producer identity. Existing run groups are not backfilled and remain on the legacy path until they
+are re-run; existing claims are revision heads with empty links; existing observations are
+unclassified legacy rows and warn `OBS-002`/`OBS-003`; existing events keep `seq` 0 and no root. Each version step is separate, so
 a version-1 database passes through the version-2 step and then the version-3 step. A version
 newer than the build is refused without modification, and the migration preserves existing rows,
 including legacy runs whose binding columns are empty.
@@ -217,11 +218,15 @@ descendants breadth-first, and `events --path` renders one root-to-event chain.
 timestamp, and a `voided` flag with a reason. A provenanced row also carries the instrument
 (kind, id, digest), rater (kind, id, version), protocol id, sample size, aggregation and unit.
 Provenance is all-or-nothing: pass the whole set or none. `protocol` is an immutable registry of
-named measurement procedures; an unregistered id is refused. `analysis stats` refuses to compare
-groups with different protocol ids, instruments, raters or units unless `--allow-incomparable` is
-explicit, and then records the caveat. A legacy observation without provenance warns `OBS-002`.
-Rows are never edited or deleted; a wrong measurement is voided so the record keeps its history.
-`analysis stats` compares two groups through `engine/stats.py`, which is pure and stdlib-only:
+named measurement procedures; an unregistered id is refused. `provenance_class` is `independent`,
+`self_reported` or `unclassified`; a self-reported production must name a `producer_path`. `analysis
+stats` refuses to compare groups with different protocol ids, instruments, raters or units unless
+`--allow-incomparable` is explicit, and refuses a self-reported group unless
+`--allow-self-reported` is explicit. The report lists self-reported measurements in a separate
+table. A legacy observation without provenance warns `OBS-002`; an unclassified observation warns
+`OBS-003`; a self-reported observation warns `OBS-004`. Rows are never edited or deleted; a wrong
+measurement is voided so the record keeps its history. `analysis stats` compares two groups through
+`engine/stats.py`, which is pure and stdlib-only:
 
 | Quantity | Method | Notes |
 |---|---|---|

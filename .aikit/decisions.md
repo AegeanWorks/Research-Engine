@@ -406,3 +406,21 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Consequences**: New events can be audited as a cause tree without a second store. A parent
   that crosses a program boundary or does not exist is refused. The flat `events` listing remains
   the default, so existing scripts are unaffected.
+
+### ADR-031: Self-produced metric quarantine
+- **Date**: 2026-10-29
+- **Status**: Accepted
+- **Context**: A measurement produced by the system under study could enter the evidence base and
+  be compared with an independent measurement as if they were the same kind of observation. The
+  source idea classified a producer by module path; the engine has no module-under-study registry,
+  so that automatic classification would have been guesswork.
+- **Decision**: Bump the schema to 10 and add `provenance_class`, `producer_path` and
+  `producer_digest` to `observation`. The class is `independent`, `self_reported` or
+  `unclassified`; a self-reported value must name its producer path, and a producer digest is
+  validated when supplied. `analysis stats` refuses a comparison involving a self-reported group
+  unless `--allow-self-reported` is explicit, and refuses a group that mixes self-reported and
+  independent rows. The report prints self-reported measurements in a separate table. `OBS-003`
+  warns on unclassified rows and `OBS-004` on self-reported rows.
+- **Consequences**: Self-reported numbers stay available for diagnosis but cannot silently support
+  an independent comparison. The operator must state the class; the engine does not infer it from
+  a path. Legacy observations are unclassified and warn rather than being retroactively labelled.

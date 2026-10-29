@@ -154,6 +154,9 @@ def _build_parser() -> argparse.ArgumentParser:
     add_o.add_argument("--sample-size", type=int, default=1)
     add_o.add_argument("--aggregation", default="raw")
     add_o.add_argument("--unit", default="")
+    add_o.add_argument("--provenance-class", default="unclassified")
+    add_o.add_argument("--producer-path", default="")
+    add_o.add_argument("--producer-digest", default="")
     list_o = observation_sub.add_parser("list", help="list measurements of a claim")
     list_o.add_argument("claim")
     list_o.add_argument("--group")
@@ -310,6 +313,8 @@ def _build_parser() -> argparse.ArgumentParser:
     stats_c.add_argument("--resamples", type=int, default=2000)
     stats_c.add_argument("--allow-incomparable", action="store_true",
                          help="compare different protocols/instruments with a recorded caveat")
+    stats_c.add_argument("--allow-self-reported", action="store_true",
+                         help="allow a self-reported measurement with a recorded caveat")
     trend_c = analysis_sub.add_parser("trend", help="fit a trend over one observation group")
     trend_c.add_argument("claim")
     trend_c.add_argument("--group", required=True)
@@ -477,6 +482,9 @@ def _cmd_observation(conn: sqlite3.Connection, args) -> int:
             sample_size=args.sample_size,
             aggregation=args.aggregation,
             unit=args.unit,
+            provenance_class=args.provenance_class,
+            producer_path=args.producer_path,
+            producer_digest=args.producer_digest,
         )
         return _emit(record, args.json, f"{record.id} {record.group_label}={record.value}\n")
     if args.action == "void":
@@ -485,7 +493,7 @@ def _cmd_observation(conn: sqlite3.Connection, args) -> int:
     records = list_observations(conn, args.claim, args.group, args.include_voided)
     text = "".join(
         f"{o.id}  {o.group_label:<12} {o.value:12.6g}  {o.unit or '-'}"
-        f"  {o.protocol_id or '-'}  {o.at}"
+        f"  {o.protocol_id or '-'}  {o.provenance_class}  {o.at}"
         + ("  VOIDED" if o.voided else "") + "\n"
         for o in records
     ) or "no observations\n"
@@ -802,6 +810,7 @@ def main(argv: List[str] | None = None) -> int:
                         conn, args.claim, args.baseline, args.treatment,
                         seed=args.seed, resamples=args.resamples,
                         allow_incomparable=args.allow_incomparable,
+                        allow_self_reported=args.allow_self_reported,
                     )
                     text = (
                         f"{result['claim']} {result['baseline_label']} -> {result['treatment_label']}"

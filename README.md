@@ -88,7 +88,7 @@ deliberately not copied. Domain content stays in the programs the engine hosts.
     `identified`, `screened_in`/`screened_out` and `included`/`excluded`, with a reason from a
     closed taxonomy. `source prisma` and the report show the flow; a claim citing an excluded
     source warns (`SCREEN-001`).
-15. **Measurements are recorded, not retyped.** `observation add` stores each value in a named group; with `--instrument-*`, `--rater-*` and `--protocol` it also stores what produced the number, and `analysis stats` refuses to compare different protocols, instruments or units unless `--allow-incomparable` is explicit. `observation void` retires one with a reason. A claim with observations but no statistics run warns (`OBS-001`), and an unprovenanced observation warns (`OBS-002`).
+15. **Measurements are recorded, not retyped.** `observation add` stores each value in a named group; with `--instrument-*`, `--rater-*` and `--protocol` it also stores what produced the number, and `analysis stats` refuses to compare different protocols, instruments or units unless `--allow-incomparable` is explicit. `--provenance-class self_reported` quarantines a number produced by the system under study; reports list it separately and comparisons require `--allow-self-reported`. `observation void` retires one with a reason. A claim with observations but no statistics run warns (`OBS-001`), an unprovenanced observation warns (`OBS-002`), and an unclassified or self-reported observation warns (`OBS-003`/`OBS-004`).
 16. **Every non-verdict action is logged.** Source status changes, screening, merges, report
     generation and schema migration append to an event log with a per-program sequence and an
     optional parent, so `events --tree` and `events --path` can render the causal chain. Verdicts
@@ -141,6 +141,8 @@ python -m engine [--db PATH] observation add CLAIM --group LABEL --value F [--no
                         [--instrument-kind K] [--instrument-id ID] [--instrument-digest SHA256]
                         [--rater-kind K] [--rater-id ID] [--rater-version V]
                         [--protocol ID] [--sample-size N] [--aggregation METHOD] [--unit U]
+                        [--provenance-class independent|self_reported|unclassified]
+                        [--producer-path PATH] [--producer-digest SHA256]
 python -m engine [--db PATH] observation list CLAIM [--group LABEL] [--include-voided]
 python -m engine [--db PATH] observation void OBS --reason TEXT
 
@@ -184,7 +186,7 @@ python -m engine [--db PATH] analysis contradictions REF [--min-score S] [--unli
 python -m engine [--db PATH] analysis matrix REF
 python -m engine [--db PATH] analysis keystone REF [--limit N]
 python -m engine [--db PATH] analysis expose REF
-python -m engine [--db PATH] analysis stats CLAIM --baseline LABEL --treatment LABEL [--seed N] [--resamples N] [--allow-incomparable]
+python -m engine [--db PATH] analysis stats CLAIM --baseline LABEL --treatment LABEL [--seed N] [--resamples N] [--allow-incomparable] [--allow-self-reported]
 python -m engine [--db PATH] analysis trend CLAIM --group LABEL
 python -m engine [--db PATH] diff OLD.jsonl NEW.jsonl [--exact]
 python -m engine [--db PATH] db integrity
@@ -227,6 +229,8 @@ present and 0 when only warnings remain. Domain errors print the `Error / Why / 
 - observations with no statistics run, or changed after the last one (`OBS-001`,
   warning);
 - observations with no instrument, rater or protocol (`OBS-002`, warning);
+- observations not classified as independent or self-reported (`OBS-003`, warning), and
+  self-reported observations quarantined from independent comparisons (`OBS-004`, warning);
 - a live claim citing a source screened out of the review (`SCREEN-001`, warning);
 - a test still bound to a retired claim (`TEST-001`, warning), to a superseded claim
   (`REV-002`, warning), or a dependent still pointing at a superseded claim (`REV-001`, warning);
@@ -236,16 +240,17 @@ Warnings are research hygiene; errors block a trustworthy report.
 
 ## Data Model
 
-One SQLite file (default `research.db`), schema version 9. Tables: `research`, `source`,
+One SQLite file (default `research.db`), schema version 10. Tables: `research`, `source`,
 `question`, `claim`, `edge`, `hypothesis`, `killtest`, `test_run`, `test_attempt`, `verdict`,
 `invalidation`, `observation`, `protocol`, `event`, plus `schema_meta` and `counters`. `claim`
 carries `revision_of`, `superseded_by` and `revision_reason`; a revision is a new row, never an
-edit. `observation` carries the instrument, rater, protocol, sample size, aggregation and unit
-recorded with the value. `event` carries a per-program `seq`, `root_id` and `parent_id`. Writes
-use `BEGIN IMMEDIATE`; WAL and `synchronous=FULL` are enabled for a durable state file. `verdict`,
-`test_run`, `test_attempt`, `event`, `observation` and `invalidation` are append-only (an
-observation is voided, never edited or deleted). `export` includes attempts, observations,
-protocols and the event log; the manifest digests cover evidence records and exclude the log.
+edit. `observation` carries the instrument, rater, protocol, sample size, aggregation, unit and
+provenance class recorded with the value. `event` carries a per-program `seq`, `root_id` and
+`parent_id`. Writes use `BEGIN IMMEDIATE`; WAL and `synchronous=FULL` are enabled for a durable
+state file. `verdict`, `test_run`, `test_attempt`, `event`, `observation` and `invalidation` are
+append-only (an observation is voided, never edited or deleted). `export` includes attempts,
+observations, protocols and the event log; the manifest digests cover evidence records and
+exclude the log.
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Non-Negotiables
@@ -262,8 +267,10 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 - A committed report is only valid alongside its manifest, and `report --check` must stay clean.
 - Negative results are kept. Corrections are new verdicts, never silent edits.
 - A claim revision is a new row and starts untested; old verdicts are never inherited.
-- A comparison across different protocols, instruments or units is refused unless it is explicitly
-  allowed and recorded as incomparable.
+- A comparison across different protocols, instruments or units is refused unless explicitly
+  allowed.
+- A self-reported measurement is not independent evidence; it is listed separately and needs a
+  caveat to compare.
 - A failed premise invalidates its dependents; a report with `CASCADE-001` is not trustworthy.
 - Reports and scorecards are generated from the graph. Do not hand-write their numbers.
 - The engine is standard library only and makes no network calls. Sources are registered explicitly.

@@ -597,6 +597,34 @@ def check(conn: sqlite3.Connection) -> List[Finding]:
             )
         )
 
+    for row in conn.execute(
+        "SELECT id, claim_id FROM observation WHERE voided = 0"
+        " AND provenance_class = 'unclassified' ORDER BY id"
+    ):
+        findings.append(
+            _finding(
+                "OBS-003",
+                "warning",
+                str(row["id"]),
+                f"observation for {row['claim_id']} is not classified independent or self-reported",
+                "pass --provenance-class when recording, or keep it as legacy data.",
+            )
+        )
+
+    for row in conn.execute(
+        "SELECT id, claim_id FROM observation WHERE voided = 0"
+        " AND provenance_class = 'self_reported' ORDER BY id"
+    ):
+        findings.append(
+            _finding(
+                "OBS-004",
+                "warning",
+                str(row["id"]),
+                f"self-reported measurement for {row['claim_id']} is quarantined",
+                "use an independent measurement for a comparative claim, or record a caveat.",
+            )
+        )
+
     findings.extend(_quote_quality(conn))
 
     for row in conn.execute(

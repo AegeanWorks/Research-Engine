@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+import re
 import sqlite3
 from typing import Dict, List, Optional
 
@@ -14,6 +15,7 @@ from engine.events import record as record_event
 from engine.models import (
     AGGREGATIONS,
     INSTRUMENT_KINDS,
+    PROVENANCE_CLASSES,
     RATER_KINDS,
     Observation,
 )
@@ -43,6 +45,9 @@ def add_observation(
     sample_size: int = 1,
     aggregation: str = "raw",
     unit: str = "",
+    provenance_class: str = "unclassified",
+    producer_path: str = "",
+    producer_digest: str = "",
 ) -> Observation:
     """Record one measurement in a named group; non-finite values are refused.
 
@@ -149,6 +154,27 @@ def add_observation(
             "pass one of the listed aggregations.",
         )
     unit = unit.strip()
+    provenance_class = provenance_class.strip().lower() or "unclassified"
+    if provenance_class not in PROVENANCE_CLASSES:
+        raise EngineError(
+            f"unknown provenance class: {provenance_class}",
+            f"allowed classes are {', '.join(PROVENANCE_CLASSES)}.",
+            "pass independent, self_reported or unclassified.",
+        )
+    producer_path = producer_path.strip()
+    producer_digest = producer_digest.strip()
+    if provenance_class == "self_reported" and not producer_path:
+        raise EngineError(
+            "self-reported measurement has no producer path",
+            "a self-reported number must name the component that produced it.",
+            "pass --producer-path with the module or script that generated the value.",
+        )
+    if producer_digest and not re.fullmatch(r"[0-9a-f]{64}", producer_digest):
+        raise EngineError(
+            "producer digest is not a SHA-256 hex string",
+            "a producer is pinned by a 64-character lowercase hex digest.",
+            "pass the digest of the producer, or omit --producer-digest.",
+        )
     with transaction(conn):
         record = Observation(
             id=next_id(conn, "ob"),
@@ -170,12 +196,16 @@ def add_observation(
             sample_size=sample_size,
             aggregation=aggregation,
             unit=unit,
+            provenance_class=provenance_class,
+            producer_path=producer_path,
+            producer_digest=producer_digest,
         )
         conn.execute(
             "INSERT INTO observation(id, research_id, claim_id, group_label, value, note, at,"
             " voided, void_reason, instrument_kind, instrument_id, instrument_digest,"
-            " rater_kind, rater_id, rater_version, protocol_id, sample_size, aggregation, unit)"
-            " VALUES (?, ?, ?, ?, ?, ?, ?, 0, '', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            " rater_kind, rater_id, rater_version, protocol_id, sample_size, aggregation, unit,"
+            " provenance_class, producer_path, producer_digest)"
+            " VALUES (?, ?, ?, ?, ?, ?, ?, 0, '', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
                 record.id,
                 record.research_id,
@@ -194,6 +224,9 @@ def add_observation(
                 record.sample_size,
                 record.aggregation,
                 record.unit,
+                record.provenance_class,
+                record.producer_path,
+                record.producer_digest,
             ),
         )
     return record

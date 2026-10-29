@@ -10,6 +10,7 @@ from engine.errors import EngineError
 from engine.integrity import check
 from engine.observations import add_observation, get_observation
 from engine.protocols import get_protocol, list_protocols, register_protocol
+from engine.synthesis import report
 from tests.support import DatabaseCase
 
 
@@ -36,6 +37,7 @@ class MeasurementTests(DatabaseCase):
             "sample_size": 1,
             "aggregation": "raw",
             "unit": unit,
+            "provenance_class": "independent",
         }
 
     def _add(self, group: str, value: float, **overrides) -> None:
@@ -134,6 +136,56 @@ class MeasurementTests(DatabaseCase):
             self._add("treatment", value)
         with self.assertRaises(EngineError):
             claim_statistics(self.conn, self.claim, "baseline", "treatment", resamples=50)
+
+    def test_self_reported_requires_a_producer_path(self) -> None:
+        with self.assertRaises(EngineError):
+            self._add("baseline", 1.0, provenance_class="self_reported")
+
+    def test_unknown_provenance_class_is_refused(self) -> None:
+        with self.assertRaises(EngineError):
+            self._add("baseline", 1.0, provenance_class="vendor")
+
+    def test_self_reported_comparison_is_refused(self) -> None:
+        for value in (1.0, 1.1, 1.2):
+            self._add("baseline", value, provenance_class="self_reported",
+                      producer_path="engine/analysis.py")
+        for value in (2.0, 2.1, 2.2):
+            self._add("treatment", value, provenance_class="self_reported",
+                      producer_path="engine/analysis.py")
+        with self.assertRaises(EngineError) as caught:
+            claim_statistics(self.conn, self.claim, "baseline", "treatment", resamples=50)
+        self.assertIn("self-reported", str(caught.exception))
+        result = claim_statistics(
+            self.conn, self.claim, "baseline", "treatment", resamples=50,
+            allow_self_reported=True,
+        )
+        self.assertFalse(result["comparability"]["comparable"])
+        self.assertEqual(result["comparability"]["provenance_class"], "self_reported")
+
+    def test_mixed_self_reported_group_is_refused(self) -> None:
+        self._add("baseline", 1.0)
+        self._add("baseline", 1.1, provenance_class="self_reported",
+                  producer_path="engine/analysis.py")
+        for value in (2.0, 2.1, 2.2):
+            self._add("treatment", value)
+        with self.assertRaises(EngineError):
+            claim_statistics(self.conn, self.claim, "baseline", "treatment", resamples=50)
+
+    def test_self_reported_measurements_are_separated_in_the_report(self) -> None:
+        for value in (1.0, 1.1, 1.2):
+            self._add("baseline", value)
+        self._add("baseline", 9.0, provenance_class="self_reported",
+                  producer_path="engine/analysis.py")
+        text = report(self.conn, self.research)
+        self.assertIn("### Self-reported measurements", text)
+
+    def test_integrity_flags_unclassified_and_self_reported(self) -> None:
+        add_observation(self.conn, self.claim, "baseline", 1.0)
+        self._add("treatment", 2.0, provenance_class="self_reported",
+                  producer_path="engine/analysis.py")
+        found = {item.code for item in check(self.conn)}
+        self.assertIn("OBS-003", found)
+        self.assertIn("OBS-004", found)
 
 
 if __name__ == "__main__":

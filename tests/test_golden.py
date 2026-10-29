@@ -45,7 +45,7 @@ class GoldenRunTests(unittest.TestCase):
         return out
 
     def test_every_command_composes(self) -> None:
-        self.assertIn("schema 9", self.must("init"))
+        self.assertIn("schema 10", self.must("init"))
 
         # 1. Program, question, source and screening.
         self.assertIn("r_000001", self.must("research", "add", "Golden program", "--scope", "end to end"))
