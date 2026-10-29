@@ -6,11 +6,11 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `66`
-- **Total Classes**: `57`
-- **Total Top-Level Functions**: `196`
-- **Total Class Methods**: `355`
-- **Total Source Lines**: `10145`
+- **Total Python Modules**: `68`
+- **Total Classes**: `59`
+- **Total Top-Level Functions**: `206`
+- **Total Class Methods**: `372`
+- **Total Source Lines**: `10659`
 
 ---
 
@@ -63,10 +63,24 @@
 
 ---
 
+### [`engine/attempts.py`](engine/attempts.py)
+> *Append-only attempt ledger for kill-test executions.*
+
+**Size**: `121` lines (`4235` bytes)
+
+**Functions:**
+- `def _to_attempt(row)`
+- `def record(conn, test_id, run_group, outcome, reason)` - *Append one attempt; a replaceable outcome requires a recorded reason.*
+- `def authoritative(conn, test_id, command_sha256, code_sha256, inputs_sha256)` - *The earliest non-replaceable attempt bound to the current command, code and inputs.*
+- `def for_group(conn, test_id, run_group)` - *The attempt recorded for one run group, if any.*
+- `def list_attempts(conn, test_ref, limit)` - *Attempts for one test or all tests, newest sequence first.*
+
+---
+
 ### [`engine/bundle.py`](engine/bundle.py)
 > *Portable JSONL export of the evidence graph, and a digest of its content.*
 
-**Size**: `259` lines (`9446` bytes)
+**Size**: `281` lines (`10303` bytes)
 
 **Functions:**
 - `def _rows(conn, table, research_id)`
@@ -97,7 +111,7 @@
 ### [`engine/claims.py`](engine/claims.py)
 > *Claims: the unit of knowledge, with provenance and an append-only verdict history.*
 
-**Size**: `380` lines (`14665` bytes)
+**Size**: `389` lines (`15157` bytes)
 
 **Functions:**
 - `def _to_claim(row)`
@@ -119,7 +133,7 @@
 ### [`engine/cli.py`](engine/cli.py)
 > *Command-line surface: one entry point for every engine mechanic.*
 
-**Size**: `745` lines (`37306` bytes)
+**Size**: `770` lines (`38480` bytes)
 
 **Functions:**
 - `def _build_parser()`
@@ -160,7 +174,7 @@
 ### [`engine/database.py`](engine/database.py)
 > *SQLite connection, schema versioning and atomic transactions.*
 
-**Size**: `333` lines (`12592` bytes)
+**Size**: `345` lines (`13015` bytes)
 
 **Functions:**
 - `def connect(path)` - *Open a database with durability pragmas suitable for a state file.*
@@ -232,18 +246,22 @@
 ### [`engine/evidence.py`](engine/evidence.py)
 > *Evidence identity: which verified run groups are valid for a test right now.*
 
-**Size**: `140` lines (`5331` bytes)
+**Size**: `214` lines (`7910` bytes)
 
 **Functions:**
 - `def test_inputs(test)` - *The canonical declared input names of a test.*
 - `def binding(test)` - *The identity a run must carry to count as evidence now.*
-- `def _groups(conn, test_id, exact)` - *Verified main-role groups for one test, newest first, optionally binding-filtered.*
+- `def _groups(conn, test_id, exact, current)` - *Verified main-role groups for one test, newest first, optionally binding-filtered.*
 - `def verified_groups(conn, test_id)` - *Every historical main-role group that passed twice with identical output.*
-- `def current_verified_groups(conn, test)` - *Every main-role group valid for the current code, inputs and command, newest first.*
+- `def current_verified_groups(conn, test, current)` - *Every main-role group valid for the current code, inputs and command, newest first.*
 - `def current_verified_group(conn, test)` - *The newest group valid for the current binding, if any.*
 - `def control_state(conn, test, group)` - *Whether the declared control was falsified in one run group.*
+- `def authoritative_attempt(conn, test)` - *The earliest non-replaceable attempt bound to the test's current identity.*
+- `def authoritative_group(conn, test)` - *The authoritative group when that attempt is also a currently verified group.*
+- `def authority_blocked(conn, test)` - *The reason a later pass cannot be promoted, when the authority is a subject failure.*
 - `def _claim_tests(conn, claim_id)`
 - `def claim_groups(conn, claim_id)` - *Current verified groups across every test bound to a claim.*
+- `def claim_authority_blocked(conn, claim_id)` - *The first subject-failure authority across a claim's tests, if any.*
 - `def claim_has_historical_evidence(conn, claim_id)` - *Whether any test bound to a claim ever produced a verified group.*
 - `def claim_tests(conn, claim_id)` - *Every test bound to a claim.*
 
@@ -282,7 +300,7 @@
 ### [`engine/integrity.py`](engine/integrity.py)
 > *Graph integrity: provenance, evidence paths, dependency acyclicity and stale dependents.*
 
-**Size**: `624` lines (`23640` bytes)
+**Size**: `623` lines (`23606` bytes)
 
 **Functions:**
 - `def _finding(code, severity, subject, message, fix)`
@@ -300,7 +318,7 @@
 ### [`engine/killtests.py`](engine/killtests.py)
 > *Executable kill tests: two agreeing runs, bound to code, inputs and command.*
 
-**Size**: `352` lines (`12867` bytes)
+**Size**: `382` lines (`14042` bytes)
 
 **Functions:**
 - `def _to_test(row)`
@@ -310,6 +328,7 @@
 - `def list_tests(conn, research_ref)` - *List tests, optionally filtered by program.*
 - `def _terminate_tree(process)` - *Kill the process and its children without leaking a detached tree.*
 - `def _run_once(command, timeout_seconds)` - *Run one command in the project root and capture a deterministic fingerprint.*
+- `def _classify_attempt(results, control, runs, before, after)` - *Classify one execution into the attempt vocabulary, conservatively.*
 - `def run_test(conn, test_ref, runs)` - *Run a test one or more times, plus its negative control, recording each run's identity.*
 - `def _execute(conn, test, command, group, runs, role, tag_prefix, current)` - *Execute one command `runs` times and persist every run under its role.*
 - `def _summarise_control(results, expect_exit)` - *A control is falsified when every repetition fails the expectation identically.*
@@ -321,7 +340,7 @@
 ### [`engine/maintenance.py`](engine/maintenance.py)
 > *Database maintenance: integrity verification and a crash-safe backup.*
 
-**Size**: `86` lines (`3212` bytes)
+**Size**: `86` lines (`3228` bytes)
 
 **Functions:**
 - `def integrity_check(conn)` - *Run SQLite's own checks plus a few facts a reviewer wants before archiving.*
@@ -370,7 +389,7 @@
 ### [`engine/models.py`](engine/models.py)
 > *Frozen domain records and the engine's closed vocabularies.*
 
-**Size**: `177` lines (`3632` bytes)
+**Size**: `201` lines (`4265` bytes)
 
 **Classes:**
 - `class Research`
@@ -380,6 +399,8 @@
 - `class Hypothesis`
 - `class KillTest`
 - `class TestRun`
+- `class Attempt`
+  - Method `.to_dict()`
 - `class Observation`
 - `class Finding`
 
@@ -563,6 +584,31 @@
   - Method `.test_matrix_ignores_assumed_claims()`
   - Method `.test_keystone_ranks_by_downstream_and_inbound()`
   - Method `.test_expose_lists_dependents_and_inbound()`
+
+---
+
+### [`tests/test_attempts.py`](tests/test_attempts.py)
+> *Attempt authority: the earliest non-replaceable attempt wins.*
+
+**Size**: `184` lines (`7462` bytes)
+
+**Classes:**
+- `class AttemptAuthorityTests`
+  - Method `.setUp()`
+  - Method `._insert_group(group, passed, values, outputs)`
+  - Method `._record(group, outcome, reason)`
+  - Method `.test_earliest_completed_attempt_wins()`
+  - Method `.test_infra_failure_is_replaceable()`
+  - Method `.test_subject_failure_blocks_a_later_pass()`
+  - Method `.test_indeterminate_is_replaceable()`
+  - Method `.test_stale_binding_is_ignored()`
+  - Method `.test_legacy_group_without_an_attempt_still_counts()`
+  - Method `.test_replaceable_outcome_requires_a_reason()`
+  - Method `.test_attempts_are_sequenced_and_listed()`
+  - Method `.test_completed_attempt_promotes()`
+  - Method `.test_real_subject_failure_records_an_attempt_and_blocks()`
+  - Method `.test_single_run_is_indeterminate()`
+  - Method `.test_control_that_does_not_fail_is_indeterminate()`
 
 ---
 
@@ -997,13 +1043,14 @@
 ### [`tests/test_migration.py`](tests/test_migration.py)
 > *Schema migration: an older database is repaired, not rejected or wiped.*
 
-**Size**: `209` lines (`9096` bytes)
+**Size**: `223` lines (`9599` bytes)
 
 **Classes:**
 - `class MigrationTests`
   - Method `._old_database()`
   - Method `.test_version_one_database_is_migrated_in_place()`
   - Method `.test_existing_rows_are_preserved()`
+  - Method `.test_migration_creates_the_attempt_table()`
   - Method `.test_migration_is_idempotent()`
   - Method `.test_future_version_is_refused_without_changes()`
   - Method `.test_future_version_is_refused_before_creating_tables()`

@@ -14,6 +14,8 @@ CLAIM_STATUSES = (
     "RETRACTED",
     "INVALIDATED",
 )
+ATTEMPT_OUTCOMES = ("completed", "subject_failed", "infra_failed", "indeterminate")
+REPLACEABLE_ATTEMPT_OUTCOMES = ("infra_failed", "indeterminate")
 PROMOTED_STATUSES = ("PROVEN", "NUMERIC")
 FAILED_STATUSES = ("FALSIFIED", "RETRACTED", "INVALIDATED")
 NON_SUPPORTING_STATUSES = FAILED_STATUSES + ("UNKNOWN",)
@@ -153,6 +155,28 @@ class TestRun:
     python_version: str = ""
     platform: str = ""
     role: str = "main"
+
+
+@dataclass(frozen=True)
+class Attempt:
+    id: str
+    test_id: str
+    attempt_no: int
+    run_group: str
+    outcome: str
+    reason: str
+    created_at: str
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "test_id": self.test_id,
+            "attempt_no": self.attempt_no,
+            "run_group": self.run_group,
+            "outcome": self.outcome,
+            "reason": self.reason,
+            "created_at": self.created_at,
+        }
 
 
 @dataclass(frozen=True)

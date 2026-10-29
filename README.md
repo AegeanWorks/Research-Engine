@@ -20,8 +20,7 @@ A falsification-first research engine for provenance-backed claims, executable k
   python -m engine check
   python -m engine report r_000001
   ```
-  `demo` builds a labelled synthetic program (quote, claim, hypothesis, kill test, verdict,
-  collapse) and makes no scientific claim.
+  `demo` builds a labelled synthetic program and makes no scientific claim.
 - **Start a real program**: see [Commands](#commands) for `research`, `question`, `source` and
   `claim add`.
 
@@ -74,16 +73,16 @@ domain content stays in the programs it hosts.
 4. **Hypotheses are pre-registered.** `hypothesis add` records the statement, confidence and the
    observation that would refute it at the moment of registration. The outcome is recorded later
    and is append-only.
-5. **Kill tests are executable and bound.** A test binds a shell command, its declared inputs
-   (`--input`, with globs expanded) and the engine code to a claim or hypothesis. `test verify`
-   runs it twice and requires the same exit code and output hashes. Each run records
-   `command_sha256`, `code_sha256`, `inputs_sha256`, the git commit and the runtime, so evidence
-   produced against different code is detectable and never silently reused. A directory is refused
-   as an input: it has no stable content, so declare files or a glob.
+5. **Kill tests are executable and bound.** A test binds a command, declared inputs and the
+   engine code to a claim or hypothesis. `test verify` runs it twice and requires the same exit
+   code and output hashes. Each run records the command, code and input hashes, git commit and
+   runtime, so stale evidence is detectable. A directory is refused as an input; declare files or
+   a glob.
 6. **Verdicts are append-only and tied to evidence.** `claim verdict` records `previous -> new`,
-   evidence, note, actor, time and — for `NUMERIC` — the verified run group it cites. A `NUMERIC`
-   promotion is refused unless the claim has a test whose two agreeing runs are bound to the
-   current code, inputs and command; `--group` pins a specific group.
+   evidence, note, actor, time and — for `NUMERIC` — the authoritative run group it cites. A
+   `NUMERIC` promotion is refused unless the claim has a test whose earliest non-replaceable
+   attempt passed twice and is bound to the current code, inputs and command; `--group` pins the
+   authoritative group.
 7. **Collapse is transitive.** `claim invalidate` records the failed root and marks every claim
    that depends on it as `INVALIDATED`, with the reason preserved in the invalidation record.
 8. **Reports are generated and verifiable.** `report` and `scorecard` compute consensus,
@@ -183,6 +182,7 @@ python -m engine [--db PATH] test list [--research REF]
 python -m engine [--db PATH] test run REF [--runs N]
 python -m engine [--db PATH] test verify REF
 python -m engine [--db PATH] test runs [REF] [--limit N]
+python -m engine [--db PATH] test attempts [REF] [--limit N]
 
 python -m engine [--db PATH] cascade preview REF
 python -m engine [--db PATH] report REF [--out PATH]
@@ -216,7 +216,7 @@ present and 0 when only warnings remain. Domain errors print the `Error / Why / 
 - numeric claims without a two-run agreeing test (`EVID-002`);
 - numeric claims whose verified run no longer matches the current engine code, declared inputs or
   command (`EVID-005`);
-- numeric claims whose promotion verdict cites a group that is no longer current (`EVID-006`);
+- numeric claims whose promotion verdict cites a group that is not authoritative (`EVID-006`);
 - failed or invalidated claims without verdict evidence (`EVID-003`);
 - hypothesis outcomes without verdict evidence (`EVID-004`);
 - claims that still cite a retracted source (`PROV-003`) or one under an expression of concern
@@ -241,13 +241,13 @@ Warnings are research hygiene; errors block a trustworthy report.
 
 ## Data Model
 
-One SQLite file (default `research.db`), schema version 5. Tables: `research`, `source`,
-`question`, `claim`, `edge`, `hypothesis`, `killtest`, `test_run`, `verdict`, `invalidation`,
-`observation`, `event`, plus `schema_meta` and `counters`. Writes use `BEGIN IMMEDIATE`; WAL and
-`synchronous=FULL` are enabled for a durable state file. `verdict`, `test_run`, `event`,
-`observation` and `invalidation` are append-only (an observation is voided, never edited or
-deleted). `export` includes observations and the event log; the manifest digests cover evidence
-records and exclude the log.
+One SQLite file (default `research.db`), schema version 6. Tables: `research`, `source`,
+`question`, `claim`, `edge`, `hypothesis`, `killtest`, `test_run`, `test_attempt`, `verdict`,
+`invalidation`, `observation`, `event`, plus `schema_meta` and `counters`. Writes use
+`BEGIN IMMEDIATE`; WAL and `synchronous=FULL` are enabled for a durable state file. `verdict`,
+`test_run`, `test_attempt`, `event`, `observation` and `invalidation` are append-only (an
+observation is voided, never edited or deleted). `export` includes attempts, observations and the
+event log; the manifest digests cover evidence records and exclude the log.
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Non-Negotiables
@@ -255,6 +255,8 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 - No empirical claim without a source, exact quote and locator.
 - No promotion without a named kill test and an evidence path.
 - No NUMERIC verdict without two agreeing runs; a single run is recorded as evidence, not proof.
+- The earliest non-replaceable attempt is authoritative; a later pass cannot displace an earlier
+  subject failure.
 - A NUMERIC promotion must cite a current verified run group; there is no promotion without one.
 - Numeric evidence must still match the current engine code, declared inputs and command; stale
   evidence is an error, not a pass.
@@ -286,6 +288,7 @@ research-engine/
 │   ├── __main__.py           <- `python -m engine`
 │   ├── analysis.py           <- contradictions, coverage matrix, keystones
 │   ├── artifacts.py          <- timestamps, output digests and atomic writes
+│   ├── attempts.py           <- append-only kill-test attempts and authority
 │   ├── bundle.py             <- deterministic JSONL export
 │   ├── cascade.py            <- transitive invalidation
 │   ├── claims.py             <- provenance rules, verdicts, edges
@@ -325,14 +328,14 @@ research-engine/
   UNKNOWN contributes zero.
 - **Discovery is advisory.** `analysis` proposes; only `claim link` records a relation.
 - **Statistics describe the recorded numbers, not the world.** Independence is assumed.
-- **The rank test's method is stated.** Exact for untied small samples, tie-corrected
-  approximation otherwise.
+- **Rank-test method is stated.** Exact for untied small samples, tie-corrected approximation
+  otherwise.
 - **Multiple comparisons are flagged, not corrected.** P-values are not adjusted.
 - **A control proves falsifiability, not correctness.** It shows the test can fail, not that the
   assertion is right.
-- **Screening is local.** States and reasons are recorded; correctness is not verified.
-- **Views are summaries.** Omitted lines are always counted; the anchor line is always kept, so
-  a tiny budget yields one over-budget line rather than an empty view.
+- **Screening is local.** States are recorded; correctness is not verified.
+- **Views are summaries.** Omitted lines are counted; the anchor line is kept, so a tiny budget
+  yields one over-budget line, never an empty view.
 - **Human judgment stays in the loop.** Tests produce evidence; they never auto-promote.
 - **Undeclared inputs are invisible.** Evidence binds the engine code and declared `--input` paths;
   an undeclared read is unseen.

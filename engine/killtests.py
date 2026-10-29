@@ -10,6 +10,7 @@ import subprocess
 import time
 from typing import Dict, List, Optional, Sequence, Tuple
 
+from engine import attempts
 from engine.artifacts import sha256_text, utc_now
 from engine.claims import get_claim
 from engine.database import next_id, transaction
@@ -202,6 +203,32 @@ def _run_once(command: str, timeout_seconds: int) -> dict:
     }
 
 
+def _classify_attempt(
+    results: List[dict],
+    control: Optional[dict],
+    runs: int,
+    before: object,
+    after: object,
+) -> tuple[str, str]:
+    """Classify one execution into the attempt vocabulary, conservatively."""
+    if runs < MIN_BINDING_RUNS:
+        return "indeterminate", "insufficient_runs"
+    if any(int(item["exit_code"]) == -1 for item in results):
+        return "infra_failed", "timeout"
+    if before != after:
+        return "indeterminate", "workspace_changed"
+    fingerprints = {
+        (item["exit_code"], item["stdout_sha256"], item["stderr_sha256"]) for item in results
+    }
+    if len(fingerprints) != 1:
+        return "indeterminate", "non_reproducible"
+    if control is not None and not bool(control["falsified"]):
+        return "indeterminate", "control_not_falsified"
+    if not all(bool(item["passed"]) for item in results):
+        return "subject_failed", "expected_exit_mismatch"
+    return "completed", ""
+
+
 def run_test(
     conn: sqlite3.Connection,
     test_ref: str,
@@ -238,6 +265,8 @@ def run_test(
     reproducible = len(fingerprints) == 1
     stable = before == after
     control_ok = control is None or bool(control["falsified"])
+    outcome, reason = _classify_attempt(results, control, runs, before, after)
+    attempt = attempts.record(conn, test.id, group, outcome, reason)
     return {
         "test": test.id,
         "name": test.name,
@@ -245,6 +274,7 @@ def run_test(
         "runs": results,
         "control": control,
         "binding": current,
+        "attempt": attempt.to_dict(),
         "workspace_changed_during_runs": not stable,
         "passed": all_passed and reproducible and stable and control_ok,
         "reproducible": reproducible,

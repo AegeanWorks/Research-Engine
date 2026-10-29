@@ -47,6 +47,7 @@ readable and gap-free without `AUTOINCREMENT` surprises.
 | `hypothesis` | pre-registered prediction | outcome once |
 | `killtest` | executable command, declared inputs and target | append-only |
 | `test_run` | one process execution, its output hashes, binding and role (`main`/`control`) | append-only |
+| `test_attempt` | one verification invocation: sequence, run group, outcome and reason | append-only |
 | `event` | non-verdict action trail | append-only |
 | `verdict` | `previous -> new` with evidence, actor and time | append-only |
 | `invalidation` | root, reason, and the JSON list of affected dependents | append-only |
@@ -95,14 +96,18 @@ recorded so a disagreement can be diagnosed.
 
 ## Promotion
 
-`set_verdict` refuses a `NUMERIC` verdict unless the claim has a test with a verified group that
-matches the current binding, and stores that group in `verdict.evidence_group`. `PROVEN` needs no
-group because it records an argument, not a measurement. Integrity reports `EVID-005` when no
-group is current at all and `EVID-006` when the promotion cites a group that is no longer current —
-the case where a claim was promoted on evidence that has since been superseded.
+`set_verdict` refuses a `NUMERIC` verdict unless the claim has a test with an authoritative
+verified group that matches the current binding, and stores that group in
+`verdict.evidence_group`. `PROVEN` needs no group because it records an argument, not a
+measurement. Integrity reports `EVID-005` when no group is current at all and `EVID-006` when the
+promotion cites a group that is no longer authoritative — the case where a claim was promoted on
+evidence that has since been superseded.
 
-Any *current* group is acceptable, not only the newest: re-verifying unchanged code allocates a new
-group and must not invalidate the promotion.
+The earliest non-replaceable attempt is authoritative. Only `infra_failed` and `indeterminate`
+attempts are replaceable, and each needs a recorded reason. Re-verifying unchanged code allocates
+a new attempt, but a later `completed` attempt cannot displace an earlier `subject_failed` attempt.
+Legacy run groups with no attempt row keep the pre-v6 any-current-group behaviour until they are
+re-run.
 
 ## Schema Versions
 
@@ -110,10 +115,11 @@ group and must not invalidate the promotion.
 raises the version, returning a report with the starting version and how many numeric claims lost
 their binding. `CREATE TABLE IF NOT EXISTS` alone would leave an older table without its new
 columns, so `_add_missing_columns` inspects `PRAGMA table_info` and adds each missing column inside
-the same transaction. Each version step is separate, so a version-1 database passes through the
-version-2 step and then the version-3 step. A version newer than the build is refused without
-modification, and the migration preserves existing rows, including legacy runs whose binding
-columns are empty.
+the same transaction. Version 6 adds the `test_attempt` table; existing run groups are not
+backfilled and remain on the legacy path until they are re-run. Each version step is separate, so
+a version-1 database passes through the version-2 step and then the version-3 step. A version
+newer than the build is refused without modification, and the migration preserves existing rows,
+including legacy runs whose binding columns are empty.
 
 ## Generated Reports
 
@@ -124,8 +130,9 @@ columns are empty.
 Two digests exist because one is not enough:
 
 - `content_sha256` hashes a projection where `test_run` rows lose `id`, `run_group`, `started_at`,
-  `duration_ms` and `output_tail` and are de-duplicated. It is stable across a pure
-  re-verification and changes when a claim, verdict, source or run fingerprint changes.
+  `duration_ms` and `output_tail`, and `test_attempt` rows keep only test, outcome and reason;
+  identical records are de-duplicated. It is stable across a pure re-verification and changes when
+  a claim, verdict, source or run fingerprint changes.
 - `graph_sha256` hashes every exported evidence record exactly, so any recorded run changes it.
 The audit log is exported but excluded from both digests: events are consequences of hashed
 state, and `report.write` is created while the manifest is produced, so including it would make

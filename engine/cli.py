@@ -20,6 +20,7 @@ from engine.analysis import (
     keystone_claims,
     unlinked_contradictions,
 )
+from engine.attempts import for_group, list_attempts
 from engine.bundle import export_jsonl, verify_export
 from engine.cascade import invalidate, preview, retract_source
 from engine.claims import (
@@ -226,6 +227,9 @@ def _build_parser() -> argparse.ArgumentParser:
     runs_t = test_sub.add_parser("runs", help="list recent runs")
     runs_t.add_argument("ref", nargs="?")
     runs_t.add_argument("--limit", type=int, default=20)
+    attempts_t = test_sub.add_parser("attempts", help="list recorded attempts")
+    attempts_t.add_argument("ref", nargs="?")
+    attempts_t.add_argument("--limit", type=int, default=50)
 
     cascade = commands.add_parser("cascade", help="preview a transitive invalidation")
     cascade_sub = cascade.add_subparsers(dest="action", required=True)
@@ -501,6 +505,12 @@ def _cmd_test(conn: sqlite3.Connection, args) -> int:
             f"{result['test']} {'PASS' if result['passed'] else 'FAIL'} "
             f"(reproducible: {result['reproducible']}, group {result['run_group']})\n"
         )
+        attempt = result.get("attempt")
+        if attempt:
+            text += f"  attempt {attempt['attempt_no']}: {attempt['outcome']}"
+            if attempt["reason"]:
+                text += f" ({attempt['reason']})"
+            text += "\n"
         if result["control_declared"]:
             state = "falsified" if result["control_falsified"] else "DID NOT FAIL"
             text += f"  control: {state}\n"
@@ -514,11 +524,26 @@ def _cmd_test(conn: sqlite3.Connection, args) -> int:
         return 0 if result["passed"] else 1
     if args.action == "runs":
         records = list_runs(conn, args.ref, args.limit)
+        text = ""
+        for run in records:
+            attempt = for_group(conn, run.test_id, run.run_group)
+            marker = (
+                f"  attempt {attempt.attempt_no} {attempt.outcome}"
+                if attempt is not None and run.role == "main"
+                else "  attempt -"
+            )
+            text += (
+                f"{run.id}  {run.test_id}  {run.run_tag}  {'PASS' if run.passed else 'FAIL'}"
+                f"  exit {run.exit_code}  code {run.code_sha256[:8]}{marker}\n"
+            )
+        return _emit(_records_payload(records), args.json, text or "no runs\n")
+    if args.action == "attempts":
+        records = list_attempts(conn, args.ref, args.limit)
         text = "".join(
-            f"{r.id}  {r.test_id}  {r.run_tag}  {'PASS' if r.passed else 'FAIL'}"
-            f"  exit {r.exit_code}  code {r.code_sha256[:8]}\n"
-            for r in records
-        ) or "no runs\n"
+            f"{a.id}  {a.test_id}  attempt {a.attempt_no}  {a.outcome}"
+            f"  group {a.run_group}  {a.reason or '-'}\n"
+            for a in records
+        ) or "no attempts\n"
         return _emit(_records_payload(records), args.json, text)
     records = list_tests(conn, args.research)
     text = "".join(

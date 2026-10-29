@@ -8,8 +8,8 @@ from typing import Dict, Iterable, List
 
 from engine import information
 from engine.evidence import (
+    claim_groups,
     control_state,
-    current_verified_groups,
     verified_groups,
 )
 from engine.killtests import get_test
@@ -213,9 +213,7 @@ def check(conn: sqlite3.Connection) -> List[Finding]:
             continue
         if not any(verified_groups(conn, test.id) for test in tests):
             continue
-        current = [
-            group for test in tests for group in current_verified_groups(conn, test)
-        ]
+        current = claim_groups(conn, row["id"])
         if not current:
             findings.append(
                 _finding(
@@ -240,9 +238,10 @@ def check(conn: sqlite3.Connection) -> List[Finding]:
                     "EVID-006",
                     "error",
                     row["id"],
-                    "the promotion verdict is not tied to a current verified run"
-                    f" (bound: {bound or 'none'}; current: {', '.join(current)})",
-                    "re-record the verdict against a current group with `claim verdict --group`.",
+                    "the promotion verdict is not tied to the authoritative current run"
+                    f" (bound: {bound or 'none'}; authoritative: {', '.join(current)})",
+                    "re-record the verdict against the authoritative group with"
+                    " `claim verdict --group`.",
                 )
             )
 

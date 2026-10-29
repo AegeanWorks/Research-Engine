@@ -23,6 +23,7 @@ _ORDER = (
     "killtest",
     "edge",
     "test_run",
+    "test_attempt",
     "verdict",
     "invalidation",
     "observation",
@@ -55,6 +56,12 @@ def _rows(conn: sqlite3.Connection, table: str, research_id: str | None) -> List
         return conn.execute(
             "SELECT u.* FROM test_run u JOIN killtest t ON t.id = u.test_id"
             " WHERE t.research_id = ? ORDER BY u.id",
+            (research_id,),
+        ).fetchall()
+    if table == "test_attempt":
+        return conn.execute(
+            "SELECT a.* FROM test_attempt a JOIN killtest t ON t.id = a.test_id"
+            " WHERE t.research_id = ? ORDER BY a.id",
             (research_id,),
         ).fetchall()
     if table == "verdict":
@@ -125,12 +132,13 @@ def evidence_records(records: List[dict]) -> List[dict]:
 def content_records(records: List[dict]) -> List[dict]:
     """Semantic projection of a record set: run allocation artefacts are dropped.
 
-    Re-running an unchanged test allocates new run ids, a new group label and new timings, so an
-    exact record digest changes even though no claim, verdict or piece of evidence changed. The
-    projection keeps the binding hashes and the pass flag, de-duplicates identical runs, and
-    therefore tracks content rather than bookkeeping.
+    Re-running an unchanged test allocates new run ids, a new group label, a new attempt number
+    and new timings, so an exact record digest changes even though no claim, verdict or piece of
+    evidence changed. The projection keeps the binding hashes, the pass flag and the attempt
+    outcome, de-duplicates identical records, and therefore tracks content rather than bookkeeping.
     """
     runs = set()
+    attempt_rows = set()
     kept: List[dict] = []
     for record in records:
         if record.get("type") == "test_run":
@@ -144,11 +152,25 @@ def content_records(records: List[dict]) -> List[dict]:
                 )
             )
             continue
+        if record.get("type") == "test_attempt":
+            attempt_rows.add(
+                (str(record.get("test_id", "")), str(record.get("outcome", "")),
+                 str(record.get("reason", "")))
+            )
+            continue
         kept.append(record)
     for run in sorted(runs):
         fields = dict(run)
         identity = f"run:{fields.get('test_id', '')}:{fields.get('run_tag', '')}"
         kept.append({"type": "test_run", "id": identity, "projection": list(run)})
+    for test_id, outcome, reason in sorted(attempt_rows):
+        kept.append(
+            {
+                "type": "test_attempt",
+                "id": f"attempt:{test_id}:{outcome}:{reason}",
+                "projection": [test_id, outcome, reason],
+            }
+        )
     return kept
 
 

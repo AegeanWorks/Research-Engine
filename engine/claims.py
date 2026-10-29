@@ -240,6 +240,15 @@ def set_verdict(
     if status == "NUMERIC":
         groups = current_groups_for_claim(conn, claim.id)
         if not groups:
+            from engine.evidence import claim_authority_blocked
+
+            blocked = claim_authority_blocked(conn, claim.id)
+            if blocked:
+                raise EngineError(
+                    "numeric promotion is blocked by an earlier attempt",
+                    f"{blocked}; a later pass cannot displace the earliest non-replaceable attempt.",
+                    "record a new test, or revise the claim and pre-register a new attempt.",
+                )
             raise EngineError(
                 "numeric promotion has no current verified run",
                 "a NUMERIC verdict claims a measurement; without two agreeing runs bound to the"
@@ -248,8 +257,8 @@ def set_verdict(
             )
         if evidence_group and evidence_group not in groups:
             raise EngineError(
-                f"evidence group {evidence_group} is not current for this claim",
-                "the named run does not match the current code, inputs and command.",
+                f"evidence group {evidence_group} is not authoritative for this claim",
+                "the named run is not the earliest non-replaceable, currently verified attempt.",
                 "pass one of: " + ", ".join(groups) + ".",
             )
         bound_group = evidence_group or groups[0]

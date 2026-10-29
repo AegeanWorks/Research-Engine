@@ -5,40 +5,12 @@
     "last_phase": "phase 4",
     "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1793299381.4165761,
+    "updated_at": 1793301223.4404154,
     "owner": "opencode:research-engine",
     "started_by": "opencode:research-engine",
     "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "T-010-review-fixes",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/2] Review the last three pushes: fix stale-group control check, label normalisation, self-comparison, OBS-001 staleness, export flag conflict",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793117051.3556347,
-      "timestamp_str": "2026-10-27 19:04:11",
-      "agent": "kilo:research-engine",
-      "impact_assessment": {
-        "why": "A code review found false gate errors and silently meaningless comparisons",
-        "benefits": "Control checks use the newest group; labels are case-insensitive; self-comparison and tiny bootstraps are refused; stale analysis is flagged",
-        "risks": "contract: none beyond behaviour; dependency: none; concurrency: read-only checks; state: OBS-001 uses timestamps with one-second resolution",
-        "mitigation": "Regression test per defect, full suite, gates before commit"
-      }
-    },
-    {
-      "task_id": "T-010-review-fixes",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[2/2] Review fixes delivered: EVID-009 reads the newest verified group, labels normalised + self-comparison and <10 resamples refused, OBS-001 detects data changed after the last run (all-voided excluded), export --check refuses --research, short trend states insufficiency; 300 tests pass; 4/4 gates pass; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793117119.5419173,
-      "timestamp_str": "2026-10-27 19:05:19",
-      "agent": "kilo:research-engine"
-    },
     {
       "task_id": "T-010-review-fixes",
       "phase": "completed",
@@ -257,6 +229,34 @@
       "status": "in_progress",
       "timestamp": 1793299381.4165761,
       "timestamp_str": "2026-10-29 21:43:01",
+      "agent": "opencode:research-engine"
+    },
+    {
+      "task_id": "T-012-evidence-integrity",
+      "phase": "planning",
+      "phase_num": 2,
+      "description": "[2/6] Attempt authority: schema v6 test_attempt ledger, earliest non-replaceable attempt selects the NUMERIC evidence group",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793299794.9277377,
+      "timestamp_str": "2026-10-29 21:49:54",
+      "agent": "opencode:research-engine",
+      "impact_assessment": {
+        "why": "The current evidence path accepts any current verified group, so a later pass can displace an earlier subject failure and reopen retry-until-pass",
+        "benefits": "Every execution is an attempt; the earliest non-replaceable attempt is authoritative; attempt history is visible, exported and checked",
+        "risks": "contract: new test_attempt table and schema 6; dependency: stdlib only; concurrency: single-writer transactions; state: legacy runs without an attempt row keep the old any-current-group behaviour",
+        "mitigation": "Failing-first tests for authority selection, run classification and migration; full suite and 4/4 gates before commit"
+      }
+    },
+    {
+      "task_id": "T-012-evidence-integrity",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[2/6] Attempt authority delivered: schema 6 test_attempt ledger, earliest non-replaceable attempt selects the NUMERIC group, test attempts command, legacy fallback; 332 tests pass; 4/4 gates pass; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793301223.4404154,
+      "timestamp_str": "2026-10-29 22:13:43",
       "agent": "opencode:research-engine"
     }
   ]

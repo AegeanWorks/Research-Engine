@@ -11,6 +11,7 @@ import json
 import sqlite3
 from typing import Dict, List, Optional, Sequence, Tuple
 
+from engine import attempts
 from engine.artifacts import sha256_text
 from engine.models import KillTest
 from engine.provenance import fingerprint, resolve_inputs
@@ -47,7 +48,12 @@ def binding(test: KillTest) -> Dict[str, str]:
     }
 
 
-def _groups(conn: sqlite3.Connection, test_id: str, exact: bool) -> List[str]:
+def _groups(
+    conn: sqlite3.Connection,
+    test_id: str,
+    exact: bool,
+    current: Optional[Dict[str, str]] = None,
+) -> List[str]:
     """Verified main-role groups for one test, newest first, optionally binding-filtered."""
     sql = (
         "SELECT run_group FROM test_run WHERE test_id = ? AND role = 'main'"
@@ -57,10 +63,11 @@ def _groups(conn: sqlite3.Connection, test_id: str, exact: bool) -> List[str]:
     )
     params: Sequence[object] = (test_id,)
     if exact:
-        row = conn.execute("SELECT * FROM killtest WHERE id = ?", (test_id,)).fetchone()
-        if row is None:
-            return []
-        current = binding(KillTest(**{key: row[key] for key in KillTest.__dataclass_fields__}))
+        if current is None:
+            row = conn.execute("SELECT * FROM killtest WHERE id = ?", (test_id,)).fetchone()
+            if row is None:
+                return []
+            current = binding(KillTest(**{key: row[key] for key in KillTest.__dataclass_fields__}))
         params = (
             test_id,
             current["command_sha256"],
@@ -75,9 +82,11 @@ def verified_groups(conn: sqlite3.Connection, test_id: str) -> List[str]:
     return _groups(conn, test_id, exact=False)
 
 
-def current_verified_groups(conn: sqlite3.Connection, test: KillTest) -> List[str]:
+def current_verified_groups(
+    conn: sqlite3.Connection, test: KillTest, current: Optional[Dict[str, str]] = None
+) -> List[str]:
     """Every main-role group valid for the current code, inputs and command, newest first."""
-    return _groups(conn, test.id, exact=True)
+    return _groups(conn, test.id, exact=True, current=current)
 
 
 def current_verified_group(conn: sqlite3.Connection, test: KillTest) -> Optional[str]:
@@ -113,6 +122,45 @@ def control_state(conn: sqlite3.Connection, test: KillTest, group: str) -> dict:
     }
 
 
+def authoritative_attempt(conn: sqlite3.Connection, test: KillTest) -> Optional[sqlite3.Row]:
+    """The earliest non-replaceable attempt bound to the test's current identity."""
+    current = binding(test)
+    return attempts.authoritative(
+        conn,
+        test.id,
+        current["command_sha256"],
+        current["code_sha256"],
+        current["inputs_sha256"],
+    )
+
+
+def authoritative_group(conn: sqlite3.Connection, test: KillTest) -> Optional[str]:
+    """The authoritative group when that attempt is also a currently verified group."""
+    current = binding(test)
+    row = attempts.authoritative(
+        conn,
+        test.id,
+        current["command_sha256"],
+        current["code_sha256"],
+        current["inputs_sha256"],
+    )
+    if row is None or str(row["outcome"]) != "completed":
+        return None
+    group = str(row["run_group"])
+    if group not in _groups(conn, test.id, exact=True, current=current):
+        return None
+    return group
+
+
+def authority_blocked(conn: sqlite3.Connection, test: KillTest) -> Optional[str]:
+    """The reason a later pass cannot be promoted, when the authority is a subject failure."""
+    row = authoritative_attempt(conn, test)
+    if row is None or str(row["outcome"]) != "subject_failed":
+        return None
+    reason = str(row["reason"]) or "no reason recorded"
+    return f"attempt {row['attempt_no']} was subject_failed ({reason})"
+
+
 def _claim_tests(conn: sqlite3.Connection, claim_id: str) -> List[KillTest]:
     rows = conn.execute(
         "SELECT * FROM killtest WHERE claim_id = ? ORDER BY id", (claim_id,)
@@ -123,11 +171,37 @@ def _claim_tests(conn: sqlite3.Connection, claim_id: str) -> List[KillTest]:
 
 
 def claim_groups(conn: sqlite3.Connection, claim_id: str) -> List[str]:
-    """Current verified groups across every test bound to a claim."""
+    """Current verified groups across every test bound to a claim.
+
+    A test with recorded attempts contributes only its authoritative group. A legacy test with
+    no attempt rows keeps the pre-v6 any-current-group behaviour.
+    """
     groups: List[str] = []
     for test in _claim_tests(conn, claim_id):
-        groups.extend(current_verified_groups(conn, test))
+        current = binding(test)
+        row = attempts.authoritative(
+            conn,
+            test.id,
+            current["command_sha256"],
+            current["code_sha256"],
+            current["inputs_sha256"],
+        )
+        if row is None:
+            groups.extend(_groups(conn, test.id, exact=True, current=current))
+        elif str(row["outcome"]) == "completed":
+            group = str(row["run_group"])
+            if group in _groups(conn, test.id, exact=True, current=current):
+                groups.append(group)
     return groups
+
+
+def claim_authority_blocked(conn: sqlite3.Connection, claim_id: str) -> Optional[str]:
+    """The first subject-failure authority across a claim's tests, if any."""
+    for test in _claim_tests(conn, claim_id):
+        reason = authority_blocked(conn, test)
+        if reason:
+            return reason
+    return None
 
 
 def claim_has_historical_evidence(conn: sqlite3.Connection, claim_id: str) -> bool:

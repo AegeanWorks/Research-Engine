@@ -53,6 +53,23 @@ unrelated worktree edit does not invalidate a durable measurement.
 **Scope limit.** Code outside `engine/` and undeclared input files are not hashed. Declaring inputs
 is the researcher's obligation; the README states this.
 
+## 3c. Attempt authority (extension of the same mechanic)
+
+**Gap found.** A current group can be any verified group, so a researcher can keep re-running a
+failing test until a later run passes and promote that group. The earlier subject failure stays in
+the log but does not constrain the verdict.
+
+**Rule here.** Every execution records an attempt with a monotonic sequence and one outcome:
+`completed`, `subject_failed`, `infra_failed` or `indeterminate`. Only `infra_failed` and
+`indeterminate` are replaceable, and each needs a recorded reason. The earliest non-replaceable
+attempt bound to the current command, code and inputs is authoritative. A later `completed`
+attempt cannot displace an earlier `subject_failed` attempt, and `set_verdict` refuses a NUMERIC
+promotion that cites anything else. Legacy run groups without an attempt row keep the old
+any-current-group behaviour until they are re-run.
+
+**Deliberately not copied.** A separate hash-chained attempt file; SQLite's append-only rows and
+the existing run binding are the ledger.
+
 ## 4. Pre-registration (`obezite-mekanizma-projesi`)
 
 **Mechanic.** A prediction is written, with its confidence and its falsification criterion, before

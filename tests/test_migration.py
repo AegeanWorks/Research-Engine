@@ -96,6 +96,20 @@ class MigrationTests(unittest.TestCase):
         run = conn.execute("SELECT * FROM test_run WHERE id = 'u_old'").fetchone()
         self.assertEqual(run["run_group"], "g_old")
         self.assertEqual(run["code_sha256"], "")
+        self.assertEqual(
+            conn.execute("SELECT COUNT(*) AS n FROM test_attempt").fetchone()["n"], 0
+        )
+
+    def test_migration_creates_the_attempt_table(self) -> None:
+        path = self._old_database()
+        conn = connect(path)
+        self.addCleanup(conn.close)
+        initialize(conn)
+        tables = {
+            row["name"]
+            for row in conn.execute("SELECT name FROM sqlite_master WHERE type = 'table'")
+        }
+        self.assertIn("test_attempt", tables)
 
     def test_migration_is_idempotent(self) -> None:
         path = self._old_database()

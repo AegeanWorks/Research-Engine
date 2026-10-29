@@ -10,7 +10,7 @@ from typing import Iterator
 from engine.artifacts import utc_now
 from engine.errors import EngineError
 
-SCHEMA_VERSION = 5
+SCHEMA_VERSION = 6
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS schema_meta (
@@ -122,6 +122,17 @@ CREATE TABLE IF NOT EXISTS test_run (
     platform TEXT NOT NULL DEFAULT '',
     role TEXT NOT NULL DEFAULT 'main'
 );
+CREATE TABLE IF NOT EXISTS test_attempt (
+    id TEXT PRIMARY KEY,
+    test_id TEXT NOT NULL REFERENCES killtest(id),
+    attempt_no INTEGER NOT NULL,
+    run_group TEXT NOT NULL,
+    outcome TEXT NOT NULL,
+    reason TEXT NOT NULL DEFAULT '',
+    created_at TEXT NOT NULL,
+    UNIQUE(test_id, attempt_no),
+    UNIQUE(test_id, run_group)
+);
 CREATE TABLE IF NOT EXISTS verdict (
     id TEXT PRIMARY KEY,
     subject_kind TEXT NOT NULL,
@@ -168,6 +179,7 @@ CREATE INDEX IF NOT EXISTS idx_claim_status ON claim(status);
 CREATE INDEX IF NOT EXISTS idx_edge_dst ON edge(dst_kind, dst_id);
 CREATE INDEX IF NOT EXISTS idx_edge_src ON edge(src_kind, src_id);
 CREATE INDEX IF NOT EXISTS idx_run_test ON test_run(test_id);
+CREATE INDEX IF NOT EXISTS idx_attempt_test ON test_attempt(test_id, attempt_no);
 CREATE INDEX IF NOT EXISTS idx_verdict_subject ON verdict(subject_kind, subject_id);
 CREATE INDEX IF NOT EXISTS idx_event_research ON event(research_id, id);
 CREATE INDEX IF NOT EXISTS idx_observation_claim ON observation(claim_id, group_label);

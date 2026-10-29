@@ -335,3 +335,24 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Consequences**: Obvious echo and duplicate quotes are visible in `check` and reports as
   warnings, never errors. A legitimate repeated quote needs a recorded reason but is not blocked.
   The weight threshold remains deferred until a source-body store exists.
+
+### ADR-027: Earliest-valid attempt authority
+- **Date**: 2026-10-29
+- **Status**: Accepted
+- **Context**: `set_verdict` accepted any current verified group, so a researcher could re-run a
+  failing kill test until a later group passed and promote that group. The earlier subject failure
+  remained in `test_run` but did not constrain the verdict. Without an attempt outcome, the engine
+  could not distinguish a legitimate retry after an infrastructure failure from a retry after a
+  subject failure.
+- **Decision**: Bump the schema to 6 and add the append-only `test_attempt` table. Each execution
+  records a monotonic attempt number, its run group, one outcome from `completed`,
+  `subject_failed`, `infra_failed` or `indeterminate`, and a reason for replaceable outcomes. The
+  earliest non-replaceable attempt bound to the current command, code and inputs is authoritative;
+  only its group may be used for a `NUMERIC` promotion. `test attempts` lists the ledger and
+  `test runs` shows the attempt beside each run. Legacy run groups without an attempt row keep the
+  old any-current-group behaviour until they are re-run.
+- **Consequences**: Retry-until-pass is blocked for new runs, including a later pass after an
+  earlier subject failure. An infrastructure failure, timeout, workspace drift, non-reproducible
+  run or a control that does not fail is replaceable only with a recorded reason. Existing
+  databases migrate without a backfill; their historical runs remain readable and keep the legacy
+  promotion path.

@@ -30,7 +30,7 @@ class CliTests(unittest.TestCase):
     def test_init_and_demo(self) -> None:
         code, out, _ = self.run_cli("init")
         self.assertEqual(code, 0)
-        self.assertIn("schema 5", out)
+        self.assertIn("schema 6", out)
         code, out, _ = self.run_cli("--json", "demo")
         self.assertEqual(code, 0)
         payload = json.loads(out)
