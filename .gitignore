@@ -1,0 +1,16 @@
+# AIKit transient state
+.aikit/*.lock
+.aikit/*.bak
+.aikit/*.tmp_*
+.aikit/*.corrupt_*
+.aikit/reforge.reviews/
+__pycache__/
+*.py[cod]
+node_modules/
+
+# generated local evidence graph
+research.db
+*.db
+*.db-wal
+*.db-shm
+*.tmp_*

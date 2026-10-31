@@ -1,0 +1,269 @@
+{
+  "version": 1,
+  "active_task": {
+    "task_id": "T-014-superseded-readonly",
+    "last_phase": "phase 4",
+    "active_phase": 5,
+    "status": "completed",
+    "updated_at": 1793308443.088614,
+    "owner": "opencode:research-engine",
+    "started_by": "opencode:research-engine",
+    "continuations": [],
+    "completed_at": 1793308505.5989633
+  },
+  "checkpoints": [
+    {
+      "task_id": "T-012-evidence-integrity",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[2/6] Attempt authority delivered: schema 6 test_attempt ledger, earliest non-replaceable attempt selects the NUMERIC group, test attempts command, legacy fallback; 332 tests pass; 4/4 gates pass; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793301223.4404154,
+      "timestamp_str": "2026-10-29 22:13:43",
+      "agent": "opencode:research-engine"
+    },
+    {
+      "task_id": "T-012-evidence-integrity",
+      "phase": "planning",
+      "phase_num": 2,
+      "description": "[3/6] Claim revisions: schema 7 revision_of/superseded_by, claim revise/history, edges repointed to the head, old claim kept as history",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793301318.525838,
+      "timestamp_str": "2026-10-29 22:15:18",
+      "agent": "opencode:research-engine",
+      "impact_assessment": {
+        "why": "Claim text is immutable, so a refined claim either becomes a silently contradicting second claim or leaves a stale statement in the graph",
+        "benefits": "A revision chain keeps the old text and verdict history visible while the head carries the live edges; reports and lists hide superseded heads by default",
+        "risks": "contract: three additive claim columns and schema 7; dependency: stdlib only; concurrency: single-writer transaction; state: edges move to the head, tests stay on the old claim and warn",
+        "mitigation": "Failing-first tests for chain creation, provenance refusal, edge repointing, list/history views and migration; full suite and 4/4 gates before commit"
+      }
+    },
+    {
+      "task_id": "T-012-evidence-integrity",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[3/6] Claim revisions delivered: schema 7 revision links, claim revise/history, edges move to the head, superseded heads hidden, REV-001/REV-002 warnings; 342 tests pass; 4/4 gates pass; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793301744.90547,
+      "timestamp_str": "2026-10-29 22:22:24",
+      "agent": "opencode:research-engine"
+    },
+    {
+      "task_id": "T-012-evidence-integrity",
+      "phase": "planning",
+      "phase_num": 2,
+      "description": "[4/6] Measurement provenance and protocol comparability: schema 8 observation provenance, protocol registry, stats comparability gate, OBS-002",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793301840.648442,
+      "timestamp_str": "2026-10-29 22:24:00",
+      "agent": "opencode:research-engine",
+      "impact_assessment": {
+        "why": "Observations store only claim/group/value, so a number cannot be traced to the instrument, rater or protocol that produced it, and two accuracy numbers can be compared silently",
+        "benefits": "Every new measurement can carry instrument, rater, protocol, sample size, aggregation and unit; stats refuses cross-protocol or cross-instrument comparisons unless explicitly allowed with a caveat",
+        "risks": "contract: observation columns and a protocol table, schema 8; dependency: stdlib only; concurrency: single-writer transactions; state: legacy observations remain readable and warn OBS-002",
+        "mitigation": "Failing-first validation, comparability and migration tests; full suite and 4/4 gates before commit"
+      }
+    },
+    {
+      "task_id": "T-012-evidence-integrity",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[4/6] Measurement provenance delivered: schema 8 observation provenance, immutable protocol registry, comparability gate with --allow-incomparable, report provenance columns, OBS-002; 356 tests pass; 4/4 gates pass; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793302278.1218705,
+      "timestamp_str": "2026-10-29 22:31:18",
+      "agent": "opencode:research-engine"
+    },
+    {
+      "task_id": "T-012-evidence-integrity",
+      "phase": "planning",
+      "phase_num": 2,
+      "description": "[5/6] Nested event provenance: schema 9 seq/root_id/parent_id, event tree and path, same-program parent validation",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793302354.5110598,
+      "timestamp_str": "2026-10-29 22:32:34",
+      "agent": "opencode:research-engine",
+      "impact_assessment": {
+        "why": "The event log is flat, so a reviewer cannot see which action caused a cascade, merge or report write",
+        "benefits": "Every new event carries a per-program sequence and a root/parent link; events tree and events path render the causal chain",
+        "risks": "contract: three event columns and schema 9; dependency: stdlib only; concurrency: sequence allocated inside the writer transaction; state: legacy events default to root-less seq 0",
+        "mitigation": "Failing-first nesting, orphan, cross-program and CLI tests; full suite and 4/4 gates before commit"
+      }
+    },
+    {
+      "task_id": "T-012-evidence-integrity",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[5/6] Nested event provenance delivered: schema 9 seq/root_id/parent_id, events tree/path, same-program parent validation, legacy event fallback; 362 tests pass; 4/4 gates pass; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793302645.6874359,
+      "timestamp_str": "2026-10-29 22:37:25",
+      "agent": "opencode:research-engine"
+    },
+    {
+      "task_id": "T-012-evidence-integrity",
+      "phase": "planning",
+      "phase_num": 2,
+      "description": "[6/6] Self-produced metric quarantine: schema 10 observation provenance class, producer path/digest, stats gate and report split, OBS-003/OBS-004",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793302704.4765642,
+      "timestamp_str": "2026-10-29 22:38:24",
+      "agent": "opencode:research-engine",
+      "impact_assessment": {
+        "why": "A measurement produced by the system under study can enter the evidence base and be compared like an independent one",
+        "benefits": "Self-reported measurements are labelled, separated in reports and refused in comparisons unless explicitly allowed with a caveat",
+        "risks": "contract: three observation columns and schema 10; dependency: stdlib only; concurrency: single-writer transactions; state: legacy measurements are unclassified and warn OBS-003",
+        "mitigation": "Failing-first class validation, stats refusal, report split and migration tests; full suite and 4/4 gates before commit"
+      }
+    },
+    {
+      "task_id": "T-012-evidence-integrity",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[6/6] Self-produced metric quarantine delivered: schema 10 provenance class/producer identity, stats refusal with --allow-self-reported, report split, OBS-003/OBS-004; 368 tests pass; 4/4 gates pass; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793303541.9934866,
+      "timestamp_str": "2026-10-29 22:52:21",
+      "agent": "opencode:research-engine"
+    },
+    {
+      "task_id": "T-012-evidence-integrity",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'T-012-evidence-integrity' completed successfully.",
+      "status": "completed",
+      "timestamp": 1793303628.588319,
+      "timestamp_str": "2026-10-29 22:53:48",
+      "agent": "opencode:research-engine"
+    },
+    {
+      "task_id": "T-013-integrity-guards",
+      "phase": "planning",
+      "phase_num": 2,
+      "description": "[1/2] Verdict reversal guard and suspicious-test warning",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793307137.863615,
+      "timestamp_str": "2026-10-29 23:52:17",
+      "agent": "opencode:research-engine",
+      "impact_assessment": {
+        "why": "A failed claim can be promoted in place, and a new test created after a subject failure bypasses attempt authority",
+        "benefits": "A failed claim needs a revision to be revived; a test created after a sibling failure is visible as TEST-002",
+        "risks": "contract: one transition guard and one warning code; dependency: stdlib only; concurrency: single writer; state: no schema change",
+        "mitigation": "Failing-first transition and warning tests; full suite and 4/4 gates before commit"
+      }
+    },
+    {
+      "task_id": "T-013-integrity-guards",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[2/2] Integrity guards delivered: failed claims cannot be promoted in place; TEST-002 warns on a new test after a sibling subject failure; 371 tests pass; 4/4 gates pass; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793307442.977135,
+      "timestamp_str": "2026-10-29 23:57:22",
+      "agent": "opencode:research-engine"
+    },
+    {
+      "task_id": "T-013-integrity-guards",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'T-013-integrity-guards' completed successfully.",
+      "status": "completed",
+      "timestamp": 1793307510.1794844,
+      "timestamp_str": "2026-10-29 23:58:30",
+      "agent": "opencode:research-engine"
+    },
+    {
+      "task_id": "reforge:run-1",
+      "phase": "reforge stage 9",
+      "phase_num": 3,
+      "description": "Reforge stage 9: run resumed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793307615.1720734,
+      "timestamp_str": "2026-10-30 00:00:15",
+      "agent": "opencode"
+    },
+    {
+      "task_id": "reforge:run-1",
+      "phase": "reforge stage 10",
+      "phase_num": 3,
+      "description": "Reforge stage 10: window 30, 10 commit(s), 34 file(s) reviewed (unreviewed), 0 finding(s), 0 repaired",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793307651.5550733,
+      "timestamp_str": "2026-10-30 00:00:51",
+      "agent": "opencode"
+    },
+    {
+      "task_id": "T-014-superseded-readonly",
+      "phase": "planning",
+      "phase_num": 2,
+      "description": "[1/1] Refuse new evidence and edges on superseded claims",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793308439.5086083,
+      "timestamp_str": "2026-10-30 00:13:59",
+      "agent": "opencode:research-engine",
+      "impact_assessment": {
+        "why": "A superseded claim could still receive a verdict, observation, test, edge or prerequisite, creating evidence that looked live but was attached to history",
+        "benefits": "The revision head is the only live target; history stays readable through claim history",
+        "risks": "contract: new refusals on five write paths; dependency: stdlib only; concurrency: single writer; state: no schema change",
+        "mitigation": "Failing-first tests for every write path; full suite and 4/4 gates before commit"
+      }
+    },
+    {
+      "task_id": "T-014-superseded-readonly",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[1/1] Superseded claims are read-only: verdict, observation, test, edge and prerequisite writes now refuse history; 376 tests pass; 4/4 gates pass; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793308443.088614,
+      "timestamp_str": "2026-10-30 00:14:03",
+      "agent": "opencode:research-engine"
+    },
+    {
+      "task_id": "T-014-superseded-readonly",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'T-014-superseded-readonly' completed successfully.",
+      "status": "completed",
+      "timestamp": 1793308505.5989645,
+      "timestamp_str": "2026-10-30 00:15:05",
+      "agent": "opencode:research-engine"
+    },
+    {
+      "task_id": "reforge:run-1",
+      "phase": "reforge stage 11",
+      "phase_num": 3,
+      "description": "Reforge stage 11: window 33, 2 commit(s), 9 file(s) reviewed (unreviewed), 0 finding(s), 0 repaired",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793308575.887926,
+      "timestamp_str": "2026-10-30 00:16:15",
+      "agent": "opencode"
+    },
+    {
+      "task_id": "reforge:run-1",
+      "phase": "reforge stage 11",
+      "phase_num": 3,
+      "description": "Reforge stage 11: run stopped at stage 11; resume it with `reforge resume`",
+      "files_affected": [],
+      "status": "suspended",
+      "timestamp": 1793308605.4645162,
+      "timestamp_str": "2026-10-30 00:16:45",
+      "agent": "opencode"
+    }
+  ]
+}
