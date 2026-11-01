@@ -5,6 +5,7 @@ from __future__ import annotations
 import sqlite3
 from typing import Dict, List, Tuple
 
+from engine.calibration import summary as calibration_summary
 from engine.claims import get_claim
 from engine.integrity import findings_for_research
 from engine.markdown import bullet, cell, code, sanitize
@@ -173,6 +174,31 @@ def report(conn: sqlite3.Connection, research_ref: str) -> str:
                 "",
             ]
         )
+
+    calibration = calibration_summary(conn, research.id)
+    if calibration["counts"]["resolved"]:
+        lines.extend(["### Hypothesis calibration", ""])
+        lines.append(
+            f"- resolved: {calibration['counts']['resolved']} of"
+            f" {calibration['counts']['total']} (coverage {calibration['coverage']:.0%})"
+        )
+        skill = (
+            "n/a" if calibration["skill"] is None else f"{calibration['skill']:+.4f}"
+        )
+        lines.append(
+            f"- Brier: {calibration['brier']:.4f}; log loss: {calibration['log_loss']:.4f};"
+            f" baseline Brier: {calibration['brier_baseline']:.4f}; skill: {skill}"
+        )
+        for item in calibration["bins"]:
+            if item["n"]:
+                lines.append(
+                    f"- bin {item['low']:.1f}-{item['high']:.1f}: n={item['n']},"
+                    f" predicted {item['mean_confidence']:.2f},"
+                    f" observed {item['observed']:.2f}, gap {item['gap']:+.2f}"
+                )
+        for warning in calibration["warnings"]:
+            lines.append(f"- warning: {warning}")
+        lines.append("")
 
     lines.extend(["## Kill tests", ""])
     tests = conn.execute(

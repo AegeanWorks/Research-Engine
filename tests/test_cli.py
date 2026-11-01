@@ -62,6 +62,52 @@ class CliTests(unittest.TestCase):
         self.assertEqual(code, 0)
         self.assertIn("Scorecard", out)
 
+    def test_search_command(self) -> None:
+        self.run_cli("demo")
+        code, out, _ = self.run_cli("--json", "search", "synthetic cohort")
+        self.assertEqual(code, 0)
+        payload = json.loads(out)
+        self.assertGreaterEqual(payload["counts"]["source"]["hits"], 1)
+        self.assertGreaterEqual(payload["counts"]["claim"]["hits"], 1)
+        code, out, _ = self.run_cli("search", "synthetic cohort", "--budget", "60")
+        self.assertEqual(code, 0)
+        self.assertIn("SEARCH", out)
+
+    def test_source_duplicates_command(self) -> None:
+        self.run_cli("demo")
+        self.run_cli(
+            "source", "add", "r_000001", "--title", "Paper A", "--year", "2024",
+            "--doi", "https://doi.org/10.1/X",
+        )
+        self.run_cli(
+            "source", "add", "r_000001", "--title", "paper a", "--year", "2024",
+            "--doi", "doi:10.1/x",
+        )
+        code, out, _ = self.run_cli("--json", "source", "duplicates", "--research", "r_000001")
+        self.assertEqual(code, 0)
+        payload = json.loads(out)
+        self.assertEqual(payload["total"], 1)
+        self.assertEqual(payload["groups"][0]["reason"], "doi")
+        code, out, _ = self.run_cli("source", "duplicates", "--research", "r_000001")
+        self.assertEqual(code, 0)
+        self.assertIn("[doi]", out)
+
+    def test_calibration_command(self) -> None:
+        self.run_cli("demo")
+        code, _, err = self.run_cli(
+            "hypothesis", "outcome", "h_000001", "--status", "SUPPORTED",
+            "--evidence", "demo outcome",
+        )
+        self.assertEqual(code, 0, err)
+        code, out, _ = self.run_cli("--json", "analysis", "calibration", "r_000001")
+        self.assertEqual(code, 0)
+        payload = json.loads(out)
+        self.assertEqual(payload["counts"]["resolved"], 1)
+        self.assertAlmostEqual(payload["brier"], 0.16, places=4)
+        code, out, _ = self.run_cli("analysis", "calibration", "r_000001")
+        self.assertEqual(code, 0)
+        self.assertIn("Brier", out)
+
     def test_kill_test_verify_exit_code(self) -> None:
         script = self.dir / "ok.py"
         script.write_text("print('ok')\n", encoding="utf-8")

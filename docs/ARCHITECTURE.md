@@ -123,6 +123,21 @@ a dependency edge that still points at a superseded claim. `claim list` hides su
 default; `claim history` renders the chain oldest first. A superseded claim refuses new verdicts,
 observations, tests, edges and prerequisites; only the head is live.
 
+## Discovery, Deduplication and Calibration
+
+Three read models share one rule: propose, never mutate. `engine/search.py` scans the rows in
+identifier order and ranks an exact phrase before scattered terms; it keeps no index and therefore
+cannot disagree with the database. `engine/duplicates.py` normalizes DOI resolver prefixes and
+title accents before grouping sources, and `DUP-002` is a warning rather than an automatic merge.
+`engine/calibration.py` scores the confidence already recorded on a hypothesis against its recorded
+outcome; `analysis calibration` appends one `hypothesis.calibration` event, and `report` includes
+the scorecard when a resolved hypothesis exists.
+
+None of the three changes a claim, source, hypothesis or verdict. `search` and `duplicates` are pure
+reads; calibration writes only its event. A duplicate source remains the researcher's decision, and
+a calibration score is descriptive rather than a posterior. The scorecard is a pure function of the
+graph so the report stays reproducible; the CLI is the only caller that records the event.
+
 ## Schema Versions
 
 `initialize` creates missing tables, then migrates an older `schema_meta.version` additively and

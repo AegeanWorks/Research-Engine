@@ -34,11 +34,10 @@ A falsification-first research engine for provenance-backed claims, executable k
 
 ## Why this is not "just lattice"
 
-`lattice` is a strong evidence store but not a research lifecycle. The engine borrows its
-provenance rule and adds what a claim is allowed to mean. The clean-room mechanics come from
-`lattice`, `fluid-universe`, `obezite-mekanizma-projesi`, `PNN`, `N1-Engine` and
-`aegean-licensing`; [docs/MECHANICS.md](docs/MECHANICS.md) records each adopted rule and what was
-deliberately not copied. Domain content stays in the programs the engine hosts.
+`lattice` is an evidence store, not a research lifecycle. The engine keeps its provenance rule and
+adds what a claim is allowed to mean. [docs/MECHANICS.md](docs/MECHANICS.md) records each
+clean-room source and what was deliberately not copied; domain content stays in the programs the
+engine hosts.
 
 ## How It Works
 
@@ -88,11 +87,23 @@ deliberately not copied. Domain content stays in the programs the engine hosts.
     `identified`, `screened_in`/`screened_out` and `included`/`excluded`, with a reason from a
     closed taxonomy. `source prisma` and the report show the flow; a claim citing an excluded
     source warns (`SCREEN-001`).
-15. **Measurements are recorded, not retyped.** `observation add` stores each value in a named group; with `--instrument-*`, `--rater-*` and `--protocol` it also stores what produced the number, and `analysis stats` refuses to compare different protocols, instruments or units unless `--allow-incomparable` is explicit. `--provenance-class self_reported` quarantines a number produced by the system under study; reports list it separately and comparisons require `--allow-self-reported`. `observation void` retires one with a reason. A claim with observations but no statistics run warns (`OBS-001`), an unprovenanced observation warns (`OBS-002`), and an unclassified or self-reported observation warns (`OBS-003`/`OBS-004`).
+15. **Measurements are recorded, not retyped.** `observation add` stores each value in a named
+    group, with optional instrument, rater, protocol and unit; `analysis stats` refuses
+    incomparable groups unless `--allow-incomparable` is explicit, and `--provenance-class
+    self_reported` quarantines a system-produced number. `observation void` retires one with a
+    reason. Missing statistics warn (`OBS-001`), as do unprovenanced, unclassified and
+    self-reported measurements (`OBS-002`..`OBS-004`).
 16. **Every non-verdict action is logged.** Source status changes, screening, merges, report
     generation and schema migration append to an event log with a per-program sequence and an
     optional parent, so `events --tree` and `events --path` can render the causal chain. Verdicts
     keep history.
+17. **Discovery is lexical and bounded.** `search` ranks claims, sources, questions and hypotheses
+    by an exact phrase then matched terms, reports the matched field with a snippet, and packs
+    text output to `--budget`; `source duplicates` groups normalized DOI and title matches, and
+    `DUP-002` warns on a hard duplicate.
+18. **Confidence is scored, not just stored.** `analysis calibration` computes Brier, log loss,
+    reliability bins, coverage and a baseline skill score from preregistered confidence and
+    recorded outcomes; a small resolved set is labelled descriptive.
 
 ## Verdict Vocabulary
 
@@ -117,6 +128,8 @@ python -m engine [--db PATH] [--json] init
 python -m engine [--db PATH] [--json] demo
 python -m engine [--db PATH] [--json] check
 python -m engine [--db PATH] [--json] inventory
+python -m engine [--db PATH] [--json] search QUERY [--research REF] [--kind KIND]...
+                        [--limit N] [--budget N] [--all]
 
 python -m engine [--db PATH] research add TITLE [--scope TEXT] [--slug SLUG]
 python -m engine [--db PATH] research list
@@ -131,6 +144,7 @@ python -m engine [--db PATH] source list [--research REF]
 python -m engine [--db PATH] source status REF --status active|expression_of_concern|retracted [--note TEXT]
 python -m engine [--db PATH] source screen REF --status identified|screened_in|screened_out|included|excluded [--reason R]
 python -m engine [--db PATH] source prisma [--research REF]
+python -m engine [--db PATH] source duplicates [--research REF] [--limit N]
 python -m engine [--db PATH] source retract REF --reason TEXT --evidence TEXT
 
 python -m engine [--db PATH] protocol add --id ID --measures TEXT [--includes-generation]
@@ -186,6 +200,7 @@ python -m engine [--db PATH] analysis contradictions REF [--min-score S] [--unli
 python -m engine [--db PATH] analysis matrix REF
 python -m engine [--db PATH] analysis keystone REF [--limit N]
 python -m engine [--db PATH] analysis expose REF
+python -m engine [--db PATH] analysis calibration REF [--min-n N]
 python -m engine [--db PATH] analysis stats CLAIM --baseline LABEL --treatment LABEL [--seed N] [--resamples N] [--allow-incomparable] [--allow-self-reported]
 python -m engine [--db PATH] analysis trend CLAIM --group LABEL
 python -m engine [--db PATH] diff OLD.jsonl NEW.jsonl [--exact]
@@ -222,6 +237,7 @@ present and 0 when only warnings remain. Domain errors print the `Error / Why / 
 - outcome timestamps before registration (`PRE-001`);
 - evidence gaps (`GAP-001`, `GAP-002`), duplicate claim text (`DUP-001`, live claims only),
   empty programs (`EMPTY-001`);
+- duplicate source identity by normalized DOI or title/year (`DUP-002`, warning);
 - a test that produced verified evidence without a negative control (`EVID-008`, warning) or
   whose declared control never failed (`EVID-009`, error);
 - a live quote that restates a linked question, duplicates another live quote, or has no content
@@ -296,38 +312,41 @@ research-engine/
 ├── engine/
 │   ├── __init__.py
 │   ├── __main__.py           <- `python -m engine`
-│   ├── analysis.py           <- contradictions, coverage matrix, keystones
-│   ├── artifacts.py          <- timestamps, output digests and atomic writes
-│   ├── attempts.py           <- append-only kill-test attempts and authority
-│   ├── bundle.py             <- deterministic JSONL export
-│   ├── cascade.py            <- transitive invalidation
-│   ├── claims.py             <- provenance rules, verdicts, edges
-│   ├── cli.py                <- one parser and dispatch surface
-│   ├── context.py            <- token-budgeted outline, brief and claim views
-│   ├── database.py           <- connection, schema, transactions, IDs
-│   ├── demo.py               <- synthetic golden path
-│   ├── diffing.py            <- snapshot comparison
-│   ├── events.py             <- append-only action log
-│   ├── errors.py             <- Error / Why / Fix
-│   ├── evidence.py           <- run binding and current verified groups
-│   ├── hypotheses.py         <- pre-registration and outcomes
-│   ├── information.py        <- cheap quote information checks
+│   ├── analysis.py
+│   ├── artifacts.py
+│   ├── attempts.py
+│   ├── bundle.py
+│   ├── calibration.py        <- Brier, log loss, reliability
+│   ├── cascade.py
+│   ├── claims.py
+│   ├── cli.py
+│   ├── context.py
+│   ├── database.py
+│   ├── demo.py
+│   ├── diffing.py
+│   ├── duplicates.py         <- duplicate source identity
+│   ├── events.py
+│   ├── errors.py
+│   ├── evidence.py
+│   ├── hypotheses.py
+│   ├── information.py
 │   ├── integrity.py          <- the check gate
-│   ├── killtests.py          <- executable tests, binding and two-run verification
-│   ├── maintenance.py        <- integrity check and verified backup
-│   ├── manifest.py           <- report manifests and drift checks
-│   ├── markdown.py           <- safe rendering of untrusted text
-│   ├── merging.py            <- duplicate claim merge
-│   ├── models.py             <- frozen DTOs and closed vocabularies
-│   ├── provenance.py         <- code and input identity recorded with evidence
-│   ├── protocols.py          <- immutable measurement protocol registry
-│   ├── observations.py       <- recorded measurements per claim group
+│   ├── killtests.py
+│   ├── maintenance.py
+│   ├── manifest.py
+│   ├── markdown.py
+│   ├── merging.py
+│   ├── models.py
+│   ├── provenance.py
+│   ├── protocols.py
+│   ├── observations.py
 │   ├── questions.py
 │   ├── researches.py
-│   ├── screening.py          <- screening decisions and PRISMA flow
+│   ├── screening.py
+│   ├── search.py             <- lexical graph search
 │   ├── sources.py
-│   ├── stats.py              <- deterministic tests, effect size, bootstrap
-│   └── synthesis.py          <- consensus, report, scorecard
+│   ├── stats.py
+│   └── synthesis.py
 └── tests/                    <- regression shield plus a full golden run
 ```
 
@@ -337,6 +356,9 @@ research-engine/
 - **Single writer.** One researcher or agent at a time.
 - **Consensus is a display heuristic.** It is not a posterior and never changes a verdict;
   UNKNOWN contributes zero.
+- **Search is lexical.** No embeddings; ranking is an exact phrase, then matched terms.
+- **Calibration is descriptive.** It scores recorded probabilities, not the world; a small
+  resolved set is labelled descriptive rather than decisive.
 - **Discovery is advisory.** `analysis` proposes; only `claim link` records a relation.
 - **Statistics describe the recorded numbers, not the world.** Independence is assumed.
 - **Rank-test method is stated.** Exact for untied small samples, tie-corrected approximation

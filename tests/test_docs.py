@@ -29,7 +29,15 @@ class DocsTests(unittest.TestCase):
         mechanics = (ROOT / "docs" / "MECHANICS.md").read_text(encoding="utf-8")
         self.assertIn("Invariants", architecture)
         self.assertIn("Reproducibility", architecture)
-        for name in ("lattice", "fluid-universe", "obezite-mekanizma-projesi", "PNN"):
+        for name in (
+            "lattice",
+            "fluid-universe",
+            "obezite-mekanizma-projesi",
+            "PNN",
+            "dupefinder",
+            "muse",
+            "N1-Engine",
+        ):
             self.assertIn(name, mechanics)
 
     def test_project_memory_declares_the_test_command(self) -> None:
@@ -53,6 +61,9 @@ class DocsTests(unittest.TestCase):
             "screening.py",
             "observations.py",
             "stats.py",
+            "calibration.py",
+            "duplicates.py",
+            "search.py",
         ):
             self.assertIn(module, text)
             self.assertTrue((ROOT / "engine" / module).exists())
@@ -61,21 +72,30 @@ class DocsTests(unittest.TestCase):
         text = (ROOT / "README.md").read_text(encoding="utf-8")
         self.assertIn("schema version 10", text)
         for code in ("EVID-005", "EVID-006", "EVID-008", "EVID-009", "PROV-003", "SCREEN-001",
-                     "TEST-001", "OBS-001"):
+                     "TEST-001", "OBS-001", "DUP-002"):
             self.assertIn(code, text)
         self.assertIn("--group", text)
         self.assertIn("--strict", text)
         self.assertIn("--control", text)
         self.assertIn("source screen", text)
+        self.assertIn("source duplicates", text)
         self.assertIn("db backup", text)
         self.assertIn("events", text)
         self.assertIn("observation add", text)
         self.assertIn("analysis stats", text)
         self.assertIn("analysis trend", text)
+        self.assertIn("analysis calibration", text)
+        self.assertIn("search QUERY", text)
 
     def test_architecture_documents_binding_and_digests(self) -> None:
         text = (ROOT / "docs" / "ARCHITECTURE.md").read_text(encoding="utf-8")
-        for heading in ("Evidence Binding", "Schema Versions", "Generated Reports", "Promotion"):
+        for heading in (
+            "Evidence Binding",
+            "Schema Versions",
+            "Generated Reports",
+            "Promotion",
+            "Discovery, Deduplication and Calibration",
+        ):
             self.assertIn(heading, text)
         self.assertIn("content_sha256", text)
         self.assertIn("graph_sha256", text)

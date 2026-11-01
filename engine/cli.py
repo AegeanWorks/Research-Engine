@@ -22,6 +22,7 @@ from engine.analysis import (
 )
 from engine.attempts import for_group, list_attempts
 from engine.bundle import export_jsonl, verify_export
+from engine.calibration import score as calibration_score
 from engine.cascade import invalidate, preview, retract_source
 from engine.claims import (
     add_claim,
@@ -37,6 +38,7 @@ from engine.context import DEFAULT_BUDGET, brief, claim_brief, outline
 from engine.database import SCHEMA_VERSION, connect, initialize
 from engine.diffing import diff_files, render as render_diff
 from engine.demo import seed_demo
+from engine.duplicates import duplicate_sources
 from engine.errors import EngineError
 from engine.hypotheses import (
     add_hypothesis,
@@ -48,6 +50,8 @@ from engine.hypotheses import (
 from engine.integrity import check, has_errors, render_json, render_markdown
 from engine.killtests import add_test, list_runs, list_tests, run_test, verify_test
 from engine.questions import add_question, close_question, get_question, list_questions
+from engine.search import KINDS as SEARCH_KINDS
+from engine.search import search as search_graph
 from engine.protocols import list_protocols, register_protocol
 from engine.researches import create_research, get_research, list_researches, research_counts
 from engine.screening import prisma_flow, set_screening
@@ -79,6 +83,19 @@ def _build_parser() -> argparse.ArgumentParser:
     commands.add_parser("demo", help="seed a synthetic program that exercises every mechanic")
     commands.add_parser("check", help="audit provenance, evidence and dependency integrity")
     commands.add_parser("inventory", help="show engine-wide counts")
+    search_c = commands.add_parser(
+        "search", help="search claims, sources, questions and hypotheses"
+    )
+    search_c.add_argument("query")
+    search_c.add_argument("--research")
+    search_c.add_argument("--kind", action="append", choices=SEARCH_KINDS,
+                          help="restrict to one kind; repeatable")
+    search_c.add_argument("--limit", type=int, default=5,
+                          help="maximum hits per kind (default: 5)")
+    search_c.add_argument("--budget", type=int, default=800,
+                          help="text output budget in estimated tokens (default: 800)")
+    search_c.add_argument("--all", action="store_true",
+                          help="include superseded claim revisions")
 
     research = commands.add_parser("research", help="manage research programs")
     research_sub = research.add_subparsers(dest="action", required=True)
@@ -126,6 +143,9 @@ def _build_parser() -> argparse.ArgumentParser:
     screen_s.add_argument("--reason", default="")
     prisma_s = source_sub.add_parser("prisma", help="show the screening flow")
     prisma_s.add_argument("--research")
+    duplicates_s = source_sub.add_parser("duplicates", help="find sources that share an identity")
+    duplicates_s.add_argument("--research")
+    duplicates_s.add_argument("--limit", type=int, default=20)
 
     protocol = commands.add_parser("protocol", help="manage measurement protocols")
     protocol_sub = protocol.add_subparsers(dest="action", required=True)
@@ -318,6 +338,12 @@ def _build_parser() -> argparse.ArgumentParser:
     trend_c = analysis_sub.add_parser("trend", help="fit a trend over one observation group")
     trend_c.add_argument("claim")
     trend_c.add_argument("--group", required=True)
+    calibration_c = analysis_sub.add_parser(
+        "calibration", help="score hypothesis confidence against recorded outcomes"
+    )
+    calibration_c.add_argument("ref")
+    calibration_c.add_argument("--min-n", type=int, default=10,
+                               help="resolved count below which the score is descriptive")
     expose_c.add_argument("ref")
 
     db_c = commands.add_parser("db", help="database maintenance")
@@ -436,6 +462,17 @@ def _cmd_source(conn: sqlite3.Connection, args) -> int:
             ) + "\n"
         text += f"included fraction: {flow['included_fraction']:.2%}\n"
         return _emit(flow, args.json, text)
+    if args.action == "duplicates":
+        result = duplicate_sources(conn, args.research, args.limit)
+        text = f"duplicate source groups: {result['total']} (shown {result['returned']})\n"
+        for group in result["groups"]:
+            text += (
+                f"  [{group['reason']}] keep {group['keep']}: {group['count']} source(s)"
+                f" share {group['key']}\n"
+            )
+            for item in group["sources"]:
+                text += f"    {item['id']}  {item['year'] or '----'}  {item['title']}\n"
+        return _emit(result, args.json, text)
     records = list_sources(conn, args.research)
     text = "".join(
         f"{s.id}  {s.year or '----'}  {s.status:<20} {s.screening:<12} {s.title}\n"
@@ -701,6 +738,18 @@ def main(argv: List[str] | None = None) -> int:
                 text += f"engine code: {payload['provenance']['code_sha256'][:16]}\n"
                 text += f"git: {commit} (dirty: {payload['provenance']['git_dirty']})\n"
                 return _emit(payload, args.json, text)
+            if args.command == "search":
+                result = search_graph(
+                    conn,
+                    args.query,
+                    args.research,
+                    tuple(args.kind) if args.kind else None,
+                    args.limit,
+                    args.all,
+                    args.budget,
+                )
+                payload = {key: value for key, value in result.items() if key != "text"}
+                return _emit(payload, args.json, result["text"])
             if args.command == "check":
                 findings = check(conn)
                 text = render_markdown(findings)
@@ -763,6 +812,38 @@ def main(argv: List[str] | None = None) -> int:
                 _emit(result, args.json, render_diff(result))
                 return 0 if result["identical"] else 1
             if args.command == "analysis":
+                if args.action == "calibration":
+                    result = calibration_score(conn, args.ref, args.min_n)
+                    counts = result["counts"]
+                    lines = [
+                        f"CALIBRATION {result['research']}:"
+                        f" {counts['resolved']}/{counts['total']} resolved"
+                        f" (coverage {result['coverage']:.0%})"
+                    ]
+                    if result["brier"] is not None:
+                        skill = (
+                            "n/a" if result["skill"] is None
+                            else f"{result['skill']:+.4f}"
+                        )
+                        lines.append(
+                            f"  Brier {result['brier']:.4f}  log loss {result['log_loss']:.4f}"
+                            f"  baseline {result['brier_baseline']:.4f}  skill {skill}"
+                        )
+                        lines.append(
+                            f"  supported {counts['supported']}  refuted {counts['refuted']}"
+                            f"  inconclusive {counts['inconclusive']}"
+                        )
+                        for item in result["bins"]:
+                            if item["n"]:
+                                lines.append(
+                                    f"  {item['low']:.1f}-{item['high']:.1f}: n={item['n']}"
+                                    f"  predicted {item['mean_confidence']:.2f}"
+                                    f"  observed {item['observed']:.2f}"
+                                    f"  gap {item['gap']:+.2f}"
+                                )
+                    for warning in result["warnings"]:
+                        lines.append(f"  warning: {warning}")
+                    return _emit(result, args.json, "\n".join(lines) + "\n")
                 if args.action == "contradictions":
                     if args.unlinked:
                         result = unlinked_contradictions(conn, args.ref)

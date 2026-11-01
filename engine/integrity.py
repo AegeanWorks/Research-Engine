@@ -7,6 +7,7 @@ import sqlite3
 from typing import Dict, Iterable, List
 
 from engine import information
+from engine.duplicates import duplicate_sources
 from engine.evidence import (
     claim_groups,
     control_state,
@@ -536,6 +537,24 @@ def check(conn: sqlite3.Connection) -> List[Finding]:
                 str(row["research_id"]),
                 f"duplicate claim text appears {row['n']} times",
                 "merge duplicates, or differentiate the assertions.",
+            )
+        )
+
+    for group in duplicate_sources(conn, limit=None)["groups"]:
+        if group["reason"] not in ("doi", "title_year"):
+            continue
+        ids = ", ".join(item["id"] for item in group["sources"])
+        if group["reason"] == "doi":
+            detail = f"share DOI {group['key'][:120]!r}"
+        else:
+            detail = f"share the normalized title/year {group['key'][:120]!r}"
+        findings.append(
+            _finding(
+                "DUP-002",
+                "warning",
+                group["keep"],
+                f"sources {ids} {detail}",
+                "keep one source, re-point its claims, and stop citing the duplicate.",
             )
         )
 

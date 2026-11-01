@@ -1,8 +1,8 @@
 # Mechanics and Their Sources
 
-This project is a clean-room composition of four mechanics observed in four separate research
-codebases. No source code was copied. The goal is to keep the transferable discipline and drop the
-domain content and pipeline weight.
+This project is a clean-room composition of mechanics observed across the AIKit portfolio. No
+source code was copied. The goal is to keep the transferable discipline and drop the domain
+content and pipeline weight.
 
 ## 1. Provenance-first claims (`lattice`)
 
@@ -303,3 +303,62 @@ independent evidence.
 **Deliberately not copied.** The intervention/baseline domain model, the medical metrics, pandas,
 scipy, SQLAlchemy and PyQt. The port is stdlib-only and deterministic; the reference bootstrap is
 unseeded, which this project does not reproduce.
+
+## 14. Deterministic lexical search (`lattice`)
+
+**Mechanic.** A research graph is only usable if a reader can find the claim, source, question or
+hypothesis that mentions a phrase without opening every table. The reference graph exposes
+`Repository.search`, `_search_papers`, `_search_claims`, `_search_questions` and `_lexical_score` in
+`projects/lattice/lattice/repository.py`, then packs the hit list through `compact_search` in
+`projects/lattice/lattice/context.py`.
+
+**Rule here.** `engine/search.py` scans the program-scoped rows and ranks them with the same
+phrase-first rule: an exact phrase scores 100, a phrase in the primary field 50, and each matched
+term 3 in the primary field or 1 elsewhere. A hit is returned with its kind, identifier, status,
+matched field, score and a one-line snippet centred on the earliest match. Each kind has its own
+`--limit`; text output passes through the shared `context.pack` budget and states every omitted
+line. Superseded claim revisions are hidden unless `--all` is explicit. There is no persistent
+index, so a result cannot be stale, and no FTS5 dependency, so the engine remains standard-library
+only on every Python 3.10 build.
+
+**Deliberately not copied.** The MCP server, web studio, semantic embeddings and a persistent
+inverted index. The engine is a ledger, not a search appliance; a scan is fast at ledger scale.
+
+## 15. Split-source detection (`lattice` + `dupefinder`)
+
+**Mechanic.** Two records of the same paper double-count its evidence and break the provenance
+trace. The reference graph normalizes DOIs and titles before ingest (`_normalize_doi`,
+`normalize_text` and `_check_duplicates` in `projects/lattice/lattice/checks.py`), while
+`projects/dupefinder/dupefinder/scanner.py::find_duplicates` groups byte-identical files through a
+cheap size bucket before an exact SHA-256 comparison.
+
+**Rule here.** `engine/duplicates.py` strips DOI resolver prefixes and case-folds the DOI, folds
+accents, case and punctuation from the title, and groups sources by DOI first, then normalized
+title/year, then title alone. A DOI or title/year group produces a `DUP-002` warning; a title-only
+group is reported by `source duplicates` as a variant because a preprint and a published version
+can legitimately share a title. Groups never cross a program boundary, the lowest identifier is
+the suggested survivor, and nothing is deleted or merged automatically.
+
+**Deliberately not copied.** File hashing, reclaimable-space accounting and automatic merging. A
+source merge changes provenance and needs a deliberate human action, not a heuristic.
+
+## 16. Hypothesis calibration (`obezite-mekanizma-projesi` + `muse` + `N1-Engine`)
+
+**Mechanic.** A pre-registered probability is only useful if it is later scored. The Turkish
+research archive keeps a calibration log next to each hypothesis card
+(`.agents/skills/tur/SKILL.md`, `99_SABLONLAR/hipotez-karti.md`), and `projects/muse/muse/rejudge.py`
+re-scores an artifact while preserving the prior verdict, model identity and timestamp. The N=1
+experiment platform additionally warns on small samples, insufficient windows and reduced power
+(`projects/N1-Engine/main/core/analysis.py`).
+
+**Rule here.** `analysis calibration` treats `SUPPORTED` as 1 and `REFUTED` as 0, excludes
+`INCONCLUSIVE` from the score but keeps it in coverage, and reports the Brier score, clipped log
+loss, the base-rate Brier baseline and a skill score. Reliability bins compare mean predicted
+confidence with observed frequency; a bin off by 0.2 or more is named over- or underconfident. A
+resolved set below `--min-n` is labelled descriptive, and a one-sided outcome set states that
+discrimination cannot be measured. The run is appended as `hypothesis.calibration`, and a report
+with resolved hypotheses includes the same figures.
+
+**Deliberately not copied.** LLM judge scores, domain-specific thresholds, a posterior update and
+automatic verdict changes. Calibration describes the recorded forecasting record; it never moves a
+hypothesis.
