@@ -6,11 +6,11 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `71`
-- **Total Classes**: `62`
-- **Total Top-Level Functions**: `218`
-- **Total Class Methods**: `421`
-- **Total Source Lines**: `12259`
+- **Total Python Modules**: `77`
+- **Total Classes**: `66`
+- **Total Top-Level Functions**: `232`
+- **Total Class Methods**: `451`
+- **Total Source Lines**: `13318`
 
 ---
 
@@ -97,6 +97,19 @@
 
 ---
 
+### [`engine/calibration.py`](engine/calibration.py)
+> *Hypothesis calibration: score preregistered confidence against recorded outcomes.*
+
+**Size**: `176` lines (`6645` bytes)
+
+**Functions:**
+- `def _clip(probability)` - *Keep log loss finite without turning a certain prediction into a free pass.*
+- `def _bin_index(probability)` - *Return the fixed reliability bin for one probability, including exactly 1.0.*
+- `def summary(conn, research_ref, min_resolved)` - *Compute the calibration scorecard for one program without writing anything.*
+- `def score(conn, research_ref, min_resolved, actor)` - *Score one program and append the calibration run to the event log.*
+
+---
+
 ### [`engine/cascade.py`](engine/cascade.py)
 > *Transitive invalidation: when a premise collapses, everything built on it collapses too.*
 
@@ -137,7 +150,7 @@
 ### [`engine/cli.py`](engine/cli.py)
 > *Command-line surface: one entry point for every engine mechanic.*
 
-**Size**: `908` lines (`44915` bytes)
+**Size**: `989` lines (`49279` bytes)
 
 **Functions:**
 - `def _build_parser()`
@@ -215,6 +228,19 @@
 - `def diff_records(old, new, semantic)` - *Compare two record sets and classify added, removed and changed records.*
 - `def diff_files(old, new, semantic)` - *Compare two exported snapshots.*
 - `def render(result)` - *Render a diff as a compact, deterministic report.*
+
+---
+
+### [`engine/duplicates.py`](engine/duplicates.py)
+> *Duplicate-source detection by normalized DOI and title.*
+
+**Size**: `134` lines (`4517` bytes)
+
+**Functions:**
+- `def normalize_doi(value)` - *Strip resolver prefixes and case-fold a DOI so two spellings compare equal.*
+- `def normalize_title(value)` - *Fold accents, case and punctuation while keeping letters from every script.*
+- `def _group(items, reason, key)`
+- `def duplicate_sources(conn, research_ref, limit)` - *Return groups of sources that share a DOI, a normalized title/year, or a title variant.*
 
 ---
 
@@ -308,7 +334,7 @@
 ### [`engine/integrity.py`](engine/integrity.py)
 > *Graph integrity: provenance, evidence paths, dependency acyclicity and stale dependents.*
 
-**Size**: `717` lines (`27207` bytes)
+**Size**: `736` lines (`27937` bytes)
 
 **Functions:**
 - `def _finding(code, severity, subject, message, fix)`
@@ -508,6 +534,21 @@
 
 ---
 
+### [`engine/search.py`](engine/search.py)
+> *Deterministic lexical search over the recorded graph.*
+
+**Size**: `226` lines (`8252` bytes)
+
+**Functions:**
+- `def _terms(query)` - *Case-folded query terms, de-duplicated and stripped of one-character noise.*
+- `def _score(needle, terms, blob, primary)` - *Phrase-first relevance: exact phrase, primary field, then matched terms.*
+- `def _snippet(text, needle, terms, width)` - *A one-line window around the earliest match, with visible cut marks.*
+- `def _fields(kind, row)` - *Primary and supporting text for one record, in match-priority order.*
+- `def _rows(conn, kind, research_id, include_superseded)` - *Program-scoped rows for one kind, in stable identifier order.*
+- `def search(conn, query, research_ref, kinds, limit, include_superseded, budget)` - *Rank one query across the graph and return matches with a matched-field snippet.*
+
+---
+
 ### [`engine/sources.py`](engine/sources.py)
 > *Bibliographic sources: the only place literature text may enter the graph.*
 
@@ -547,7 +588,7 @@
 ### [`engine/synthesis.py`](engine/synthesis.py)
 > *Evidence synthesis: weighted consensus, contradiction pairs, and generated reports.*
 
-**Size**: `381` lines (`15592` bytes)
+**Size**: `407` lines (`16787` bytes)
 
 **Functions:**
 - `def stance_claims(conn, question_id)`
@@ -682,6 +723,24 @@
 
 ---
 
+### [`tests/test_calibration.py`](tests/test_calibration.py)
+> *Hypothesis calibration: recorded confidence is scored against recorded outcomes.*
+
+**Size**: `110` lines (`5065` bytes)
+
+**Classes:**
+- `class CalibrationTests`
+  - Method `.add_outcome(research, confidence, status, text)`
+  - Method `.test_brier_log_loss_and_coverage()`
+  - Method `.test_reliability_bins_separate_direction()`
+  - Method `.test_empty_program_is_undefined_not_zero()`
+  - Method `.test_small_resolved_set_is_flagged()`
+  - Method `.test_one_sided_outcomes_cannot_measure_discrimination()`
+  - Method `.test_score_appends_an_event_and_report_shows_the_score()`
+  - Method `.test_minimum_resolved_set_must_be_positive()`
+
+---
+
 ### [`tests/test_cascade.py`](tests/test_cascade.py)
 > *A collapsed premise invalidates every dependent transitively.*
 
@@ -726,7 +785,7 @@
 ### [`tests/test_cli.py`](tests/test_cli.py)
 > *The CLI surface: JSON output, exit codes and the error triad.*
 
-**Size**: `374` lines (`15159` bytes)
+**Size**: `420` lines (`17198` bytes)
 
 **Classes:**
 - `class CliTests`
@@ -736,6 +795,9 @@
   - Method `.test_demo_passes_integrity_gate()`
   - Method `.test_error_triad_on_missing_quote()`
   - Method `.test_report_and_scorecard()`
+  - Method `.test_search_command()`
+  - Method `.test_source_duplicates_command()`
+  - Method `.test_calibration_command()`
   - Method `.test_kill_test_verify_exit_code()`
   - Method `.test_export_writes_a_file()`
   - Method `.test_missing_database_record_exits_one()`
@@ -828,7 +890,7 @@
 ### [`tests/test_docs.py`](tests/test_docs.py)
 > *Documentation and project memory stay discoverable and within budget.*
 
-**Size**: `85` lines (`3322` bytes)
+**Size**: `105` lines (`3807` bytes)
 
 **Classes:**
 - `class DocsTests`
@@ -838,6 +900,25 @@
   - Method `.test_readme_tree_names_real_modules()`
   - Method `.test_readme_documents_the_current_schema_and_gates()`
   - Method `.test_architecture_documents_binding_and_digests()`
+
+---
+
+### [`tests/test_duplicates.py`](tests/test_duplicates.py)
+> *Duplicate sources: DOI and title normalization, scope, and the integrity warning.*
+
+**Size**: `92` lines (`4343` bytes)
+
+**Classes:**
+- `class NormalizationTests`
+  - Method `.test_doi_resolver_prefix_and_case_are_folded()`
+  - Method `.test_title_folds_accents_case_and_punctuation()`
+- `class DuplicateSourceTests`
+  - Method `.test_doi_duplicates_are_grouped_with_the_lowest_id_kept()`
+  - Method `.test_title_year_duplicates_are_grouped()`
+  - Method `.test_same_title_different_year_is_only_a_variant()`
+  - Method `.test_programs_are_never_grouped_together()`
+  - Method `.test_limit_keeps_the_total_visible()`
+  - Method `.test_integrity_warns_on_doi_and_title_year_but_not_variants()`
 
 ---
 
@@ -1270,6 +1351,27 @@
   - Method `.test_prisma_counts_and_fraction()`
   - Method `.test_excluded_source_citing_claim_warns()`
   - Method `.test_included_source_does_not_warn()`
+
+---
+
+### [`tests/test_search.py`](tests/test_search.py)
+> *Deterministic lexical search: phrase ranking, snippets, scope and budget.*
+
+**Size**: `129` lines (`5971` bytes)
+
+**Classes:**
+- `class SearchTests`
+  - Method `.add_assumption(research, text, basis)`
+  - Method `.test_phrase_beats_scattered_terms()`
+  - Method `.test_case_and_punctuation_are_folded()`
+  - Method `.test_all_four_kinds_are_searched()`
+  - Method `.test_research_filter_excludes_other_programs()`
+  - Method `.test_superseded_claims_are_hidden_unless_requested()`
+  - Method `.test_snippet_reports_the_matching_field()`
+  - Method `.test_budget_reports_omitted_lines()`
+  - Method `.test_result_limit_is_per_kind()`
+  - Method `.test_repeat_is_deterministic()`
+  - Method `.test_invalid_inputs_are_refused()`
 
 ---
 

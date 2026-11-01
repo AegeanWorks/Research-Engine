@@ -463,3 +463,45 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   readable through `claim history` and the old verdict trail.
 - **Consequences**: The live graph has one target per assertion. A caller that names the old id
   gets the Error/Why/Fix triad naming the head. No schema change is needed.
+
+### ADR-035: Deterministic Lexical Search Without an Index
+- **Date**: 2026-10-30
+- **Status**: Accepted
+- **Context**: The graph could only be read through lists and budgeted views. Finding a phrase
+  across claims, sources, questions and hypotheses required opening each table, and the reference
+  research graph already ranks a phrase before scattered terms.
+- **Decision**: Add `engine/search.py` and `search QUERY`. It scans program-scoped rows in
+  identifier order, scores an exact phrase before matched terms, returns the matched field and a
+  centred snippet, hides superseded claim revisions by default, and packs text output through the
+  existing budget. No persistent index and no FTS5 dependency.
+- **Consequences**: A result cannot be stale and the standard-library-only contract holds on every
+  Python 3.10 build. Search is lexical, not semantic; a future embedding index would be a new
+  adapter, not a change to this ranking rule.
+
+### ADR-036: Split Sources Are Detected, Not Merged Automatically
+- **Date**: 2026-10-30
+- **Status**: Accepted
+- **Context**: A source registered twice splits its provenance and doubles its apparent evidence.
+  The reference graph normalizes DOIs and titles before ingest, and the duplicate-file tool groups
+  exact identities before reporting.
+- **Decision**: Add `engine/duplicates.py`, `source duplicates` and the `DUP-002` warning. DOIs are
+  stripped of resolver prefixes and case-folded; titles are accent-, case- and punctuation-folded;
+  sources group by DOI, then normalized title/year, then title alone. Only DOI and title/year groups
+  warn; a title-only match is a variant. The lowest identifier is the suggested survivor.
+- **Consequences**: Hard duplicates become visible in `check` without deleting history or crossing
+  a program boundary. A source merge would change provenance, so it stays a deliberate human action
+  rather than an automatic repair.
+
+### ADR-037: Calibration Scores Recorded Confidence
+- **Date**: 2026-10-30
+- **Status**: Accepted
+- **Context**: Every hypothesis stores the confidence recorded before its outcome, but nothing
+  compared that probability with what happened. The reference research archive keeps a calibration
+  log, and the N=1 engine warns when a small sample cannot support a confident reading.
+- **Decision**: Add `engine/calibration.py` and `analysis calibration`. `SUPPORTED` scores 1,
+  `REFUTED` 0, and `INCONCLUSIVE` is excluded from the score but counted in coverage. Report the
+  Brier score, clipped log loss, base-rate baseline, skill score and fixed reliability bins; label
+  a resolved set below `--min-n` descriptive and a one-sided set non-discriminating. The CLI appends
+  one `hypothesis.calibration` event; the report calls the pure summary.
+- **Consequences**: A program can see whether its probabilities were calibrated without changing a
+  hypothesis. Calibration is a scoring rule, not a posterior, and it does not touch verdicts.
