@@ -28,6 +28,7 @@ _ORDER = (
     "verdict",
     "invalidation",
     "observation",
+    "ai_artifact",
     "event",
 )
 
@@ -91,7 +92,7 @@ def _rows(conn: sqlite3.Connection, table: str, research_id: str | None) -> List
             for row in conn.execute("SELECT * FROM invalidation ORDER BY id")
             if str(row["root_id"]) in members
         ]
-    if table in ("observation", "event"):
+    if table in ("observation", "ai_artifact", "event"):
         return conn.execute(
             f"SELECT * FROM {table} WHERE research_id = ? ORDER BY id", (research_id,)
         ).fetchall()

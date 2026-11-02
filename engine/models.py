@@ -41,6 +41,7 @@ SCREENING_REASONS = (
     "superseded",
     "other",
 )
+AI_KINDS = ("sweep", "extraction", "idea", "draft")
 DEPENDENCY_RELATIONS = ("derived_from", "depends_on")
 CLAIM_CLAIM_RELATIONS = (
     "supports",
@@ -184,6 +185,22 @@ class Attempt:
             "reason": self.reason,
             "created_at": self.created_at,
         }
+
+
+@dataclass(frozen=True)
+class AIArtifact:
+    id: str
+    research_id: str
+    kind: str
+    model_id: str
+    prompt_sha256: str
+    output_sha256: str
+    cited_json: str = "[]"
+    claim_id: Optional[str] = None
+    hypothesis_id: Optional[str] = None
+    test_id: Optional[str] = None
+    actor: str = "agent"
+    created_at: str = ""
 
 
 @dataclass(frozen=True)

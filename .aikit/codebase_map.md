@@ -6,11 +6,11 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `77`
-- **Total Classes**: `66`
-- **Total Top-Level Functions**: `232`
-- **Total Class Methods**: `451`
-- **Total Source Lines**: `13318`
+- **Total Python Modules**: `79`
+- **Total Classes**: `72`
+- **Total Top-Level Functions**: `244`
+- **Total Class Methods**: `470`
+- **Total Source Lines**: `14345`
 
 ---
 
@@ -27,6 +27,26 @@
 > *Entry point for `python -m engine`.*
 
 **Size**: `5` lines (`97` bytes)
+
+---
+
+### [`engine/ai.py`](engine/ai.py)
+> *AI provenance adapter: notarize model I/O, ingest UNVERIFIED claims, propose template tests.*
+
+**Size**: `431` lines (`16006` bytes)
+
+**Functions:**
+- `def actor_for(model_id)` - *Attribution for AI-proximate actions: the model, not the default agent.*
+- `def _to_artifact(row)`
+- `def _validate_cited(cited)` - *Check citation shape only; existence is enforced at ingest and by AI-001.*
+- `def record_artifact(conn, research_ref, kind, model_id, prompt_text, output_text, cited)` - *Notarize one model invocation: hashes in, raw text never stored.*
+- `def get_artifact(conn, ref)` - *Fetch one AI artifact by identifier.*
+- `def list_artifacts(conn, research_ref)` - *List AI artifacts, optionally filtered by program.*
+- `def ingest_claim(conn, artifact_ref, text, kind, source_ref, quote, locator, confidence, kill_test, basis, prerequisites, question_ref, stance, actor)` - *Enter one AI-proposed claim as UNVERIFIED, or refuse it loudly.*
+- `def ingest_hypothesis(conn, artifact_ref, statement, criterion, confidence, question_ref, actor)` - *Pre-register one AI-proposed hypothesis from an idea artifact.*
+- `def propose_test(conn, artifact_ref, template, name, claim_ref, hypothesis_ref, actor)` - *Bind a fixed-template kill test to a claim or hypothesis.*
+- `def fetch_external(*args, **kwargs)` - *Refusing stub for the external-API adapter: this build is local-only.*
+- `def render_draft(conn, research_ref)` - *Assemble an article draft from surviving claims only. Never upgrades a verdict.*
 
 ---
 
@@ -82,7 +102,7 @@
 ### [`engine/bundle.py`](engine/bundle.py)
 > *Portable JSONL export of the evidence graph, and a digest of its content.*
 
-**Size**: `284` lines (`10424` bytes)
+**Size**: `285` lines (`10458` bytes)
 
 **Functions:**
 - `def _rows(conn, table, research_id)`
@@ -150,7 +170,7 @@
 ### [`engine/cli.py`](engine/cli.py)
 > *Command-line surface: one entry point for every engine mechanic.*
 
-**Size**: `989` lines (`49279` bytes)
+**Size**: `1150` lines (`56376` bytes)
 
 **Functions:**
 - `def _build_parser()`
@@ -164,6 +184,7 @@
 - `def _cmd_claim(conn, args)`
 - `def _cmd_hypothesis(conn, args)`
 - `def _cmd_test(conn, args)`
+- `def _cmd_ai(conn, args)`
 - `def main(argv)` - *Parse one command, open the database, and dispatch it.*
 
 ---
@@ -192,7 +213,7 @@
 ### [`engine/database.py`](engine/database.py)
 > *SQLite connection, schema versioning and atomic transactions.*
 
-**Size**: `408` lines (`15738` bytes)
+**Size**: `429` lines (`16559` bytes)
 
 **Functions:**
 - `def connect(path)` - *Open a database with durability pragmas suitable for a state file.*
@@ -334,7 +355,7 @@
 ### [`engine/integrity.py`](engine/integrity.py)
 > *Graph integrity: provenance, evidence paths, dependency acyclicity and stale dependents.*
 
-**Size**: `736` lines (`27937` bytes)
+**Size**: `806` lines (`30810` bytes)
 
 **Functions:**
 - `def _finding(code, severity, subject, message, fix)`
@@ -423,7 +444,7 @@
 ### [`engine/models.py`](engine/models.py)
 > *Frozen domain records and the engine's closed vocabularies.*
 
-**Size**: `231` lines (`5164` bytes)
+**Size**: `248` lines (`5557` bytes)
 
 **Classes:**
 - `class Research`
@@ -435,6 +456,7 @@
 - `class TestRun`
 - `class Attempt`
   - Method `.to_dict()`
+- `class AIArtifact`
 - `class Observation`
 - `class Protocol`
 - `class Finding`
@@ -627,6 +649,39 @@
 
 ---
 
+### [`tests/test_ai.py`](tests/test_ai.py)
+> *AI integration: provenance at birth, fabricated citations die, novelty can survive.*
+
+**Size**: `322` lines (`12778` bytes)
+
+**Classes:**
+- `class ArtifactTests`
+  - Method `.test_schema_carries_ai_artifact_table()`
+  - Method `.test_record_hashes_only_never_raw_text()`
+  - Method `.test_record_refuses_empty_model_or_payload()`
+  - Method `.test_external_fetch_always_refuses()`
+- `class IngestTests`
+  - Method `._extraction(research, cited)`
+  - Method `.test_extract_enters_unverified_with_link()`
+  - Method `.test_fabricated_source_is_refused_and_flagged()`
+  - Method `.test_wrong_kind_from_wrong_artifact_is_refused()`
+  - Method `.test_idea_preregisters_hypothesis()`
+- `class KillTestAdapterTests`
+  - Method `.test_free_form_template_is_refused()`
+  - Method `.test_template_probe_verifies_like_a_human_test()`
+  - Method `.test_tampered_template_command_trips_ai003()`
+  - Method `.test_ai_proven_without_a_run_trips_ai002()`
+- `class BoundaryTests`
+  - Method `.test_no_network_imports_anywhere_in_the_engine()`
+  - Method `.test_ai_module_never_calls_verdict_paths()`
+- `class DraftTests`
+  - Method `._surviving_claim(research)`
+  - Method `.test_draft_carries_kill_test_receipts()`
+  - Method `.test_draft_withholds_unverified_claims()`
+  - Method `.test_draft_refuses_a_failing_gate()`
+
+---
+
 ### [`tests/test_analysis.py`](tests/test_analysis.py)
 > *Discovery: contradictions, coverage matrix, keystone ranking, exposure.*
 
@@ -785,7 +840,7 @@
 ### [`tests/test_cli.py`](tests/test_cli.py)
 > *The CLI surface: JSON output, exit codes and the error triad.*
 
-**Size**: `420` lines (`17198` bytes)
+**Size**: `421` lines (`17256` bytes)
 
 **Classes:**
 - `class CliTests`
@@ -890,7 +945,7 @@
 ### [`tests/test_docs.py`](tests/test_docs.py)
 > *Documentation and project memory stay discoverable and within budget.*
 
-**Size**: `105` lines (`3807` bytes)
+**Size**: `107` lines (`3866` bytes)
 
 **Classes:**
 - `class DocsTests`
@@ -947,7 +1002,7 @@
 ### [`tests/test_golden.py`](tests/test_golden.py)
 > *Golden run: the whole command surface, end to end, in a fresh database.*
 
-**Size**: `164` lines (`8064` bytes)
+**Size**: `165` lines (`8122` bytes)
 
 **Classes:**
 - `class GoldenRunTests`

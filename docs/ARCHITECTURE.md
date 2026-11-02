@@ -50,6 +50,7 @@ readable and gap-free without `AUTOINCREMENT` surprises.
 | `test_attempt` | one verification invocation: sequence, run group, outcome and reason | append-only |
 | `protocol` | immutable measurement procedure | append-only |
 | `observation` | one measurement with instrument, rater, protocol and unit | append-only; voided, never edited |
+| `ai_artifact` | one notarized model invocation: kind, model, prompt/output hashes, cited ids | append-only; subjects linked, never edited |
 | `event` | non-verdict action trail | append-only |
 | `verdict` | `previous -> new` with evidence, actor and time | append-only |
 | `invalidation` | root, reason, and the JSON list of affected dependents | append-only |
@@ -78,6 +79,8 @@ them.
 13. A claim does not silently cite a source that was screened out of the review.
 14. A failed claim is revived only by a revision, never by an in-place promotion.
 15. A test created after a sibling subject failure is flagged `TEST-002`.
+16. AI output enters as `UNVERIFIED` with a linked artifact, and only a fixed-template
+    test may be proposed for it; the adapter never records a verdict.
 
 ## Evidence Binding
 
@@ -138,6 +141,24 @@ reads; calibration writes only its event. A duplicate source remains the researc
 a calibration score is descriptive rather than a posterior. The scorecard is a pure function of the
 graph so the report stays reproducible; the CLI is the only caller that records the event.
 
+## AI Provenance
+
+`engine/ai.py` notarizes model invocations without executing models or calling the
+network. `record_artifact` stores the program, the artifact kind, the model id, the
+SHA-256 of the exact prompt and output bytes, and the cited `{source_id, locator}`
+pairs; raw prompt/output text never enters the database or the repository. `ingest_claim`
+and `ingest_hypothesis` create `UNVERIFIED`/`PREREGISTERED` rows linked to the artifact,
+or refuse loudly: a failed ingest records an `ai.reject` event on the artifact and
+re-raises, so the run is flagged even though nothing entered the graph. The module
+never calls `set_verdict`, `invalidate`, `retract`, `merge` or `record_outcome`; every
+promotion stays operator-invoked through the unchanged kill-test gates. `propose_test`
+binds only fixed-template deterministic probes (free-form model shell is refused, because
+test commands execute), and `fetch_external` is a refusing stub: this build is
+local-only. Integrity adds `AI-001` (AI citation resolves nowhere), `AI-002` (AI-origin
+claim `PROVEN` with no twice-passing test) and `AI-003` (AI test off its template).
+`render_draft` assembles prose from surviving claims only, refuses on error-level
+findings, and carries the content and exact graph digests; it never writes a verdict.
+
 ## Schema Versions
 
 `initialize` creates missing tables, then migrates an older `schema_meta.version` additively and
@@ -147,7 +168,8 @@ columns, so `_add_missing_columns` inspects `PRAGMA table_info` and adds each mi
 the same transaction. Version 6 adds the `test_attempt` table; version 7 adds the claim revision
 columns; version 8 adds the `protocol` table and the observation provenance columns; version 9
 adds the event sequence and causal links; version 10 adds the observation provenance class and
-producer identity. Existing run groups are not backfilled and remain on the legacy path until they
+producer identity. Version 11 adds the `ai_artifact` table; existing graphs simply have
+no AI rows. Existing run groups are not backfilled and remain on the legacy path until they
 are re-run; existing claims are revision heads with empty links; existing observations are
 unclassified legacy rows and warn `OBS-002`/`OBS-003`; existing events keep `seq` 0 and no root. Each version step is separate, so
 a version-1 database passes through the version-2 step and then the version-3 step. A version

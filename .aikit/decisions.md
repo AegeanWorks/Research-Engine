@@ -505,3 +505,32 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   one `hypothesis.calibration` event; the report calls the pure summary.
 - **Consequences**: A program can see whether its probabilities were calibrated without changing a
   hypothesis. Calibration is a scoring rule, not a posterior, and it does not touch verdicts.
+
+### ADR-038: AI output enters as UNVERIFIED with hash-only provenance
+- **Date**: 2026-11-02
+- **Status**: Accepted
+- **Context**: Automating sweeps, idea generation and drafting needs the engine as skeptic:
+  AI text is a hypothesis source, never evidence. Stage-2 verification found three bypasses
+  in a naive design: `PROVEN` needs only a free-text kill-test name and evidence string
+  (presence, never validity), `invalidate`/`retract`/`merge` destroy with free-text reasons,
+  and the CLI verdict path never records an actor, so AI and human verdicts were
+  indistinguishable. It also found that quote text is unverifiable by construction (the
+  engine stores no body), that model-supplied shell would execute via `shell=True` in test
+  runs, and that no network import exists in the engine to guard.
+- **Decision**: Add `engine/ai.py` plus a schema-11 `ai_artifact` table (kind, model id,
+  prompt/output SHA-256, cited source ids, optional claim/hypothesis/test links). Raw
+  prompt/output bytes are never stored. Ingest creates `UNVERIFIED`/`PREREGISTERED` rows
+  linked to the artifact or refuses (`ai.reject` event keeps the failed run flagged). The
+  adapter never calls `set_verdict`, `invalidate`, `retract`, `merge` or `record_outcome`;
+  CLI `verdict`/`outcome` gain `--actor` (default `agent`, adapter stamps `model:<id>`).
+  Test proposals come only from fixed deterministic templates; free-form model shell and
+  the external API are refused in code. Integrity adds `AI-001` (unresolvable AI citation),
+  `AI-002` (AI-origin `PROVEN` with no twice-passing test) and `AI-003` (AI test off its
+  template). The event-log-only alternative was rejected because the claim-to-artifact
+  join needed for `AI-002` is not queryable from free-text event detail. Draft assembly
+  reuses `report` digests, refuses on error-level findings, withholds non-surviving claims
+  with their status, and never writes a verdict.
+- **Consequences**: A fabricated source id fails closed at ingest; a fake quote against a
+  real source stays `UNVERIFIED` until a kill test it cannot pass. Per-claim kill tests
+  with real discriminating power remain researcher-authored; template probes prove the
+  plumbing, not the science. The external adapter is a later ADR, not this change.

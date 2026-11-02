@@ -11,6 +11,27 @@ from pathlib import Path
 from typing import Callable, Dict, List
 
 from engine import __version__
+from engine.ai import (
+    get_artifact as get_ai_artifact,
+)
+from engine.ai import (
+    ingest_claim as ingest_ai_claim,
+)
+from engine.ai import (
+    ingest_hypothesis as ingest_ai_hypothesis,
+)
+from engine.ai import (
+    list_artifacts as list_ai_artifacts,
+)
+from engine.ai import (
+    propose_test as propose_ai_test,
+)
+from engine.ai import (
+    record_artifact as record_ai_artifact,
+)
+from engine.ai import (
+    render_draft as render_ai_draft,
+)
 from engine.analysis import (
     claim_statistics,
     claim_trend,
@@ -233,6 +254,8 @@ def _build_parser() -> argparse.ArgumentParser:
     verdict_c.add_argument("--note", default="")
     verdict_c.add_argument("--group", dest="evidence_group", default="",
                            help="the verified run group a NUMERIC verdict cites")
+    verdict_c.add_argument("--actor", default="agent",
+                           help="who records the verdict (default: agent)")
     merge_c = claim_sub.add_parser("merge", help="merge duplicates into one survivor")
     merge_c.add_argument("keep")
     merge_c.add_argument("duplicates", nargs="+")
@@ -261,6 +284,8 @@ def _build_parser() -> argparse.ArgumentParser:
     outcome_h.add_argument("--status", required=True)
     outcome_h.add_argument("--evidence", required=True)
     outcome_h.add_argument("--note", default="")
+    outcome_h.add_argument("--actor", default="agent",
+                           help="who records the outcome (default: agent)")
     card_h = hypothesis_sub.add_parser("card", help="render the pre-registration card")
     card_h.add_argument("ref")
 
@@ -367,6 +392,51 @@ def _build_parser() -> argparse.ArgumentParser:
 
     score_c = commands.add_parser("scorecard", help="generate a one-line-per-claim scorecard")
     score_c.add_argument("ref")
+    ai_c = commands.add_parser(
+        "ai", help="notarize model I/O and ingest UNVERIFIED AI output (local-only)")
+    ai_sub = ai_c.add_subparsers(dest="action", required=True)
+    sweep_c = ai_sub.add_parser("sweep", help="notarize a model invocation (any kind)")
+    sweep_c.add_argument("research")
+    sweep_c.add_argument("--kind", default="sweep",
+                         help="artifact kind: sweep, extraction, idea or draft")
+    sweep_c.add_argument("--model", required=True, help="model id, e.g. local:qwen2.5-coder-1.5b-hf")
+    sweep_c.add_argument("--prompt-file", required=True, help="path to the exact prompt bytes")
+    sweep_c.add_argument("--output-file", required=True, help="path to the raw model output")
+    sweep_c.add_argument("--cited", default="[]",
+                         help="JSON list of {source_id, locator} the model cited")
+    extract_c = ai_sub.add_parser("extract", help="ingest one AI-proposed claim as UNVERIFIED")
+    extract_c.add_argument("--artifact", required=True)
+    extract_c.add_argument("--text", required=True)
+    extract_c.add_argument("--kind", required=True)
+    extract_c.add_argument("--source")
+    extract_c.add_argument("--quote", default="")
+    extract_c.add_argument("--locator", default="")
+    extract_c.add_argument("--confidence", type=float, default=0.5)
+    extract_c.add_argument("--kill-test", default="")
+    extract_c.add_argument("--basis", default="")
+    extract_c.add_argument("--from", dest="prerequisites", action="append", default=[])
+    extract_c.add_argument("--question")
+    extract_c.add_argument("--stance", default="supports")
+    extract_c.add_argument("--actor", default="agent")
+    idea_c = ai_sub.add_parser("idea", help="pre-register one AI-proposed hypothesis")
+    idea_c.add_argument("--artifact", required=True)
+    idea_c.add_argument("--statement", required=True)
+    idea_c.add_argument("--criterion", required=True)
+    idea_c.add_argument("--confidence", type=float, default=0.5)
+    idea_c.add_argument("--question")
+    idea_c.add_argument("--actor", default="agent")
+    propose_c = ai_sub.add_parser("propose-test", help="bind a fixed-template kill test")
+    propose_c.add_argument("--artifact", required=True)
+    propose_c.add_argument("--template", required=True, help="one of the fixed templates")
+    propose_c.add_argument("--name", required=True)
+    propose_c.add_argument("--claim")
+    propose_c.add_argument("--hypothesis")
+    propose_c.add_argument("--actor", default="agent")
+    draft_c = ai_sub.add_parser("draft", help="assemble an article draft from surviving claims")
+    draft_c.add_argument("ref")
+    draft_c.add_argument("--out", help="write the draft atomically instead of printing it")
+    artifacts_c = ai_sub.add_parser("artifacts", help="list AI artifacts")
+    artifacts_c.add_argument("--research")
     export_c = commands.add_parser("export", help="export the graph as JSONL")
     export_c.add_argument("path")
     export_c.add_argument("--research")
@@ -591,7 +661,7 @@ def _cmd_claim(conn: sqlite3.Connection, args) -> int:
     if args.action == "verdict":
         record = set_verdict(
             conn, args.ref, args.status, args.evidence, args.note,
-            evidence_group=args.evidence_group,
+            actor=args.actor, evidence_group=args.evidence_group,
         )
         return _emit(record, args.json, f"{record.id} -> {record.status}\n")
     if args.action == "merge":
@@ -624,7 +694,9 @@ def _cmd_hypothesis(conn: sqlite3.Connection, args) -> int:
         )
         return _emit(record, args.json, f"{record.id} {record.status} {record.statement}\n")
     if args.action == "outcome":
-        record = record_outcome(conn, args.ref, args.status, args.evidence, args.note)
+        record = record_outcome(
+            conn, args.ref, args.status, args.evidence, args.note, actor=args.actor
+        )
         return _emit(record, args.json, f"{record.id} -> {record.status}\n")
     if args.action == "card":
         return _emit({"card": preregistration_card(conn, args.ref)}, args.json,
@@ -701,6 +773,94 @@ def _cmd_test(conn: sqlite3.Connection, args) -> int:
     text = "".join(
         f"{t.id}  {t.claim_id or t.hypothesis_id}  {t.name}  `{t.command}`\n" for t in records
     ) or "no tests\n"
+    return _emit(_records_payload(records), args.json, text)
+
+
+def _cmd_ai(conn: sqlite3.Connection, args) -> int:
+    if args.action == "sweep":
+        try:
+            cited = json.loads(args.cited)
+        except ValueError as error:
+            raise EngineError(
+                f"cited payload is not valid JSON: {error}",
+                "citations arrive as data, not prose.",
+                'pass --cited \'[{"source_id": "s_000001", "locator": "p. 3"}]\'.',
+            ) from error
+        if not isinstance(cited, list):
+            raise EngineError(
+                "cited payload is not a list",
+                "citations arrive as a list of {source_id, locator} objects.",
+                'pass --cited \'[{"source_id": "s_000001", "locator": "p. 3"}]\'.',
+            )
+        try:
+            prompt_text = Path(args.prompt_file).read_text(encoding="utf-8")
+            output_text = Path(args.output_file).read_text(encoding="utf-8")
+        except OSError as error:
+            raise EngineError(
+                f"cannot read model I/O file: {error.filename}",
+                "the adapter notarizes exact bytes; a missing file proves nothing.",
+                "pass paths to files that exist outside the repository.",
+            ) from error
+        record = record_ai_artifact(
+            conn, args.research, args.kind, args.model, prompt_text, output_text, cited
+        )
+        return _emit(record, args.json, f"{record.id} {record.kind} {record.model_id}\n")
+    if args.action == "extract":
+        claim = ingest_ai_claim(
+            conn,
+            args.artifact,
+            args.text,
+            args.kind,
+            source_ref=args.source,
+            quote=args.quote,
+            locator=args.locator,
+            confidence=args.confidence,
+            kill_test=args.kill_test,
+            basis=args.basis,
+            prerequisites=args.prerequisites,
+            question_ref=args.question,
+            stance=args.stance,
+            actor=args.actor,
+        )
+        return _emit(claim, args.json, f"{claim.id} UNVERIFIED {claim.text}\n")
+    if args.action == "idea":
+        hypothesis = ingest_ai_hypothesis(
+            conn,
+            args.artifact,
+            args.statement,
+            args.criterion,
+            args.confidence,
+            args.question,
+            actor=args.actor,
+        )
+        return _emit(
+            hypothesis, args.json, f"{hypothesis.id} {hypothesis.status} {hypothesis.statement}\n"
+        )
+    if args.action == "propose-test":
+        test = propose_ai_test(
+            conn,
+            args.artifact,
+            args.template,
+            args.name,
+            claim_ref=args.claim,
+            hypothesis_ref=args.hypothesis,
+            actor=args.actor,
+        )
+        return _emit(test, args.json, f"{test.id} {test.name}\n")
+    if args.action == "draft":
+        text = render_ai_draft(conn, args.ref)
+        if args.out:
+            from engine.artifacts import atomic_write_text
+
+            atomic_write_text(Path(args.out), text)
+            return _emit({"draft": args.out}, args.json, f"wrote {args.out}\n")
+        return _emit({"draft": text}, args.json, text)
+    records = list_ai_artifacts(conn, args.research)
+    text = "".join(
+        f"{a.id}  {a.kind:<10} {a.model_id}  prompt={a.prompt_sha256[:12]}"
+        f"  output={a.output_sha256[:12]}\n"
+        for a in records
+    ) or "no AI artifacts\n"
     return _emit(_records_payload(records), args.json, text)
 
 
@@ -980,6 +1140,7 @@ def main(argv: List[str] | None = None) -> int:
                 "protocol": _cmd_protocol,
                 "observation": _cmd_observation,
                 "test": _cmd_test,
+                "ai": _cmd_ai,
             }
             return handlers[args.command](conn, args)
         finally:

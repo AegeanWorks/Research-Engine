@@ -496,6 +496,76 @@ def check(conn: sqlite3.Connection) -> List[Finding]:
         )
 
     for row in conn.execute(
+        "SELECT a.id, a.research_id, a.kind, a.cited_json FROM ai_artifact a"
+        " WHERE a.kind != 'sweep' ORDER BY a.id"
+    ):
+        try:
+            import json as _json
+
+            cited = _json.loads(row["cited_json"] or "[]")
+        except ValueError:
+            cited = []
+        for entry in cited if isinstance(cited, list) else []:
+            source_id = str((entry or {}).get("source_id", ""))
+            locator = str((entry or {}).get("locator", ""))
+            exists = conn.execute(
+                "SELECT 1 FROM source WHERE id = ? AND research_id = ?",
+                (source_id, row["research_id"]),
+            ).fetchone()
+            if not locator.strip() or exists is None:
+                findings.append(
+                    _finding(
+                        "AI-001",
+                        "error",
+                        str(row["id"]),
+                        f"AI {row['kind']} artifact cites unresolvable source"
+                        f" {source_id or '(none)'}",
+                        "cite a source registered in this program with a locator, or"
+                        " leave the claim UNVERIFIED and unlinked.",
+                    )
+                )
+                break
+
+    for row in conn.execute(
+        "SELECT c.id, c.status FROM claim c JOIN ai_artifact a ON a.claim_id = c.id"
+        " WHERE a.kind IN ('extraction', 'idea') AND c.status = 'PROVEN' ORDER BY c.id"
+    ):
+        from engine.evidence import claim_has_historical_evidence
+
+        if not claim_has_historical_evidence(conn, str(row["id"])):
+            findings.append(
+                _finding(
+                    "AI-002",
+                    "error",
+                    str(row["id"]),
+                    "AI-origin claim is PROVEN with no test that ever passed twice",
+                    "bind a kill test, run `test verify`, and re-promote on the"
+                    " verified group — or downgrade the claim.",
+                )
+            )
+
+    for row in conn.execute(
+        "SELECT t.id, t.command, t.control_command FROM killtest t"
+        " JOIN ai_artifact a ON a.test_id = t.id ORDER BY t.id"
+    ):
+        from engine.ai import TEMPLATES
+
+        template_commands = {
+            (spec["command"], spec["control_command"]) for spec in TEMPLATES.values()
+        }
+        if (str(row["command"]), str(row["control_command"])) not in template_commands:
+            findings.append(
+                _finding(
+                    "AI-003",
+                    "error",
+                    str(row["id"]),
+                    "AI-proposed test no longer matches its fixed template",
+                    "re-propose the test from a template with `ai propose-test`, or"
+                    " record why the command was changed by hand.",
+                )
+            )
+
+    for row in conn.execute(
         "SELECT q.* FROM question q WHERE q.status = 'open' AND NOT EXISTS ("
         " SELECT 1 FROM edge e WHERE e.dst_kind = 'question' AND e.dst_id = q.id"
         " AND e.src_kind = 'claim' AND e.rel IN ('supports', 'contradicts', 'answers'))"
@@ -723,7 +793,7 @@ def render_json(findings: Iterable[Finding]) -> str:
 def findings_for_research(conn: sqlite3.Connection, research_id: str) -> List[Finding]:
     """Findings attributable to one program: its own records, edges and the program itself."""
     ids = {research_id}
-    for table in ("claim", "question", "hypothesis", "source", "killtest"):
+    for table in ("claim", "question", "hypothesis", "source", "killtest", "ai_artifact"):
         for row in conn.execute(f"SELECT id FROM {table} WHERE research_id = ?", (research_id,)):
             ids.add(str(row["id"]))
     members = tuple(ids)

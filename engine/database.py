@@ -10,7 +10,7 @@ from typing import Iterator
 from engine.artifacts import utc_now
 from engine.errors import EngineError
 
-SCHEMA_VERSION = 10
+SCHEMA_VERSION = 11
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS schema_meta (
@@ -201,6 +201,20 @@ CREATE TABLE IF NOT EXISTS invalidation (
     at TEXT NOT NULL,
     affected_json TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS ai_artifact (
+    id TEXT PRIMARY KEY,
+    research_id TEXT NOT NULL REFERENCES research(id),
+    kind TEXT NOT NULL,
+    model_id TEXT NOT NULL,
+    prompt_sha256 TEXT NOT NULL,
+    output_sha256 TEXT NOT NULL,
+    cited_json TEXT NOT NULL DEFAULT '[]',
+    claim_id TEXT REFERENCES claim(id),
+    hypothesis_id TEXT REFERENCES hypothesis(id),
+    test_id TEXT REFERENCES killtest(id),
+    actor TEXT NOT NULL,
+    created_at TEXT NOT NULL
+);
 CREATE INDEX IF NOT EXISTS idx_claim_research ON claim(research_id);
 CREATE INDEX IF NOT EXISTS idx_claim_status ON claim(status);
 CREATE INDEX IF NOT EXISTS idx_edge_dst ON edge(dst_kind, dst_id);
@@ -280,6 +294,10 @@ _MIGRATIONS = {
         ("observation", "producer_path", "TEXT NOT NULL DEFAULT ''"),
         ("observation", "producer_digest", "TEXT NOT NULL DEFAULT ''"),
     ),
+    # Version 10 -> 11 adds the ai_artifact table. Fresh tables are created by the
+    # CREATE TABLE IF NOT EXISTS script above, so this step is intentionally empty:
+    # it only advances the version marker for existing databases.
+    10: (),
 }
 
 
@@ -294,6 +312,9 @@ def _ensure_indexes(conn: sqlite3.Connection) -> None:
     )
     conn.execute(
         "CREATE INDEX IF NOT EXISTS idx_event_root ON event(root_id, seq)"
+    )
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_ai_research ON ai_artifact(research_id)"
     )
 
 

@@ -6,6 +6,8 @@ import json
 import unittest
 from pathlib import Path
 
+from engine.database import SCHEMA_VERSION
+
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -70,7 +72,7 @@ class DocsTests(unittest.TestCase):
 
     def test_readme_documents_the_current_schema_and_gates(self) -> None:
         text = (ROOT / "README.md").read_text(encoding="utf-8")
-        self.assertIn("schema version 10", text)
+        self.assertIn(f"schema version {SCHEMA_VERSION}", text)
         for code in ("EVID-005", "EVID-006", "EVID-008", "EVID-009", "PROV-003", "SCREEN-001",
                      "TEST-001", "OBS-001", "DUP-002"):
             self.assertIn(code, text)

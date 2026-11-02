@@ -211,6 +211,7 @@ python -m engine [--db PATH] events --tree ROOT
 python -m engine [--db PATH] events --path EVENT
 python -m engine [--db PATH] scorecard REF
 python -m engine [--db PATH] export PATH [--research REF] [--check]
+python -m engine [--db PATH] ai sweep|extract|idea|propose-test|draft|artifacts
 ```
 
 `--json` prints stable machine-readable payloads. `check` exits 1 when any error-level finding is
@@ -252,21 +253,25 @@ present and 0 when only warnings remain. Domain errors print the `Error / Why / 
   (`REV-002`, warning), or a dependent still pointing at a superseded claim (`REV-001`, warning);
 - a test created after another test on the same claim failed (`TEST-002`, warning);
 - an UNKNOWN claim with no recorded reason (`EVID-007`, warning).
+- AI provenance: an AI citation that resolves nowhere (`AI-001`), an AI-origin
+  claim proven without a twice-passing test (`AI-002`), an AI test off its fixed
+  template (`AI-003`).
 
 Warnings are research hygiene; errors block a trustworthy report.
 
 ## Data Model
 
-One SQLite file (default `research.db`), schema version 10. Tables: `research`, `source`,
+One SQLite file (default `research.db`), schema version 11. Tables: `research`, `source`,
 `question`, `claim`, `edge`, `hypothesis`, `killtest`, `test_run`, `test_attempt`, `verdict`,
-`invalidation`, `observation`, `protocol`, `event`, plus `schema_meta` and `counters`. `claim`
+`invalidation`, `observation`, `protocol`, `ai_artifact`, `event`, plus `schema_meta` and
+`counters`. `claim`
 carries `revision_of`, `superseded_by` and `revision_reason`; a revision is a new row, never an
 edit. `observation` carries the instrument, rater, protocol, sample size, aggregation, unit and
 provenance class recorded with the value. `event` carries a per-program `seq`, `root_id` and
 `parent_id`. Writes use `BEGIN IMMEDIATE`; WAL and `synchronous=FULL` are enabled for a durable
 state file. `verdict`, `test_run`, `test_attempt`, `event`, `observation` and `invalidation` are
 append-only (an observation is voided, never edited or deleted). `export` includes attempts,
-observations, protocols and the event log; the manifest digests cover evidence records and
+observations, protocols, AI artifacts and the event log; the manifest digests cover evidence records and
 exclude the log.
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
@@ -312,6 +317,7 @@ research-engine/
 ├── engine/
 │   ├── __init__.py
 │   ├── __main__.py           <- `python -m engine`
+│   ├── ai.py
 │   ├── analysis.py
 │   ├── artifacts.py
 │   ├── attempts.py
