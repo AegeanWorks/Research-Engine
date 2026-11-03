@@ -534,3 +534,18 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   real source stays `UNVERIFIED` until a kill test it cannot pass. Per-claim kill tests
   with real discriminating power remain researcher-authored; template probes prove the
   plumbing, not the science. The external adapter is a later ADR, not this change.
+
+### ADR-039: Diff refuses non-object snapshot lines
+- **Date**: 2026-11-03
+- **Status**: Accepted
+- **Context**: `export --check` reports a tampered snapshot whose JSONL line is valid JSON
+  but not an object (for example `[1, 2]`) as a digest mismatch, while `diff` crashed on
+  the same file with `AttributeError` in `load_jsonl`. The first-30 audit reproduced the
+  crash against the current head; the export-side guard from the earlier malformed-snapshot
+  fix did not cover the diff path.
+- **Decision**: `engine/diffing.py load_jsonl` refuses any non-dict record with an
+  `EngineError` Error/Why/Fix triad naming the line number, matching the existing
+  malformed-JSON refusal. `verify_export` keeps its pinned behaviour of reporting
+  `ok=False` with a count mismatch for the same input.
+- **Consequences**: A tampered snapshot fails closed in both commands with no traceback.
+  `diff_records` keeps its `List[dict]` contract; file-level refusal is the boundary.

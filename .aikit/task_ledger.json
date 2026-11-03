@@ -1,54 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "T-016-ai-integration",
-    "last_phase": "delivery",
-    "active_phase": 5,
+    "task_id": "T-017-first30-audit",
+    "last_phase": "phase 4",
+    "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1793658726.7379148,
+    "updated_at": 1793724153.8417718,
     "owner": "kilo:research-engine",
     "started_by": "kilo:research-engine",
     "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "T-013-integrity-guards",
-      "phase": "planning",
-      "phase_num": 2,
-      "description": "[1/2] Verdict reversal guard and suspicious-test warning",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793307137.863615,
-      "timestamp_str": "2026-10-29 23:52:17",
-      "agent": "opencode:research-engine",
-      "impact_assessment": {
-        "why": "A failed claim can be promoted in place, and a new test created after a subject failure bypasses attempt authority",
-        "benefits": "A failed claim needs a revision to be revived; a test created after a sibling failure is visible as TEST-002",
-        "risks": "contract: one transition guard and one warning code; dependency: stdlib only; concurrency: single writer; state: no schema change",
-        "mitigation": "Failing-first transition and warning tests; full suite and 4/4 gates before commit"
-      }
-    },
-    {
-      "task_id": "T-013-integrity-guards",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[2/2] Integrity guards delivered: failed claims cannot be promoted in place; TEST-002 warns on a new test after a sibling subject failure; 371 tests pass; 4/4 gates pass; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793307442.977135,
-      "timestamp_str": "2026-10-29 23:57:22",
-      "agent": "opencode:research-engine"
-    },
-    {
-      "task_id": "T-013-integrity-guards",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'T-013-integrity-guards' completed successfully.",
-      "status": "completed",
-      "timestamp": 1793307510.1794844,
-      "timestamp_str": "2026-10-29 23:58:30",
-      "agent": "opencode:research-engine"
-    },
     {
       "task_id": "reforge:run-1",
       "phase": "reforge stage 9",
@@ -251,6 +213,45 @@
       "status": "in_progress",
       "timestamp": 1793658726.7379148,
       "timestamp_str": "2026-11-03 01:32:06",
+      "agent": "kilo:research-engine"
+    },
+    {
+      "task_id": "T-017-first30-audit",
+      "phase": "phase 2",
+      "phase_num": 2,
+      "description": "[1/4] Wave 0-30 audit plan: survey baseline, verify waves 10/20/30, fix diff non-object crash, gate and commit",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793723488.6586018,
+      "timestamp_str": "2026-11-03 19:31:28",
+      "agent": "kilo:research-engine",
+      "impact_assessment": {
+        "why": "diff load_jsonl crashes with AttributeError on non-dict JSONL lines while export reports them; violates malformed-snapshot contract from first-30 scope",
+        "benefits": "diff reports Error/Why/Fix instead of traceback; preserves export/diff parity",
+        "risks": "contract: one new EngineError refusal in diffing.load_jsonl; dependency: stdlib only; concurrency: single writer; state: no schema change",
+        "mitigation": "failing-first test in test_diffing, full suite plus 4/4 aikit gates before commit"
+      },
+      "plan_digest": "ae2fec1645810714dad05d94995c78f9fffb81871c1f763827404c3a9e3f85bb"
+    },
+    {
+      "task_id": "T-016-ai-integration",
+      "phase": "superseded",
+      "phase_num": 5,
+      "description": "Superseded by 'T-017-first30-audit' without --complete or --reset",
+      "status": "superseded",
+      "timestamp": 1793723488.6586018,
+      "timestamp_str": "2026-11-03 19:31:28",
+      "agent": "kilo:research-engine"
+    },
+    {
+      "task_id": "T-017-first30-audit",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[4/4] Waves 0/10/20/30 verified and delivered: diff non-object refusal with failing-first test; 422 tests pass; 4/4 gates pass; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793724153.8417718,
+      "timestamp_str": "2026-11-03 19:42:33",
       "agent": "kilo:research-engine"
     }
   ]

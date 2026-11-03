@@ -34,6 +34,12 @@ def load_jsonl(path: Path) -> List[dict]:
                 f"{error}",
                 "re-export the snapshot with this engine version.",
             ) from error
+        if not isinstance(record, dict):
+            raise EngineError(
+                f"snapshot line {number} is not an object: {source}",
+                "a snapshot record must be a JSON object with a type field.",
+                "re-export the snapshot with this engine version.",
+            )
         if record.get("type") == "meta":
             continue
         records.append(record)

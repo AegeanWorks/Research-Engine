@@ -9,8 +9,8 @@
 - **Total Python Modules**: `79`
 - **Total Classes**: `72`
 - **Total Top-Level Functions**: `244`
-- **Total Class Methods**: `470`
-- **Total Source Lines**: `14345`
+- **Total Class Methods**: `471`
+- **Total Source Lines**: `14357`
 
 ---
 
@@ -239,7 +239,7 @@
 ### [`engine/diffing.py`](engine/diffing.py)
 > *Snapshot comparison: what changed between two exported graphs.*
 
-**Size**: `117` lines (`4444` bytes)
+**Size**: `123` lines (`4746` bytes)
 
 **Functions:**
 - `def load_jsonl(path)` - *Read an export, dropping its meta line; a malformed file is refused.*
@@ -926,7 +926,7 @@
 ### [`tests/test_diffing.py`](tests/test_diffing.py)
 > *Snapshot diff: semantic by default, exact on request.*
 
-**Size**: `113` lines (`4477` bytes)
+**Size**: `119` lines (`4724` bytes)
 
 **Classes:**
 - `class DiffTests`
@@ -937,6 +937,7 @@
   - Method `.test_a_changed_status_is_reported()`
   - Method `.test_missing_snapshot_is_reported()`
   - Method `.test_malformed_snapshot_is_reported()`
+  - Method `.test_non_object_snapshot_line_is_reported()`
   - Method `.test_render_lists_each_change()`
   - Method `.test_a_second_run_with_the_same_identity_cannot_mask_a_change()`
 

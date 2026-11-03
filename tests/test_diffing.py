@@ -82,6 +82,12 @@ class DiffTests(DatabaseCase):
         with self.assertRaises(EngineError):
             load_jsonl(bad)
 
+    def test_non_object_snapshot_line_is_reported(self) -> None:
+        bad = self.dir / "bad.jsonl"
+        bad.write_text('{"type": "meta"}\n[1, 2]\n', encoding="utf-8")
+        with self.assertRaises(EngineError):
+            load_jsonl(bad)
+
     def test_render_lists_each_change(self) -> None:
         result = diff_records([{"type": "claim", "id": "c_1", "status": "X"}],
                               [{"type": "claim", "id": "c_2", "status": "Y"}])

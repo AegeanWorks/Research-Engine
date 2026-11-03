@@ -14,3 +14,5 @@ research.db
 *.db-wal
 *.db-shm
 *.tmp_*
+# AIKit transient state
+.aikit/*.log
