@@ -29,7 +29,6 @@ from engine.provenance import PROJECT_ROOT, environment, fingerprint, git_state,
 from engine.researches import get_research
 
 MAX_CAPTURE = 2000
-MIN_BINDING_RUNS = 2
 
 
 def _to_test(row: sqlite3.Row) -> KillTest:
@@ -360,11 +359,12 @@ def _summarise_control(results: list, expect_exit: int) -> dict:
     fingerprints = {
         (item["exit_code"], item["stdout_sha256"], item["stderr_sha256"]) for item in results
     }
+    enough = len(results) >= MIN_BINDING_RUNS
     return {
         "runs": results,
-        "reproducible": len(fingerprints) == 1,
+        "reproducible": enough and len(fingerprints) == 1,
         "expected_exit": expect_exit,
-        "falsified": all(not item["passed"] for item in results) and len(fingerprints) == 1,
+        "falsified": enough and all(not item["passed"] for item in results) and len(fingerprints) == 1,
     }
 
 

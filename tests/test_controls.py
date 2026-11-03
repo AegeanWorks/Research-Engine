@@ -121,5 +121,47 @@ class ControlTests(DatabaseCase):
         self.assertNotIn("EVID-008", codes)
 
 
+    def test_single_control_run_is_not_falsified_or_reproducible(self) -> None:
+        from engine.killtests import _summarise_control
+
+        single = [{"exit_code": 2, "passed": False, "stdout_sha256": "s", "stderr_sha256": "e"}]
+        summary = _summarise_control(single, 0)
+        self.assertFalse(summary["falsified"])
+        self.assertFalse(summary["reproducible"])
+
+    def test_control_state_single_run_is_not_reproducible(self) -> None:
+        test_id = self._test()
+        test = get_test(self.conn, test_id)
+        state = control_state(self.conn, test, "g_000001")
+        self.assertEqual(state["declared"], False)
+        self.assertEqual(state["runs"], 0)
+
+        control = self._script("control.py", "import sys\nprint('x')\nsys.exit(2)\n")
+        test_id = self._test(control)
+        test = get_test(self.conn, test_id)
+        self.conn.execute(
+            "INSERT INTO test_run(id,test_id,run_tag,run_group,role,exit_code,passed,"
+            "command_sha256,code_sha256,inputs_sha256,git_commit,git_dirty,python_version,"
+            "platform,stdout_sha256,stderr_sha256,started_at,duration_ms,output_tail)"
+            " VALUES('tr_single',?, 'control1','g_single','control',2,0,"
+            "'a','b','c','d',0,'py','plat','s1','e1','t',5,'x')",
+            (test.id,),
+        )
+        state = control_state(self.conn, test, "g_single")
+        self.assertEqual(state["runs"], 1)
+        self.assertFalse(state["falsified"])
+        self.assertFalse(state["reproducible"])
+
+    def test_binding_runs_single_source_of_truth(self) -> None:
+        import engine.evidence as evidence_mod
+        import engine.killtests as killtests_mod
+
+        self.assertEqual(killtests_mod.MIN_BINDING_RUNS, evidence_mod.MIN_BINDING_RUNS)
+        import inspect
+
+        source = inspect.getsource(killtests_mod)
+        self.assertEqual(source.count("MIN_BINDING_RUNS ="), 0)
+
+
 if __name__ == "__main__":
     unittest.main()

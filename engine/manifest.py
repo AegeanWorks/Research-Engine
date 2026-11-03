@@ -142,6 +142,17 @@ def check_report(
     if current_report != stored.get("report_sha256"):
         drift.append("rendered report changed since it was generated")
 
+    report_path = Path(path)
+    if report_path.name.endswith(MANIFEST_SUFFIX):
+        report_path = Path(str(report_path)[: -len(MANIFEST_SUFFIX)])
+    try:
+        file_bytes = report_path.read_bytes()
+    except OSError:
+        drift.append(f"report file missing: {report_path}")
+    else:
+        if digest("report/1", file_bytes) != stored.get("report_sha256"):
+            drift.append("report file bytes differ from the manifest digest")
+
     if stored.get("license") != license_block():
         drift.append("license terms changed since the report was generated")
 

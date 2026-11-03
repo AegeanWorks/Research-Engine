@@ -118,7 +118,7 @@ def control_state(conn: sqlite3.Connection, test: KillTest, group: str) -> dict:
         "falsified": len(rows) >= MIN_BINDING_RUNS
         and all(not bool(row["passed"]) for row in rows)
         and len(fingerprints) == 1,
-        "reproducible": len(fingerprints) == 1,
+        "reproducible": len(rows) >= MIN_BINDING_RUNS and len(fingerprints) == 1,
     }
 
 

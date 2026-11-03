@@ -167,5 +167,22 @@ class ManifestTests(DatabaseCase):
         self.assertTrue(result["clean"], result["drift"])
 
 
+    def test_tampered_report_body_is_drift(self) -> None:
+        target = self.directory / "r.md"
+        write_report(self.conn, self.research, target)
+        target.write_text(target.read_text(encoding="utf-8") + "TAMPERED\n", encoding="utf-8")
+        result = check_report(self.conn, self.research, target)
+        self.assertFalse(result["clean"])
+        self.assertTrue(any("report file bytes" in item for item in result["drift"]))
+
+    def test_missing_report_file_is_drift(self) -> None:
+        target = self.directory / "gone.md"
+        write_report(self.conn, self.research, target)
+        target.unlink()
+        result = check_report(self.conn, self.research, target)
+        self.assertFalse(result["clean"])
+        self.assertTrue(any("missing" in item for item in result["drift"]))
+
+
 if __name__ == "__main__":
     unittest.main()
