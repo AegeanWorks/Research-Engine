@@ -699,8 +699,8 @@ def _cmd_hypothesis(conn: sqlite3.Connection, args) -> int:
         )
         return _emit(record, args.json, f"{record.id} -> {record.status}\n")
     if args.action == "card":
-        return _emit({"card": preregistration_card(conn, args.ref)}, args.json,
-                     preregistration_card(conn, args.ref))
+        card = preregistration_card(conn, args.ref)
+        return _emit({"card": card}, args.json, card)
     records = list_hypotheses(conn, args.research)
     text = "".join(
         f"{h.id}  {h.status:<13} {h.confidence:.2f}  {h.statement}\n" for h in records
@@ -776,6 +776,36 @@ def _cmd_test(conn: sqlite3.Connection, args) -> int:
     return _emit(_records_payload(records), args.json, text)
 
 
+def _ensure_outside_repo(path_str: str) -> Path:
+    """Refuse model I/O files that live inside the project checkout.
+
+    Raw prompt/output bytes must never enter the repo history; the database
+    keeps hashes only. Resolving against the engine package root keeps the
+    boundary in code, not convention.
+    """
+    candidate = Path(path_str).expanduser()
+    try:
+        resolved = candidate.resolve()
+    except OSError as error:
+        raise EngineError(
+            f"cannot resolve model I/O path: {path_str}",
+            "the adapter notarizes exact bytes from outside the repository.",
+            "pass a path to a file outside the project checkout.",
+        ) from error
+    root = Path(__file__).resolve().parents[1]
+    try:
+        resolved.relative_to(root)
+    except ValueError:
+        return resolved
+    raise EngineError(
+        f"model I/O file inside the repository: {resolved}",
+        "raw prompt/output bytes must not enter version control; only hashes"
+        " belong in the database.",
+        "move the file outside the project checkout (e.g. the system temp"
+        " directory) and pass that path.",
+    )
+
+
 def _cmd_ai(conn: sqlite3.Connection, args) -> int:
     if args.action == "sweep":
         try:
@@ -792,9 +822,11 @@ def _cmd_ai(conn: sqlite3.Connection, args) -> int:
                 "citations arrive as a list of {source_id, locator} objects.",
                 'pass --cited \'[{"source_id": "s_000001", "locator": "p. 3"}]\'.',
             )
+        prompt_path = _ensure_outside_repo(args.prompt_file)
+        output_path = _ensure_outside_repo(args.output_file)
         try:
-            prompt_text = Path(args.prompt_file).read_text(encoding="utf-8")
-            output_text = Path(args.output_file).read_text(encoding="utf-8")
+            prompt_text = prompt_path.read_text(encoding="utf-8")
+            output_text = output_path.read_text(encoding="utf-8")
         except OSError as error:
             raise EngineError(
                 f"cannot read model I/O file: {error.filename}",
@@ -1100,9 +1132,11 @@ def main(argv: List[str] | None = None) -> int:
                         f"graph: {result['graph_sha256'][:16]}\n"
                     )
                     return _emit(result, args.json, text)
-                return _emit({"report": report(conn, args.ref)}, args.json, report(conn, args.ref))
+                result = report(conn, args.ref)
+                return _emit({"report": result}, args.json, result)
             if args.command == "scorecard":
-                return _emit({"scorecard": scorecard(conn, args.ref)}, args.json, scorecard(conn, args.ref))
+                result = scorecard(conn, args.ref)
+                return _emit({"scorecard": result}, args.json, result)
             if args.command == "export":
                 if args.check and args.research:
                     raise EngineError(

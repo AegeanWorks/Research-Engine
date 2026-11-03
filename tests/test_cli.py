@@ -417,5 +417,37 @@ class CliTests(unittest.TestCase):
         self.assertIn("unsupported", out)
 
 
+    def test_report_scorecard_card_evaluate_once(self) -> None:
+        self.run_cli("demo")
+        import engine.cli as cli_mod
+
+        for attr, argv in (
+            ("report", ("report", "r_000001")),
+            ("scorecard", ("scorecard", "r_000001")),
+            ("preregistration_card", ("hypothesis", "card", "h_000001")),
+        ):
+            calls = []
+            orig = getattr(cli_mod, attr)
+
+            def wrap(*args, _orig=orig, _calls=calls, **kwargs):
+                _calls.append(1)
+                return _orig(*args, **kwargs)
+
+            setattr(cli_mod, attr, wrap)
+            try:
+                self.run_cli(*argv)
+            finally:
+                setattr(cli_mod, attr, orig)
+            self.assertEqual(len(calls), 1, attr)
+
+    def test_main_module_import_has_no_side_effects(self) -> None:
+        import importlib.util
+
+        spec = importlib.util.find_spec("engine.__main__")
+        assert spec is not None and spec.origin is not None
+        source = Path(spec.origin).read_text(encoding="utf-8")
+        self.assertIn('__name__ == "__main__"', source)
+
+
 if __name__ == "__main__":
     unittest.main()
