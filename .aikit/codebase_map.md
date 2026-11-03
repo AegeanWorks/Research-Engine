@@ -8,9 +8,9 @@
 ## 📊 Codebase Metrics
 - **Total Python Modules**: `79`
 - **Total Classes**: `72`
-- **Total Top-Level Functions**: `244`
-- **Total Class Methods**: `471`
-- **Total Source Lines**: `14357`
+- **Total Top-Level Functions**: `248`
+- **Total Class Methods**: `483`
+- **Total Source Lines**: `14665`
 
 ---
 
@@ -26,19 +26,22 @@
 ### [`engine/__main__.py`](engine/__main__.py)
 > *Entry point for `python -m engine`.*
 
-**Size**: `5` lines (`97` bytes)
+**Size**: `6` lines (`128` bytes)
 
 ---
 
 ### [`engine/ai.py`](engine/ai.py)
 > *AI provenance adapter: notarize model I/O, ingest UNVERIFIED claims, propose template tests.*
 
-**Size**: `431` lines (`16006` bytes)
+**Size**: `507` lines (`19242` bytes)
 
 **Functions:**
 - `def actor_for(model_id)` - *Attribution for AI-proximate actions: the model, not the default agent.*
 - `def _to_artifact(row)`
 - `def _validate_cited(cited)` - *Check citation shape only; existence is enforced at ingest and by AI-001.*
+- `def _cited_entries(artifact)` - *Parse the stored cited payload; shape was checked at record time.*
+- `def _ensure_cited_resolve(conn, artifact, source_ref)` - *Fail closed when a cited source cannot be resolved in-program.*
+- `def _resolve_actor(artifact, actor)` - *Default AI-proximate actions to the model identity.*
 - `def record_artifact(conn, research_ref, kind, model_id, prompt_text, output_text, cited)` - *Notarize one model invocation: hashes in, raw text never stored.*
 - `def get_artifact(conn, ref)` - *Fetch one AI artifact by identifier.*
 - `def list_artifacts(conn, research_ref)` - *List AI artifacts, optionally filtered by program.*
@@ -170,7 +173,7 @@
 ### [`engine/cli.py`](engine/cli.py)
 > *Command-line surface: one entry point for every engine mechanic.*
 
-**Size**: `1150` lines (`56376` bytes)
+**Size**: `1184` lines (`57622` bytes)
 
 **Functions:**
 - `def _build_parser()`
@@ -184,6 +187,7 @@
 - `def _cmd_claim(conn, args)`
 - `def _cmd_hypothesis(conn, args)`
 - `def _cmd_test(conn, args)`
+- `def _ensure_outside_repo(path_str)` - *Refuse model I/O files that live inside the project checkout.*
 - `def _cmd_ai(conn, args)`
 - `def main(argv)` - *Parse one command, open the database, and dispatch it.*
 
@@ -301,7 +305,7 @@
 ### [`engine/evidence.py`](engine/evidence.py)
 > *Evidence identity: which verified run groups are valid for a test right now.*
 
-**Size**: `214` lines (`7910` bytes)
+**Size**: `214` lines (`7944` bytes)
 
 **Functions:**
 - `def test_inputs(test)` - *The canonical declared input names of a test.*
@@ -373,7 +377,7 @@
 ### [`engine/killtests.py`](engine/killtests.py)
 > *Executable kill tests: two agreeing runs, bound to code, inputs and command.*
 
-**Size**: `388` lines (`14354` bytes)
+**Size**: `388` lines (`14401` bytes)
 
 **Functions:**
 - `def _to_test(row)`
@@ -406,7 +410,7 @@
 ### [`engine/manifest.py`](engine/manifest.py)
 > *Generated-report manifests and drift detection.*
 
-**Size**: `161` lines (`6250` bytes)
+**Size**: `172` lines (`6698` bytes)
 
 **Functions:**
 - `def license_block()` - *Identify the terms the generated artifact is offered under, by id and text digest.*
@@ -652,7 +656,7 @@
 ### [`tests/test_ai.py`](tests/test_ai.py)
 > *AI integration: provenance at birth, fabricated citations die, novelty can survive.*
 
-**Size**: `322` lines (`12778` bytes)
+**Size**: `417` lines (`16243` bytes)
 
 **Classes:**
 - `class ArtifactTests`
@@ -664,6 +668,9 @@
   - Method `._extraction(research, cited)`
   - Method `.test_extract_enters_unverified_with_link()`
   - Method `.test_fabricated_source_is_refused_and_flagged()`
+  - Method `.test_cited_divergence_is_refused_and_flagged()`
+  - Method `.test_source_outside_cited_list_is_refused()`
+  - Method `.test_ingest_defaults_actor_to_model()`
   - Method `.test_wrong_kind_from_wrong_artifact_is_refused()`
   - Method `.test_idea_preregisters_hypothesis()`
 - `class KillTestAdapterTests`
@@ -674,6 +681,8 @@
 - `class BoundaryTests`
   - Method `.test_no_network_imports_anywhere_in_the_engine()`
   - Method `.test_ai_module_never_calls_verdict_paths()`
+  - Method `.test_model_io_inside_repo_is_refused()`
+  - Method `.test_model_io_outside_repo_is_allowed()`
 - `class DraftTests`
   - Method `._surviving_claim(research)`
   - Method `.test_draft_carries_kill_test_receipts()`
@@ -840,7 +849,7 @@
 ### [`tests/test_cli.py`](tests/test_cli.py)
 > *The CLI surface: JSON output, exit codes and the error triad.*
 
-**Size**: `421` lines (`17256` bytes)
+**Size**: `453` lines (`18362` bytes)
 
 **Classes:**
 - `class CliTests`
@@ -876,6 +885,8 @@
   - Method `.test_export_check_detects_tampering()`
   - Method `.test_export_check_refuses_a_research_filter()`
   - Method `.test_export_check_fails_on_an_unsupported_schema()`
+  - Method `.test_report_scorecard_card_evaluate_once()`
+  - Method `.test_main_module_import_has_no_side_effects()`
 
 ---
 
@@ -905,7 +916,7 @@
 ### [`tests/test_controls.py`](tests/test_controls.py)
 > *Negative controls: a test must be able to fail before its pass is evidence.*
 
-**Size**: `125` lines (`5231` bytes)
+**Size**: `167` lines (`7133` bytes)
 
 **Classes:**
 - `class ControlTests`
@@ -920,6 +931,9 @@
   - Method `.test_control_state_reports_absence_explicitly()`
   - Method `.test_outline_counts_the_program_screening()`
   - Method `.test_adding_a_control_later_clears_the_error()`
+  - Method `.test_single_control_run_is_not_falsified_or_reproducible()`
+  - Method `.test_control_state_single_run_is_not_reproducible()`
+  - Method `.test_binding_runs_single_source_of_truth()`
 
 ---
 
@@ -1146,7 +1160,7 @@
 ### [`tests/test_manifest.py`](tests/test_manifest.py)
 > *Generated report manifests and drift detection.*
 
-**Size**: `171` lines (`7216` bytes)
+**Size**: `188` lines (`8022` bytes)
 
 **Classes:**
 - `class ManifestTests`
@@ -1164,6 +1178,8 @@
   - Method `.test_tampered_counts_are_reported()`
   - Method `.test_another_program_does_not_dirty_a_committed_report()`
   - Method `.test_strict_check_passes_right_after_generation()`
+  - Method `.test_tampered_report_body_is_drift()`
+  - Method `.test_missing_report_file_is_drift()`
 
 ---
 
