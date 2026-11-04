@@ -417,6 +417,45 @@ class CliTests(unittest.TestCase):
         self.assertIn("unsupported", out)
 
 
+    def test_demo_failure_reports_the_error_triad(self) -> None:
+        import engine.demo as demo_mod
+        from engine.errors import EngineError
+
+        real = demo_mod.run_test
+        demo_mod.run_test = lambda conn, ref, **kwargs: {
+            "verification_complete": False,
+            "run_group": "g_broken",
+        }
+        try:
+            code, _, err = self.run_cli("demo")
+        finally:
+            demo_mod.run_test = real
+        self.assertEqual(code, 1)
+        self.assertIn("Why:", err)
+        self.assertIn("Fix:", err)
+        self.assertNotIn("Traceback", err)
+
+    def test_events_tree_refuses_list_filters(self) -> None:
+        self.run_cli("demo")
+        code, _, err = self.run_cli("events", "--tree", "ev_000001", "--kind", "other")
+        self.assertEqual(code, 1)
+        self.assertIn("Why:", err)
+        code, _, err = self.run_cli("events", "--path", "ev_000001", "--research", "r_000001")
+        self.assertEqual(code, 1)
+
+    def test_strict_needs_check(self) -> None:
+        self.run_cli("demo")
+        code, _, err = self.run_cli("report", "r_000001", "--strict")
+        self.assertEqual(code, 1)
+        self.assertIn("--check", err)
+
+    def test_check_json_is_stable_machine_output(self) -> None:
+        self.run_cli("demo")
+        code, out, _ = self.run_cli("--json", "check")
+        self.assertEqual(code, 0)
+        payload = json.loads(out)
+        self.assertIsInstance(payload, list)
+
     def test_report_scorecard_card_evaluate_once(self) -> None:
         self.run_cli("demo")
         import engine.cli as cli_mod

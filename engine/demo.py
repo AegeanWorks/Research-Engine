@@ -7,6 +7,7 @@ import sys
 
 from engine.cascade import invalidate
 from engine.claims import add_claim, link_claims, link_to_question, set_verdict
+from engine.errors import EngineError
 from engine.hypotheses import add_hypothesis
 from engine.killtests import add_test, run_test
 from engine.questions import add_question
@@ -81,7 +82,7 @@ def seed_demo(conn: sqlite3.Connection) -> dict:
         conn,
         research.id,
         "Synthetic consistency probe",
-        'python -c "print(\'kill-test:signal-consistent\')"',
+        '"' + sys.executable + '" -c "print(\'kill-test:signal-consistent\')"',
         claim_ref=claim.id,
         timeout_seconds=30,
         control_command=(
@@ -91,7 +92,11 @@ def seed_demo(conn: sqlite3.Connection) -> dict:
     )
     run = run_test(conn, test.id, runs=2)
     if not run["verification_complete"]:
-        raise RuntimeError("demo kill test did not pass twice")
+        raise EngineError(
+            "demo kill test did not verify twice",
+            "the demonstration program is only valid when its probe passes twice.",
+            "re-run the demo; if the probe keeps failing, check the Python runtime.",
+        )
 
     set_verdict(
         conn,

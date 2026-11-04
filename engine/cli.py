@@ -946,7 +946,7 @@ def main(argv: List[str] | None = None) -> int:
                 findings = check(conn)
                 text = render_markdown(findings)
                 if args.json:
-                    print(render_json(findings))
+                    _emit(json.loads(render_json(findings)), True, text)
                 else:
                     print(text, end="")
                 return 1 if has_errors(findings) else 0
@@ -974,6 +974,14 @@ def main(argv: List[str] | None = None) -> int:
                 text = f"backup: {result['path']} ({result['bytes']} bytes, verified)\n"
                 return _emit(result, args.json, text)
             if args.command == "events":
+                if (args.tree or args.path) and (
+                    args.research or args.kind or args.limit != 50
+                ):
+                    raise EngineError(
+                        "--tree and --path ignore list filters",
+                        "a causal tree or chain is rooted at one event, not filtered.",
+                        "drop --research, --kind and --limit when using --tree or --path.",
+                    )
                 if args.tree:
                     tree = event_tree(conn, args.tree)
                     text = "".join(
@@ -1116,6 +1124,12 @@ def main(argv: List[str] | None = None) -> int:
                     text += f"  {item['id']} depth {item['depth']} {item['status']} {item['text']}\n"
                 return _emit(result, args.json, text)
             if args.command == "report":
+                if args.strict and not args.check:
+                    raise EngineError(
+                        "--strict needs --check",
+                        "strictness only changes manifest comparison, not rendering.",
+                        "pass --check PATH together with --strict, or drop --strict.",
+                    )
                 if args.check:
                     result = check_report(conn, args.ref, Path(args.check), strict=args.strict)
                     text = (
