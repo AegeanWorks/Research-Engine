@@ -170,6 +170,21 @@ def check(conn: sqlite3.Connection) -> List[Finding]:
             )
         )
 
+    from engine.events import verify_ledger
+
+    for row in conn.execute("SELECT DISTINCT research_id FROM event").fetchall():
+        program = str(row["research_id"])
+        for event_id, reason in verify_ledger(conn, program):
+            findings.append(
+                _finding(
+                    "LEDGER-001",
+                    "error",
+                    event_id,
+                    f"event ledger is broken: {reason}",
+                    "restore the event row from a backup; never hand-edit the event log.",
+                )
+            )
+
     for row in conn.execute(
         "SELECT * FROM claim WHERE kind = 'empirical'"
         " AND (source_id IS NULL OR trim(quote) = '' OR trim(locator) = '')"

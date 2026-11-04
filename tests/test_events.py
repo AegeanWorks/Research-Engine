@@ -129,6 +129,59 @@ class EventTests(DatabaseCase):
         self.assertEqual(len(events), 1)
         self.assertIn("schema 1 ->", events[0].detail)
 
+    def test_chain_links_each_event_to_its_predecessor(self) -> None:
+        from engine.events import event_hash_for
+
+        research = self.add_research()
+        first = record(self.conn, "a", "s1", research_id=research)
+        second = record(self.conn, "b", "s2", research_id=research)
+        self.assertEqual(first.prev_hash, "")
+        self.assertEqual(len(first.event_hash), 64)
+        self.assertEqual(second.prev_hash, first.event_hash)
+        self.assertEqual(first.event_hash, event_hash_for(first))
+        self.assertEqual(second.event_hash, event_hash_for(second))
+
+    def test_tampered_middle_row_breaks_the_chain(self) -> None:
+        from engine.events import verify_ledger
+
+        research = self.add_research()
+        record(self.conn, "a", "s1", research_id=research)
+        middle = record(self.conn, "b", "s2", research_id=research)
+        record(self.conn, "c", "s3", research_id=research)
+        self.conn.execute(
+            "UPDATE event SET detail = 'forged' WHERE id = ?", (middle.id,)
+        )
+        breaks = verify_ledger(self.conn, research)
+        self.assertEqual([event_id for event_id, _ in breaks], [middle.id])
+        from engine.integrity import check
+
+        self.assertIn("LEDGER-001", {finding.code for finding in check(self.conn)})
+
+    def test_extending_a_broken_tip_is_refused(self) -> None:
+        research = self.add_research()
+        tip = record(self.conn, "a", "s1", research_id=research)
+        self.conn.execute(
+            "UPDATE event SET detail = 'forged' WHERE id = ?", (tip.id,)
+        )
+        with self.assertRaises(EngineError):
+            record(self.conn, "b", "s2", research_id=research)
+
+    def test_legacy_unhashed_rows_are_grandfathered(self) -> None:
+        from engine.database import next_id
+
+        research = self.add_research()
+        self.conn.execute(
+            "INSERT INTO event(id, at, research_id, kind, subject, seq)"
+            " VALUES (?, 'then', ?, 'legacy', 's', 1)",
+            (next_id(self.conn, "ev"), research),
+        )
+        record(self.conn, "new", "s2", research_id=research)
+        from engine.events import verify_ledger
+        from engine.integrity import check
+
+        self.assertEqual(verify_ledger(self.conn, research), [])
+        self.assertNotIn("LEDGER-001", {finding.code for finding in check(self.conn)})
+
 
 if __name__ == "__main__":
     unittest.main()

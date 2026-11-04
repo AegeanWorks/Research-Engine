@@ -621,3 +621,18 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   moved folder reads as one error naming the volume and the count. Ten and three are
   tripwires in the MIN_GROUP tradition, not safety proofs; the limits registry
   (IDEA-1613, Proposed) stays the follow-up.
+
+### ADR-044: Anchored event ledger (schema v12)
+- **Date**: 2026-11-04
+- **Status**: Accepted
+- **Context**: IDEA-981. The event log had no tamper evidence: deleting the newest
+  rows was invisible. `event` gains `prev_hash`/`event_hash` (schema v12 with an
+  additive 11 -> 12 migration); every new row chains to its program predecessor.
+- **Decision**: `record()` recomputes the tip digest and refuses to extend a broken
+  chain; `verify_ledger()` replays each program and `check` reports every break as
+  `LEDGER-001`; `events --verify` exposes the same replay on demand. Rows written
+  before v12 carry no digest and are grandfathered: the chain restarts at the first
+  hashed row instead of condemning the archive.
+- **Consequences**: Silent log edits surface as errors naming the row; legacy
+  databases keep a clean gate after migration. Cross-program chains stay separate:
+  the hash restarts per program, matching the causal-tree boundary.

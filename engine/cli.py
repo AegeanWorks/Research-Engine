@@ -91,7 +91,7 @@ from engine.protocols import list_protocols, register_protocol
 from engine.researches import create_research, get_research, list_researches, research_counts
 from engine.screening import prisma_flow, set_screening
 from engine.sources import add_source, list_sources, set_source_status
-from engine.events import event_path, event_tree, list_events
+from engine.events import event_path, event_tree, list_events, verify_ledger
 from engine.maintenance import backup, integrity_check
 from engine.manifest import check_report, write_report
 from engine.observations import (
@@ -404,6 +404,7 @@ def _build_parser() -> argparse.ArgumentParser:
     event_view = events_c.add_mutually_exclusive_group()
     event_view.add_argument("--tree", metavar="ROOT", help="render a causal tree from a root event")
     event_view.add_argument("--path", metavar="EVENT", help="render the root-to-event chain")
+    event_view.add_argument("--verify", action="store_true", help="verify the ledger hash chain")
 
     diff_c = commands.add_parser("diff", help="compare two exported snapshots")
     diff_c.add_argument("old")
@@ -1042,6 +1043,30 @@ def main(argv: List[str] | None = None) -> int:
                         for event in chain
                     )
                     return _emit(_records_payload(chain), args.json, text)
+                if args.verify:
+                    programs = [args.research] if args.research else [
+                        str(row["research_id"]) for row in conn.execute(
+                            "SELECT DISTINCT research_id FROM event ORDER BY research_id"
+                        ).fetchall()
+                    ]
+                    breaks = [
+                        (program, event_id, reason)
+                        for program in programs or [""]
+                        for event_id, reason in verify_ledger(conn, program)
+                    ]
+                    if breaks:
+                        detail = "; ".join(
+                            f"{program or '-'}:{event_id} {reason}"
+                            for program, event_id, reason in breaks
+                        )
+                        raise EngineError(
+                            "event ledger is broken",
+                            f"the hash chain does not verify: {detail}.",
+                            "restore the event rows from a backup; never hand-edit the log.",
+                        )
+                    checked = len(programs or [""])
+                    text = f"ledger ok ({checked} program(s) verified)\n"
+                    return _emit({"programs": programs, "breaks": []}, args.json, text)
                 records = list_events(conn, args.research, args.kind, args.limit)
                 text = "".join(
                     f"{e.at}  {e.kind:<18} {e.subject:<14} {e.detail}\n" for e in records

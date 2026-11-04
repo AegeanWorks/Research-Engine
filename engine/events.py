@@ -11,9 +11,65 @@ import sqlite3
 from dataclasses import dataclass
 from typing import List, Optional
 
-from engine.artifacts import utc_now
+from engine.artifacts import sha256_text, utc_now
 from engine.database import next_id, transaction
 from engine.errors import EngineError, NotFound
+
+
+def event_hash_for(event: "Event") -> str:
+    """The tamper-evident digest of one event, chained to its predecessor."""
+    return sha256_text(
+        "\n".join(
+            (
+                event.prev_hash,
+                event.id,
+                event.at,
+                event.research_id,
+                event.kind,
+                event.subject,
+                event.detail,
+                event.actor,
+                str(event.seq),
+                event.root_id,
+                event.parent_id,
+            )
+        )
+    )
+
+
+def _stored_tip(conn: sqlite3.Connection, research_id: str) -> sqlite3.Row | None:
+    return conn.execute(
+        "SELECT * FROM event WHERE research_id = ? ORDER BY seq DESC, id DESC LIMIT 1",
+        (research_id,),
+    ).fetchone()
+
+
+def verify_ledger(
+    conn: sqlite3.Connection, research_id: str
+) -> List[tuple]:
+    """Replay one program's event chain; every break is an (event id, reason) pair.
+
+    Rows written before the hash columns existed carry no digest and are grandfathered:
+    the chain restarts at the first hashed row instead of condemning the archive.
+    """
+    rows = conn.execute(
+        "SELECT * FROM event WHERE research_id = ? ORDER BY seq, id", (research_id,)
+    ).fetchall()
+    breaks: List[tuple] = []
+    previous = ""
+    for row in rows:
+        event = _to_event(row)
+        if not event.event_hash:
+            previous = ""
+            continue
+        if event.prev_hash != previous:
+            breaks.append((event.id, "event does not link to its predecessor"))
+            previous = event.event_hash
+            continue
+        if event.event_hash != event_hash_for(event):
+            breaks.append((event.id, "stored digest does not match the event content"))
+        previous = event.event_hash
+    return breaks
 
 
 @dataclass(frozen=True)
@@ -28,6 +84,8 @@ class Event:
     seq: int = 0
     root_id: str = ""
     parent_id: str = ""
+    prev_hash: str = ""
+    event_hash: str = ""
 
 
 def _to_event(row: sqlite3.Row) -> Event:
@@ -73,6 +131,18 @@ def record(
             "SELECT COALESCE(MAX(seq), 0) + 1 AS next_seq FROM event WHERE research_id = ?",
             (research_id,),
         ).fetchone()
+        tip = _stored_tip(conn, research_id)
+        previous = ""
+        if tip is not None and str(tip["event_hash"] or ""):
+            tip_event = _to_event(tip)
+            if tip_event.event_hash != event_hash_for(tip_event):
+                raise EngineError(
+                    "event ledger is broken at the tip",
+                    "the newest stored event no longer matches its digest, so new events"
+                    " cannot be chained onto it.",
+                    "inspect the tip row for direct edits, restore it, then retry.",
+                )
+            previous = tip_event.event_hash
         event = Event(
             id=event_id,
             at=utc_now(),
@@ -87,10 +157,25 @@ def record(
             seq=int(row["next_seq"]),
             root_id=root_id,
             parent_id=parent_id,
+            prev_hash=previous,
+        )
+        event = Event(
+            id=event.id,
+            at=event.at,
+            research_id=event.research_id,
+            kind=event.kind,
+            subject=event.subject,
+            detail=event.detail,
+            actor=event.actor,
+            seq=event.seq,
+            root_id=event.root_id,
+            parent_id=event.parent_id,
+            prev_hash=event.prev_hash,
+            event_hash=event_hash_for(event),
         )
         conn.execute(
             "INSERT INTO event(id, at, research_id, kind, subject, detail, actor, seq, root_id,"
-            " parent_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            " parent_id, prev_hash, event_hash) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
                 event.id,
                 event.at,
@@ -102,6 +187,8 @@ def record(
                 event.seq,
                 event.root_id,
                 event.parent_id,
+                event.prev_hash,
+                event.event_hash,
             ),
         )
     return event

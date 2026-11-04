@@ -8,9 +8,9 @@
 ## 📊 Codebase Metrics
 - **Total Python Modules**: `80`
 - **Total Classes**: `74`
-- **Total Top-Level Functions**: `252`
-- **Total Class Methods**: `548`
-- **Total Source Lines**: `15973`
+- **Total Top-Level Functions**: `255`
+- **Total Class Methods**: `553`
+- **Total Source Lines**: `16165`
 
 ---
 
@@ -173,7 +173,7 @@
 ### [`engine/cli.py`](engine/cli.py)
 > *Command-line surface: one entry point for every engine mechanic.*
 
-**Size**: `1238` lines (`60166` bytes)
+**Size**: `1263` lines (`61584` bytes)
 
 **Functions:**
 - `def _build_parser()`
@@ -218,7 +218,7 @@
 ### [`engine/database.py`](engine/database.py)
 > *SQLite connection, schema versioning and atomic transactions.*
 
-**Size**: `436` lines (`16917` bytes)
+**Size**: `442` lines (`17136` bytes)
 
 **Functions:**
 - `def connect(path)` - *Open a database with durability pragmas suitable for a state file.*
@@ -287,12 +287,15 @@
 ### [`engine/events.py`](engine/events.py)
 > *Append-only event log for actions that are not verdicts.*
 
-**Size**: `196` lines (`6579` bytes)
+**Size**: `283` lines (`9637` bytes)
 
 **Classes:**
 - `class Event`
 
 **Functions:**
+- `def event_hash_for(event)` - *The tamper-evident digest of one event, chained to its predecessor.*
+- `def _stored_tip(conn, research_id)`
+- `def verify_ledger(conn, research_id)` - *Replay one program's event chain; every break is an (event id, reason) pair.*
 - `def _to_event(row)`
 - `def record(conn, kind, subject, detail, research_id, actor, parent_id)` - *Append one event. Callers run inside their own write transaction.*
 - `def list_events(conn, research_ref, kind, limit)` - *Recent events, newest first, optionally filtered by program and kind.*
@@ -360,7 +363,7 @@
 ### [`engine/integrity.py`](engine/integrity.py)
 > *Graph integrity: provenance, evidence paths, dependency acyclicity and stale dependents.*
 
-**Size**: `919` lines (`34974` bytes)
+**Size**: `934` lines (`35534` bytes)
 
 **Functions:**
 - `def _finding(code, severity, subject, message, fix)`
@@ -866,7 +869,7 @@
 ### [`tests/test_cli.py`](tests/test_cli.py)
 > *The CLI surface: JSON output, exit codes and the error triad.*
 
-**Size**: `555` lines (`22580` bytes)
+**Size**: `561` lines (`22809` bytes)
 
 **Classes:**
 - `class CliTests`
@@ -912,6 +915,7 @@
   - Method `.test_report_scorecard_card_evaluate_once()`
   - Method `.test_protocol_add_doc_path_mismatch_is_refused()`
   - Method `.test_bulk_invalidate_needs_allow_bulk()`
+  - Method `.test_events_verify_reports_a_healthy_ledger()`
   - Method `.test_main_module_import_has_no_side_effects()`
 
 ---
@@ -1032,7 +1036,7 @@
 ### [`tests/test_events.py`](tests/test_events.py)
 > *Event log: append-only record of actions that are not verdicts.*
 
-**Size**: `134` lines (`5869` bytes)
+**Size**: `187` lines (`8224` bytes)
 
 **Classes:**
 - `class EventTests`
@@ -1048,6 +1052,10 @@
   - Method `.test_merge_is_recorded_once()`
   - Method `.test_report_generation_is_recorded()`
   - Method `.test_migration_records_an_event()`
+  - Method `.test_chain_links_each_event_to_its_predecessor()`
+  - Method `.test_tampered_middle_row_breaks_the_chain()`
+  - Method `.test_extending_a_broken_tip_is_refused()`
+  - Method `.test_legacy_unhashed_rows_are_grandfathered()`
 
 ---
 

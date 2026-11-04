@@ -92,10 +92,9 @@ engine hosts.
     self_reported` quarantines a system-produced number. `observation void` retires one with a
     reason. Missing statistics warn (`OBS-001`), as do unprovenanced, unclassified and
     self-reported measurements (`OBS-002`..`OBS-004`).
-16. **Every non-verdict action is logged.** Source status changes, screening, merges, report
-    generation and schema migration append to an event log with a per-program sequence and an
-    optional parent, so `events --tree` and `events --path` can render the causal chain. Verdicts
-    keep history.
+16. **Every non-verdict action is logged.** Status changes, screening, merges, reports and
+    migrations append to a hash-chained event log verified by `events --verify`;
+    `events --tree`/`--path` render causality. Verdicts keep their own history.
 17. **Discovery is lexical and bounded.** `search` ranks claims, sources, questions and hypotheses
     by an exact phrase then matched terms, reports the matched field with a snippet, and packs
     text output to `--budget`; `source duplicates` groups normalized DOI and title matches, and
@@ -208,6 +207,7 @@ python -m engine [--db PATH] db backup PATH
 python -m engine [--db PATH] events [--research REF] [--kind K] [--limit N]
 python -m engine [--db PATH] events --tree ROOT
 python -m engine [--db PATH] events --path EVENT
+python -m engine [--db PATH] events --verify
 python -m engine [--db PATH] scorecard REF
 python -m engine [--db PATH] export PATH [--research REF] [--check]
 python -m engine [--db PATH] ai sweep|extract|idea|propose-test|draft|artifacts
@@ -227,7 +227,7 @@ present and 0 when only warnings remain. Domain errors print the `Error / Why / 
 - numeric claims whose verified run no longer matches the current engine code, inputs or command (`EVID-005`);
 - one missing evidence volume shared by 3 or more stale claims (`EVID-011`);
 - numeric claims citing a non-authoritative verdict group (`EVID-006`);
-- failed or invalidated claims without verdict evidence (`EVID-003`);
+- failed/invalidated claims without verdict evidence (`EVID-003`);
 - hypothesis outcomes without verdict evidence (`EVID-004`);
 - claims citing a retracted source (`PROV-003`) or one under concern (`PROV-004`, warning);
 - dependency cycles (`GRAPH-001`), dangling edges (`GRAPH-002`), self edges (`GRAPH-003`),
@@ -235,32 +235,33 @@ present and 0 when only warnings remain. Domain errors print the `Error / Why / 
 - cross-program edges (`SCOPE-001`);
 - dependents left standing after a failed premise (`CASCADE-001`);
 - outcome timestamps before registration (`PRE-001`);
-- evidence gaps (`GAP-001`, `GAP-002`), duplicate claim text (`DUP-001`, live claims only), empty programs (`EMPTY-001`);
+- evidence gaps (`GAP-001`, `GAP-002`), duplicate claim text (`DUP-001`, live only), empty programs (`EMPTY-001`);
 - duplicate source identity (`DUP-002`, warning);
 - a verified test without a negative control (`EVID-008`, warning) or whose control never failed (`EVID-009`, error);
-- a live quote that restates a linked question, duplicates another live quote, or has no content terms (`EVID-010`, warning);
+- a live quote restating a question, duplicating another quote, or empty (`EVID-010`, warning);
 - observations with missing or stale statistics (`OBS-001`, warning);
 - observations with no instrument, rater or protocol (`OBS-002`, warning);
 - observations not classified as independent or self-reported (`OBS-003`, warning), and self-reported observations quarantined from independent comparisons (`OBS-004`, warning);
-- a live claim citing a source screened out of the review (`SCREEN-001`, warning);
-- a test still bound to a retired claim (`TEST-001`, warning), to a superseded claim (`REV-002`, warning), or a dependent still pointing at a superseded claim (`REV-001`, warning);
+- a live claim citing a screened-out source (`SCREEN-001`, warning);
+- a test bound to a retired (`TEST-001`, warning) or superseded (`REV-002`, warning) claim, or a dependent pointing at a superseded claim (`REV-001`, warning);
 - a test created after another test on the same claim failed (`TEST-002`, warning);
 - an UNKNOWN claim with no recorded reason (`EVID-007`, warning).
 - AI provenance: an unresolvable AI citation (`AI-001`), an AI-origin claim proven without a twice-passing test (`AI-002`), an AI test off its fixed template (`AI-003`).
+- a broken event hash chain (`LEDGER-001`);
 - a corrupt schema ledger (`SCHEMA-001`).
 
 Warnings are research hygiene; errors block a trustworthy report.
 
 ## Data Model
 
-One SQLite file (default `research.db`), schema version 11. Tables: `research`, `source`,
+One SQLite file (default `research.db`), schema version 12. Tables: `research`, `source`,
 `question`, `claim`, `edge`, `hypothesis`, `killtest`, `test_run`, `test_attempt`, `verdict`,
 `invalidation`, `observation`, `protocol`, `ai_artifact`, `event`, plus `schema_meta` and
 `counters`. `claim`
 carries `revision_of`, `superseded_by` and `revision_reason`; a revision is a new row, never an
 edit. `observation` carries the instrument, rater, protocol, sample size, aggregation, unit and
-provenance class recorded with the value. `event` carries a per-program `seq`, `root_id` and
-`parent_id`. Writes use `BEGIN IMMEDIATE`; WAL and `synchronous=FULL` are enabled for a durable
+provenance class recorded with the value. `event` carries a per-program `seq`, `root_id`,
+`parent_id` and a hash chain (`prev_hash`, `event_hash`). Writes use `BEGIN IMMEDIATE`; WAL and `synchronous=FULL` are enabled for a durable
 state file. `verdict`, `test_run`, `test_attempt`, `event`, `observation` and `invalidation` are
 append-only (an observation is voided, never edited or deleted). `export` includes attempts,
 observations, protocols, AI artifacts and the event log; the manifest digests cover evidence records and

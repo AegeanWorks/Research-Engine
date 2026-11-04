@@ -10,7 +10,7 @@ from typing import Iterator
 from engine.artifacts import utc_now
 from engine.errors import EngineError
 
-SCHEMA_VERSION = 11
+SCHEMA_VERSION = 12
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS schema_meta (
@@ -190,7 +190,9 @@ CREATE TABLE IF NOT EXISTS event (
     actor TEXT NOT NULL DEFAULT 'agent',
     seq INTEGER NOT NULL DEFAULT 0,
     root_id TEXT NOT NULL DEFAULT '',
-    parent_id TEXT NOT NULL DEFAULT ''
+    parent_id TEXT NOT NULL DEFAULT '',
+    prev_hash TEXT NOT NULL DEFAULT '',
+    event_hash TEXT NOT NULL DEFAULT ''
 );
 CREATE TABLE IF NOT EXISTS invalidation (
     id TEXT PRIMARY KEY,
@@ -298,6 +300,10 @@ _MIGRATIONS = {
     # CREATE TABLE IF NOT EXISTS script above, so this step is intentionally empty:
     # it only advances the version marker for existing databases.
     10: (),
+    11: (
+        ("event", "prev_hash", "TEXT NOT NULL DEFAULT ''"),
+        ("event", "event_hash", "TEXT NOT NULL DEFAULT ''"),
+    ),
 }
 
 

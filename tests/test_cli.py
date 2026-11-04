@@ -542,6 +542,12 @@ class CliTests(unittest.TestCase):
         )
         self.assertEqual(code, 0)
 
+    def test_events_verify_reports_a_healthy_ledger(self) -> None:
+        self.run_cli("demo")
+        code, out, _ = self.run_cli("events", "--verify")
+        self.assertEqual(code, 0)
+        self.assertIn("ledger ok", out)
+
     def test_main_module_import_has_no_side_effects(self) -> None:
         import importlib.util
 
