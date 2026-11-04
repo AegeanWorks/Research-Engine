@@ -204,6 +204,23 @@ class ClaimTests(DatabaseCase):
         with self.assertRaises(EngineError):
             record_edge(self.conn, "claim", claim.id, "claim", foreign.id, "related")
 
+    def test_record_edge_validates_the_relation(self) -> None:
+        from engine.claims import record_edge
+        from engine.questions import add_question
+
+        research = self.add_research()
+        left = add_claim(self.conn, research, "Left.", "assumption", basis="a")
+        right = add_claim(self.conn, research, "Right.", "assumption", basis="a")
+        question = add_question(self.conn, research, "Q?")
+        with self.assertRaises(EngineError):
+            record_edge(self.conn, "claim", left.id, "question", question.id, "likes")
+        with self.assertRaises(EngineError):
+            record_edge(self.conn, "claim", left.id, "claim", right.id, "adores")
+        with self.assertRaises(EngineError):
+            record_edge(self.conn, "question", question.id, "claim", left.id, "supports")
+        edge = record_edge(self.conn, "claim", left.id, "claim", right.id, "depends_on")
+        self.assertTrue(edge.startswith("e_"))
+
 
 if __name__ == "__main__":
     unittest.main()

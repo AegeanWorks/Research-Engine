@@ -11,6 +11,7 @@ from engine.events import record as record_event
 from engine.models import (
     CLAIM_CLAIM_RELATIONS,
     CLAIM_KINDS,
+    CLAIM_QUESTION_RELATIONS,
     CLAIM_STATUSES,
     DEPENDENCY_RELATIONS,
     FAILED_STATUSES,
@@ -495,6 +496,22 @@ def record_edge(
     rel: str,
 ) -> str:
     """Insert one typed edge, returning the existing id when the edge is already present."""
+    allowed = {
+        ("claim", "claim"): CLAIM_CLAIM_RELATIONS + DEPENDENCY_RELATIONS,
+        ("claim", "question"): CLAIM_QUESTION_RELATIONS,
+    }.get((src_kind, dst_kind))
+    if allowed is None:
+        raise EngineError(
+            f"unsupported edge endpoints: {src_kind} -> {dst_kind}",
+            "the graph only links claims to claims and claims to questions.",
+            "link a claim to a claim or a claim to a question.",
+        )
+    if rel not in allowed:
+        raise EngineError(
+            f"unknown relation for {src_kind} -> {dst_kind}: {rel}",
+            f"allowed relations are {', '.join(allowed)}.",
+            "pass one of the listed relations.",
+        )
     programs = set()
     for kind, ref in ((src_kind, src_id), (dst_kind, dst_id)):
         if kind == "claim":
