@@ -541,6 +541,8 @@ def _cmd_source(conn: sqlite3.Connection, args) -> int:
     if args.action == "retract":
         result = retract_source(conn, args.ref, args.reason, args.evidence)
         text = f"{result['source']} -> retracted\n"
+        if result["siblings"]:
+            text += f"  twin rows retracted: {', '.join(result['siblings'])}\n"
         for item in result["affected"]:
             text += f"  {item['id']} {item['previous_status']} -> RETRACTED"
             if item["cascade"]:

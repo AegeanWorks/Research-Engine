@@ -138,6 +138,33 @@ class SourceStatusTests(DatabaseCase):
 
 
 
+    def test_retraction_covers_twin_doi_rows(self) -> None:
+        research = self.add_research()
+        first = self.add_source(research)
+        self.conn.execute(
+            "UPDATE source SET doi = ? WHERE id = ?",
+            ("https://doi.org/10.1000/abc", first),
+        )
+        from engine.sources import add_source
+
+        twin = add_source(
+            self.conn, research, "Twin record", year=2024, doi="doi:10.1000/ABC",
+        ).id
+        for source, text in ((first, "S rose with O."), (twin, "S rose with O too.")):
+            add_claim(
+                self.conn, research, text, "empirical",
+                source_ref=source, quote=text, locator="p.1",
+                kill_test="A replicate.",
+            )
+        result = retract_source(self.conn, first, "notice", "evidence")
+        self.assertEqual(get_source(self.conn, first).status, "retracted")
+        self.assertEqual(get_source(self.conn, twin).status, "retracted")
+        self.assertIn(twin, result["siblings"])
+        live_retracted = [
+            item for item in check(self.conn) if item.code == "PROV-003"
+        ]
+        self.assertEqual(live_retracted, [])
+
     def test_reinstatement_requires_a_note_and_keeps_claim_verdicts(self) -> None:
         research = self.add_research()
         source = self.add_source(research)

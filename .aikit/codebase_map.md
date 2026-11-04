@@ -9,8 +9,8 @@
 - **Total Python Modules**: `80`
 - **Total Classes**: `73`
 - **Total Top-Level Functions**: `250`
-- **Total Class Methods**: `535`
-- **Total Source Lines**: `15550`
+- **Total Class Methods**: `536`
+- **Total Source Lines**: `15597`
 
 ---
 
@@ -136,7 +136,7 @@
 ### [`engine/cascade.py`](engine/cascade.py)
 > *Transitive invalidation: when a premise collapses, everything built on it collapses too.*
 
-**Size**: `193` lines (`6906` bytes)
+**Size**: `211` lines (`7719` bytes)
 
 **Functions:**
 - `def dependents(conn, claim_id)` - *Return every claim that structurally depends on this claim, by depth.*
@@ -173,7 +173,7 @@
 ### [`engine/cli.py`](engine/cli.py)
 > *Command-line surface: one entry point for every engine mechanic.*
 
-**Size**: `1227` lines (`59662` bytes)
+**Size**: `1229` lines (`59773` bytes)
 
 **Functions:**
 - `def _build_parser()`
@@ -1523,7 +1523,7 @@
 ### [`tests/test_sources_retraction.py`](tests/test_sources_retraction.py)
 > *Source status and retraction cascade.*
 
-**Size**: `159` lines (`7010` bytes)
+**Size**: `186` lines (`8172` bytes)
 
 **Classes:**
 - `class SourceStatusTests`
@@ -1538,6 +1538,7 @@
   - Method `.test_retracting_twice_is_refused()`
   - Method `.test_claims_are_left_alone_when_already_failed()`
   - Method `.test_retracted_source_is_clean_after_cascade()`
+  - Method `.test_retraction_covers_twin_doi_rows()`
   - Method `.test_reinstatement_requires_a_note_and_keeps_claim_verdicts()`
 
 ---

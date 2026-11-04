@@ -69,7 +69,7 @@ engine hosts.
    digest, so `export --check` proves a snapshot intact and refuses an unread schema. No number is
    hand-written.
 9. **Sources can be retired.** `source status` records an expression of concern; `source retract`
-   retires every claim that cites the source and cascades to their dependents.
+   retires every claim citing that work, twins included, and cascades.
 10. **Missing evidence is explicit.** `claim verdict --status UNKNOWN` records that the evidence
     does not exist and why. UNKNOWN has zero consensus weight, never promotes a dependent, and
     is never treated as a failure that would cascade.
@@ -286,7 +286,7 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 - A NUMERIC promotion must cite a current verified run group; there is no promotion without one.
 - Numeric evidence must still match the current engine code, declared inputs and command; stale
   evidence is an error, not a pass.
-- A retracted source retires the claims that cite it; a live claim citing one is an error.
+- Retracting a source retires its claims across twin rows; a live claim citing one is an error.
 - A committed report is only valid alongside its manifest, and `report --check` must stay clean.
 - Negative results are kept; corrections are new verdicts.
 - A revision starts untested; verdicts are not inherited.

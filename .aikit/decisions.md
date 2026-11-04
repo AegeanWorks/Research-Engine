@@ -585,3 +585,22 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Consequences**: Post-verdict edits to the expected exit or the timeout retire the
   group instead of redefining the pass. One upgrade cost: pre-existing verified groups
   need one fresh `test verify` to rebind under the stronger identity.
+
+### ADR-042: Retraction covers every row of the retracted work
+- **Date**: 2026-11-04
+- **Status**: Accepted
+- **Context**: IDEA-980. `retract_source` retired only the single cited row: a twin row
+  sharing the normalized DOI stayed `active`, so the retraction was bypassed without
+  touching the retracted record. `DUP-002` already detects the split, and ADR-036 keeps
+  detection advisory, but nothing closed the bypass at retraction time.
+- **Decision**: `retract_source` resolves the work identity via `normalize_doi` and
+  retracts every same-program sibling row with its claims in one transaction; the CLI
+  names the covered twins. No schema change, no insert-time refusal: `DUP-002` stays the
+  detection path and the advisory-merge workflow is untouched. Full terminality
+  (refusing `retracted -> active`) is deliberately not added: reinstatement after a
+  withdrawn retraction is pinned behavior
+  (`test_reinstatement_requires_a_note_and_keeps_claim_verdicts`) and stays a per-row
+  operator action with its claim verdicts preserved.
+- **Consequences**: A twin row can no longer shelter live claims past a retraction;
+  `PROV-003` stays clean without a second pass. Cross-program rows are out of scope:
+  programs are separate boundaries and retract in their own scope.

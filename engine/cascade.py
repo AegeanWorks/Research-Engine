@@ -155,39 +155,57 @@ def retract_source(
             "a retraction is recorded once and then remains in the record.",
             "inspect the source and its affected claims.",
         )
-    affected: list = []
-    with transaction(conn):
-        conn.execute(
-            "UPDATE source SET status = 'retracted', status_note = ?, status_at = ? WHERE id = ?",
-            (reason.strip(), utc_now(), source.id),
-        )
-        record_event(
-            conn,
-            "source.status",
-            source.id,
-            f"{source.status} -> retracted: {reason.strip()}",
-            research_id=source.research_id,
-            actor=actor,
-        )
+    from engine.duplicates import normalize_doi
+
+    targets = [source]
+    siblings: list = []
+    work = normalize_doi(source.doi)
+    if work:
         rows = conn.execute(
-            "SELECT id, status FROM claim WHERE source_id = ? AND superseded_by IS NULL ORDER BY id", (source.id,)
+            "SELECT id, doi, status FROM source WHERE research_id = ? AND id != ? ORDER BY id",
+            (source.research_id, source.id),
         ).fetchall()
         for row in rows:
-            if str(row["status"]) in FAILED_STATUSES:
+            if normalize_doi(str(row["doi"] or "")) != work:
                 continue
-            result = invalidate(
+            if str(row["status"]) == "retracted":
+                continue
+            targets.append(get_source(conn, str(row["id"])))
+            siblings.append(str(row["id"]))
+    affected: list = []
+    with transaction(conn):
+        for target in targets:
+            conn.execute(
+                "UPDATE source SET status = 'retracted', status_note = ?, status_at = ? WHERE id = ?",
+                (reason.strip(), utc_now(), target.id),
+            )
+            record_event(
                 conn,
-                str(row["id"]),
-                "RETRACTED",
-                f"source {source.id} retracted: {reason}",
-                evidence,
+                "source.status",
+                target.id,
+                f"{target.status} -> retracted: {reason.strip()}",
+                research_id=target.research_id,
                 actor=actor,
             )
-            affected.append(
-                {
-                    "id": str(row["id"]),
-                    "previous_status": str(row["status"]),
-                    "cascade": [item["id"] for item in result["affected"]],
-                }
-            )
-    return {"source": source.id, "status": "retracted", "affected": affected}
+            rows = conn.execute(
+                "SELECT id, status FROM claim WHERE source_id = ? AND superseded_by IS NULL ORDER BY id", (target.id,)
+            ).fetchall()
+            for row in rows:
+                if str(row["status"]) in FAILED_STATUSES:
+                    continue
+                result = invalidate(
+                    conn,
+                    str(row["id"]),
+                    "RETRACTED",
+                    f"source {target.id} retracted: {reason}",
+                    evidence,
+                    actor=actor,
+                )
+                affected.append(
+                    {
+                        "id": str(row["id"]),
+                        "previous_status": str(row["status"]),
+                        "cascade": [item["id"] for item in result["affected"]],
+                    }
+                )
+    return {"source": source.id, "status": "retracted", "siblings": siblings, "affected": affected}
