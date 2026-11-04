@@ -7,10 +7,10 @@
 
 ## 📊 Codebase Metrics
 - **Total Python Modules**: `80`
-- **Total Classes**: `73`
-- **Total Top-Level Functions**: `250`
-- **Total Class Methods**: `539`
-- **Total Source Lines**: `15644`
+- **Total Classes**: `74`
+- **Total Top-Level Functions**: `251`
+- **Total Class Methods**: `543`
+- **Total Source Lines**: `15726`
 
 ---
 
@@ -56,7 +56,7 @@
 ### [`engine/analysis.py`](engine/analysis.py)
 > *Discovery and ranking over the graph: contradictions, coverage, keystones.*
 
-**Size**: `509` lines (`20960` bytes)
+**Size**: `534` lines (`21969` bytes)
 
 **Functions:**
 - `def keywords(text)` - *Content words of an assertion, lowercased and de-duplicated.*
@@ -594,7 +594,7 @@
 ### [`engine/stats.py`](engine/stats.py)
 > *Deterministic statistics for recorded observations.*
 
-**Size**: `312` lines (`11572` bytes)
+**Size**: `333` lines (`12464` bytes)
 
 **Functions:**
 - `def sample_sd(values)` - *Sample standard deviation; zero for fewer than two values.*
@@ -607,6 +607,7 @@
 - `def _u_distribution(n1, n2)` - *Counts of the U statistic under the null, by dynamic programming.*
 - `def _exact_u_two_sided_p(u1, n1, n2)` - *Exact two-sided p for the U statistic when the sample is small and untied.*
 - `def mann_whitney(baseline, treatment)` - *Mann-Whitney U: exact for small untied samples, continuity-corrected asymptotic otherwise.*
+- `def holm_adjust(p_values)` - *Holm step-down adjustment for a family of p-values, in standard-library code.*
 - `def bootstrap_ci(baseline, treatment, seed, resamples)` - *Percentile bootstrap interval for the difference in means, reproducibly seeded.*
 - `def linregress(xs, ys)` - *Least-squares slope, intercept, correlation and two-sided p for paired points.*
 - `def compare_groups(baseline, treatment, seed, resamples)` - *Compare two recorded groups and state the result, the agreement and the caveats.*
@@ -1354,7 +1355,7 @@
 ### [`tests/test_observations.py`](tests/test_observations.py)
 > *Observations: raw values, their voiding, and the statistics projection over them.*
 
-**Size**: `215` lines (`10463` bytes)
+**Size**: `231` lines (`11197` bytes)
 
 **Classes:**
 - `class ObservationTests`
@@ -1377,6 +1378,7 @@
   - Method `.test_trend_needs_a_group()`
   - Method `.test_short_series_warns_instead_of_pretending()`
   - Method `.test_more_than_two_groups_warns_about_uncorrected_comparison()`
+  - Method `.test_more_than_two_groups_reports_a_holm_family()`
   - Method `.test_group_labels_are_case_insensitive()`
   - Method `.test_a_group_cannot_be_compared_with_itself()`
   - Method `.test_too_few_resamples_are_refused()`
@@ -1549,7 +1551,7 @@
 ### [`tests/test_stats.py`](tests/test_stats.py)
 > *Statistics: values checked against an independent implementation, behaviour checked here.*
 
-**Size**: `138` lines (`5453` bytes)
+**Size**: `158` lines (`6331` bytes)
 
 **Classes:**
 - `class DistributionTests`
@@ -1574,6 +1576,10 @@
   - Method `.test_linregress_ignores_non_finite_points()`
   - Method `.test_linregress_too_few_points()`
   - Method `.test_linregress_flat_line()`
+- `class HolmTests`
+  - Method `.test_holm_adjusts_step_down()`
+  - Method `.test_holm_enforces_monotonicity()`
+  - Method `.test_holm_empty()`
 - `class CompareTests`
   - Method `.test_significant_difference_with_agreeing_tests()`
   - Method `.test_small_groups_warn()`

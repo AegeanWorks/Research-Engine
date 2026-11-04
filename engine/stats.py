@@ -210,6 +210,27 @@ def mann_whitney(baseline: Sequence[float], treatment: Sequence[float]) -> Dict[
     return {"u": u, "z": z, "p": min(max(p, 0.0), 1.0), "method": "asymptotic"}
 
 
+def holm_adjust(p_values: Sequence[float]) -> List[dict]:
+    """Holm step-down adjustment for a family of p-values, in standard-library code.
+
+    Returns one record per input, in input order, with the adjusted p-value and the
+    rejection at `ALPHA`. Adjusted values are forced non-decreasing in sorted order so
+    a later hypothesis can never look stronger than an earlier one it passed.
+    """
+    order = sorted(range(len(p_values)), key=lambda index: (p_values[index], index))
+    total = len(p_values)
+    adjusted = [0.0] * total
+    ceiling = 0.0
+    for rank, index in enumerate(order):
+        ceiling = max(ceiling, min(max((total - rank) * p_values[index], 0.0), 1.0))
+        adjusted[index] = ceiling
+    return [
+        {"index": index, "p": p_values[index], "holm_p": adjusted[index],
+         "reject": adjusted[index] < ALPHA}
+        for index in range(total)
+    ]
+
+
 def bootstrap_ci(
     baseline: Sequence[float],
     treatment: Sequence[float],

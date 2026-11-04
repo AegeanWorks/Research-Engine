@@ -9,6 +9,7 @@ from engine.stats import (
     bootstrap_ci,
     cohens_d,
     compare_groups,
+    holm_adjust,
     linregress,
     mann_whitney,
     sample_sd,
@@ -111,6 +112,25 @@ class RegressionTests(unittest.TestCase):
 
     def test_linregress_flat_line(self) -> None:
         self.assertEqual(linregress([1, 2, 3], [2, 2, 2])["slope"], 0.0)
+
+
+class HolmTests(unittest.TestCase):
+    def test_holm_adjusts_step_down(self) -> None:
+        adjusted = holm_adjust([0.01, 0.02, 0.03])
+        for item, expected in zip(adjusted, (0.03, 0.04, 0.04)):
+            self.assertAlmostEqual(item["holm_p"], expected, places=12)
+        self.assertTrue(all(item["reject"] for item in adjusted))
+
+    def test_holm_enforces_monotonicity(self) -> None:
+        adjusted = holm_adjust([0.011, 0.012, 0.5])
+        by_index = {item["index"]: item for item in adjusted}
+        self.assertAlmostEqual(by_index[0]["holm_p"], 0.033, places=12)
+        self.assertAlmostEqual(by_index[1]["holm_p"], 0.033, places=12)
+        self.assertAlmostEqual(by_index[2]["holm_p"], 0.5, places=12)
+        self.assertFalse(by_index[2]["reject"])
+
+    def test_holm_empty(self) -> None:
+        self.assertEqual(holm_adjust([]), [])
 
 
 class CompareTests(unittest.TestCase):

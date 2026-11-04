@@ -361,7 +361,7 @@ research-engine/
 - **Statistics describe the recorded numbers, not the world.** Independence is assumed.
 - **Rank-test method is stated.** Exact for untied small samples, tie-corrected approximation
   otherwise.
-- **Multiple comparisons are flagged, not corrected.** P-values are not adjusted.
+- **Multiple groups get a Holm family table; each pairwise test stays uncorrected on its own.**
 - **A control proves falsifiability, not correctness.** It shows the test can fail, not that the
   assertion is right.
 - **Screening is local.** States are recorded; correctness is not verified.

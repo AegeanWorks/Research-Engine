@@ -151,6 +151,22 @@ class ObservationTests(DatabaseCase):
         )
         self.assertTrue(any("uncorrected" in warning for warning in result["warnings"]))
 
+    def test_more_than_two_groups_reports_a_holm_family(self) -> None:
+        for value in (3.0, 3.1, 3.2):
+            add_observation(self.conn, self.claim, "control", value)
+        result = claim_statistics(
+            self.conn, self.claim, "baseline", "treatment", resamples=50
+        )
+        family = result["family"]
+        self.assertEqual(family["comparisons"], 3)
+        self.assertEqual(
+            {(item["pair"][0], item["pair"][1]) for item in family["welch"]},
+            {("baseline", "control"), ("baseline", "treatment"), ("control", "treatment")},
+        )
+        for item in family["welch"] + family["mann_whitney"]:
+            self.assertIn("holm_p", item)
+            self.assertIn("reject", item)
+
 
     def test_group_labels_are_case_insensitive(self) -> None:
         result = claim_statistics(

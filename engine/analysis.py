@@ -18,7 +18,10 @@ from engine.stats import (
     DEFAULT_SEED,
     MIN_GROUP,
     compare_groups,
+    holm_adjust,
     linregress,
+    mann_whitney,
+    welch_t,
 )
 from engine.questions import list_questions
 from engine.researches import get_research
@@ -407,6 +410,28 @@ def claim_statistics(
         result["warnings"].append(
             f"{len(groups)} groups recorded; this single pairwise test is uncorrected"
         )
+        labels = sorted(groups)
+        pairs = [
+            (first, second)
+            for position, first in enumerate(labels)
+            for second in labels[position + 1:]
+        ]
+        welch_ps = [welch_t(groups[first], groups[second])["p"] for first, second in pairs]
+        rank_ps = [mann_whitney(groups[first], groups[second])["p"] for first, second in pairs]
+        result["family"] = {
+            "comparisons": len(pairs),
+            "alpha": ALPHA,
+            "welch": [
+                {"pair": list(pair), "p": record["p"],
+                 "holm_p": record["holm_p"], "reject": record["reject"]}
+                for pair, record in zip(pairs, holm_adjust(welch_ps))
+            ],
+            "mann_whitney": [
+                {"pair": list(pair), "p": record["p"],
+                 "holm_p": record["holm_p"], "reject": record["reject"]}
+                for pair, record in zip(pairs, holm_adjust(rank_ps))
+            ],
+        }
     result["claim"] = claim.id
     result["baseline_label"] = baseline
     result["treatment_label"] = treatment
