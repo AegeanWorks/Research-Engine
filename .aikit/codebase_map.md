@@ -8,9 +8,9 @@
 ## 📊 Codebase Metrics
 - **Total Python Modules**: `80`
 - **Total Classes**: `73`
-- **Total Top-Level Functions**: `249`
-- **Total Class Methods**: `525`
-- **Total Source Lines**: `15358`
+- **Total Top-Level Functions**: `250`
+- **Total Class Methods**: `526`
+- **Total Source Lines**: `15378`
 
 ---
 
@@ -400,10 +400,11 @@
 ### [`engine/maintenance.py`](engine/maintenance.py)
 > *Database maintenance: integrity verification and a crash-safe backup.*
 
-**Size**: `98` lines (`3708` bytes)
+**Size**: `109` lines (`4245` bytes)
 
 **Functions:**
 - `def integrity_check(conn)` - *Run SQLite's own checks plus a few facts a reviewer wants before archiving.*
+- `def _refuse_if_exists(target, because)` - *Refuse to clobber an existing backup target.*
 - `def backup(conn, destination)` - *Copy the live database through SQLite's backup API and verify the copy.*
 
 ---
@@ -1175,7 +1176,7 @@
 ### [`tests/test_maintenance.py`](tests/test_maintenance.py)
 > *Database maintenance: integrity verification and verified backups.*
 
-**Size**: `157` lines (`6835` bytes)
+**Size**: `166` lines (`7202` bytes)
 
 **Classes:**
 - `class MaintenanceTests`
@@ -1192,6 +1193,7 @@
   - Method `.test_counts_cover_edges_and_ai_artifacts()`
   - Method `.test_version_skew_fails_the_gate()`
   - Method `.test_corrupt_version_fails_closed()`
+  - Method `.test_backup_target_guard_refuses_existing_paths()`
   - Method `.test_backup_of_a_database_with_events_copies_them()`
 
 ---
