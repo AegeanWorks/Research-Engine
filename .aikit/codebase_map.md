@@ -9,8 +9,8 @@
 - **Total Python Modules**: `80`
 - **Total Classes**: `73`
 - **Total Top-Level Functions**: `250`
-- **Total Class Methods**: `529`
-- **Total Source Lines**: `15449`
+- **Total Class Methods**: `533`
+- **Total Source Lines**: `15519`
 
 ---
 
@@ -173,7 +173,7 @@
 ### [`engine/cli.py`](engine/cli.py)
 > *Command-line surface: one entry point for every engine mechanic.*
 
-**Size**: `1225` lines (`59577` bytes)
+**Size**: `1227` lines (`59662` bytes)
 
 **Functions:**
 - `def _build_parser()`
@@ -487,11 +487,11 @@
 ### [`engine/protocols.py`](engine/protocols.py)
 > *Measurement protocol registry.*
 
-**Size**: `114` lines (`4066` bytes)
+**Size**: `138` lines (`5093` bytes)
 
 **Functions:**
 - `def _to_protocol(row)`
-- `def register_protocol(conn, protocol_id, measures, includes_generation, includes_judge, doc_digest, actor)` - *Register an immutable protocol id; re-registering the same id is refused.*
+- `def register_protocol(conn, protocol_id, measures, includes_generation, includes_judge, doc_digest, doc_path, actor)` - *Register an immutable protocol id; re-registering the same id is refused.*
 - `def get_protocol(conn, ref)` - *Fetch one registered protocol by id.*
 - `def list_protocols(conn)` - *Every registered protocol, oldest id first.*
 
@@ -863,7 +863,7 @@
 ### [`tests/test_cli.py`](tests/test_cli.py)
 > *The CLI surface: JSON output, exit codes and the error triad.*
 
-**Size**: `517` lines (`20981` bytes)
+**Size**: `529` lines (`21467` bytes)
 
 **Classes:**
 - `class CliTests`
@@ -907,6 +907,7 @@
   - Method `.test_strict_needs_check()`
   - Method `.test_check_json_is_stable_machine_output()`
   - Method `.test_report_scorecard_card_evaluate_once()`
+  - Method `.test_protocol_add_doc_path_mismatch_is_refused()`
   - Method `.test_main_module_import_has_no_side_effects()`
 
 ---
@@ -1251,7 +1252,7 @@
 ### [`tests/test_measurements.py`](tests/test_measurements.py)
 > *Measurement provenance and protocol comparability.*
 
-**Size**: `192` lines (`8730` bytes)
+**Size**: `224` lines (`10023` bytes)
 
 **Classes:**
 - `class MeasurementTests`
@@ -1259,6 +1260,9 @@
   - Method `._kwargs(protocol, instrument, digest, unit)`
   - Method `._add(group, value, **overrides)`
   - Method `.test_protocol_registration_is_immutable()`
+  - Method `.test_doc_path_digest_mismatch_is_refused()`
+  - Method `.test_doc_path_only_pins_computed_digest()`
+  - Method `.test_missing_doc_path_is_refused()`
   - Method `.test_observation_round_trips_provenance()`
   - Method `.test_incomplete_provenance_is_refused()`
   - Method `.test_unknown_protocol_is_refused()`

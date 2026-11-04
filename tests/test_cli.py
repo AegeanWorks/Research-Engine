@@ -504,6 +504,18 @@ class CliTests(unittest.TestCase):
                 setattr(cli_mod, attr, orig)
             self.assertEqual(len(calls), 1, attr)
 
+    def test_protocol_add_doc_path_mismatch_is_refused(self) -> None:
+        doc = self.dir / "protocol.md"
+        doc.write_bytes(b"procedure v1")
+        code, _, err = self.run_cli(
+            "protocol", "add", "--id", "doc_pinned", "--measures", "pinned",
+            "--doc-path", str(doc), "--doc-digest", "0" * 64,
+        )
+        self.assertEqual(code, 1)
+        self.assertIn("does not match", err)
+        self.assertIn("Why:", err)
+        self.assertIn("Fix:", err)
+
     def test_main_module_import_has_no_side_effects(self) -> None:
         import importlib.util
 

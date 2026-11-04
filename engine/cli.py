@@ -190,6 +190,7 @@ def _build_parser() -> argparse.ArgumentParser:
     add_p.add_argument("--includes-generation", action="store_true")
     add_p.add_argument("--includes-judge", action="store_true")
     add_p.add_argument("--doc-digest", default="")
+    add_p.add_argument("--doc-path", default="")
     protocol_sub.add_parser("list", help="list registered protocols")
 
     observation = commands.add_parser("observation", help="record and retire measurements")
@@ -587,6 +588,7 @@ def _cmd_protocol(conn: sqlite3.Connection, args) -> int:
             includes_generation=args.includes_generation,
             includes_judge=args.includes_judge,
             doc_digest=args.doc_digest,
+            doc_path=args.doc_path,
         )
         return _emit(record, args.json, f"{record.id} {record.measures}\n")
     records = list_protocols(conn)

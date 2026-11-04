@@ -7,8 +7,10 @@ explicitly allows an incomparable comparison with a caveat.
 
 from __future__ import annotations
 
+import hashlib
 import re
 import sqlite3
+from pathlib import Path
 from typing import List
 
 from engine.artifacts import utc_now
@@ -34,6 +36,7 @@ def register_protocol(
     includes_generation: bool = False,
     includes_judge: bool = False,
     doc_digest: str = "",
+    doc_path: str = "",
     actor: str = "agent",
 ) -> Protocol:
     """Register an immutable protocol id; re-registering the same id is refused."""
@@ -52,6 +55,27 @@ def register_protocol(
             "pass --measures with a short description.",
         )
     doc_digest = doc_digest.strip()
+    doc_path = doc_path.strip()
+    if doc_path:
+        try:
+            document = Path(doc_path).read_bytes()
+        except OSError:
+            raise EngineError(
+                "protocol document cannot be read",
+                "the --doc-path file is missing or unreadable, so no digest"
+                " can be computed for the pin.",
+                "pass a readable document path, or omit --doc-path.",
+            )
+        computed = hashlib.sha256(document).hexdigest()
+        if doc_digest and doc_digest != computed:
+            raise EngineError(
+                "protocol doc digest does not match document",
+                "the pinned digest differs from the SHA-256 of the document at"
+                " --doc-path, so the pin does not describe that document.",
+                "recompute the digest from the current document, or pin the"
+                " document the digest was taken from.",
+            )
+        doc_digest = computed
     if doc_digest and not re.fullmatch(r"[0-9a-f]{64}", doc_digest):
         raise EngineError(
             "protocol doc digest is not a SHA-256 hex string",

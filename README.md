@@ -148,7 +148,7 @@ python -m engine [--db PATH] source duplicates [--research REF] [--limit N]
 python -m engine [--db PATH] source retract REF --reason TEXT --evidence TEXT
 
 python -m engine [--db PATH] protocol add --id ID --measures TEXT [--includes-generation]
-                        [--includes-judge] [--doc-digest SHA256]
+                        [--includes-judge] [--doc-digest SHA256] [--doc-path PATH]
 python -m engine [--db PATH] protocol list
 
 python -m engine [--db PATH] observation add CLAIM --group LABEL --value F [--note TEXT]
@@ -225,12 +225,12 @@ present and 0 when only warnings remain. Domain errors print the `Error / Why / 
 - sources with no year, DOI or URL (`PROV-002`);
 - promoted claims without a kill test or evidence-backed verdict (`EVID-001`);
 - numeric claims without a two-run agreeing test (`EVID-002`);
-- numeric claims whose verified run no longer matches the current engine code, declared inputs or
+- numeric claims whose verified run no longer matches the current engine code, inputs or
   command (`EVID-005`);
 - numeric claims whose promotion verdict cites a group that is not authoritative (`EVID-006`);
 - failed or invalidated claims without verdict evidence (`EVID-003`);
 - hypothesis outcomes without verdict evidence (`EVID-004`);
-- claims that still cite a retracted source (`PROV-003`) or one under an expression of concern
+- claims that cite a retracted source (`PROV-003`) or one under an expression of concern
   (`PROV-004`, warning);
 - dependency cycles (`GRAPH-001`), dangling edges (`GRAPH-002`), self edges (`GRAPH-003`);
 - edges that cross program boundaries (`SCOPE-001`);

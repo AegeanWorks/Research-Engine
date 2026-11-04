@@ -1,60 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "T-017-first30-audit",
+    "task_id": "T-018-approved-wave1",
     "last_phase": "phase 4",
     "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1793816824.2592986,
+    "updated_at": 1793817346.9412994,
     "owner": "kilo:goal",
-    "started_by": "kilo:research-engine",
-    "continuations": [
-      {
-        "agent": "kilo:goal",
-        "from": "kilo:research-engine",
-        "at": 1793816748.401829
-      }
-    ]
+    "started_by": "kilo:goal",
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "T-014-superseded-readonly",
-      "phase": "planning",
-      "phase_num": 2,
-      "description": "[1/1] Refuse new evidence and edges on superseded claims",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793308439.5086083,
-      "timestamp_str": "2026-10-30 00:13:59",
-      "agent": "opencode:research-engine",
-      "impact_assessment": {
-        "why": "A superseded claim could still receive a verdict, observation, test, edge or prerequisite, creating evidence that looked live but was attached to history",
-        "benefits": "The revision head is the only live target; history stays readable through claim history",
-        "risks": "contract: new refusals on five write paths; dependency: stdlib only; concurrency: single writer; state: no schema change",
-        "mitigation": "Failing-first tests for every write path; full suite and 4/4 gates before commit"
-      }
-    },
-    {
-      "task_id": "T-014-superseded-readonly",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[1/1] Superseded claims are read-only: verdict, observation, test, edge and prerequisite writes now refuse history; 376 tests pass; 4/4 gates pass; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793308443.088614,
-      "timestamp_str": "2026-10-30 00:14:03",
-      "agent": "opencode:research-engine"
-    },
-    {
-      "task_id": "T-014-superseded-readonly",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'T-014-superseded-readonly' completed successfully.",
-      "status": "completed",
-      "timestamp": 1793308505.5989645,
-      "timestamp_str": "2026-10-30 00:15:05",
-      "agent": "opencode:research-engine"
-    },
     {
       "task_id": "reforge:run-1",
       "phase": "reforge stage 11",
@@ -259,6 +215,45 @@
       "status": "in_progress",
       "timestamp": 1793816824.2592986,
       "timestamp_str": "2026-11-04 21:27:04",
+      "agent": "kilo:goal"
+    },
+    {
+      "task_id": "T-017-first30-audit",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'T-017-first30-audit' completed successfully.",
+      "status": "completed",
+      "timestamp": 1793816838.910869,
+      "timestamp_str": "2026-11-04 21:27:18",
+      "agent": "kilo:goal"
+    },
+    {
+      "task_id": "T-018-approved-wave1",
+      "phase": "planning",
+      "phase_num": 2,
+      "description": "[1/6] Planning Wave-1 integrity: 987 protocol recompute, 979 test identity, 980 work identity, 977 support-cycle, 990 Holm, 982+974 volume guards",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793816842.545664,
+      "timestamp_str": "2026-11-04 21:27:22",
+      "agent": "kilo:goal",
+      "impact_assessment": {
+        "why": "Deep-checked Approved ideas with P1 integrity gaps unverified at runtime; forged protocol pins and mutable test bindings undermine NUMERIC trust",
+        "benefits": "Closes P1 forgery/mutation paths; adds cycle and volume guards; each milestone independently gated",
+        "risks": "contract: new refusals on protocol/test/cascade paths; dependency: stdlib only; concurrency: single writer; state: 980 needs UNIQUE migration",
+        "mitigation": "Failing-first tests per milestone; full suite plus aikit check per milestone; explicit staging; no push without gates"
+      },
+      "plan_digest": "22dfb770931981a3b1de3034d35b52df77df8efee15dfe126bbf46f13b9efb12"
+    },
+    {
+      "task_id": "T-018-approved-wave1",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[1/6] IDEA-987 protocol doc recompute shipped: doc-path verify-or-fill, mismatch refused, CLI plus README, 484 tests pass, 4/4 gates pass, checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793817346.9412994,
+      "timestamp_str": "2026-11-04 21:35:46",
       "agent": "kilo:goal"
     }
   ]

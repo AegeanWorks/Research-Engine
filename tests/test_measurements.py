@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import hashlib
+import tempfile
 import unittest
+from pathlib import Path
 
 from engine.analysis import claim_statistics
 from engine.claims import add_claim
@@ -52,6 +55,35 @@ class MeasurementTests(DatabaseCase):
                          ["accuracy_at_1", "end_to_end_judge"])
         with self.assertRaises(EngineError):
             register_protocol(self.conn, "accuracy_at_1", "different procedure")
+
+    def test_doc_path_digest_mismatch_is_refused(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            doc = Path(tmp) / "protocol.md"
+            doc.write_bytes(b"procedure v1")
+            with self.assertRaises(EngineError) as caught:
+                register_protocol(
+                    self.conn, "doc_pinned", "pinned procedure",
+                    doc_digest="0" * 64, doc_path=str(doc),
+                )
+            self.assertIn("does not match", str(caught.exception))
+
+    def test_doc_path_only_pins_computed_digest(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            doc = Path(tmp) / "protocol.md"
+            doc.write_bytes(b"procedure v1")
+            record = register_protocol(
+                self.conn, "doc_pinned", "pinned procedure", doc_path=str(doc),
+            )
+            self.assertEqual(
+                record.doc_digest, hashlib.sha256(b"procedure v1").hexdigest(),
+            )
+
+    def test_missing_doc_path_is_refused(self) -> None:
+        with self.assertRaises(EngineError):
+            register_protocol(
+                self.conn, "doc_missing", "missing procedure",
+                doc_path="nonexistent-protocol-doc.md",
+            )
 
     def test_observation_round_trips_provenance(self) -> None:
         self._add("baseline", 1.0)
