@@ -165,6 +165,25 @@ class SourceStatusTests(DatabaseCase):
         ]
         self.assertEqual(live_retracted, [])
 
+    def test_bulk_retraction_is_refused_without_override(self) -> None:
+        research = self.add_research()
+        source = self.add_source(research)
+        for index in range(11):
+            add_claim(
+                self.conn, research, f"Cites the source {index}.", "empirical",
+                source_ref=source, quote="quote", locator="p.1",
+                kill_test="A replicate.",
+            )
+        with self.assertRaises(EngineError) as caught:
+            retract_source(self.conn, source, "notice", "evidence")
+        self.assertIn("--allow-bulk", str(caught.exception.fix))
+        self.assertEqual(get_source(self.conn, source).status, "active")
+        result = retract_source(
+            self.conn, source, "notice", "evidence", allow_bulk=True,
+        )
+        self.assertEqual(get_source(self.conn, source).status, "retracted")
+        self.assertEqual(len(result["affected"]), 11)
+
     def test_reinstatement_requires_a_note_and_keeps_claim_verdicts(self) -> None:
         research = self.add_research()
         source = self.add_source(research)

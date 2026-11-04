@@ -604,3 +604,20 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Consequences**: A twin row can no longer shelter live claims past a retraction;
   `PROV-003` stays clean without a second pass. Cross-program rows are out of scope:
   programs are separate boundaries and retract in their own scope.
+
+### ADR-043: Collapse bulk tripwire and missing-volume finding
+- **Date**: 2026-11-04
+- **Status**: Accepted
+- **Context**: IDEA-982 and IDEA-974. `invalidate`/`retract_source` retired unbounded
+  record sets in one command; and a moved evidence folder turned every `NUMERIC` claim
+  stale at once, burying the single root cause under N `EVID-005` errors.
+- **Decision**: `CASCADE_BULK_LIMIT = 10` tripwire in `engine/cascade.py`: collapses
+  retiring more than 10 records refuse unless `allow_bulk` (`--allow-bulk` on
+  `claim invalidate` and `source retract`); the refusal names `cascade preview` for
+  inspection. When 3 or more stale `NUMERIC` claims in one program share a missing
+  ancestor folder, `check` reports one `EVID-011` volume error instead of per-claim
+  `EVID-005`s; smaller or heterogeneous stale sets keep per-claim findings.
+- **Consequences**: Fat-fingered program-wide collapses need an explicit opt-in; a
+  moved folder reads as one error naming the volume and the count. Ten and three are
+  tripwires in the MIN_GROUP tradition, not safety proofs; the limits registry
+  (IDEA-1613, Proposed) stays the follow-up.

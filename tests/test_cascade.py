@@ -6,6 +6,7 @@ import unittest
 
 from engine.cascade import dependents, invalidate, preview
 from engine.claims import add_claim, get_claim, link_claims
+from engine.errors import EngineError
 from tests.support import DatabaseCase
 
 
@@ -83,6 +84,23 @@ class CascadeTests(DatabaseCase):
         self.assertEqual(get_claim(self.conn, middle).status, "FALSIFIED")
         self.assertEqual(get_claim(self.conn, leaf).status, "INVALIDATED")
         self.assertEqual([item["id"] for item in result["affected"]], [leaf])
+
+    def test_bulk_collapse_is_refused_without_override(self) -> None:
+        research = self.add_research()
+        root = add_claim(self.conn, research, "Root.", "assumption", basis="a")
+        for index in range(11):
+            add_claim(
+                self.conn, research, f"Dependent {index}.", "derived",
+                basis="from root", prerequisites=[root.id],
+            )
+        with self.assertRaises(EngineError) as caught:
+            invalidate(self.conn, root.id, "FALSIFIED", "reason", "evidence")
+        self.assertIn("--allow-bulk", str(caught.exception.fix))
+        self.assertEqual(get_claim(self.conn, root.id).status, "UNVERIFIED")
+        result = invalidate(
+            self.conn, root.id, "FALSIFIED", "reason", "evidence", allow_bulk=True,
+        )
+        self.assertEqual(len(result["affected"]), 11)
 
     def test_collapse_requires_evidence(self) -> None:
         root, _, _ = self._chain()

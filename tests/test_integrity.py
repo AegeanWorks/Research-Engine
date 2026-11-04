@@ -304,6 +304,78 @@ class IntegrityTests(DatabaseCase):
         self.conn.execute("UPDATE test_run SET code_sha256 = ? WHERE test_id = ?", ("0" * 64, test.id))
         self.assertIn("EVID-005", codes(check(self.conn)))
 
+    def test_missing_evidence_volume_reports_once(self) -> None:
+        import shutil
+        import sys
+        import tempfile
+        from pathlib import Path
+
+        from engine.claims import add_claim
+        from engine.killtests import add_test, verify_test
+
+        research = self.add_research()
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        volume = Path(directory.name) / "evidence"
+        volume.mkdir()
+        for name in ("one", "two", "three"):
+            claim = add_claim(
+                self.conn, research, f"Measured {name}.", "empirical",
+                source_ref=self.add_source(research), quote=f"Measured {name}.",
+                locator="p.1", kill_test="A different measurement.",
+            )
+            data = volume / f"{name}.csv"
+            data.write_text("1.0\n", encoding="utf-8")
+            script = Path(directory.name) / f"{name}.py"
+            script.write_text("print('value=1')\n", encoding="utf-8")
+            test = add_test(
+                self.conn, research, f"Measure {name}",
+                f'"{sys.executable}" "{script}"',
+                claim_ref=claim.id, inputs=[str(data)],
+            )
+            self.assertTrue(verify_test(self.conn, test.id)["verification_complete"])
+            set_verdict(self.conn, claim.id, "NUMERIC", f"{test.id} two-run verification")
+        shutil.rmtree(volume)
+        found = check(self.conn)
+        volume_findings = [item for item in found if item.code == "EVID-011"]
+        self.assertEqual(len(volume_findings), 1)
+        self.assertIn("3", volume_findings[0].message)
+        self.assertEqual([item for item in found if item.code == "EVID-005"], [])
+
+    def test_small_stale_set_keeps_per_claim_findings(self) -> None:
+        import shutil
+        import sys
+        import tempfile
+        from pathlib import Path
+
+        from engine.claims import add_claim
+        from engine.killtests import add_test, verify_test
+
+        research = self.add_research()
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        for name in ("one", "two"):
+            claim = add_claim(
+                self.conn, research, f"Measured {name}.", "empirical",
+                source_ref=self.add_source(research), quote=f"Measured {name}.",
+                locator="p.1", kill_test="A different measurement.",
+            )
+            data = Path(directory.name) / f"{name}.csv"
+            data.write_text("1.0\n", encoding="utf-8")
+            script = Path(directory.name) / f"{name}.py"
+            script.write_text("print('value=1')\n", encoding="utf-8")
+            test = add_test(
+                self.conn, research, f"Measure {name}",
+                f'"{sys.executable}" "{script}"',
+                claim_ref=claim.id, inputs=[str(data)],
+            )
+            self.assertTrue(verify_test(self.conn, test.id)["verification_complete"])
+            set_verdict(self.conn, claim.id, "NUMERIC", f"{test.id} two-run verification")
+            data.unlink()
+        found = check(self.conn)
+        self.assertEqual(len([item for item in found if item.code == "EVID-005"]), 2)
+        self.assertEqual([item for item in found if item.code == "EVID-011"], [])
+
     def test_retracted_source_blocks_a_live_claim(self) -> None:
         research = self.add_research()
         source = self.add_source(research)

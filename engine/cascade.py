@@ -12,6 +12,13 @@ from engine.errors import EngineError
 from engine.models import DEPENDENCY_RELATIONS, FAILED_STATUSES
 from engine.artifacts import utc_now
 
+CASCADE_BULK_LIMIT = 10
+"""Collapse tripwire: retiring more than this many records needs an explicit opt-in.
+
+Ten is a tripwire, not a safety proof: it catches the fat-fingered program-wide
+collapse while staying out of the way of ordinary small cascades.
+"""
+
 
 def dependents(conn: sqlite3.Connection, claim_id: str) -> List[Tuple[str, int]]:
     """Return every claim that structurally depends on this claim, by depth."""
@@ -65,6 +72,7 @@ def invalidate(
     reason: str,
     evidence: str,
     actor: str = "agent",
+    allow_bulk: bool = False,
 ) -> dict:
     """Record a failed root claim, then invalidate every dependent in one transaction."""
     if status not in ("FALSIFIED", "RETRACTED"):
@@ -87,6 +95,13 @@ def invalidate(
         )
     root = get_claim(conn, claim_ref)
     planned = dependents(conn, root.id)
+    if len(planned) > CASCADE_BULK_LIMIT and not allow_bulk:
+        raise EngineError(
+            f"collapse would retire {len(planned)} records",
+            "a collapse this wide is usually a wrong root, not a real cascade.",
+            "run `cascade preview` to inspect the blast radius, then repeat with"
+            " --allow-bulk when every dependent really falls.",
+        )
     affected = []
     with transaction(conn):
         set_verdict(conn, root.id, status, evidence, note=reason, actor=actor)
@@ -131,6 +146,7 @@ def retract_source(
     reason: str,
     evidence: str,
     actor: str = "agent",
+    allow_bulk: bool = False,
 ) -> dict:
     """Retract a source and retire every empirical claim that cites it."""
     from engine.events import record as record_event
@@ -172,9 +188,25 @@ def retract_source(
                 continue
             targets.append(get_source(conn, str(row["id"])))
             siblings.append(str(row["id"]))
+    plan: list = []
+    for target in targets:
+        rows = conn.execute(
+            "SELECT id, status FROM claim WHERE source_id = ? AND superseded_by IS NULL ORDER BY id", (target.id,)
+        ).fetchall()
+        plan.append((target, rows))
+    retiring = sum(
+        1 for _, rows in plan for row in rows if str(row["status"]) not in FAILED_STATUSES
+    )
+    if retiring > CASCADE_BULK_LIMIT and not allow_bulk:
+        raise EngineError(
+            f"retraction would retire {retiring} claims",
+            "a retraction this wide is usually a wrong source, not a real withdrawal.",
+            "run `source duplicates` to inspect twin rows, then repeat with"
+            " --allow-bulk when every citing claim really falls.",
+        )
     affected: list = []
     with transaction(conn):
-        for target in targets:
+        for target, rows in plan:
             conn.execute(
                 "UPDATE source SET status = 'retracted', status_note = ?, status_at = ? WHERE id = ?",
                 (reason.strip(), utc_now(), target.id),
@@ -187,9 +219,6 @@ def retract_source(
                 research_id=target.research_id,
                 actor=actor,
             )
-            rows = conn.execute(
-                "SELECT id, status FROM claim WHERE source_id = ? AND superseded_by IS NULL ORDER BY id", (target.id,)
-            ).fetchall()
             for row in rows:
                 if str(row["status"]) in FAILED_STATUSES:
                     continue
@@ -200,6 +229,7 @@ def retract_source(
                     f"source {target.id} retracted: {reason}",
                     evidence,
                     actor=actor,
+                    allow_bulk=allow_bulk,
                 )
                 affected.append(
                     {

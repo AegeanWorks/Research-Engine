@@ -58,8 +58,7 @@ engine hosts.
 6. **Verdicts are append-only and tied to evidence.** `claim verdict` records `previous -> new`,
    evidence, note, actor, time and — for `NUMERIC` — the authoritative run group it cites. A
    `NUMERIC` promotion is refused unless the claim has a test whose earliest non-replaceable
-   attempt passed twice and is bound to the current code, inputs and command; `--group` pins the
-   authoritative group.
+   attempt passed twice and is bound to the current code, inputs and command; `--group` pins the group.
 7. **Collapse is transitive.** `claim invalidate` records the failed root and marks every claim
    that depends on it as `INVALIDATED`, with the reason preserved in the invalidation record.
 8. **Reports are generated and verifiable.** `report` and `scorecard` compute consensus,
@@ -145,7 +144,7 @@ python -m engine [--db PATH] source status REF --status active|expression_of_con
 python -m engine [--db PATH] source screen REF --status identified|screened_in|screened_out|included|excluded [--reason R]
 python -m engine [--db PATH] source prisma [--research REF]
 python -m engine [--db PATH] source duplicates [--research REF] [--limit N]
-python -m engine [--db PATH] source retract REF --reason TEXT --evidence TEXT
+python -m engine [--db PATH] source retract REF --reason TEXT --evidence TEXT [--allow-bulk]
 
 python -m engine [--db PATH] protocol add --id ID --measures TEXT [--includes-generation]
                         [--includes-judge] [--doc-digest SHA256] [--doc-path PATH]
@@ -172,7 +171,7 @@ python -m engine [--db PATH] claim show REF
 python -m engine [--db PATH] claim link SRC DST --rel REL
 python -m engine [--db PATH] claim link-question CLAIM QUESTION --stance STANCE
 python -m engine [--db PATH] claim verdict REF --status STATUS --evidence TEXT [--note TEXT] [--group GROUP]
-python -m engine [--db PATH] claim invalidate REF --status FALSIFIED|RETRACTED --reason TEXT --evidence TEXT
+python -m engine [--db PATH] claim invalidate REF --status FALSIFIED|RETRACTED --reason TEXT --evidence TEXT [--allow-bulk]
 python -m engine [--db PATH] claim merge KEEP DUP... [--note TEXT]
 python -m engine [--db PATH] claim context REF [--budget N]
 
@@ -226,27 +225,28 @@ present and 0 when only warnings remain. Domain errors print the `Error / Why / 
 - promoted claims without a kill test or evidence-backed verdict (`EVID-001`);
 - numeric claims without a two-run agreeing test (`EVID-002`);
 - numeric claims whose verified run no longer matches the current engine code, inputs or command (`EVID-005`);
+- one missing evidence volume shared by 3 or more stale claims (`EVID-011`);
 - numeric claims citing a non-authoritative verdict group (`EVID-006`);
 - failed or invalidated claims without verdict evidence (`EVID-003`);
 - hypothesis outcomes without verdict evidence (`EVID-004`);
-- claims that cite a retracted source (`PROV-003`) or one under an expression of concern (`PROV-004`, warning);
+- claims citing a retracted source (`PROV-003`) or one under concern (`PROV-004`, warning);
 - dependency cycles (`GRAPH-001`), dangling edges (`GRAPH-002`), self edges (`GRAPH-003`),
   support cycles (`GRAPH-004`, warning);
-- edges that cross program boundaries (`SCOPE-001`);
-- dependents left standing after a premise failed (`CASCADE-001`);
+- cross-program edges (`SCOPE-001`);
+- dependents left standing after a failed premise (`CASCADE-001`);
 - outcome timestamps before registration (`PRE-001`);
 - evidence gaps (`GAP-001`, `GAP-002`), duplicate claim text (`DUP-001`, live claims only), empty programs (`EMPTY-001`);
 - duplicate source identity (`DUP-002`, warning);
-- a test that produced verified evidence without a negative control (`EVID-008`, warning) or whose declared control never failed (`EVID-009`, error);
+- a verified test without a negative control (`EVID-008`, warning) or whose control never failed (`EVID-009`, error);
 - a live quote that restates a linked question, duplicates another live quote, or has no content terms (`EVID-010`, warning);
-- observations with no statistics run, or changed after the last one (`OBS-001`, warning);
+- observations with missing or stale statistics (`OBS-001`, warning);
 - observations with no instrument, rater or protocol (`OBS-002`, warning);
 - observations not classified as independent or self-reported (`OBS-003`, warning), and self-reported observations quarantined from independent comparisons (`OBS-004`, warning);
 - a live claim citing a source screened out of the review (`SCREEN-001`, warning);
 - a test still bound to a retired claim (`TEST-001`, warning), to a superseded claim (`REV-002`, warning), or a dependent still pointing at a superseded claim (`REV-001`, warning);
 - a test created after another test on the same claim failed (`TEST-002`, warning);
 - an UNKNOWN claim with no recorded reason (`EVID-007`, warning).
-- AI provenance: an AI citation that resolves nowhere (`AI-001`), an AI-origin claim proven without a twice-passing test (`AI-002`), an AI test off its fixed template (`AI-003`).
+- AI provenance: an unresolvable AI citation (`AI-001`), an AI-origin claim proven without a twice-passing test (`AI-002`), an AI test off its fixed template (`AI-003`).
 - a corrupt schema ledger (`SCHEMA-001`).
 
 Warnings are research hygiene; errors block a trustworthy report.

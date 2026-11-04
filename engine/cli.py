@@ -172,6 +172,8 @@ def _build_parser() -> argparse.ArgumentParser:
     retract_s.add_argument("ref")
     retract_s.add_argument("--reason", required=True)
     retract_s.add_argument("--evidence", required=True)
+    retract_s.add_argument("--allow-bulk", action="store_true",
+                           help="retire more than 10 claims in one retraction")
     screen_s = source_sub.add_parser("screen", help="record a screening decision")
     screen_s.add_argument("ref")
     screen_s.add_argument("--status", required=True, choices=SCREENING_STATUSES)
@@ -284,6 +286,8 @@ def _build_parser() -> argparse.ArgumentParser:
     inv_c.add_argument("--status", required=True, choices=("FALSIFIED", "RETRACTED"))
     inv_c.add_argument("--reason", required=True)
     inv_c.add_argument("--evidence", required=True)
+    inv_c.add_argument("--allow-bulk", action="store_true",
+                       help="retire more than 10 records in one collapse")
 
     hypothesis = commands.add_parser("hypothesis", help="pre-register hypotheses and record outcomes")
     hypothesis_sub = hypothesis.add_subparsers(dest="action", required=True)
@@ -539,7 +543,9 @@ def _cmd_source(conn: sqlite3.Connection, args) -> int:
         record = set_source_status(conn, args.ref, args.status, args.note)
         return _emit(record, args.json, f"{record.id} -> {record.status}\n")
     if args.action == "retract":
-        result = retract_source(conn, args.ref, args.reason, args.evidence)
+        result = retract_source(
+            conn, args.ref, args.reason, args.evidence, allow_bulk=args.allow_bulk,
+        )
         text = f"{result['source']} -> retracted\n"
         if result["siblings"]:
             text += f"  twin rows retracted: {', '.join(result['siblings'])}\n"
@@ -706,7 +712,10 @@ def _cmd_claim(conn: sqlite3.Connection, args) -> int:
         view = claim_brief(conn, args.ref, _need_budget(args.budget, "context"))
         return _emit(view.to_dict(), args.json, view.text)
     if args.action == "invalidate":
-        result = invalidate(conn, args.ref, args.status, args.reason, args.evidence)
+        result = invalidate(
+            conn, args.ref, args.status, args.reason, args.evidence,
+            allow_bulk=args.allow_bulk,
+        )
         text = f"{result['root']} -> {result['status']}\n"
         for item in result["affected"]:
             text += f"  {item['id']} depth {item['depth']} ({item['previous_status']} -> INVALIDATED)\n"

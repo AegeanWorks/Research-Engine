@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import json
+import os
 import sqlite3
+from pathlib import Path
 from typing import Dict, Iterable, List
 
 from engine import information
@@ -21,11 +23,14 @@ from engine.models import (
     FAILED_STATUSES,
     Finding,
 )
+from engine.provenance import PROJECT_ROOT, resolve_inputs
 from engine.markdown import cell
 
 _KIND_TABLES = {"claim": "claim", "question": "question", "hypothesis": "hypothesis", "source": "source"}
 _FAILED = tuple(FAILED_STATUSES)
 _BROKEN_SOURCES = tuple(BROKEN_SOURCE_STATUSES)
+MIN_VOLUME_CLAIMS = 3
+"""Volume tripwire: this many stale claims sharing one missing folder report once."""
 
 
 def _finding(code: str, severity: str, subject: str, message: str, fix: str) -> Finding:
@@ -77,6 +82,23 @@ def _cycles(
         if state.get(node, 0) == 0:
             visit(node)
     return found
+
+
+def _missing_inputs(tests) -> List[str]:
+    """Declared input files that no longer exist, resolved exactly like the fingerprint."""
+    missing = []
+    for test in tests:
+        try:
+            declared = json.loads(test.inputs_json or "[]")
+        except ValueError:
+            continue
+        for name in resolve_inputs(declared):
+            path = Path(name)
+            if not path.is_absolute():
+                path = PROJECT_ROOT / name
+            if not path.is_file():
+                missing.append(str(path))
+    return missing
 
 
 def _quote_quality(conn: sqlite3.Connection) -> List[Finding]:
@@ -224,6 +246,7 @@ def check(conn: sqlite3.Connection) -> List[Finding]:
             )
         )
 
+    volume: Dict[str, List[tuple]] = {}
     for row in conn.execute(
         "SELECT * FROM claim WHERE status = 'NUMERIC' ORDER BY id"
     ):
@@ -239,6 +262,12 @@ def check(conn: sqlite3.Connection) -> List[Finding]:
             continue
         current = claim_groups(conn, row["id"])
         if not current:
+            missing = _missing_inputs(tests)
+            if missing:
+                volume.setdefault(str(row["research_id"]), []).append(
+                    (str(row["id"]), missing)
+                )
+                continue
             findings.append(
                 _finding(
                     "EVID-005",
@@ -268,6 +297,50 @@ def check(conn: sqlite3.Connection) -> List[Finding]:
                     " `claim verdict --group`.",
                 )
             )
+
+    for research_id, candidates in sorted(volume.items()):
+        if len(candidates) < MIN_VOLUME_CLAIMS:
+            for claim_id, _ in candidates:
+                findings.append(
+                    _finding(
+                        "EVID-005",
+                        "error",
+                        claim_id,
+                        "numeric evidence is stale: no verified run matches the current code,"
+                        " inputs and command",
+                        "re-run `test verify` for the claim's test, or downgrade the claim.",
+                    )
+                )
+            continue
+        roots = [os.path.dirname(path) for _, paths in candidates for path in paths]
+        try:
+            common = os.path.commonpath(roots)
+        except ValueError:
+            common = ""
+        if not common:
+            for claim_id, _ in candidates:
+                findings.append(
+                    _finding(
+                        "EVID-005",
+                        "error",
+                        claim_id,
+                        "numeric evidence is stale: no verified run matches the current code,"
+                        " inputs and command",
+                        "re-run `test verify` for the claim's test, or downgrade the claim.",
+                    )
+                )
+            continue
+        names = ", ".join(claim_id for claim_id, _ in candidates)
+        findings.append(
+            _finding(
+                "EVID-011",
+                "error",
+                research_id,
+                f"evidence volume missing: {common} leaves {len(candidates)} NUMERIC"
+                f" claims stale ({names})",
+                "restore the folder, then re-run `test verify` for the affected tests.",
+            )
+        )
 
     # A test that has produced verified evidence is the unit that must be able to fail.
     for row in conn.execute("SELECT id FROM killtest ORDER BY id"):

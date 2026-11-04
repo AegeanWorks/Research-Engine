@@ -8,9 +8,9 @@
 ## 📊 Codebase Metrics
 - **Total Python Modules**: `80`
 - **Total Classes**: `74`
-- **Total Top-Level Functions**: `251`
-- **Total Class Methods**: `543`
-- **Total Source Lines**: `15726`
+- **Total Top-Level Functions**: `252`
+- **Total Class Methods**: `548`
+- **Total Source Lines**: `15973`
 
 ---
 
@@ -136,13 +136,13 @@
 ### [`engine/cascade.py`](engine/cascade.py)
 > *Transitive invalidation: when a premise collapses, everything built on it collapses too.*
 
-**Size**: `211` lines (`7719` bytes)
+**Size**: `241` lines (`9044` bytes)
 
 **Functions:**
 - `def dependents(conn, claim_id)` - *Return every claim that structurally depends on this claim, by depth.*
 - `def preview(conn, claim_ref)` - *Show what a collapse would invalidate without writing anything.*
-- `def invalidate(conn, claim_ref, status, reason, evidence, actor)` - *Record a failed root claim, then invalidate every dependent in one transaction.*
-- `def retract_source(conn, ref, reason, evidence, actor)` - *Retract a source and retire every empirical claim that cites it.*
+- `def invalidate(conn, claim_ref, status, reason, evidence, actor, allow_bulk)` - *Record a failed root claim, then invalidate every dependent in one transaction.*
+- `def retract_source(conn, ref, reason, evidence, actor, allow_bulk)` - *Retract a source and retire every empirical claim that cites it.*
 
 ---
 
@@ -173,7 +173,7 @@
 ### [`engine/cli.py`](engine/cli.py)
 > *Command-line surface: one entry point for every engine mechanic.*
 
-**Size**: `1229` lines (`59773` bytes)
+**Size**: `1238` lines (`60166` bytes)
 
 **Functions:**
 - `def _build_parser()`
@@ -360,12 +360,13 @@
 ### [`engine/integrity.py`](engine/integrity.py)
 > *Graph integrity: provenance, evidence paths, dependency acyclicity and stale dependents.*
 
-**Size**: `846` lines (`32176` bytes)
+**Size**: `919` lines (`34974` bytes)
 
 **Functions:**
 - `def _finding(code, severity, subject, message, fix)`
 - `def _entity(conn, kind, ref)`
 - `def _cycles(conn, relations)`
+- `def _missing_inputs(tests)` - *Declared input files that no longer exist, resolved exactly like the fingerprint.*
 - `def _quote_quality(conn)` - *Warn when a live quote restates a question, duplicates another quote, or is empty.*
 - `def check(conn)` - *Return every integrity finding; an empty list means the graph is coherent.*
 - `def has_errors(findings)` - *Return True when at least one finding blocks a verdict.*
@@ -816,7 +817,7 @@
 ### [`tests/test_cascade.py`](tests/test_cascade.py)
 > *A collapsed premise invalidates every dependent transitively.*
 
-**Size**: `101` lines (`4676` bytes)
+**Size**: `119` lines (`5556` bytes)
 
 **Classes:**
 - `class CascadeTests`
@@ -827,6 +828,7 @@
   - Method `.test_collapse_invalidates_every_dependent()`
   - Method `.test_retracted_dependent_is_not_rewritten()`
   - Method `.test_falsified_dependent_keeps_its_primary_failure()`
+  - Method `.test_bulk_collapse_is_refused_without_override()`
   - Method `.test_collapse_requires_evidence()`
   - Method `.test_collapse_requires_reason_and_failed_status()`
 
@@ -864,7 +866,7 @@
 ### [`tests/test_cli.py`](tests/test_cli.py)
 > *The CLI surface: JSON output, exit codes and the error triad.*
 
-**Size**: `529` lines (`21467` bytes)
+**Size**: `555` lines (`22580` bytes)
 
 **Classes:**
 - `class CliTests`
@@ -909,6 +911,7 @@
   - Method `.test_check_json_is_stable_machine_output()`
   - Method `.test_report_scorecard_card_evaluate_once()`
   - Method `.test_protocol_add_doc_path_mismatch_is_refused()`
+  - Method `.test_bulk_invalidate_needs_allow_bulk()`
   - Method `.test_main_module_import_has_no_side_effects()`
 
 ---
@@ -1115,7 +1118,7 @@
 ### [`tests/test_integrity.py`](tests/test_integrity.py)
 > *Every integrity rule must detect the corruption it names.*
 
-**Size**: `390` lines (`17735` bytes)
+**Size**: `462` lines (`21009` bytes)
 
 **Classes:**
 - `class IntegrityTests`
@@ -1146,6 +1149,8 @@
   - Method `.test_empty_program_warns()`
   - Method `.test_renderers_are_stable()`
   - Method `.test_stale_numeric_evidence_is_detected()`
+  - Method `.test_missing_evidence_volume_reports_once()`
+  - Method `.test_small_stale_set_keeps_per_claim_findings()`
   - Method `.test_retracted_source_blocks_a_live_claim()`
   - Method `.test_expression_of_concern_is_a_warning()`
   - Method `.test_unknown_is_recorded_with_a_reason()`
@@ -1528,7 +1533,7 @@
 ### [`tests/test_sources_retraction.py`](tests/test_sources_retraction.py)
 > *Source status and retraction cascade.*
 
-**Size**: `186` lines (`8172` bytes)
+**Size**: `205` lines (`9087` bytes)
 
 **Classes:**
 - `class SourceStatusTests`
@@ -1544,6 +1549,7 @@
   - Method `.test_claims_are_left_alone_when_already_failed()`
   - Method `.test_retracted_source_is_clean_after_cascade()`
   - Method `.test_retraction_covers_twin_doi_rows()`
+  - Method `.test_bulk_retraction_is_refused_without_override()`
   - Method `.test_reinstatement_requires_a_note_and_keeps_claim_verdicts()`
 
 ---

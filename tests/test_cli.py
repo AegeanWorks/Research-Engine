@@ -516,6 +516,32 @@ class CliTests(unittest.TestCase):
         self.assertIn("Why:", err)
         self.assertIn("Fix:", err)
 
+    def test_bulk_invalidate_needs_allow_bulk(self) -> None:
+        self.run_cli("demo")
+        code, out, _ = self.run_cli("claim", "list")
+        self.assertEqual(code, 0)
+        root = out.splitlines()[0].split()[0]
+        code, out, _ = self.run_cli("claim", "list", "--research", "r_000001")
+        self.assertEqual(code, 0)
+        research = "r_000001"
+        for index in range(11):
+            code, _, _ = self.run_cli(
+                "claim", "add", research, "--text", f"Dependent {index}.",
+                "--kind", "derived", "--basis", "from root", "--from", root,
+            )
+            self.assertEqual(code, 0)
+        code, _, err = self.run_cli(
+            "claim", "invalidate", root, "--status", "FALSIFIED",
+            "--reason", "reason", "--evidence", "evidence",
+        )
+        self.assertEqual(code, 1)
+        self.assertIn("--allow-bulk", err)
+        code, _, _ = self.run_cli(
+            "claim", "invalidate", root, "--status", "FALSIFIED",
+            "--reason", "reason", "--evidence", "evidence", "--allow-bulk",
+        )
+        self.assertEqual(code, 0)
+
     def test_main_module_import_has_no_side_effects(self) -> None:
         import importlib.util
 
