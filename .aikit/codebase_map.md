@@ -6,11 +6,11 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `79`
-- **Total Classes**: `72`
-- **Total Top-Level Functions**: `248`
-- **Total Class Methods**: `483`
-- **Total Source Lines**: `14665`
+- **Total Python Modules**: `80`
+- **Total Classes**: `73`
+- **Total Top-Level Functions**: `249`
+- **Total Class Methods**: `520`
+- **Total Source Lines**: `15257`
 
 ---
 
@@ -56,7 +56,7 @@
 ### [`engine/analysis.py`](engine/analysis.py)
 > *Discovery and ranking over the graph: contradictions, coverage, keystones.*
 
-**Size**: `502` lines (`20669` bytes)
+**Size**: `503` lines (`20742` bytes)
 
 **Functions:**
 - `def keywords(text)` - *Content words of an assertion, lowercased and de-duplicated.*
@@ -91,7 +91,7 @@
 ### [`engine/attempts.py`](engine/attempts.py)
 > *Append-only attempt ledger for kill-test executions.*
 
-**Size**: `121` lines (`4235` bytes)
+**Size**: `131` lines (`4781` bytes)
 
 **Functions:**
 - `def _to_attempt(row)`
@@ -123,7 +123,7 @@
 ### [`engine/calibration.py`](engine/calibration.py)
 > *Hypothesis calibration: score preregistered confidence against recorded outcomes.*
 
-**Size**: `176` lines (`6645` bytes)
+**Size**: `184` lines (`7018` bytes)
 
 **Functions:**
 - `def _clip(probability)` - *Keep log loss finite without turning a certain prediction into a free pass.*
@@ -136,7 +136,7 @@
 ### [`engine/cascade.py`](engine/cascade.py)
 > *Transitive invalidation: when a premise collapses, everything built on it collapses too.*
 
-**Size**: `169` lines (`6012` bytes)
+**Size**: `181` lines (`6526` bytes)
 
 **Functions:**
 - `def dependents(conn, claim_id)` - *Return every claim that structurally depends on this claim, by depth.*
@@ -149,7 +149,7 @@
 ### [`engine/claims.py`](engine/claims.py)
 > *Claims: the unit of knowledge, with provenance and an append-only verdict history.*
 
-**Size**: `543` lines (`21133` bytes)
+**Size**: `571` lines (`22359` bytes)
 
 **Functions:**
 - `def _to_claim(row)`
@@ -173,12 +173,13 @@
 ### [`engine/cli.py`](engine/cli.py)
 > *Command-line surface: one entry point for every engine mechanic.*
 
-**Size**: `1184` lines (`57622` bytes)
+**Size**: `1208` lines (`58834` bytes)
 
 **Functions:**
 - `def _build_parser()`
 - `def _emit(payload, as_json, text)`
 - `def _records_payload(rows)`
+- `def _need_budget(value, command)`
 - `def _cmd_research(conn, args)`
 - `def _cmd_question(conn, args)`
 - `def _cmd_source(conn, args)`
@@ -217,7 +218,7 @@
 ### [`engine/database.py`](engine/database.py)
 > *SQLite connection, schema versioning and atomic transactions.*
 
-**Size**: `429` lines (`16559` bytes)
+**Size**: `436` lines (`16917` bytes)
 
 **Functions:**
 - `def connect(path)` - *Open a database with durability pragmas suitable for a state file.*
@@ -233,7 +234,7 @@
 ### [`engine/demo.py`](engine/demo.py)
 > *A self-contained demonstration of every engine mechanic in under ten seconds.*
 
-**Size**: `148` lines (`5231` bytes)
+**Size**: `153` lines (`5481` bytes)
 
 **Functions:**
 - `def seed_demo(conn)` - *Create one synthetic program that exercises provenance, tests, and cascade.*
@@ -272,7 +273,7 @@
 ### [`engine/errors.py`](engine/errors.py)
 > *Error types that carry a cause and a concrete repair step (Why/Fix triad).*
 
-**Size**: `26` lines (`822` bytes)
+**Size**: `35` lines (`1015` bytes)
 
 **Classes:**
 - `class EngineError` - *A user-facing failure with a reason and a repair step.*
@@ -359,7 +360,7 @@
 ### [`engine/integrity.py`](engine/integrity.py)
 > *Graph integrity: provenance, evidence paths, dependency acyclicity and stale dependents.*
 
-**Size**: `806` lines (`30810` bytes)
+**Size**: `810` lines (`31022` bytes)
 
 **Functions:**
 - `def _finding(code, severity, subject, message, fix)`
@@ -399,7 +400,7 @@
 ### [`engine/maintenance.py`](engine/maintenance.py)
 > *Database maintenance: integrity verification and a crash-safe backup.*
 
-**Size**: `87` lines (`3263` bytes)
+**Size**: `98` lines (`3708` bytes)
 
 **Functions:**
 - `def integrity_check(conn)` - *Run SQLite's own checks plus a few facts a reviewer wants before archiving.*
@@ -438,7 +439,7 @@
 ### [`engine/merging.py`](engine/merging.py)
 > *Claim merging: one survivor, every edge repointed, duplicates retired.*
 
-**Size**: `129` lines (`4918` bytes)
+**Size**: `151` lines (`5780` bytes)
 
 **Functions:**
 - `def merge_claims(conn, keep_ref, drop_refs, note, actor)` - *Keep one claim, repoint edges from the duplicates, and retire the duplicates.*
@@ -470,7 +471,7 @@
 ### [`engine/observations.py`](engine/observations.py)
 > *Recorded observations: the raw measurements a numeric claim is computed from.*
 
-**Size**: `313` lines (`11534` bytes)
+**Size**: `327` lines (`12165` bytes)
 
 **Functions:**
 - `def _to_observation(row)`
@@ -522,7 +523,7 @@
 ### [`engine/questions.py`](engine/questions.py)
 > *Research questions that collect supporting and contradicting claims.*
 
-**Size**: `67` lines (`2440` bytes)
+**Size**: `73` lines (`2726` bytes)
 
 **Functions:**
 - `def _to_question(row)`
@@ -536,7 +537,7 @@
 ### [`engine/researches.py`](engine/researches.py)
 > *Research programs: the top-level containers the engine is asked to investigate.*
 
-**Size**: `91` lines (`3450` bytes)
+**Size**: `92` lines (`3486` bytes)
 
 **Functions:**
 - `def _slugify(conn, title)`
@@ -578,7 +579,7 @@
 ### [`engine/sources.py`](engine/sources.py)
 > *Bibliographic sources: the only place literature text may enter the graph.*
 
-**Size**: `145` lines (`4989` bytes)
+**Size**: `151` lines (`5293` bytes)
 
 **Functions:**
 - `def _to_source(row)`
@@ -592,7 +593,7 @@
 ### [`engine/stats.py`](engine/stats.py)
 > *Deterministic statistics for recorded observations.*
 
-**Size**: `309` lines (`11549` bytes)
+**Size**: `312` lines (`11572` bytes)
 
 **Functions:**
 - `def sample_sd(values)` - *Sample standard deviation; zero for fewer than two values.*
@@ -614,7 +615,7 @@
 ### [`engine/synthesis.py`](engine/synthesis.py)
 > *Evidence synthesis: weighted consensus, contradiction pairs, and generated reports.*
 
-**Size**: `407` lines (`16787` bytes)
+**Size**: `410` lines (`16822` bytes)
 
 **Functions:**
 - `def stance_claims(conn, question_id)`
@@ -694,7 +695,7 @@
 ### [`tests/test_analysis.py`](tests/test_analysis.py)
 > *Discovery: contradictions, coverage matrix, keystone ranking, exposure.*
 
-**Size**: `102` lines (`4618` bytes)
+**Size**: `113` lines (`5246` bytes)
 
 **Classes:**
 - `class KeywordTests`
@@ -706,6 +707,7 @@
   - Method `.test_contradictions_are_ranked_by_score()`
   - Method `.test_min_score_filters()`
   - Method `.test_claims_on_different_questions_are_not_paired()`
+  - Method `.test_unlinked_score_uses_both_confidences()`
   - Method `.test_unlinked_contradictions_skip_recorded_edges()`
   - Method `.test_matrix_counts_claims_per_source_and_question()`
   - Method `.test_matrix_ignores_assumed_claims()`
@@ -717,11 +719,13 @@
 ### [`tests/test_attempts.py`](tests/test_attempts.py)
 > *Attempt authority: the earliest non-replaceable attempt wins.*
 
-**Size**: `209` lines (`8355` bytes)
+**Size**: `218` lines (`8803` bytes)
 
 **Classes:**
 - `class AttemptAuthorityTests`
   - Method `.setUp()`
+  - Method `.test_duplicate_attempt_is_an_engine_error()`
+  - Method `.test_attempt_for_a_missing_test_is_not_found()`
   - Method `._insert_group(group, passed, values, outputs)`
   - Method `._record(group, outcome, reason)`
   - Method `.test_earliest_completed_attempt_wins()`
@@ -790,11 +794,12 @@
 ### [`tests/test_calibration.py`](tests/test_calibration.py)
 > *Hypothesis calibration: recorded confidence is scored against recorded outcomes.*
 
-**Size**: `110` lines (`5065` bytes)
+**Size**: `121` lines (`5590` bytes)
 
 **Classes:**
 - `class CalibrationTests`
   - Method `.add_outcome(research, confidence, status, text)`
+  - Method `.test_min_resolved_must_be_a_positive_integer()`
   - Method `.test_brier_log_loss_and_coverage()`
   - Method `.test_reliability_bins_separate_direction()`
   - Method `.test_empty_program_is_undefined_not_zero()`
@@ -808,7 +813,7 @@
 ### [`tests/test_cascade.py`](tests/test_cascade.py)
 > *A collapsed premise invalidates every dependent transitively.*
 
-**Size**: `68` lines (`2995` bytes)
+**Size**: `91` lines (`4012` bytes)
 
 **Classes:**
 - `class CascadeTests`
@@ -817,6 +822,8 @@
   - Method `.test_preview_writes_nothing()`
   - Method `.test_collapse_invalidates_every_dependent()`
   - Method `.test_retracted_dependent_is_not_rewritten()`
+  - Method `.test_falsified_dependent_keeps_its_primary_failure()`
+  - Method `.test_collapse_requires_evidence()`
   - Method `.test_collapse_requires_reason_and_failed_status()`
 
 ---
@@ -824,7 +831,7 @@
 ### [`tests/test_claims.py`](tests/test_claims.py)
 > *Provenance requirements and the append-only verdict lifecycle.*
 
-**Size**: `162` lines (`6975` bytes)
+**Size**: `209` lines (`8736` bytes)
 
 **Classes:**
 - `class ClaimTests`
@@ -843,13 +850,16 @@
   - Method `.test_list_filters_by_status()`
   - Method `.test_failed_claim_cannot_be_promoted_in_place()`
   - Method `.test_failed_claim_can_move_to_another_failed_status()`
+  - Method `.test_revision_of_must_exist_in_the_same_program()`
+  - Method `.test_revise_refuses_itself_as_a_prerequisite()`
+  - Method `.test_record_edge_validates_its_endpoints()`
 
 ---
 
 ### [`tests/test_cli.py`](tests/test_cli.py)
 > *The CLI surface: JSON output, exit codes and the error triad.*
 
-**Size**: `453` lines (`18362` bytes)
+**Size**: `502` lines (`20249` bytes)
 
 **Classes:**
 - `class CliTests`
@@ -885,6 +895,11 @@
   - Method `.test_export_check_detects_tampering()`
   - Method `.test_export_check_refuses_a_research_filter()`
   - Method `.test_export_check_fails_on_an_unsupported_schema()`
+  - Method `.test_non_positive_budgets_are_refused()`
+  - Method `.test_demo_failure_reports_the_error_triad()`
+  - Method `.test_events_tree_refuses_list_filters()`
+  - Method `.test_strict_needs_check()`
+  - Method `.test_check_json_is_stable_machine_output()`
   - Method `.test_report_scorecard_card_evaluate_once()`
   - Method `.test_main_module_import_has_no_side_effects()`
 
@@ -976,7 +991,7 @@
 ### [`tests/test_duplicates.py`](tests/test_duplicates.py)
 > *Duplicate sources: DOI and title normalization, scope, and the integrity warning.*
 
-**Size**: `92` lines (`4343` bytes)
+**Size**: `93` lines (`4413` bytes)
 
 **Classes:**
 - `class NormalizationTests`
@@ -988,7 +1003,18 @@
   - Method `.test_same_title_different_year_is_only_a_variant()`
   - Method `.test_programs_are_never_grouped_together()`
   - Method `.test_limit_keeps_the_total_visible()`
-  - Method `.test_integrity_warns_on_doi_and_title_year_but_not_variants()`
+  - Method `.test_integrity_warns_on_doi_title_year_and_variants()`
+
+---
+
+### [`tests/test_errors.py`](tests/test_errors.py)
+> *NotFound fixes must point at real CLI verbs.*
+
+**Size**: `33` lines (`1023` bytes)
+
+**Classes:**
+- `class NotFoundTests`
+  - Method `.test_fix_points_at_a_real_cli_verb()`
 
 ---
 
@@ -1081,7 +1107,7 @@
 ### [`tests/test_integrity.py`](tests/test_integrity.py)
 > *Every integrity rule must detect the corruption it names.*
 
-**Size**: `318` lines (`14414` bytes)
+**Size**: `353` lines (`15833` bytes)
 
 **Classes:**
 - `class IntegrityTests`
@@ -1101,6 +1127,9 @@
   - Method `.test_dangling_and_self_edges_are_detected()`
   - Method `.test_cross_program_edge_is_detected()`
   - Method `.test_stale_dependent_is_detected()`
+  - Method `.test_both_failed_is_not_a_stale_dependent()`
+  - Method `.test_title_variant_duplicate_warns()`
+  - Method `.test_rendered_table_escapes_untrusted_text()`
   - Method `.test_gaps_and_duplicates_are_warnings()`
   - Method `.test_empty_program_warns()`
   - Method `.test_renderers_are_stable()`
@@ -1143,7 +1172,7 @@
 ### [`tests/test_maintenance.py`](tests/test_maintenance.py)
 > *Database maintenance: integrity verification and verified backups.*
 
-**Size**: `81` lines (`3291` bytes)
+**Size**: `157` lines (`6835` bytes)
 
 **Classes:**
 - `class MaintenanceTests`
@@ -1153,6 +1182,13 @@
   - Method `.test_backup_produces_a_readable_copy()`
   - Method `.test_backup_refuses_to_overwrite()`
   - Method `.test_backup_leaves_no_temporary_file()`
+  - Method `.test_connect_uses_a_lock_wait_timeout()`
+  - Method `.test_locked_database_reports_an_engine_error()`
+  - Method `.test_backup_preserves_the_journal_mode()`
+  - Method `.test_backup_refuses_an_open_write_transaction()`
+  - Method `.test_counts_cover_edges_and_ai_artifacts()`
+  - Method `.test_version_skew_fails_the_gate()`
+  - Method `.test_corrupt_version_fails_closed()`
   - Method `.test_backup_of_a_database_with_events_copies_them()`
 
 ---
@@ -1238,7 +1274,7 @@
 ### [`tests/test_merging.py`](tests/test_merging.py)
 > *Merging duplicates: survivor, repointed edges, retired duplicates, history kept.*
 
-**Size**: `93` lines (`4146` bytes)
+**Size**: `139` lines (`6172` bytes)
 
 **Classes:**
 - `class MergeTests`
@@ -1251,6 +1287,9 @@
   - Method `.test_empty_duplicate_list_is_refused()`
   - Method `.test_retired_duplicate_is_refused()`
   - Method `.test_cross_program_merge_is_refused()`
+  - Method `.test_falsified_survivor_and_duplicate_are_refused()`
+  - Method `.test_observations_and_artifacts_follow_the_survivor()`
+  - Method `.test_already_repointed_edges_are_not_double_counted()`
   - Method `.test_linking_two_merged_claims_does_not_leave_a_self_edge()`
 
 ---
@@ -1298,13 +1337,15 @@
 ### [`tests/test_observations.py`](tests/test_observations.py)
 > *Observations: raw values, their voiding, and the statistics projection over them.*
 
-**Size**: `201` lines (`9695` bytes)
+**Size**: `215` lines (`10463` bytes)
 
 **Classes:**
 - `class ObservationTests`
   - Method `.setUp()`
   - Method `.test_values_are_recorded_in_order()`
   - Method `.test_non_finite_values_are_refused()`
+  - Method `.test_non_numeric_values_are_refused()`
+  - Method `.test_sample_size_must_be_a_positive_integer()`
   - Method `.test_invalid_group_is_refused()`
   - Method `.test_groups_are_lowercased()`
   - Method `.test_void_retires_without_deleting()`
@@ -1369,7 +1410,7 @@
 ### [`tests/test_research.py`](tests/test_research.py)
 > *Program creation, slug resolution and counts.*
 
-**Size**: `40` lines (`1581` bytes)
+**Size**: `45` lines (`1739` bytes)
 
 **Classes:**
 - `class ResearchTests`
@@ -1378,6 +1419,7 @@
   - Method `.test_invalid_slug_is_refused()`
   - Method `.test_missing_program_is_reported()`
   - Method `.test_counts_include_open_questions()`
+  - Method `.test_counts_require_an_existing_program()`
 
 ---
 
@@ -1450,7 +1492,7 @@
 ### [`tests/test_sources_questions.py`](tests/test_sources_questions.py)
 > *Source identifiers and question lifecycle.*
 
-**Size**: `48` lines (`1949` bytes)
+**Size**: `63` lines (`2639` bytes)
 
 **Classes:**
 - `class SourceQuestionTests`
@@ -1458,6 +1500,8 @@
   - Method `.test_source_accepts_doi_or_url()`
   - Method `.test_source_rejects_bad_kind_and_year()`
   - Method `.test_question_closes_without_deleting()`
+  - Method `.test_source_year_must_be_an_integer()`
+  - Method `.test_double_close_is_refused()`
   - Method `.test_empty_question_is_refused()`
 
 ---
@@ -1465,13 +1509,15 @@
 ### [`tests/test_sources_retraction.py`](tests/test_sources_retraction.py)
 > *Source status and retraction cascade.*
 
-**Size**: `118` lines (`5098` bytes)
+**Size**: `145` lines (`6361` bytes)
 
 **Classes:**
 - `class SourceStatusTests`
   - Method `.test_downgrade_requires_a_note()`
   - Method `.test_unknown_status_and_repeat_are_refused()`
   - Method `.test_retraction_requires_a_reason()`
+  - Method `.test_retraction_requires_evidence()`
+  - Method `.test_retraction_ignores_superseded_claims()`
   - Method `.test_retraction_retires_claims_and_dependents()`
   - Method `.test_retracting_twice_is_refused()`
   - Method `.test_claims_are_left_alone_when_already_failed()`
@@ -1483,7 +1529,7 @@
 ### [`tests/test_stats.py`](tests/test_stats.py)
 > *Statistics: values checked against an independent implementation, behaviour checked here.*
 
-**Size**: `132` lines (`5151` bytes)
+**Size**: `138` lines (`5453` bytes)
 
 **Classes:**
 - `class DistributionTests`
@@ -1505,6 +1551,7 @@
   - Method `.test_bootstrap_empty()`
 - `class RegressionTests`
   - Method `.test_linregress_matches_reference()`
+  - Method `.test_linregress_ignores_non_finite_points()`
   - Method `.test_linregress_too_few_points()`
   - Method `.test_linregress_flat_line()`
 - `class CompareTests`
@@ -1518,13 +1565,14 @@
 ### [`tests/test_synthesis.py`](tests/test_synthesis.py)
 > *Consensus weighting and generated reports.*
 
-**Size**: `116` lines (`5273` bytes)
+**Size**: `126` lines (`5774` bytes)
 
 **Classes:**
 - `class SynthesisTests`
   - Method `._question_with_opposition()`
   - Method `.test_consensus_weights_status_and_confidence()`
   - Method `.test_report_contains_evidence_and_contradictions()`
+  - Method `.test_report_pairs_answers_with_contradictions()`
   - Method `.test_scorecard_orders_failed_claims_first()`
   - Method `.test_claim_detail_shows_verdict_history()`
   - Method `.test_untrusted_text_cannot_break_a_table()`
