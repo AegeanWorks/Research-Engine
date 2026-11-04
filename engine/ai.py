@@ -91,6 +91,65 @@ def _validate_cited(cited: Sequence[dict]) -> str:
     return json.dumps(normalized, sort_keys=True)
 
 
+def _cited_entries(artifact: AIArtifact) -> List[dict]:
+    """Parse the stored cited payload; shape was checked at record time."""
+    try:
+        parsed = json.loads(artifact.cited_json or "[]")
+    except ValueError:
+        return []
+    return [entry for entry in parsed if isinstance(entry, dict)]
+
+
+def _ensure_cited_resolve(
+    conn: sqlite3.Connection, artifact: AIArtifact, source_ref: Optional[str] = None
+) -> None:
+    """Fail closed when a cited source cannot be resolved in-program.
+
+    Shape is checked at record time; existence is checked here at ingest time
+    so a sweep recorded before its sources exist can still be notarized, while
+    no claim enters the graph citing an unregistered source. Sweep artifacts
+    carry no claim and stay outside this gate by construction.
+    """
+    if artifact.kind == "sweep":
+        return
+    entries = _cited_entries(artifact)
+    for entry in entries:
+        source_id = str(entry.get("source_id", "")).strip()
+        locator = str(entry.get("locator", "")).strip()
+        exists = conn.execute(
+            "SELECT 1 FROM source WHERE id = ? AND research_id = ?",
+            (source_id, artifact.research_id),
+        ).fetchone()
+        if not locator.strip() or exists is None:
+            raise EngineError(
+                f"AI cited source is unresolvable: {source_id or '(none)'}",
+                "a citation without a registered in-program source and locator"
+                " cannot be audited.",
+                "register the source first, or remove the entry from --cited.",
+            )
+    if source_ref:
+        cited_ids = {str(e.get("source_id", "")).strip() for e in entries}
+        if str(source_ref).strip() not in cited_ids:
+            raise EngineError(
+                "AI claim source is not among the artifact citations",
+                "the ingested source must be one the model actually cited, so the"
+                " provenance record matches the entry.",
+                "pass --source with one of the cited source ids, or re-notarize"
+                " the model I/O with the full cited list.",
+            )
+
+
+def _resolve_actor(artifact: AIArtifact, actor: str) -> str:
+    """Default AI-proximate actions to the model identity.
+
+    An explicit --actor override is honored; the bare default resolves to the
+    artifact's model actor so AI and human actions stay distinguishable.
+    """
+    if actor == "agent":
+        return artifact.actor
+    return actor
+
+
 def record_artifact(
     conn: sqlite3.Connection,
     research_ref: str,
@@ -206,6 +265,7 @@ def ingest_claim(
     flagged even though the claim never enters the graph.
     """
     artifact = get_artifact(conn, artifact_ref)
+    resolved_actor = _resolve_actor(artifact, actor)
     allowed = _CLAIM_KINDS_FOR_ARTIFACT.get(artifact.kind, ())
     if kind not in allowed:
         raise EngineError(
@@ -214,6 +274,7 @@ def ingest_claim(
             "record an artifact of the matching kind first.",
         )
     try:
+        _ensure_cited_resolve(conn, artifact, source_ref if kind == "empirical" else None)
         with transaction(conn):
             claim = add_claim(
                 conn,
@@ -240,7 +301,7 @@ def ingest_claim(
                 claim.id,
                 f"{artifact.id} -> {claim.id} ({kind}, UNVERIFIED)",
                 research_id=artifact.research_id,
-                actor=actor,
+                actor=resolved_actor,
             )
     except EngineError as error:
         with transaction(conn):
@@ -250,7 +311,7 @@ def ingest_claim(
                 artifact.id,
                 f"ingest refused: {error}",
                 research_id=artifact.research_id,
-                actor=actor,
+                actor=resolved_actor,
             )
         raise
     return get_claim(conn, claim.id)
@@ -267,33 +328,47 @@ def ingest_hypothesis(
 ) -> object:
     """Pre-register one AI-proposed hypothesis from an idea artifact."""
     artifact = get_artifact(conn, artifact_ref)
+    resolved_actor = _resolve_actor(artifact, actor)
     if artifact.kind != "idea":
         raise EngineError(
             f"a hypothesis cannot come from a {artifact.kind} artifact",
             "hypotheses are new ideas, pre-registered before any test.",
             "record an idea artifact first.",
         )
-    with transaction(conn):
-        hypothesis = add_hypothesis(
-            conn,
-            artifact.research_id,
-            statement,
-            criterion,
-            confidence,
-            question_ref,
-        )
-        conn.execute(
-            "UPDATE ai_artifact SET hypothesis_id = ? WHERE id = ?",
-            (hypothesis.id, artifact.id),
-        )
-        record_event(
-            conn,
-            "ai.ingest",
-            hypothesis.id,
-            f"{artifact.id} -> {hypothesis.id} (hypothesis, PREREGISTERED)",
-            research_id=artifact.research_id,
-            actor=actor,
-        )
+    try:
+        _ensure_cited_resolve(conn, artifact, None)
+        with transaction(conn):
+            hypothesis = add_hypothesis(
+                conn,
+                artifact.research_id,
+                statement,
+                criterion,
+                confidence,
+                question_ref,
+            )
+            conn.execute(
+                "UPDATE ai_artifact SET hypothesis_id = ? WHERE id = ?",
+                (hypothesis.id, artifact.id),
+            )
+            record_event(
+                conn,
+                "ai.ingest",
+                hypothesis.id,
+                f"{artifact.id} -> {hypothesis.id} (hypothesis, PREREGISTERED)",
+                research_id=artifact.research_id,
+                actor=resolved_actor,
+            )
+    except EngineError as error:
+        with transaction(conn):
+            record_event(
+                conn,
+                "ai.reject",
+                artifact.id,
+                f"ingest refused: {error}",
+                research_id=artifact.research_id,
+                actor=resolved_actor,
+            )
+        raise
     return hypothesis
 
 
@@ -312,6 +387,7 @@ def propose_test(
     refused. Creating the row is safe — running it stays the operator's act.
     """
     artifact = get_artifact(conn, artifact_ref)
+    resolved_actor = _resolve_actor(artifact, actor)
     spec = TEMPLATES.get(template)
     if spec is None:
         raise EngineError(
@@ -341,7 +417,7 @@ def propose_test(
             test.id,
             f"{artifact.id} proposed {template} as {test.id}",
             research_id=artifact.research_id,
-            actor=actor,
+            actor=resolved_actor,
         )
     return test
 

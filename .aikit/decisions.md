@@ -549,3 +549,25 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   `ok=False` with a count mismatch for the same input.
 - **Consequences**: A tampered snapshot fails closed in both commands with no traceback.
   `diff_records` keeps its `List[dict]` contract; file-level refusal is the boundary.
+
+### ADR-040: Harden AI ingest citations, actor default and file boundary
+- **Date**: 2026-11-03
+- **Status**: Accepted
+- **Context**: Stage-2 verification of the AI integration found three gaps around a
+  sufficient core: a claim with a valid `source_ref` but one fake `cited_json` entry
+  entered as `UNVERIFIED` with only an async `AI-001` flag (promotion not blocked in
+  code); AI-proximate ingest/test events defaulted to `agent`, so AI/human actions were
+  indistinguishable without operator discipline; `--prompt-file/--output-file` inside the
+  checkout would commit raw payloads despite the hashes-only DB invariant.
+- **Decision**: Validate cited existence in-program at ingest time (`sweep` stays outside
+  the gate as pre-source notarization) and require an empirical `source_ref` to appear in
+  the cited list; both refuse with `ai.reject`, closing the divergence without a schema
+  change. Default AI-proximate ingest/test actors to the artifact's `model:` identity
+  unless `--actor` is explicit. Refuse model I/O paths resolving inside the project
+  checkout in `engine/cli.py`. No new loop engine code: the automation is the documented
+  gated operator sequence `sweep -> extract/idea -> propose-test -> verify -> verdict ->
+  draft`. `fetch_external` stays a refusing stub; no new templates.
+- **Consequences**: A fabricated cited entry dies at entry with a flagged run; copy-paste
+  around `ai ingest` remains operator malfeasance, not a code path, and stays visible via
+  the artifact join and `AI-002`. Raw payloads cannot enter the repo through the CLI.
+  `AI-001` remains as the backstop for legacy rows and direct DB edits.

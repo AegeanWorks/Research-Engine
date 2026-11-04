@@ -121,6 +121,78 @@ class IngestTests(DatabaseCase):
         codes = {finding.code for finding in check(self.conn)}
         self.assertIn("AI-001", codes)
 
+    def test_cited_divergence_is_refused_and_flagged(self) -> None:
+        research = self.add_research()
+        source = self.add_source(research)
+        artifact = self._extraction(
+            research,
+            [
+                {"source_id": source, "locator": "Results, paragraph 1"},
+                {"source_id": "s_999999", "locator": "p. 1"},
+            ],
+        )
+        with self.assertRaises(EngineError):
+            ai.ingest_claim(
+                self.conn,
+                artifact.id,
+                "A claim with one fake citation.",
+                "empirical",
+                source_ref=source,
+                quote="A claim with one fake citation.",
+                locator="Results, paragraph 1",
+            )
+        self.assertEqual(
+            self.conn.execute("SELECT COUNT(*) AS n FROM claim").fetchone()["n"], 0
+        )
+        reject = self.conn.execute(
+            "SELECT * FROM event WHERE kind = 'ai.reject' AND subject = ?",
+            (artifact.id,),
+        ).fetchone()
+        self.assertIsNotNone(reject)
+
+    def test_source_outside_cited_list_is_refused(self) -> None:
+        research = self.add_research()
+        source = self.add_source(research)
+        other = self.add_source(research, title="Other source")
+        artifact = self._extraction(
+            research, [{"source_id": source, "locator": "Results, paragraph 1"}]
+        )
+        with self.assertRaises(EngineError):
+            ai.ingest_claim(
+                self.conn,
+                artifact.id,
+                "A claim citing a source the model did not cite.",
+                "empirical",
+                source_ref=other,
+                quote="A claim citing a source the model did not cite.",
+                locator="Results, paragraph 1",
+            )
+        self.assertEqual(
+            self.conn.execute("SELECT COUNT(*) AS n FROM claim").fetchone()["n"], 0
+        )
+
+    def test_ingest_defaults_actor_to_model(self) -> None:
+        research = self.add_research()
+        source = self.add_source(research)
+        artifact = self._extraction(
+            research, [{"source_id": source, "locator": "Results, paragraph 1"}]
+        )
+        claim = ai.ingest_claim(
+            self.conn,
+            artifact.id,
+            "Signal S rose with O.",
+            "empirical",
+            source_ref=source,
+            quote="Signal S rose with O.",
+            locator="Results, paragraph 1",
+        )
+        event = self.conn.execute(
+            "SELECT * FROM event WHERE kind = 'ai.ingest' AND subject = ?",
+            (claim.id,),
+        ).fetchone()
+        self.assertIsNotNone(event)
+        self.assertEqual(event["actor"], "model:" + MODEL)
+
     def test_wrong_kind_from_wrong_artifact_is_refused(self) -> None:
         research = self.add_research()
         artifact = ai.record_artifact(
@@ -240,6 +312,29 @@ class BoundaryTests(unittest.TestCase):
         for symbol in ("set_verdict(", "invalidate(", "retract_source(", "merge_claims(",
                        "record_outcome(", "import urllib", "import socket"):
             self.assertNotIn(symbol, text)
+
+    def test_model_io_inside_repo_is_refused(self) -> None:
+        from engine.cli import _ensure_outside_repo
+
+        inside = str(ENGINE_DIR / "ai.py")
+        with self.assertRaises(EngineError):
+            _ensure_outside_repo(inside)
+
+    def test_model_io_outside_repo_is_allowed(self) -> None:
+        import tempfile
+
+        from engine.cli import _ensure_outside_repo
+
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".txt", delete=False, encoding="utf-8"
+        ) as handle:
+            handle.write("prompt")
+            path = handle.name
+        try:
+            resolved = _ensure_outside_repo(path)
+            self.assertTrue(str(resolved))
+        finally:
+            Path(path).unlink(missing_ok=True)
 
 
 class DraftTests(DatabaseCase):

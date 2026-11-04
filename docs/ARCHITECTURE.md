@@ -147,10 +147,15 @@ graph so the report stays reproducible; the CLI is the only caller that records 
 network. `record_artifact` stores the program, the artifact kind, the model id, the
 SHA-256 of the exact prompt and output bytes, and the cited `{source_id, locator}`
 pairs; raw prompt/output text never enters the database or the repository. `ingest_claim`
-and `ingest_hypothesis` create `UNVERIFIED`/`PREREGISTERED` rows linked to the artifact,
-or refuse loudly: a failed ingest records an `ai.reject` event on the artifact and
-re-raises, so the run is flagged even though nothing entered the graph. The module
-never calls `set_verdict`, `invalidate`, `retract`, `merge` or `record_outcome`; every
+and `ingest_hypothesis` validate cited existence in-program at ingest time (sweeps are
+pre-source notarizations and stay outside this gate) and require an empirical
+`source_ref` to appear in the cited list, or refuse loudly: a failed ingest records an
+`ai.reject` event on the artifact and re-raises, so the run is flagged even though
+nothing entered the graph. AI-proximate ingest/test events default to the artifact's
+`model:` actor unless an explicit `--actor` override is passed, so AI and human actions
+stay distinguishable. The CLI refuses `--prompt-file/--output-file` paths that resolve
+inside the project checkout, keeping raw payloads out of version control in code, not
+convention. The module never records a verdict, collapse, retraction or merge; every
 promotion stays operator-invoked through the unchanged kill-test gates. `propose_test`
 binds only fixed-template deterministic probes (free-form model shell is refused, because
 test commands execute), and `fetch_external` is a refusing stub: this build is
@@ -158,6 +163,13 @@ local-only. Integrity adds `AI-001` (AI citation resolves nowhere), `AI-002` (AI
 claim `PROVEN` with no twice-passing test) and `AI-003` (AI test off its template).
 `render_draft` assembles prose from surviving claims only, refuses on error-level
 findings, and carries the content and exact graph digests; it never writes a verdict.
+
+The gated automation loop is a documented operator sequence, not a daemon: `ai sweep`
+(notarize) → register sources → `ai extract`/`ai idea` (`UNVERIFIED`/`PREREGISTERED`) →
+`ai propose-test` (fixed template) → `test verify` (twice + control) → `claim verdict`
+(operator, `--actor model:<id>` for AI-proximate promotions) → `ai draft` (survivors
+with receipts, rest withheld). Each arrow is gated on the last; there is no auto-promote
+path.
 
 ## Schema Versions
 
