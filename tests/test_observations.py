@@ -143,6 +143,19 @@ class ObservationTests(DatabaseCase):
         self.assertEqual(result["n"], 1)
         self.assertTrue(any("fewer than" in warning for warning in result["warnings"]))
 
+    def test_summary_reports_median_and_mad(self) -> None:
+        research = self.add_research()
+        claim = add_claim(
+            self.conn, research, "Measured.", "assumption", basis="a"
+        ).id
+        for value in (1.0, 1.0, 1.0, 1.0, 100.0):
+            add_observation(self.conn, claim, "skewed", value)
+        (summary,) = observation_summary(self.conn, claim)
+        self.assertEqual(summary["group"], "skewed")
+        self.assertAlmostEqual(summary["median"], 1.0, places=12)
+        self.assertAlmostEqual(summary["mad"], 0.0, places=12)
+        self.assertAlmostEqual(summary["mean"], 20.8, places=12)
+
     def test_more_than_two_groups_warns_about_uncorrected_comparison(self) -> None:
         for value in (3.0, 3.1, 3.2):
             add_observation(self.conn, self.claim, "control", value)

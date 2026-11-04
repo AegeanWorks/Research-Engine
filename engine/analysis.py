@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 import sqlite3
+import statistics
 from typing import Dict, List, Sequence, Tuple
 
 from engine.cascade import dependents
@@ -34,6 +35,27 @@ _STOPWORDS = frozenset(
     " will would should could do does did done have has had more most less least also".split()
 )
 _WORD = re.compile(r"[A-Za-z][A-Za-z'\-]+")
+_NEGATIONS = frozenset(
+    {"not", "no", "never", "neither", "nor", "none", "cannot", "without", "n't"}
+)
+
+
+def _negated(text: str) -> bool:
+    """Whether an assertion carries an explicit negation marker.
+
+    Stopwords swallow "not"/"no", so keyword overlap alone cannot see polarity.
+    Contractions split on the apostrophe ("don't" -> "don", "n't"), hence the
+    bare "n't" marker.
+    """
+    return any(
+        word.lower() in _NEGATIONS or word.lower().endswith("n't")
+        for word in _WORD.findall(str(text))
+    )
+
+
+def polarity_mismatch(left: str, right: str) -> bool:
+    """Exactly one of two assertions is negated: an advisory-only polarity bit."""
+    return _negated(left) != _negated(right)
 
 
 def keywords(text: str) -> frozenset:
@@ -95,6 +117,9 @@ def contradictions(
                         "contradicts": str(right["id"]),
                         "score": score,
                         "overlap": round(overlap(str(left["text"]), str(right["text"])), 4),
+                        "polarity_mismatch": polarity_mismatch(
+                            str(left["text"]), str(right["text"])
+                        ),
                         "support_text": str(left["text"]),
                         "contradicts_text": str(right["text"]),
                     }
@@ -139,6 +164,9 @@ def unlinked_contradictions(
                     "left": str(left["id"]),
                     "right": str(right["id"]),
                     "score": score,
+                    "polarity_mismatch": polarity_mismatch(
+                        str(left["text"]), str(right["text"])
+                    ),
                     "left_text": str(left["text"]),
                     "right_text": str(right["text"]),
                 }
@@ -487,7 +515,12 @@ def claim_statistics(
 
 
 def observation_summary(conn: sqlite3.Connection, claim_ref: str) -> List[dict]:
-    """Per-group counts and basic summaries for one claim."""
+    """Per-group counts and basic summaries for one claim.
+
+    The mean rides alongside the median and the median absolute deviation, so a
+    single extreme observation cannot silently drag the location: when mean and
+    median disagree, the group deserves a second look before it is compared.
+    """
     claim = get_claim(conn, claim_ref)
     rows = conn.execute(
         "SELECT group_label, COUNT(*) AS n, MIN(value) AS low, MAX(value) AS high,"
@@ -499,22 +532,30 @@ def observation_summary(conn: sqlite3.Connection, claim_ref: str) -> List[dict]:
         " GROUP BY group_label ORDER BY group_label",
         (claim.id,),
     ).fetchall()
-    return [
-        {
-            "group": str(row["group_label"]),
-            "n": int(row["n"]),
-            "min": float(row["low"]),
-            "max": float(row["high"]),
-            "mean": float(row["mean"]),
-            "protocols": [item for item in str(row["protocols"] or "").split(",") if item],
-            "units": [item for item in str(row["units"] or "").split(",") if item],
-            "instruments": [
-                item for item in str(row["instruments"] or "").split(",") if item
-            ],
-            "classes": [item for item in str(row["classes"] or "").split(",") if item],
-        }
-        for row in rows
-    ]
+    values = group_values(conn, claim.id)
+    summaries = []
+    for row in rows:
+        group = str(row["group_label"])
+        center = statistics.median(values[group])
+        spread = statistics.median([abs(value - center) for value in values[group]])
+        summaries.append(
+            {
+                "group": group,
+                "n": int(row["n"]),
+                "min": float(row["low"]),
+                "max": float(row["high"]),
+                "mean": float(row["mean"]),
+                "median": float(center),
+                "mad": float(spread),
+                "protocols": [item for item in str(row["protocols"] or "").split(",") if item],
+                "units": [item for item in str(row["units"] or "").split(",") if item],
+                "instruments": [
+                    item for item in str(row["instruments"] or "").split(",") if item
+                ],
+                "classes": [item for item in str(row["classes"] or "").split(",") if item],
+            }
+        )
+    return summaries
 
 
 def claim_trend(

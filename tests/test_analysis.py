@@ -11,6 +11,7 @@ from engine.analysis import (
     keystone_claims,
     keywords,
     overlap,
+    polarity_mismatch,
     unlinked_contradictions,
 )
 from engine.claims import add_claim, get_claim, link_claims, link_to_question
@@ -25,6 +26,12 @@ class KeywordTests(unittest.TestCase):
     def test_overlap_is_jaccard(self) -> None:
         self.assertAlmostEqual(overlap("alpha beta", "beta gamma"), 1 / 3, places=4)
         self.assertEqual(overlap("alpha", ""), 0.0)
+
+    def test_negation_is_visible_despite_stopwords(self) -> None:
+        self.assertTrue(polarity_mismatch("S rises.", "S does not rise."))
+        self.assertTrue(polarity_mismatch("No effect was found.", "An effect was found."))
+        self.assertFalse(polarity_mismatch("S rises.", "S rises fast."))
+        self.assertFalse(polarity_mismatch("S never rises.", "S does not rise."))
 
 
 class AnalysisTests(DatabaseCase):
@@ -47,6 +54,40 @@ class AnalysisTests(DatabaseCase):
     def test_min_score_filters(self) -> None:
         pairs = contradictions(self.conn, self.demo["research"], min_score=0.99)
         self.assertEqual(pairs, [])
+
+    def test_contradiction_pairs_carry_the_polarity_bit(self) -> None:
+        research = self.add_research()
+        question = add_question(self.conn, research, "Does S rise?")
+        yes = add_claim(self.conn, research, "S rises here.", "assumption", basis="a")
+        no = add_claim(
+            self.conn, research, "S does not rise here.", "assumption", basis="b"
+        )
+        plain = add_claim(
+            self.conn, research, "S stays flat here.", "assumption", basis="c"
+        )
+        link_to_question(self.conn, yes.id, question.id, "supports")
+        link_to_question(self.conn, no.id, question.id, "contradicts")
+        link_to_question(self.conn, plain.id, question.id, "contradicts")
+        by_pair = {
+            (item["support"], item["contradicts"]): item
+            for item in contradictions(self.conn, research)
+        }
+        self.assertTrue(by_pair[(yes.id, no.id)]["polarity_mismatch"])
+        self.assertFalse(by_pair[(yes.id, plain.id)]["polarity_mismatch"])
+
+    def test_unlinked_proposals_carry_the_polarity_bit(self) -> None:
+        research = self.add_research()
+        first = add_claim(
+            self.conn, research, "S rises here.", "assumption", basis="a"
+        )
+        second = add_claim(
+            self.conn, research, "S does not rise here.", "assumption", basis="b"
+        )
+        proposals = {
+            (item["left"], item["right"]): item
+            for item in unlinked_contradictions(self.conn, research, min_score=0.0)
+        }
+        self.assertTrue(proposals[(first.id, second.id)]["polarity_mismatch"])
 
     def test_pairings_ignore_withdrawn_and_superseded_claims(self) -> None:
         from engine.claims import revise_claim, set_verdict

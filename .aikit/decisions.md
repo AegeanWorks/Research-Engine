@@ -706,3 +706,19 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Consequences**: Unadjudicated work can no longer ship as a report; WIP reading
   moves to the summary views. Three report fixtures gained a `FALSIFIED` verdict
   to keep exercising the rendered sections.
+
+### ADR-049: Robust summaries and the polarity bit
+- **Date**: 2026-11-04
+- **Status**: Accepted
+- **Context**: IDEA-988 and IDEA-989. `observation_summary` reported only the
+  mean, so one extreme observation silently dragged the location; and keyword
+  overlap dropped negations with the stopwords, so "S rises" vs "S does not rise"
+  scored as near-identical while true paraphrases ranked lower.
+- **Decision**: Summaries now carry median and MAD beside the mean; when they
+  disagree the group deserves a second look before comparison (no auto-trim: the
+  engine never rewrites data). Contradiction pairs and unlinked proposals carry
+  an advisory-only `polarity_mismatch` bit plus a text marker; scores and ranking
+  are untouched.
+- **Consequences**: Skewed groups are visible in the summary dicts; negated
+  opposition is flagged instead of outranked. No new gate, no refusals: both
+  changes inform, they do not block.

@@ -8,9 +8,9 @@
 ## 📊 Codebase Metrics
 - **Total Python Modules**: `83`
 - **Total Classes**: `77`
-- **Total Top-Level Functions**: `272`
-- **Total Class Methods**: `576`
-- **Total Source Lines**: `17198`
+- **Total Top-Level Functions**: `274`
+- **Total Class Methods**: `580`
+- **Total Source Lines**: `17295`
 
 ---
 
@@ -68,9 +68,11 @@
 ### [`engine/analysis.py`](engine/analysis.py)
 > *Discovery and ranking over the graph: contradictions, coverage, keystones.*
 
-**Size**: `563` lines (`23166` bytes)
+**Size**: `604` lines (`24828` bytes)
 
 **Functions:**
+- `def _negated(text)` - *Whether an assertion carries an explicit negation marker.*
+- `def polarity_mismatch(left, right)` - *Exactly one of two assertions is negated: an advisory-only polarity bit.*
 - `def keywords(text)` - *Content words of an assertion, lowercased and de-duplicated.*
 - `def overlap(left, right)` - *Jaccard overlap of two keyword sets, 0.0 when either is empty.*
 - `def _pair_score(first, second)`
@@ -189,7 +191,7 @@
 ### [`engine/cli.py`](engine/cli.py)
 > *Command-line surface: one entry point for every engine mechanic.*
 
-**Size**: `1314` lines (`64330` bytes)
+**Size**: `1316` lines (`64508` bytes)
 
 **Functions:**
 - `def _build_parser()`
@@ -738,17 +740,20 @@
 ### [`tests/test_analysis.py`](tests/test_analysis.py)
 > *Discovery: contradictions, coverage matrix, keystone ranking, exposure.*
 
-**Size**: `144` lines (`6909` bytes)
+**Size**: `185` lines (`8910` bytes)
 
 **Classes:**
 - `class KeywordTests`
   - Method `.test_stopwords_are_removed()`
   - Method `.test_overlap_is_jaccard()`
+  - Method `.test_negation_is_visible_despite_stopwords()`
 - `class AnalysisTests`
   - Method `.setUp()`
   - Method `.test_contradictions_pair_within_a_question()`
   - Method `.test_contradictions_are_ranked_by_score()`
   - Method `.test_min_score_filters()`
+  - Method `.test_contradiction_pairs_carry_the_polarity_bit()`
+  - Method `.test_unlinked_proposals_carry_the_polarity_bit()`
   - Method `.test_pairings_ignore_withdrawn_and_superseded_claims()`
   - Method `.test_claims_on_different_questions_are_not_paired()`
   - Method `.test_unlinked_score_uses_both_confidences()`
@@ -1415,7 +1420,7 @@
 ### [`tests/test_observations.py`](tests/test_observations.py)
 > *Observations: raw values, their voiding, and the statistics projection over them.*
 
-**Size**: `231` lines (`11197` bytes)
+**Size**: `244` lines (`11825` bytes)
 
 **Classes:**
 - `class ObservationTests`
@@ -1437,6 +1442,7 @@
   - Method `.test_trend_is_fitted_over_recording_order()`
   - Method `.test_trend_needs_a_group()`
   - Method `.test_short_series_warns_instead_of_pretending()`
+  - Method `.test_summary_reports_median_and_mad()`
   - Method `.test_more_than_two_groups_warns_about_uncorrected_comparison()`
   - Method `.test_more_than_two_groups_reports_a_holm_family()`
   - Method `.test_group_labels_are_case_insensitive()`

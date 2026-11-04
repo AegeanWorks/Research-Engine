@@ -1151,14 +1151,16 @@ def main(argv: List[str] | None = None) -> int:
                     if args.unlinked:
                         result = unlinked_contradictions(conn, args.ref)
                         text = "".join(
-                            f"{item['left']} <> {item['right']} score {item['score']:.2f}\n"
+                            f"{item['left']} <> {item['right']} score {item['score']:.2f}"
+                            f"{' polarity-mismatch' if item['polarity_mismatch'] else ''}\n"
                             for item in result
                         ) or "no unlinked contradictions\n"
                         return _emit(result, args.json, text)
                     result = contradictions(conn, args.ref, args.min_score)
                     text = "".join(
                         f"Q {item['question']} + {item['support']} - {item['contradicts']}"
-                        f" score {item['score']:.2f}\n"
+                        f" score {item['score']:.2f}"
+                        f"{' polarity-mismatch' if item['polarity_mismatch'] else ''}\n"
                         for item in result
                     ) or "no contradictions\n"
                     return _emit(result, args.json, text)
