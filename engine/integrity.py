@@ -20,6 +20,7 @@ from engine.models import (
     FAILED_STATUSES,
     Finding,
 )
+from engine.markdown import cell
 
 _KIND_TABLES = {"claim": "claim", "question": "question", "hypothesis": "hypothesis", "source": "source"}
 _FAILED = tuple(FAILED_STATUSES)
@@ -772,8 +773,8 @@ def render_markdown(findings: Iterable[Finding]) -> str:
              "| Severity | Code | Subject | Finding | Fix |", "|---|---|---|---|---|"]
     for item in items:
         lines.append(
-            f"| {item.severity} | {item.code} | {item.subject} | "
-            f"{item.message.replace('|', '/')} | {item.fix.replace('|', '/')} |"
+            f"| {item.severity} | {item.code} | {cell(item.subject)} | "
+            f"{cell(item.message)} | {cell(item.fix)} |"
         )
     return "\n".join(lines) + "\n"
 

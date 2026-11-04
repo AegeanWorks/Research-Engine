@@ -60,7 +60,10 @@ def consensus(conn: sqlite3.Connection, question_ref: str) -> float:
 
 
 def _contradictions(conn: sqlite3.Connection, question_id: str) -> List[Tuple[str, str]]:
-    supports = [cid for cid, rel, _ in stance_claims(conn, question_id) if rel == "supports"]
+    supports = [
+        cid for cid, rel, _ in stance_claims(conn, question_id)
+        if rel in ("supports", "answers")
+    ]
     against = [cid for cid, rel, _ in stance_claims(conn, question_id) if rel == "contradicts"]
     return [(left, right) for left in supports for right in against]
 

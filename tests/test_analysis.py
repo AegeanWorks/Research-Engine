@@ -58,6 +58,17 @@ class AnalysisTests(DatabaseCase):
         link_to_question(self.conn, against.id, second.id, "contradicts")
         self.assertEqual(contradictions(self.conn, research), [])
 
+    def test_unlinked_score_uses_both_confidences(self) -> None:
+        research = self.add_research()
+        left = add_claim(self.conn, research, "Alpha beta gamma.", "assumption",
+                         basis="a", confidence=0.9)
+        right = add_claim(self.conn, research, "Alpha beta delta.", "assumption",
+                          basis="b", confidence=0.1)
+        proposals = unlinked_contradictions(self.conn, research)
+        self.assertEqual(len(proposals), 1)
+        self.assertEqual(proposals[0]["score"], 0.5)
+        self.assertEqual({proposals[0]["left"], proposals[0]["right"]}, {left.id, right.id})
+
     def test_unlinked_contradictions_skip_recorded_edges(self) -> None:
         research = self.add_research()
         left = add_claim(self.conn, research, "Signal S rises with outcome O.", "assumption",

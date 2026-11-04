@@ -417,6 +417,16 @@ class CliTests(unittest.TestCase):
         self.assertIn("unsupported", out)
 
 
+    def test_non_positive_budgets_are_refused(self) -> None:
+        self.run_cli("demo")
+        for command in ("outline", "brief"):
+            code, _, err = self.run_cli(command, "r_000001", "--budget", "0")
+            self.assertEqual(code, 1)
+            self.assertIn("Why:", err)
+        code, _, err = self.run_cli("search", "signal", "--budget", "0")
+        self.assertEqual(code, 1)
+        self.assertIn("Why:", err)
+
     def test_demo_failure_reports_the_error_triad(self) -> None:
         import engine.demo as demo_mod
         from engine.errors import EngineError

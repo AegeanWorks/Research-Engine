@@ -201,6 +201,22 @@ class IntegrityTests(DatabaseCase):
         add_source(self.conn, research, "Same Title!", year=2021)
         self.assertIn("DUP-002", codes(check(self.conn)))
 
+    def test_rendered_table_escapes_untrusted_text(self) -> None:
+        from engine.models import Finding
+
+        hostile = Finding(
+            severity="warning",
+            code="X",
+            subject="s",
+            message="a|b `c`\nnewline",
+            fix="f",
+        )
+        lines = render_markdown([hostile]).splitlines()
+        row = [line for line in lines if line.startswith("| warning")]
+        self.assertEqual(len(row), 1)
+        self.assertIn("a\\|b", row[0])
+        self.assertEqual(len(lines), 7)
+
     def test_gaps_and_duplicates_are_warnings(self) -> None:
         research = self.add_research()
         add_question(self.conn, research, "Unanswered?")

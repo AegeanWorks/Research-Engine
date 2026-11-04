@@ -42,6 +42,16 @@ class SynthesisTests(DatabaseCase):
         self.assertIn("Contradictions", text)
         self.assertIn("consensus", text)
 
+    def test_report_pairs_answers_with_contradictions(self) -> None:
+        research, question, _, against = self._question_with_opposition()
+        answered = add_claim(
+            self.conn, research, "S drives O, measured.", "assumption",
+            confidence=0.6, kill_test="A cohort in which O stays flat.",
+        )
+        link_to_question(self.conn, answered.id, question, "answers")
+        text = report(self.conn, research)
+        self.assertIn(f"{answered.id} vs {against}", text)
+
     def test_scorecard_orders_failed_claims_first(self) -> None:
         research, _, support, against = self._question_with_opposition()
         set_verdict(self.conn, against, "FALSIFIED", "the cohort rejected it")

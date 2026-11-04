@@ -464,6 +464,16 @@ def _records_payload(rows) -> list:
     return [dict(row) if not hasattr(row, "__dataclass_fields__") else asdict(row) for row in rows]
 
 
+def _need_budget(value: int, command: str) -> int:
+    if value <= 0:
+        raise EngineError(
+            f"{command} budget must be positive: {value}",
+            "a view needs at least one token to render its anchor line.",
+            f"pass --budget 1 or more, for example `--budget 800 {command}`.",
+        )
+    return value
+
+
 def _cmd_research(conn: sqlite3.Connection, args) -> int:
     if args.action == "add":
         record = create_research(conn, args.title, args.scope, args.slug)
@@ -938,7 +948,7 @@ def main(argv: List[str] | None = None) -> int:
                     tuple(args.kind) if args.kind else None,
                     args.limit,
                     args.all,
-                    args.budget,
+                    _need_budget(args.budget, "search"),
                 )
                 payload = {key: value for key, value in result.items() if key != "text"}
                 return _emit(payload, args.json, result["text"])
@@ -951,10 +961,10 @@ def main(argv: List[str] | None = None) -> int:
                     print(text, end="")
                 return 1 if has_errors(findings) else 0
             if args.command == "outline":
-                view = outline(conn, args.ref, args.budget)
+                view = outline(conn, args.ref, _need_budget(args.budget, "outline"))
                 return _emit(view.to_dict(), args.json, view.text)
             if args.command == "brief":
-                view = brief(conn, args.ref, args.budget)
+                view = brief(conn, args.ref, _need_budget(args.budget, "brief"))
                 return _emit(view.to_dict(), args.json, view.text)
             if args.command == "db":
                 if args.action == "integrity":

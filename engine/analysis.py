@@ -119,7 +119,8 @@ def unlinked_contradictions(
             key = tuple(sorted((str(left["id"]), str(right["id"]))))
             if key in existing:
                 continue
-            score = round(0.4 * float(left["confidence"]) + 0.6 * overlap(
+            confidence = (float(left["confidence"]) + float(right["confidence"])) / 2.0
+            score = round(0.4 * confidence + 0.6 * overlap(
                 str(left["text"]), str(right["text"])
             ), 4)
             if score < min_score:
