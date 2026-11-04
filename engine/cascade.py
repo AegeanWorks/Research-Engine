@@ -133,7 +133,8 @@ def retract_source(
     actor: str = "agent",
 ) -> dict:
     """Retract a source and retire every empirical claim that cites it."""
-    from engine.sources import get_source, set_source_status
+    from engine.events import record as record_event
+    from engine.sources import get_source
 
     if not reason.strip():
         raise EngineError(
@@ -156,7 +157,18 @@ def retract_source(
         )
     affected: list = []
     with transaction(conn):
-        set_source_status(conn, source.id, "retracted", reason, actor)
+        conn.execute(
+            "UPDATE source SET status = 'retracted', status_note = ?, status_at = ? WHERE id = ?",
+            (reason.strip(), utc_now(), source.id),
+        )
+        record_event(
+            conn,
+            "source.status",
+            source.id,
+            f"{source.status} -> retracted: {reason.strip()}",
+            research_id=source.research_id,
+            actor=actor,
+        )
         rows = conn.execute(
             "SELECT id, status FROM claim WHERE source_id = ? AND superseded_by IS NULL ORDER BY id", (source.id,)
         ).fetchall()

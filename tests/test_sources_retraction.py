@@ -5,6 +5,7 @@ from __future__ import annotations
 import unittest
 
 from engine.claims import add_claim, get_claim
+from engine.cascade import retract_source
 from engine.errors import EngineError
 from engine.integrity import check
 from engine.cascade import retract_source
@@ -29,9 +30,22 @@ class SourceStatusTests(DatabaseCase):
         source = self.add_source(research)
         with self.assertRaises(EngineError):
             set_source_status(self.conn, source, "dubious", "note")
-        set_source_status(self.conn, source, "retracted", "notice")
         with self.assertRaises(EngineError):
-            set_source_status(self.conn, source, "retracted", "notice again")
+            set_source_status(self.conn, source, "active", "note")
+
+    def test_direct_retracted_status_routes_through_retraction(self) -> None:
+        research = self.add_research()
+        source = self.add_source(research)
+        with self.assertRaises(EngineError):
+            set_source_status(self.conn, source, "retracted", "notice")
+
+    def test_retraction_path_retires_and_refuses_repeats(self) -> None:
+        research = self.add_research()
+        source = self.add_source(research)
+        retract_source(self.conn, source, "notice", "evidence")
+        self.assertEqual(get_source(self.conn, source).status, "retracted")
+        with self.assertRaises(EngineError):
+            retract_source(self.conn, source, "notice", "evidence")
 
     def test_retraction_requires_a_reason(self) -> None:
         research = self.add_research()

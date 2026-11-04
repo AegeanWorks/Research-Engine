@@ -12,6 +12,9 @@ from typing import Callable, Dict, List
 
 from engine import __version__
 from engine.ai import (
+    TEMPLATES as AI_TEMPLATES,
+)
+from engine.ai import (
     get_artifact as get_ai_artifact,
 )
 from engine.ai import (
@@ -61,6 +64,17 @@ from engine.diffing import diff_files, render as render_diff
 from engine.demo import seed_demo
 from engine.duplicates import duplicate_sources
 from engine.errors import EngineError
+from engine.models import (
+    AI_KINDS,
+    CLAIM_CLAIM_RELATIONS,
+    CLAIM_KINDS,
+    CLAIM_QUESTION_RELATIONS,
+    CLAIM_STATUSES,
+    DEPENDENCY_RELATIONS,
+    HYPOTHESIS_OUTCOMES,
+    SCREENING_STATUSES,
+    SOURCE_STATUSES,
+)
 from engine.hypotheses import (
     add_hypothesis,
     get_hypothesis,
@@ -152,7 +166,7 @@ def _build_parser() -> argparse.ArgumentParser:
     list_s.add_argument("--research")
     status_s = source_sub.add_parser("status", help="record a source's evidence status")
     status_s.add_argument("ref")
-    status_s.add_argument("--status", required=True)
+    status_s.add_argument("--status", required=True, choices=SOURCE_STATUSES)
     status_s.add_argument("--note", default="")
     retract_s = source_sub.add_parser("retract", help="retract a source and retire its claims")
     retract_s.add_argument("ref")
@@ -160,7 +174,7 @@ def _build_parser() -> argparse.ArgumentParser:
     retract_s.add_argument("--evidence", required=True)
     screen_s = source_sub.add_parser("screen", help="record a screening decision")
     screen_s.add_argument("ref")
-    screen_s.add_argument("--status", required=True)
+    screen_s.add_argument("--status", required=True, choices=SCREENING_STATUSES)
     screen_s.add_argument("--reason", default="")
     prisma_s = source_sub.add_parser("prisma", help="show the screening flow")
     prisma_s.add_argument("--research")
@@ -211,7 +225,7 @@ def _build_parser() -> argparse.ArgumentParser:
     add_c = claim_sub.add_parser("add", help="record a claim")
     add_c.add_argument("research")
     add_c.add_argument("--text", required=True)
-    add_c.add_argument("--kind", required=True)
+    add_c.add_argument("--kind", required=True, choices=CLAIM_KINDS)
     add_c.add_argument("--source")
     add_c.add_argument("--quote", default="")
     add_c.add_argument("--locator", default="")
@@ -221,7 +235,7 @@ def _build_parser() -> argparse.ArgumentParser:
     add_c.add_argument("--from", dest="prerequisites", action="append", default=[])
     list_c = claim_sub.add_parser("list", help="list claims")
     list_c.add_argument("--research")
-    list_c.add_argument("--status")
+    list_c.add_argument("--status", choices=CLAIM_STATUSES)
     list_c.add_argument("--history", action="store_true",
                         help="include superseded revisions")
     revise_c = claim_sub.add_parser("revise", help="append a revision and supersede the old claim")
@@ -242,14 +256,15 @@ def _build_parser() -> argparse.ArgumentParser:
     link_c = claim_sub.add_parser("link", help="link two claims")
     link_c.add_argument("src")
     link_c.add_argument("dst")
-    link_c.add_argument("--rel", required=True)
+    link_c.add_argument("--rel", required=True,
+                        choices=CLAIM_CLAIM_RELATIONS + DEPENDENCY_RELATIONS)
     link_q = claim_sub.add_parser("link-question", help="attach a claim to a question")
     link_q.add_argument("claim")
     link_q.add_argument("question")
-    link_q.add_argument("--stance", required=True)
+    link_q.add_argument("--stance", required=True, choices=CLAIM_QUESTION_RELATIONS)
     verdict_c = claim_sub.add_parser("verdict", help="record an evidence-backed verdict")
     verdict_c.add_argument("ref")
-    verdict_c.add_argument("--status", required=True)
+    verdict_c.add_argument("--status", required=True, choices=CLAIM_STATUSES)
     verdict_c.add_argument("--evidence", required=True)
     verdict_c.add_argument("--note", default="")
     verdict_c.add_argument("--group", dest="evidence_group", default="",
@@ -281,7 +296,7 @@ def _build_parser() -> argparse.ArgumentParser:
     list_h.add_argument("--research")
     outcome_h = hypothesis_sub.add_parser("outcome", help="record an outcome")
     outcome_h.add_argument("ref")
-    outcome_h.add_argument("--status", required=True)
+    outcome_h.add_argument("--status", required=True, choices=HYPOTHESIS_OUTCOMES)
     outcome_h.add_argument("--evidence", required=True)
     outcome_h.add_argument("--note", default="")
     outcome_h.add_argument("--actor", default="agent",
@@ -397,7 +412,7 @@ def _build_parser() -> argparse.ArgumentParser:
     ai_sub = ai_c.add_subparsers(dest="action", required=True)
     sweep_c = ai_sub.add_parser("sweep", help="notarize a model invocation (any kind)")
     sweep_c.add_argument("research")
-    sweep_c.add_argument("--kind", default="sweep",
+    sweep_c.add_argument("--kind", default="sweep", choices=AI_KINDS,
                          help="artifact kind: sweep, extraction, idea or draft")
     sweep_c.add_argument("--model", required=True, help="model id, e.g. local:qwen2.5-coder-1.5b-hf")
     sweep_c.add_argument("--prompt-file", required=True, help="path to the exact prompt bytes")
@@ -407,7 +422,7 @@ def _build_parser() -> argparse.ArgumentParser:
     extract_c = ai_sub.add_parser("extract", help="ingest one AI-proposed claim as UNVERIFIED")
     extract_c.add_argument("--artifact", required=True)
     extract_c.add_argument("--text", required=True)
-    extract_c.add_argument("--kind", required=True)
+    extract_c.add_argument("--kind", required=True, choices=CLAIM_KINDS)
     extract_c.add_argument("--source")
     extract_c.add_argument("--quote", default="")
     extract_c.add_argument("--locator", default="")
@@ -416,7 +431,8 @@ def _build_parser() -> argparse.ArgumentParser:
     extract_c.add_argument("--basis", default="")
     extract_c.add_argument("--from", dest="prerequisites", action="append", default=[])
     extract_c.add_argument("--question")
-    extract_c.add_argument("--stance", default="supports")
+    extract_c.add_argument("--stance", default="supports",
+                           choices=CLAIM_QUESTION_RELATIONS)
     extract_c.add_argument("--actor", default="agent")
     idea_c = ai_sub.add_parser("idea", help="pre-register one AI-proposed hypothesis")
     idea_c.add_argument("--artifact", required=True)
@@ -427,7 +443,8 @@ def _build_parser() -> argparse.ArgumentParser:
     idea_c.add_argument("--actor", default="agent")
     propose_c = ai_sub.add_parser("propose-test", help="bind a fixed-template kill test")
     propose_c.add_argument("--artifact", required=True)
-    propose_c.add_argument("--template", required=True, help="one of the fixed templates")
+    propose_c.add_argument("--template", required=True, choices=tuple(sorted(AI_TEMPLATES)),
+                           help="one of the fixed templates")
     propose_c.add_argument("--name", required=True)
     propose_c.add_argument("--claim")
     propose_c.add_argument("--hypothesis")
@@ -682,7 +699,7 @@ def _cmd_claim(conn: sqlite3.Connection, args) -> int:
         text += f"  edges repointed: {len(result['edges_repointed'])}\n"
         return _emit(result, args.json, text)
     if args.action == "context":
-        view = claim_brief(conn, args.ref, args.budget)
+        view = claim_brief(conn, args.ref, _need_budget(args.budget, "context"))
         return _emit(view.to_dict(), args.json, view.text)
     if args.action == "invalidate":
         result = invalidate(conn, args.ref, args.status, args.reason, args.evidence)

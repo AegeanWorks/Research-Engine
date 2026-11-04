@@ -68,8 +68,14 @@ def contradictions(
     seen = set()
     for question in list_questions(conn, research.id):
         rows = stance_claims(conn, question.id)
-        support = [row for _cid, rel, row in rows if rel in ("supports", "answers")]
-        against = [row for _cid, rel, row in rows if rel == "contradicts"]
+        live = [
+            (rel, row)
+            for _cid, rel, row in rows
+            if str(row["status"]) not in ("RETRACTED", "INVALIDATED")
+            and row["superseded_by"] is None
+        ]
+        support = [row for rel, row in live if rel in ("supports", "answers")]
+        against = [row for rel, row in live if rel == "contradicts"]
         for left in support:
             for right in against:
                 key = (question.id, *sorted((str(left["id"]), str(right["id"]))))
@@ -103,7 +109,7 @@ def unlinked_contradictions(
     research = get_research(conn, research_ref)
     claims = conn.execute(
         "SELECT * FROM claim WHERE research_id = ? AND status NOT IN"
-        " ('RETRACTED', 'INVALIDATED') ORDER BY id",
+        " ('RETRACTED', 'INVALIDATED') AND superseded_by IS NULL ORDER BY id",
         (research.id,),
     ).fetchall()
     existing = {

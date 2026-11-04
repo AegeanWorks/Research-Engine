@@ -123,6 +123,12 @@ def set_source_status(
             f"allowed statuses are {', '.join(SOURCE_STATUSES)}.",
             "pass one of the listed statuses with --status.",
         )
+    if status == "retracted":
+        raise EngineError(
+            "a retraction is not a status edit",
+            "retiring a source must also retire every empirical claim that cites it.",
+            "use `source retract` with --reason and --evidence instead.",
+        )
     if status == source.status:
         raise EngineError(
             f"source already has status {status}",

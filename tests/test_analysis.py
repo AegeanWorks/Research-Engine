@@ -13,7 +13,7 @@ from engine.analysis import (
     overlap,
     unlinked_contradictions,
 )
-from engine.claims import add_claim, link_claims, link_to_question
+from engine.claims import add_claim, get_claim, link_claims, link_to_question
 from engine.questions import add_question
 from tests.support import DatabaseCase
 
@@ -47,6 +47,37 @@ class AnalysisTests(DatabaseCase):
     def test_min_score_filters(self) -> None:
         pairs = contradictions(self.conn, self.demo["research"], min_score=0.99)
         self.assertEqual(pairs, [])
+
+    def test_pairings_ignore_withdrawn_and_superseded_claims(self) -> None:
+        from engine.claims import revise_claim, set_verdict
+
+        research = self.add_research()
+        question = add_question(self.conn, research, "Does S hold?")
+        live = add_claim(self.conn, research, "S holds here.", "assumption", basis="a")
+        against = add_claim(self.conn, research, "S fails here.", "assumption", basis="b")
+        link_to_question(self.conn, live.id, question.id, "supports")
+        link_to_question(self.conn, against.id, question.id, "contradicts")
+        withdrawn = add_claim(
+            self.conn, research, "S holds broadly.", "assumption", basis="a"
+        )
+        link_to_question(self.conn, withdrawn.id, question.id, "supports")
+        set_verdict(self.conn, withdrawn.id, "RETRACTED", "withdrawn")
+        old = add_claim(
+            self.conn, research, "S holds narrowly here.", "assumption", basis="a"
+        )
+        link_to_question(self.conn, old.id, question.id, "supports")
+        revise_claim(self.conn, old.id, "S holds narrowly revised.", "narrower")
+        head = get_claim(self.conn, old.id).superseded_by
+        pairs = contradictions(self.conn, research)
+        self.assertEqual(
+            {(item["support"], item["contradicts"]) for item in pairs},
+            {(live.id, against.id), (head, against.id)},
+        )
+        proposals = unlinked_contradictions(self.conn, research)
+        seen = {proposal["left"] for proposal in proposals}
+        seen.update(proposal["right"] for proposal in proposals)
+        self.assertNotIn(withdrawn.id, seen)
+        self.assertNotIn(old.id, seen)
 
     def test_claims_on_different_questions_are_not_paired(self) -> None:
         research = self.add_research()

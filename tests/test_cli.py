@@ -417,6 +417,21 @@ class CliTests(unittest.TestCase):
         self.assertIn("unsupported", out)
 
 
+    def test_closed_vocabularies_are_rejected_by_the_parser(self) -> None:
+        with self.assertRaises(SystemExit):
+            self.run_cli(
+                "claim", "add", "r_000001", "--text", "X.", "--kind", "bogus",
+            )
+        with self.assertRaises(SystemExit):
+            self.run_cli("claim", "link", "c_000001", "c_000002", "--rel", "bogus")
+
+    def test_retracted_status_points_at_retract(self) -> None:
+        self.run_cli("research", "add", "R")
+        self.run_cli("source", "add", "r_000001", "--title", "T", "--year", "2024")
+        code, _, err = self.run_cli("source", "status", "s_000001", "--status", "retracted")
+        self.assertEqual(code, 1)
+        self.assertIn("source retract", err)
+
     def test_non_positive_budgets_are_refused(self) -> None:
         self.run_cli("demo")
         for command in ("outline", "brief"):
