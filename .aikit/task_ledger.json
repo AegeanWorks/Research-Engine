@@ -5,23 +5,12 @@
     "last_phase": "phase 4",
     "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1793819753.438031,
+    "updated_at": 1793820831.3286917,
     "owner": "kilo:goal",
     "started_by": "kilo:goal",
     "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "reforge:run-1",
-      "phase": "reforge stage 12",
-      "phase_num": 3,
-      "description": "Reforge stage 12: stage 12 host review reviewed; run active; coverage 0/0",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793459401.9765186,
-      "timestamp_str": "2026-10-31 18:10:01",
-      "agent": "github"
-    },
     {
       "task_id": "T-015-discovery-calibration",
       "phase": "phase 4",
@@ -248,6 +237,17 @@
       "status": "in_progress",
       "timestamp": 1793819753.438031,
       "timestamp_str": "2026-11-04 22:15:53",
+      "agent": "kilo:goal"
+    },
+    {
+      "task_id": "T-019-approved-wave2",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[2/6] IDEA-986 plans plus 993 amendments shipped: v13 preregistration with exploratory warnings plus ledger-backed corrections with ADR-045, 516 tests pass, 4/4 gates pass, checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793820831.3286917,
+      "timestamp_str": "2026-11-04 22:33:51",
       "agent": "kilo:goal"
     }
   ]

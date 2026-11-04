@@ -247,3 +247,28 @@ class Finding:
     subject: str
     message: str
     fix: str
+
+
+@dataclass(frozen=True)
+class AnalysisPlan:
+    id: str
+    research_id: str
+    claim_id: str
+    baseline: str
+    treatment: str
+    prediction: str
+    status: str
+    registered_at: str
+
+
+@dataclass(frozen=True)
+class Amendment:
+    id: str
+    subject_kind: str
+    subject_id: str
+    field: str
+    before: str
+    after: str
+    reason: str
+    actor: str
+    at: str

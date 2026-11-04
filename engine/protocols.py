@@ -13,6 +13,7 @@ import sqlite3
 from pathlib import Path
 from typing import List
 
+from engine.amendments import record_amendment
 from engine.artifacts import utc_now
 from engine.database import transaction
 from engine.errors import EngineError, NotFound
@@ -128,6 +129,55 @@ def get_protocol(conn: sqlite3.Connection, ref: str) -> Protocol:
     if row is None:
         raise NotFound("protocol", ref)
     return _to_protocol(row)
+
+
+def amend_protocol(
+    conn: sqlite3.Connection,
+    ref: str,
+    measures: str,
+    reason: str,
+    actor: str = "agent",
+) -> Protocol:
+    """Correct a protocol's measures text; the pin and digest never move.
+
+    The document digest keeps pinning the registered document, so a measures
+    correction cannot smuggle in a different document. The before and after go to
+    the amendment ledger with the stated reason.
+    """
+    record = get_protocol(conn, ref)
+    measures = measures.strip()
+    if not measures:
+        raise EngineError(
+            "amended measures text is empty",
+            "a correction cannot blank the text it fixes.",
+            "pass a non-empty --measures value.",
+        )
+    reason = reason.strip()
+    if not reason:
+        raise EngineError(
+            "amendment has no reason",
+            "a correction without a stated reason cannot be audited.",
+            "pass --reason naming the error being fixed.",
+        )
+    if measures == record.measures:
+        raise EngineError(
+            "amendment changes nothing",
+            "the supplied measures already match the record.",
+            "pass different text, or leave the record alone.",
+        )
+    with transaction(conn):
+        record_amendment(
+            conn, "protocol", record.id, "measures", record.measures, measures,
+            reason, actor,
+        )
+        conn.execute(
+            "UPDATE protocol SET measures = ? WHERE id = ?", (measures, record.id)
+        )
+        record_event(
+            conn, "protocol.amend", record.id, f"measures corrected: {reason}",
+            actor=actor,
+        )
+    return get_protocol(conn, record.id)
 
 
 def list_protocols(conn: sqlite3.Connection) -> List[Protocol]:

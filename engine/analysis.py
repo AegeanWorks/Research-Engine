@@ -366,6 +366,7 @@ def claim_statistics(
     allow_incomparable: bool = False,
     allow_self_reported: bool = False,
     actor: str = "agent",
+    plan_ref: str = "",
 ) -> dict:
     """Compare two observation groups of a claim and record that the comparison happened."""
     claim = get_claim(conn, claim_ref)
@@ -392,6 +393,28 @@ def claim_statistics(
                 "a comparison needs recorded values in both groups.",
                 f"add values with `observation add`, or choose one of: {available}.",
             )
+    from engine.plans import get_plan, match_plan
+
+    plan_ref = plan_ref.strip()
+    result_plan = ""
+    planned = False
+    if plan_ref:
+        plan = get_plan(conn, plan_ref)
+        if plan.claim_id != claim.id:
+            raise EngineError(
+                "analysis plan belongs to another claim",
+                "a plan predicts one claim's comparison, not any comparison.",
+                "cite a plan preregistered for this claim.",
+            )
+        if (plan.baseline, plan.treatment) != (baseline, treatment):
+            raise EngineError(
+                "analysis plan predicts a different group pair",
+                "the cited plan compares other groups than this run.",
+                "cite the plan matching this baseline and treatment.",
+            )
+        result_plan = plan.id
+    else:
+        planned = bool(match_plan(conn, claim.id, baseline, treatment))
     comparable, reason, details = _comparability(
         _group_provenance(conn, claim.id, baseline),
         _group_provenance(conn, claim.id, treatment),
@@ -435,6 +458,12 @@ def claim_statistics(
     result["claim"] = claim.id
     result["baseline_label"] = baseline
     result["treatment_label"] = treatment
+    result["plan"] = result_plan
+    if planned and not result_plan:
+        result["warnings"].append(
+            "exploratory: preregistered plans exist for this comparison and none"
+            " is cited; cite one with --plan or record why this run is unplanned"
+        )
     detail = (
         f"{baseline}->{treatment} n={result['baseline']['n']}/{result['treatment']['n']}"
         f" d={result['cohens_d']:.3f} welch_p={result['welch']['p']:.4g}"

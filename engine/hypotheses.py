@@ -5,8 +5,10 @@ from __future__ import annotations
 import sqlite3
 from typing import List, Optional
 
+from engine.amendments import record_amendment
 from engine.database import next_id, transaction
 from engine.errors import EngineError, NotFound
+from engine.events import record as record_event
 from engine.models import HYPOTHESIS_OUTCOMES, Hypothesis
 from engine.questions import get_question
 from engine.researches import get_research
@@ -156,6 +158,79 @@ def record_outcome(
         conn.execute(
             "UPDATE hypothesis SET status = ?, outcome_note = ?, updated_at = ? WHERE id = ?",
             (outcome, note.strip(), stamp, hypothesis.id),
+        )
+    return get_hypothesis(conn, hypothesis.id)
+
+
+def amend_hypothesis(
+    conn: sqlite3.Connection,
+    hypothesis_ref: str,
+    reason: str,
+    statement: Optional[str] = None,
+    criterion: Optional[str] = None,
+    actor: str = "agent",
+) -> Hypothesis:
+    """Correct a pre-registered hypothesis; the original registration is kept.
+
+    Only a live (PREREGISTERED) hypothesis can be corrected: once an outcome is
+    recorded the record is frozen. Every change is appended to the amendment ledger
+    with the stated reason; the registration timestamp never moves.
+    """
+    hypothesis = get_hypothesis(conn, hypothesis_ref)
+    if hypothesis.status != "PREREGISTERED":
+        raise EngineError(
+            f"hypothesis already has outcome {hypothesis.status}",
+            "a closed hypothesis is frozen; correcting it would rewrite history.",
+            "register a new hypothesis instead of editing a decided one.",
+        )
+    reason = reason.strip()
+    if not reason:
+        raise EngineError(
+            "amendment has no reason",
+            "a correction without a stated reason cannot be audited.",
+            "pass --reason naming the error being fixed.",
+        )
+    updates: List[str] = []
+    params: List[object] = []
+    fields = {"statement": statement, "criterion": criterion}
+    with transaction(conn):
+        for field, value in fields.items():
+            if value is None:
+                continue
+            cleaned = value.strip()
+            if not cleaned:
+                raise EngineError(
+                    f"amended {field} is empty",
+                    "a correction cannot blank the field it fixes.",
+                    "pass a non-empty value, or omit the field.",
+                )
+            before = str(getattr(hypothesis, field))
+            if cleaned == before:
+                continue
+            record_amendment(
+                conn, "hypothesis", hypothesis.id, field, before, cleaned, reason, actor
+            )
+            updates.append(f"{field} = ?")
+            params.append(cleaned)
+        if not updates:
+            raise EngineError(
+                "amendment changes nothing",
+                "every supplied value already matches the record.",
+                "pass a different value, or leave the record alone.",
+            )
+        params.append(utc_now())
+        params.append(hypothesis.id)
+        conn.execute(
+            f"UPDATE hypothesis SET {', '.join(updates)}, updated_at = ? WHERE id = ?",
+            tuple(params),
+        )
+        record_event(
+            conn,
+            "hypothesis.amend",
+            hypothesis.id,
+            f"{', '.join(u.split(' = ')[0] for u in updates)} corrected: {reason}",
+            research_id=hypothesis.research_id,
+            actor=actor,
         )
     return get_hypothesis(conn, hypothesis.id)
 

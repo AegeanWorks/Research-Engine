@@ -10,7 +10,7 @@ from typing import Iterator
 from engine.artifacts import utc_now
 from engine.errors import EngineError
 
-SCHEMA_VERSION = 12
+SCHEMA_VERSION = 13
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS schema_meta (
@@ -217,6 +217,27 @@ CREATE TABLE IF NOT EXISTS ai_artifact (
     actor TEXT NOT NULL,
     created_at TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS analysis_plan (
+    id TEXT PRIMARY KEY,
+    research_id TEXT NOT NULL REFERENCES research(id),
+    claim_id TEXT NOT NULL REFERENCES claim(id),
+    baseline TEXT NOT NULL,
+    treatment TEXT NOT NULL,
+    prediction TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'PREREGISTERED',
+    registered_at TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS amendment (
+    id TEXT PRIMARY KEY,
+    subject_kind TEXT NOT NULL,
+    subject_id TEXT NOT NULL,
+    field TEXT NOT NULL,
+    before_value TEXT NOT NULL DEFAULT '',
+    after_value TEXT NOT NULL DEFAULT '',
+    reason TEXT NOT NULL,
+    actor TEXT NOT NULL,
+    at TEXT NOT NULL
+);
 CREATE INDEX IF NOT EXISTS idx_claim_research ON claim(research_id);
 CREATE INDEX IF NOT EXISTS idx_claim_status ON claim(status);
 CREATE INDEX IF NOT EXISTS idx_edge_dst ON edge(dst_kind, dst_id);
@@ -304,6 +325,10 @@ _MIGRATIONS = {
         ("event", "prev_hash", "TEXT NOT NULL DEFAULT ''"),
         ("event", "event_hash", "TEXT NOT NULL DEFAULT ''"),
     ),
+    # Version 12 -> 13 adds the analysis_plan and amendment tables. Fresh tables are
+    # created by the CREATE TABLE IF NOT EXISTS script above, so this step is
+    # intentionally empty: it only advances the version marker for existing databases.
+    12: (),
 }
 
 

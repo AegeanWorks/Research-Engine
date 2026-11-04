@@ -12,7 +12,12 @@ from engine.claims import add_claim
 from engine.errors import EngineError
 from engine.integrity import check
 from engine.observations import add_observation, get_observation
-from engine.protocols import get_protocol, list_protocols, register_protocol
+from engine.protocols import (
+    amend_protocol,
+    get_protocol,
+    list_protocols,
+    register_protocol,
+)
 from engine.synthesis import report
 from tests.support import DatabaseCase
 
@@ -83,6 +88,27 @@ class MeasurementTests(DatabaseCase):
             register_protocol(
                 self.conn, "doc_missing", "missing procedure",
                 doc_path="nonexistent-protocol-doc.md",
+            )
+
+    def test_measures_correction_preserves_digest_and_logs(self) -> None:
+        record = register_protocol(self.conn, "top_1", "measures accuracy")
+        corrected = amend_protocol(
+            self.conn, "top_1", "measures top-1 accuracy", reason="typo",
+        )
+        self.assertEqual(corrected.measures, "measures top-1 accuracy")
+        self.assertEqual(corrected.doc_digest, record.doc_digest)
+        self.assertEqual(corrected.registered_at, record.registered_at)
+        from engine.amendments import list_amendments
+
+        trail = list_amendments(self.conn, "protocol", "top_1")
+        self.assertEqual(len(trail), 1)
+        self.assertEqual(trail[0].field, "measures")
+
+    def test_protocol_amendment_needs_a_reason(self) -> None:
+        register_protocol(self.conn, "top_1", "measures accuracy")
+        with self.assertRaises(EngineError):
+            amend_protocol(
+                self.conn, "top_1", "other measures", reason="   ",
             )
 
     def test_observation_round_trips_provenance(self) -> None:

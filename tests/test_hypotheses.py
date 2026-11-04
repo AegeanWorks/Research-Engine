@@ -4,9 +4,11 @@ from __future__ import annotations
 
 import unittest
 
+from engine.amendments import list_amendments
 from engine.errors import EngineError
 from engine.hypotheses import (
     add_hypothesis,
+    amend_hypothesis,
     get_hypothesis,
     list_hypotheses,
     preregistration_card,
@@ -51,6 +53,30 @@ class HypothesisTests(DatabaseCase):
             record_outcome(self.conn, hypothesis.id, "MAYBE", "some analysis")
         self.assertEqual(get_hypothesis(self.conn, hypothesis.id).status, "PREREGISTERED")
         self.assertEqual(len(list_hypotheses(self.conn, research)), 1)
+
+    def test_statement_correction_keeps_registration_and_logs(self) -> None:
+        research = self.add_research()
+        hypothesis = add_hypothesis(self.conn, research, "S predicts O.", "O stays flat.")
+        corrected = amend_hypothesis(
+            self.conn, hypothesis.id, statement="S predicts O rises.", reason="typo: missing verb",
+        )
+        self.assertEqual(corrected.statement, "S predicts O rises.")
+        self.assertEqual(corrected.registered_at, hypothesis.registered_at)
+        trail = list_amendments(self.conn, "hypothesis", hypothesis.id)
+        self.assertEqual(len(trail), 1)
+        self.assertEqual(trail[0].field, "statement")
+        self.assertEqual(trail[0].before, "S predicts O.")
+        self.assertEqual(trail[0].after, "S predicts O rises.")
+
+    def test_amendment_needs_a_reason_and_a_live_record(self) -> None:
+        research = self.add_research()
+        hypothesis = add_hypothesis(self.conn, research, "S predicts O.", "O stays flat.")
+        with self.assertRaises(EngineError):
+            amend_hypothesis(self.conn, hypothesis.id, statement="Other.", reason="  ")
+        closed = record_outcome(self.conn, hypothesis.id, "REFUTED", "trial 2")
+        self.assertEqual(closed.status, "REFUTED")
+        with self.assertRaises(EngineError):
+            amend_hypothesis(self.conn, hypothesis.id, statement="Other.", reason="typo")
 
 
 if __name__ == "__main__":

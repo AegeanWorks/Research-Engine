@@ -548,6 +548,44 @@ class CliTests(unittest.TestCase):
         self.assertEqual(code, 0)
         self.assertIn("ledger ok", out)
 
+    def test_analysis_plan_is_cited_by_stats(self) -> None:
+        self.run_cli("demo")
+        for value in (1.2, 1.4, 1.1, 1.3):
+            self.run_cli("observation", "add", "c_000003", "--group", "baseline",
+                         "--value", str(value))
+        for value in (1.9, 2.1, 2.0, 2.2):
+            self.run_cli("observation", "add", "c_000003", "--group", "treatment",
+                         "--value", str(value))
+        code, out, _ = self.run_cli(
+            "analysis", "plan", "c_000003", "--baseline", "baseline",
+            "--treatment", "treatment", "--prediction", "treatment exceeds baseline",
+        )
+        self.assertEqual(code, 0)
+        plan_id = out.split()[0]
+        code, out, _ = self.run_cli(
+            "analysis", "stats", "c_000003", "--baseline", "baseline",
+            "--treatment", "treatment", "--plan", plan_id, "--resamples", "100",
+        )
+        self.assertEqual(code, 0)
+        self.assertIn(f"plan: {plan_id}", out)
+
+    def test_amend_commands_correct_live_records(self) -> None:
+        self.run_cli("demo")
+        code, _, _ = self.run_cli(
+            "hypothesis", "amend", "h_000001", "--statement", "Revised S predicts O.",
+            "--reason", "typo",
+        )
+        self.assertEqual(code, 0)
+        code, _, _ = self.run_cli(
+            "protocol", "add", "--id", "top_1", "--measures", "measures accuracy",
+        )
+        self.assertEqual(code, 0)
+        code, _, _ = self.run_cli(
+            "protocol", "amend", "top_1", "--measures", "measures top-1 accuracy",
+            "--reason", "typo",
+        )
+        self.assertEqual(code, 0)
+
     def test_main_module_import_has_no_side_effects(self) -> None:
         import importlib.util
 

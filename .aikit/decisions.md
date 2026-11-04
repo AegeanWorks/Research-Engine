@@ -636,3 +636,24 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Consequences**: Silent log edits surface as errors naming the row; legacy
   databases keep a clean gate after migration. Cross-program chains stay separate:
   the hash restarts per program, matching the causal-tree boundary.
+
+### ADR-045: Preregistered analysis plans and the amendment ledger (schema v13)
+- **Date**: 2026-11-04
+- **Status**: Accepted
+- **Context**: IDEA-986 and IDEA-993. Comparisons ran without declared predictions,
+  so unmatched runs could not be told apart from planned ones; and hypothesis or
+  protocol text had no correction path, forcing direct database surgery for typos.
+- **Decision**: New `analysis_plan` table (`analysis plan` preregisters a claim's
+  baseline/treatment pair with a prediction before data is seen);
+  `claim_statistics` accepts `--plan`, cites it in the result, and warns
+  `exploratory` when plans exist for the pair but none is cited. New `amendment`
+  table: `hypothesis amend` and `protocol amend` correct live records with a
+  mandatory reason, keep the original registration timestamp and digest, and append
+  the before/after to the ledger plus a causal event. Closed hypotheses are frozen
+  (register a new one); protocols stay immutable except for measures text.
+  `plan-list` is deliberately omitted: plan ids print at creation and surface in
+  `events --kind analysis.plan`, which is enough discovery until a registry pass.
+- **Consequences**: Planned vs exploratory comparisons are explicit in the result;
+  typo corrections no longer bypass the record. No integrity finding is attached to
+  exploratory runs yet: verdict-time linkage of evidence groups to plans is the
+  follow-up, not this milestone.

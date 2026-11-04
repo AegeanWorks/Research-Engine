@@ -43,49 +43,45 @@ engine hosts.
 
 1. **A program is a boundary.** A research program (`research`) owns its sources, questions,
    claims, hypotheses and tests. Edges may not cross programs.
-2. **Sources enter once.** A source needs a title and at least one of year, DOI or URL. Claims
-   cite the registered source, never a raw URL.
-3. **Empirical claims need provenance.** `kind=empirical` refuses to save unless a source, an
-   exact quote and a locator are present. `kind=derived` needs a basis or premise claims.
+2. **Sources enter once.** A source needs a title plus a year, DOI or URL; claims cite the
+   registered source, never a raw URL.
+3. **Empirical claims need provenance.** `kind=empirical` needs a source, exact quote and
+   locator; `kind=derived` needs a basis or premises.
 4. **Hypotheses are pre-registered.** `hypothesis add` records the statement, confidence and the
-   observation that would refute it at the moment of registration. The outcome is recorded later
-   and is append-only.
+   observation that would refute it at the moment of registration. Comparisons cite preregistered
+   plans; uncited runs read as exploratory, corrections through amendments.
 5. **Kill tests are executable and bound.** A test binds a command, declared inputs and the
-   engine code to a claim or hypothesis. `test verify` runs it twice and requires the same exit
-   code and output hashes. Each run records the command, code and input hashes, git commit and
-   runtime, so stale evidence is detectable. A directory is refused as an input; declare files or
-   a glob.
+   engine code to a claim or hypothesis; `test verify` requires two agreeing runs. Each run
+   records command, code and input hashes, git commit and runtime, so stale evidence is
+   detectable; directories are refused, declare files or globs.
 6. **Verdicts are append-only and tied to evidence.** `claim verdict` records `previous -> new`,
    evidence, note, actor, time and — for `NUMERIC` — the authoritative run group it cites. A
    `NUMERIC` promotion is refused unless the claim has a test whose earliest non-replaceable
    attempt passed twice and is bound to the current code, inputs and command; `--group` pins the group.
-7. **Collapse is transitive.** `claim invalidate` records the failed root and marks every claim
-   that depends on it as `INVALIDATED`, with the reason preserved in the invalidation record.
+7. **Collapse is transitive.** `claim invalidate` records the failed root and marks dependents
+   `INVALIDATED`, preserving the reason in the invalidation record.
 8. **Reports are generated and verifiable.** `report` and `scorecard` compute consensus,
    contradictions, gaps and audit findings from the graph. `report --out` also writes a manifest
    with a content digest, an exact record digest, the report digest, counts, findings and limits.
    `report --check` compares content; `--strict` compares exact records. An export carries its own
    digest, so `export --check` proves a snapshot intact and refuses an unread schema. No number is
    hand-written.
-9. **Sources can be retired.** `source status` records an expression of concern; `source retract`
+9. **Sources can be retired.** `source status` notes concern; `source retract`
    retires every claim citing that work, twins included, and cascades.
-10. **Missing evidence is explicit.** `claim verdict --status UNKNOWN` records that the evidence
-    does not exist and why. UNKNOWN has zero consensus weight, never promotes a dependent, and
-    is never treated as a failure that would cascade.
+10. **Missing evidence is explicit.** `claim verdict --status UNKNOWN` records what evidence
+    is missing and why. UNKNOWN carries no weight, never promotes, never cascades.
 11. **The graph is readable under a budget.** `outline` gives one line per question, hypothesis
     and test; `brief` gives the strongest support and contradiction per question; `claim context`
     gives one claim with provenance, premises and history. Each states its omitted line count.
-12. **Duplicates merge; refinements revise.** `claim merge KEEP DUP...` repoints every edge and
-    bound test to the survivor and records each duplicate as RETRACTED. `claim revise` appends a
-    revision, marks the old claim superseded and moves its edges to the new head; old verdicts stay
-    visible through `claim history`, and the new claim starts untested.
+12. **Duplicates merge; refinements revise.** `claim merge` repoints edges and bound tests to
+    the survivor and records duplicates as RETRACTED. `claim revise` supersedes the old claim,
+    moves its edges to the new head, and starts untested; old verdicts stay visible.
 13. **A test must be able to fail.** `test add --control CMD` declares a negative control that
     must fail reproducibly. A test that has produced verified evidence without a control is a
     warning (`EVID-008`); a declared control that does not fail is an error (`EVID-009`).
-14. **Sources are screened, not just stored.** `source screen` moves a source through
-    `identified`, `screened_in`/`screened_out` and `included`/`excluded`, with a reason from a
-    closed taxonomy. `source prisma` and the report show the flow; a claim citing an excluded
-    source warns (`SCREEN-001`).
+14. **Sources are screened.** `source screen` moves a source through the lifecycle with a
+    closed-taxonomy reason; `source prisma` shows the flow, and citing an excluded source
+    warns (`SCREEN-001`).
 15. **Measurements are recorded, not retyped.** `observation add` stores each value in a named
     group, with optional instrument, rater, protocol and unit; `analysis stats` refuses
     incomparable groups unless `--allow-incomparable` is explicit, and `--provenance-class
@@ -93,8 +89,8 @@ engine hosts.
     reason. Missing statistics warn (`OBS-001`), as do unprovenanced, unclassified and
     self-reported measurements (`OBS-002`..`OBS-004`).
 16. **Every non-verdict action is logged.** Status changes, screening, merges, reports and
-    migrations append to a hash-chained event log verified by `events --verify`;
-    `events --tree`/`--path` render causality. Verdicts keep their own history.
+    migrations append to a hash-chained log; `events --verify` checks continuity,
+    `events --tree`/`--path` render causality.
 17. **Discovery is lexical and bounded.** `search` ranks claims, sources, questions and hypotheses
     by an exact phrase then matched terms, reports the matched field with a snippet, and packs
     text output to `--budget`; `source duplicates` groups normalized DOI and title matches, and
@@ -148,6 +144,7 @@ python -m engine [--db PATH] source retract REF --reason TEXT --evidence TEXT [-
 python -m engine [--db PATH] protocol add --id ID --measures TEXT [--includes-generation]
                         [--includes-judge] [--doc-digest SHA256] [--doc-path PATH]
 python -m engine [--db PATH] protocol list
+python -m engine [--db PATH] protocol amend ID --measures TEXT --reason TEXT
 
 python -m engine [--db PATH] observation add CLAIM --group LABEL --value F [--note TEXT]
                         [--instrument-kind K] [--instrument-id ID] [--instrument-digest SHA256]
@@ -178,6 +175,7 @@ python -m engine [--db PATH] hypothesis add RESEARCH --statement TEXT --criterio
                         [--confidence C] [--question REF]
 python -m engine [--db PATH] hypothesis list [--research REF]
 python -m engine [--db PATH] hypothesis outcome REF --status SUPPORTED|REFUTED|INCONCLUSIVE --evidence TEXT
+python -m engine [--db PATH] hypothesis amend REF [--statement TEXT] [--criterion TEXT] --reason TEXT
 python -m engine [--db PATH] hypothesis card REF
 
 python -m engine [--db PATH] test add RESEARCH --name NAME --command CMD [--claim REF]
@@ -199,7 +197,8 @@ python -m engine [--db PATH] analysis matrix REF
 python -m engine [--db PATH] analysis keystone REF [--limit N]
 python -m engine [--db PATH] analysis expose REF
 python -m engine [--db PATH] analysis calibration REF [--min-n N]
-python -m engine [--db PATH] analysis stats CLAIM --baseline LABEL --treatment LABEL [--seed N] [--resamples N] [--allow-incomparable] [--allow-self-reported]
+python -m engine [--db PATH] analysis stats CLAIM --baseline LABEL --treatment LABEL [--seed N] [--resamples N] [--allow-incomparable] [--allow-self-reported] [--plan PLAN]
+python -m engine [--db PATH] analysis plan CLAIM --baseline L --treatment L --prediction TEXT
 python -m engine [--db PATH] analysis trend CLAIM --group LABEL
 python -m engine [--db PATH] diff OLD.jsonl NEW.jsonl [--exact]
 python -m engine [--db PATH] db integrity
@@ -254,7 +253,7 @@ Warnings are research hygiene; errors block a trustworthy report.
 
 ## Data Model
 
-One SQLite file (default `research.db`), schema version 12. Tables: `research`, `source`,
+One SQLite file (default `research.db`), schema version 13. Tables: `research`, `source`,
 `question`, `claim`, `edge`, `hypothesis`, `killtest`, `test_run`, `test_attempt`, `verdict`,
 `invalidation`, `observation`, `protocol`, `ai_artifact`, `event`, plus `schema_meta` and
 `counters`. `claim`
@@ -312,6 +311,7 @@ research-engine/
 │   ├── __main__.py           <- `python -m engine`
 │   ├── ai.py
 │   ├── analysis.py
+│   ├── amendments.py        <- append-only correction ledger
 │   ├── artifacts.py
 │   ├── attempts.py
 │   ├── bundle.py
@@ -336,6 +336,7 @@ research-engine/
 │   ├── markdown.py
 │   ├── merging.py
 │   ├── models.py
+│   ├── plans.py             <- preregistered analysis plans
 │   ├── provenance.py
 │   ├── protocols.py
 │   ├── observations.py
@@ -359,9 +360,8 @@ research-engine/
 - **Calibration is descriptive.** It scores recorded probabilities, not the world; a small
   resolved set is labelled descriptive rather than decisive.
 - **Discovery is advisory.** `analysis` proposes; only `claim link` records a relation.
-- **Statistics describe the recorded numbers, not the world.** Independence is assumed.
-- **Rank-test method is stated.** Exact for untied small samples, tie-corrected approximation
-  otherwise.
+- **Statistics describe the recorded numbers; independence is assumed.**
+- **Rank tests are exact for untied small samples, tie-corrected otherwise.**
 - **Multiple groups get a Holm family table; each pairwise test stays uncorrected on its own.**
 - **A control proves falsifiability, not correctness.** It shows the test can fail, not that the
   assertion is right.

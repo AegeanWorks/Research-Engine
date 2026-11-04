@@ -77,6 +77,7 @@ from engine.models import (
 )
 from engine.hypotheses import (
     add_hypothesis,
+    amend_hypothesis,
     get_hypothesis,
     list_hypotheses,
     preregistration_card,
@@ -87,7 +88,8 @@ from engine.killtests import add_test, list_runs, list_tests, run_test, verify_t
 from engine.questions import add_question, close_question, get_question, list_questions
 from engine.search import KINDS as SEARCH_KINDS
 from engine.search import search as search_graph
-from engine.protocols import list_protocols, register_protocol
+from engine.plans import add_plan
+from engine.protocols import amend_protocol, list_protocols, register_protocol
 from engine.researches import create_research, get_research, list_researches, research_counts
 from engine.screening import prisma_flow, set_screening
 from engine.sources import add_source, list_sources, set_source_status
@@ -194,6 +196,12 @@ def _build_parser() -> argparse.ArgumentParser:
     add_p.add_argument("--doc-digest", default="")
     add_p.add_argument("--doc-path", default="")
     protocol_sub.add_parser("list", help="list registered protocols")
+    amend_p = protocol_sub.add_parser("amend", help="correct a protocol's measures text")
+    amend_p.add_argument("ref")
+    amend_p.add_argument("--measures", required=True)
+    amend_p.add_argument("--reason", required=True)
+    amend_p.add_argument("--actor", default="agent",
+                         help="who records the amendment (default: agent)")
 
     observation = commands.add_parser("observation", help="record and retire measurements")
     observation_sub = observation.add_subparsers(dest="action", required=True)
@@ -308,6 +316,13 @@ def _build_parser() -> argparse.ArgumentParser:
                            help="who records the outcome (default: agent)")
     card_h = hypothesis_sub.add_parser("card", help="render the pre-registration card")
     card_h.add_argument("ref")
+    amend_h = hypothesis_sub.add_parser("amend", help="correct a live preregistration")
+    amend_h.add_argument("ref")
+    amend_h.add_argument("--statement", default=None)
+    amend_h.add_argument("--criterion", default=None)
+    amend_h.add_argument("--reason", required=True)
+    amend_h.add_argument("--actor", default="agent",
+                         help="who records the amendment (default: agent)")
 
     test = commands.add_parser("test", help="manage executable kill tests")
     test_sub = test.add_subparsers(dest="action", required=True)
@@ -380,6 +395,13 @@ def _build_parser() -> argparse.ArgumentParser:
                          help="compare different protocols/instruments with a recorded caveat")
     stats_c.add_argument("--allow-self-reported", action="store_true",
                          help="allow a self-reported measurement with a recorded caveat")
+    stats_c.add_argument("--plan", default="",
+                         help="cite a preregistered analysis plan for this comparison")
+    plan_sub = analysis_sub.add_parser("plan", help="preregister an analysis comparison")
+    plan_sub.add_argument("claim")
+    plan_sub.add_argument("--baseline", required=True)
+    plan_sub.add_argument("--treatment", required=True)
+    plan_sub.add_argument("--prediction", required=True)
     trend_c = analysis_sub.add_parser("trend", help="fit a trend over one observation group")
     trend_c.add_argument("claim")
     trend_c.add_argument("--group", required=True)
@@ -600,6 +622,11 @@ def _cmd_protocol(conn: sqlite3.Connection, args) -> int:
             doc_path=args.doc_path,
         )
         return _emit(record, args.json, f"{record.id} {record.measures}\n")
+    if args.action == "amend":
+        record = amend_protocol(
+            conn, args.ref, args.measures, args.reason, actor=args.actor,
+        )
+        return _emit(record, args.json, f"{record.id} amended {record.measures}\n")
     records = list_protocols(conn)
     text = "".join(
         f"{p.id}  generation={int(p.includes_generation)} judge={int(p.includes_judge)}"
@@ -739,6 +766,12 @@ def _cmd_hypothesis(conn: sqlite3.Connection, args) -> int:
             conn, args.ref, args.status, args.evidence, args.note, actor=args.actor
         )
         return _emit(record, args.json, f"{record.id} -> {record.status}\n")
+    if args.action == "amend":
+        record = amend_hypothesis(
+            conn, args.ref, args.reason, statement=args.statement,
+            criterion=args.criterion, actor=args.actor,
+        )
+        return _emit(record, args.json, f"{record.id} amended\n")
     if args.action == "card":
         card = preregistration_card(conn, args.ref)
         return _emit({"card": card}, args.json, card)
@@ -1157,6 +1190,7 @@ def main(argv: List[str] | None = None) -> int:
                         seed=args.seed, resamples=args.resamples,
                         allow_incomparable=args.allow_incomparable,
                         allow_self_reported=args.allow_self_reported,
+                        plan_ref=args.plan,
                     )
                     text = (
                         f"{result['claim']} {result['baseline_label']} -> {result['treatment_label']}"
@@ -1174,7 +1208,18 @@ def main(argv: List[str] | None = None) -> int:
                     )
                     for warning in result["warnings"]:
                         text += f"  warning: {warning}\n"
+                    if result.get("plan"):
+                        text += f"  plan: {result['plan']}\n"
                     return _emit(result, args.json, text)
+                if args.action == "plan":
+                    plan = add_plan(
+                        conn, args.claim, args.baseline, args.treatment,
+                        args.prediction,
+                    )
+                    return _emit(
+                        plan, args.json,
+                        f"{plan.id} preregistered {plan.baseline}->{plan.treatment}\n",
+                    )
                 result = expose(conn, args.ref)
                 text = f"{result['claim']} [{result['status']}]\n"
                 for item in result["dependents"]:

@@ -6,11 +6,11 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `80`
-- **Total Classes**: `74`
-- **Total Top-Level Functions**: `255`
-- **Total Class Methods**: `553`
-- **Total Source Lines**: `16165`
+- **Total Python Modules**: `83`
+- **Total Classes**: `77`
+- **Total Top-Level Functions**: `265`
+- **Total Class Methods**: `566`
+- **Total Source Lines**: `16824`
 
 ---
 
@@ -53,10 +53,22 @@
 
 ---
 
+### [`engine/amendments.py`](engine/amendments.py)
+> *Append-only amendment ledger: every correction keeps its before and after.*
+
+**Size**: `100` lines (`3118` bytes)
+
+**Functions:**
+- `def _to_amendment(row)`
+- `def record_amendment(conn, subject_kind, subject_id, field, before, after, reason, actor)` - *Append one correction; the reason is mandatory and the past is kept.*
+- `def list_amendments(conn, subject_kind, subject_id)` - *Amendments in record order, optionally filtered to one corrected record.*
+
+---
+
 ### [`engine/analysis.py`](engine/analysis.py)
 > *Discovery and ranking over the graph: contradictions, coverage, keystones.*
 
-**Size**: `534` lines (`21969` bytes)
+**Size**: `563` lines (`23166` bytes)
 
 **Functions:**
 - `def keywords(text)` - *Content words of an assertion, lowercased and de-duplicated.*
@@ -69,7 +81,7 @@
 - `def expose(conn, claim_ref)` - *What a claim would take down with it, plus what cites it.*
 - `def _group_provenance(conn, claim_id, label)` - *Protocols, instruments and units recorded for one observation group.*
 - `def _comparability(baseline, treatment, allow_incomparable, allow_self_reported)` - *Whether two groups measure the same quantity under the same procedure.*
-- `def claim_statistics(conn, claim_ref, baseline, treatment, seed, resamples, allow_incomparable, allow_self_reported, actor)` - *Compare two observation groups of a claim and record that the comparison happened.*
+- `def claim_statistics(conn, claim_ref, baseline, treatment, seed, resamples, allow_incomparable, allow_self_reported, actor, plan_ref)` - *Compare two observation groups of a claim and record that the comparison happened.*
 - `def observation_summary(conn, claim_ref)` - *Per-group counts and basic summaries for one claim.*
 - `def claim_trend(conn, claim_ref, group, actor)` - *Fit a least-squares trend over a group's observations in recording order.*
 
@@ -173,7 +185,7 @@
 ### [`engine/cli.py`](engine/cli.py)
 > *Command-line surface: one entry point for every engine mechanic.*
 
-**Size**: `1263` lines (`61584` bytes)
+**Size**: `1308` lines (`63896` bytes)
 
 **Functions:**
 - `def _build_parser()`
@@ -218,7 +230,7 @@
 ### [`engine/database.py`](engine/database.py)
 > *SQLite connection, schema versioning and atomic transactions.*
 
-**Size**: `442` lines (`17136` bytes)
+**Size**: `467` lines (`18053` bytes)
 
 **Functions:**
 - `def connect(path)` - *Open a database with durability pragmas suitable for a state file.*
@@ -333,7 +345,7 @@
 ### [`engine/hypotheses.py`](engine/hypotheses.py)
 > *Pre-registered hypotheses and their outcomes (the K13 discipline).*
 
-**Size**: `174` lines (`6438` bytes)
+**Size**: `249` lines (`9334` bytes)
 
 **Functions:**
 - `def _to_hypothesis(row)`
@@ -341,6 +353,7 @@
 - `def get_hypothesis(conn, ref)` - *Fetch one hypothesis by identifier.*
 - `def list_hypotheses(conn, research_ref)` - *List hypotheses, optionally filtered by program.*
 - `def record_outcome(conn, hypothesis_ref, outcome, evidence, note, actor)` - *Close a pre-registered hypothesis with an evidence-backed outcome.*
+- `def amend_hypothesis(conn, hypothesis_ref, reason, statement, criterion, actor)` - *Correct a pre-registered hypothesis; the original registration is kept.*
 - `def preregistration_card(conn, hypothesis_ref)` - *Render the pre-registration card an agent writes before searching.*
 
 ---
@@ -454,7 +467,7 @@
 ### [`engine/models.py`](engine/models.py)
 > *Frozen domain records and the engine's closed vocabularies.*
 
-**Size**: `249` lines (`5621` bytes)
+**Size**: `274` lines (`6000` bytes)
 
 **Classes:**
 - `class Research`
@@ -470,6 +483,8 @@
 - `class Observation`
 - `class Protocol`
 - `class Finding`
+- `class AnalysisPlan`
+- `class Amendment`
 
 ---
 
@@ -488,15 +503,30 @@
 
 ---
 
+### [`engine/plans.py`](engine/plans.py)
+> *Pre-registered analysis plans: comparisons declare their prediction first.*
+
+**Size**: `119` lines (`4189` bytes)
+
+**Functions:**
+- `def _to_plan(row)`
+- `def add_plan(conn, claim_ref, baseline, treatment, prediction, actor)` - *Pre-register what a comparison is expected to show, before it runs.*
+- `def get_plan(conn, ref)` - *Fetch one analysis plan by identifier.*
+- `def list_plans(conn, claim_ref)` - *Plans in record order, optionally filtered to one claim.*
+- `def match_plan(conn, claim_id, baseline, treatment)` - *Plans preregistered for exactly this claim and group pair.*
+
+---
+
 ### [`engine/protocols.py`](engine/protocols.py)
 > *Measurement protocol registry.*
 
-**Size**: `138` lines (`5093` bytes)
+**Size**: `188` lines (`6814` bytes)
 
 **Functions:**
 - `def _to_protocol(row)`
 - `def register_protocol(conn, protocol_id, measures, includes_generation, includes_judge, doc_digest, doc_path, actor)` - *Register an immutable protocol id; re-registering the same id is refused.*
 - `def get_protocol(conn, ref)` - *Fetch one registered protocol by id.*
+- `def amend_protocol(conn, ref, measures, reason, actor)` - *Correct a protocol's measures text; the pin and digest never move.*
 - `def list_protocols(conn)` - *Every registered protocol, oldest id first.*
 
 ---
@@ -869,7 +899,7 @@
 ### [`tests/test_cli.py`](tests/test_cli.py)
 > *The CLI surface: JSON output, exit codes and the error triad.*
 
-**Size**: `561` lines (`22809` bytes)
+**Size**: `599` lines (`24444` bytes)
 
 **Classes:**
 - `class CliTests`
@@ -916,6 +946,8 @@
   - Method `.test_protocol_add_doc_path_mismatch_is_refused()`
   - Method `.test_bulk_invalidate_needs_allow_bulk()`
   - Method `.test_events_verify_reports_a_healthy_ledger()`
+  - Method `.test_analysis_plan_is_cited_by_stats()`
+  - Method `.test_amend_commands_correct_live_records()`
   - Method `.test_main_module_import_has_no_side_effects()`
 
 ---
@@ -1076,7 +1108,7 @@
 ### [`tests/test_hypotheses.py`](tests/test_hypotheses.py)
 > *Pre-registration precedes outcomes and cards carry the falsification criterion.*
 
-**Size**: `57` lines (`2368` bytes)
+**Size**: `83` lines (`3827` bytes)
 
 **Classes:**
 - `class HypothesisTests`
@@ -1084,6 +1116,8 @@
   - Method `.test_registration_is_immediate_and_card_is_rendered()`
   - Method `.test_outcome_requires_evidence_and_closes_once()`
   - Method `.test_unknown_outcome_is_refused()`
+  - Method `.test_statement_correction_keeps_registration_and_logs()`
+  - Method `.test_amendment_needs_a_reason_and_a_live_record()`
 
 ---
 
@@ -1271,7 +1305,7 @@
 ### [`tests/test_measurements.py`](tests/test_measurements.py)
 > *Measurement provenance and protocol comparability.*
 
-**Size**: `224` lines (`10023` bytes)
+**Size**: `250` lines (`11038` bytes)
 
 **Classes:**
 - `class MeasurementTests`
@@ -1282,6 +1316,8 @@
   - Method `.test_doc_path_digest_mismatch_is_refused()`
   - Method `.test_doc_path_only_pins_computed_digest()`
   - Method `.test_missing_doc_path_is_refused()`
+  - Method `.test_measures_correction_preserves_digest_and_logs()`
+  - Method `.test_protocol_amendment_needs_a_reason()`
   - Method `.test_observation_round_trips_provenance()`
   - Method `.test_incomplete_provenance_is_refused()`
   - Method `.test_unknown_protocol_is_refused()`
@@ -1400,6 +1436,23 @@
   - Method `.test_a_void_after_a_run_warns_again()`
   - Method `.test_a_short_trend_says_it_is_insufficient()`
   - Method `.test_a_claim_whose_observations_were_all_voided_does_not_warn()`
+
+---
+
+### [`tests/test_plans.py`](tests/test_plans.py)
+> *Analysis plans are preregistered; unmatched comparisons read as exploratory.*
+
+**Size**: `101` lines (`3941` bytes)
+
+**Classes:**
+- `class PlanTests`
+  - Method `._planned_claim()`
+  - Method `.test_plan_registers_before_data_is_seen()`
+  - Method `.test_plan_needs_a_prediction_and_two_groups()`
+  - Method `.test_cited_plan_is_recorded_on_the_comparison()`
+  - Method `.test_uncited_comparison_with_plans_is_exploratory()`
+  - Method `.test_plan_must_match_the_compared_pair()`
+  - Method `.test_plan_belongs_to_one_claim()`
 
 ---
 
