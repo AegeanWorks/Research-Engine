@@ -193,6 +193,14 @@ class IntegrityTests(DatabaseCase):
         self.conn.execute("UPDATE claim SET status = 'FALSIFIED' WHERE id = ?", (derived.id,))
         self.assertNotIn("CASCADE-001", codes(check(self.conn)))
 
+    def test_title_variant_duplicate_warns(self) -> None:
+        from engine.sources import add_source
+
+        research = self.add_research()
+        add_source(self.conn, research, "Same Title", year=2020)
+        add_source(self.conn, research, "Same Title!", year=2021)
+        self.assertIn("DUP-002", codes(check(self.conn)))
+
     def test_gaps_and_duplicates_are_warnings(self) -> None:
         research = self.add_research()
         add_question(self.conn, research, "Unanswered?")

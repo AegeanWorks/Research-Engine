@@ -73,7 +73,7 @@ class DuplicateSourceTests(DatabaseCase):
         self.assertEqual(result["returned"], 1)
         self.assertEqual(len(result["groups"]), 1)
 
-    def test_integrity_warns_on_doi_and_title_year_but_not_variants(self) -> None:
+    def test_integrity_warns_on_doi_title_year_and_variants(self) -> None:
         research = self.add_research()
         add_source(self.conn, research, "A Study", year=2024, doi="10.1/a")
         add_source(self.conn, research, "a study", year=2024, doi="doi:10.1/a")
@@ -84,8 +84,9 @@ class DuplicateSourceTests(DatabaseCase):
         other = self.add_research("Variants")
         add_source(self.conn, other, "Same Title", year=2019)
         add_source(self.conn, other, "Same Title", year=2020)
-        codes = [item.code for item in check(self.conn)]
-        self.assertEqual(codes.count("DUP-002"), 1)
+        findings = [item for item in check(self.conn) if item.code == "DUP-002"]
+        self.assertEqual(len(findings), 2)
+        self.assertIn("normalized title", findings[1].message)
 
 
 if __name__ == "__main__":

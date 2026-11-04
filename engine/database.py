@@ -406,7 +406,14 @@ def transaction(conn: sqlite3.Connection) -> Iterator[sqlite3.Connection]:
     """Run a write atomically; nested calls join the outer transaction."""
     owns = not conn.in_transaction
     if owns:
-        conn.execute("BEGIN IMMEDIATE")
+        try:
+            conn.execute("BEGIN IMMEDIATE")
+        except sqlite3.OperationalError as error:
+            raise EngineError(
+                "the database is locked by another writer",
+                f"sqlite reports: {error}; one researcher or agent writes at a time.",
+                "retry the command; if it persists, finish or stop the other process.",
+            ) from error
     try:
         yield conn
     except BaseException:

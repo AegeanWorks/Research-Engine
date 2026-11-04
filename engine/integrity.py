@@ -612,13 +612,15 @@ def check(conn: sqlite3.Connection) -> List[Finding]:
         )
 
     for group in duplicate_sources(conn, limit=None)["groups"]:
-        if group["reason"] not in ("doi", "title_year"):
+        if group["reason"] not in ("doi", "title_year", "title_variant"):
             continue
         ids = ", ".join(item["id"] for item in group["sources"])
         if group["reason"] == "doi":
             detail = f"share DOI {group['key'][:120]!r}"
-        else:
+        elif group["reason"] == "title_year":
             detail = f"share the normalized title/year {group['key'][:120]!r}"
+        else:
+            detail = f"share the normalized title {group['key'][:120]!r}"
         findings.append(
             _finding(
                 "DUP-002",

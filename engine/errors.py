@@ -15,12 +15,21 @@ class EngineError(Exception):
         return f"Error: {self}\nWhy: {self.why}\nFix: {self.fix}"
 
 
+_CLI_VERBS = {
+    "event": "events",
+    "ai_artifact": "ai artifacts",
+    "observation": "observation list CLAIM",
+    "killtest": "test",
+}
+
+
 class NotFound(EngineError):
     """A referenced record does not exist."""
 
     def __init__(self, kind: str, ref: str) -> None:
+        verb = _CLI_VERBS.get(kind, f"{kind} list")
         super().__init__(
             f"{kind} not found: {ref}",
             f"no {kind} with that identifier exists in this database.",
-            f"run `python -m engine {kind} list` to see the identifiers that exist.",
+            f"run `python -m engine {verb}` to see the identifiers that exist.",
         )

@@ -22,19 +22,24 @@ def integrity_check(conn: sqlite3.Connection) -> dict:
     ]
     counts: Dict[str, int] = {}
     for table in (
-        "research", "source", "question", "claim", "hypothesis", "killtest",
+        "research", "source", "question", "claim", "edge", "hypothesis", "killtest",
         "test_run", "test_attempt", "verdict", "invalidation", "event",
-        "observation", "protocol",
+        "observation", "protocol", "ai_artifact",
     ):
         counts[table] = int(
             conn.execute(f"SELECT COUNT(*) AS n FROM {table}").fetchone()["n"]
         )
     schema = conn.execute("SELECT version FROM schema_meta").fetchone()
+    try:
+        version = int(schema["version"]) if schema else 0
+    except (TypeError, ValueError):
+        version = 0
+    version_ok = version == SCHEMA_VERSION
     return {
-        "ok": quick == ["ok"] and not foreign,
+        "ok": quick == ["ok"] and not foreign and version_ok,
         "integrity": quick,
         "foreign_key_violations": foreign,
-        "schema_version": int(schema["version"]) if schema else 0,
+        "schema_version": version,
         "expected_schema_version": SCHEMA_VERSION,
         "journal_mode": str(conn.execute("PRAGMA journal_mode").fetchone()[0]),
         "counts": counts,
@@ -54,6 +59,12 @@ def backup(conn: sqlite3.Connection, destination: Path) -> dict:
             f"backup target already exists: {target}",
             "an existing file is never overwritten by a backup.",
             "choose a new path, or delete the old backup first.",
+        )
+    if conn.in_transaction:
+        raise EngineError(
+            "the database has an open write transaction",
+            "backing up mid-transaction would snapshot uncommitted state or block.",
+            "commit or roll back first, then retry the backup.",
         )
     target.parent.mkdir(parents=True, exist_ok=True)
     fd, temporary = tempfile.mkstemp(prefix=f".{target.name}.tmp_", dir=str(target.parent))
