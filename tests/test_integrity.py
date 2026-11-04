@@ -201,6 +201,15 @@ class IntegrityTests(DatabaseCase):
         add_source(self.conn, research, "Same Title!", year=2021)
         self.assertIn("DUP-002", codes(check(self.conn)))
 
+    def test_corrupt_schema_ledger_is_an_error(self) -> None:
+        self.add_research()
+        self.assertNotIn("SCHEMA-001", codes(check(self.conn)))
+        self.conn.execute("INSERT INTO schema_meta(version) VALUES (11)")
+        self.assertIn("SCHEMA-001", codes(check(self.conn)))
+        self.conn.execute("DELETE FROM schema_meta")
+        self.conn.execute("INSERT INTO schema_meta(version) VALUES ('abc')")
+        self.assertIn("SCHEMA-001", codes(check(self.conn)))
+
     def test_rendered_table_escapes_untrusted_text(self) -> None:
         from engine.models import Finding
 

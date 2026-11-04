@@ -334,9 +334,9 @@ cheap size bucket before an exact SHA-256 comparison.
 
 **Rule here.** `engine/duplicates.py` strips DOI resolver prefixes and case-folds the DOI, folds
 accents, case and punctuation from the title, and groups sources by DOI first, then normalized
-title/year, then title alone. A DOI or title/year group produces a `DUP-002` warning; a title-only
-group is reported by `source duplicates` as a variant because a preprint and a published version
-can legitimately share a title. Groups never cross a program boundary, the lowest identifier is
+title/year, then title alone. A DOI, title/year, or title-variant group produces a `DUP-002`
+warning; the variant reason names a shared normalized title across years because a preprint
+and a published version can legitimately share a title. Groups never cross a program boundary, the lowest identifier is
 the suggested survivor, and nothing is deleted or merged automatically.
 
 **Deliberately not copied.** File hashing, reclaimable-space accounting and automatic merging. A

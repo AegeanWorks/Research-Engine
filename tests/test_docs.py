@@ -74,7 +74,7 @@ class DocsTests(unittest.TestCase):
         text = (ROOT / "README.md").read_text(encoding="utf-8")
         self.assertIn(f"schema version {SCHEMA_VERSION}", text)
         for code in ("EVID-005", "EVID-006", "EVID-008", "EVID-009", "PROV-003", "SCREEN-001",
-                     "TEST-001", "OBS-001", "DUP-002"):
+                     "TEST-001", "OBS-001", "DUP-002", "SCHEMA-001"):
             self.assertIn(code, text)
         self.assertIn("--group", text)
         self.assertIn("--strict", text)

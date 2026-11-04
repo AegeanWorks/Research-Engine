@@ -126,6 +126,24 @@ def check(conn: sqlite3.Connection) -> List[Finding]:
     """Return every integrity finding; an empty list means the graph is coherent."""
     findings: List[Finding] = []
 
+    meta_rows = conn.execute("SELECT version FROM schema_meta").fetchall()
+    meta_ok = len(meta_rows) == 1
+    if meta_ok:
+        try:
+            int(meta_rows[0]["version"])
+        except (TypeError, ValueError):
+            meta_ok = False
+    if not meta_ok:
+        findings.append(
+            _finding(
+                "SCHEMA-001",
+                "error",
+                "schema_meta",
+                "the schema ledger is corrupt: expected exactly one integer version row",
+                "restore the database from a backup; never hand-edit schema_meta.",
+            )
+        )
+
     for row in conn.execute(
         "SELECT * FROM claim WHERE kind = 'empirical'"
         " AND (source_id IS NULL OR trim(quote) = '' OR trim(locator) = '')"

@@ -238,7 +238,7 @@ present and 0 when only warnings remain. Domain errors print the `Error / Why / 
 - outcome timestamps before registration (`PRE-001`);
 - evidence gaps (`GAP-001`, `GAP-002`), duplicate claim text (`DUP-001`, live claims only),
   empty programs (`EMPTY-001`);
-- duplicate source identity by normalized DOI or title/year (`DUP-002`, warning);
+- duplicate source identity (`DUP-002`, warning);
 - a test that produced verified evidence without a negative control (`EVID-008`, warning) or
   whose declared control never failed (`EVID-009`, error);
 - a live quote that restates a linked question, duplicates another live quote, or has no content
@@ -256,6 +256,7 @@ present and 0 when only warnings remain. Domain errors print the `Error / Why / 
 - AI provenance: an AI citation that resolves nowhere (`AI-001`), an AI-origin
   claim proven without a twice-passing test (`AI-002`), an AI test off its fixed
   template (`AI-003`).
+- a corrupt schema ledger (`SCHEMA-001`).
 
 Warnings are research hygiene; errors block a trustworthy report.
 
