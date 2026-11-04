@@ -8,9 +8,9 @@
 ## 📊 Codebase Metrics
 - **Total Python Modules**: `83`
 - **Total Classes**: `77`
-- **Total Top-Level Functions**: `265`
-- **Total Class Methods**: `566`
-- **Total Source Lines**: `16824`
+- **Total Top-Level Functions**: `267`
+- **Total Class Methods**: `569`
+- **Total Source Lines**: `16907`
 
 ---
 
@@ -209,7 +209,7 @@
 ### [`engine/context.py`](engine/context.py)
 > *Token-budgeted views: the same graph, measured in tokens for an agent reader.*
 
-**Size**: `192` lines (`7522` bytes)
+**Size**: `192` lines (`7536` bytes)
 
 **Classes:**
 - `class View` - *A rendered, bounded view of one program.*
@@ -651,11 +651,13 @@
 ### [`engine/synthesis.py`](engine/synthesis.py)
 > *Evidence synthesis: weighted consensus, contradiction pairs, and generated reports.*
 
-**Size**: `410` lines (`16822` bytes)
+**Size**: `456` lines (`18608` bytes)
 
 **Functions:**
 - `def stance_claims(conn, question_id)`
 - `def consensus(conn, question_ref)` - *Confidence-weighted support minus contradiction in [-1, 1].*
+- `def coverage(conn, question_ref)` - *Tested fraction and source breadth behind a question's stances.*
+- `def consensus_display(conn, question_ref)` - *The reportable consensus: a number with coverage, or an explicit refusal.*
 - `def _contradictions(conn, question_id)`
 - `def _provenance_cell(conn, row)`
 - `def report(conn, research_ref)` - *Render a full, reproducible research report from the graph.*
@@ -1658,12 +1660,15 @@
 ### [`tests/test_synthesis.py`](tests/test_synthesis.py)
 > *Consensus weighting and generated reports.*
 
-**Size**: `126` lines (`5774` bytes)
+**Size**: `163` lines (`7512` bytes)
 
 **Classes:**
 - `class SynthesisTests`
   - Method `._question_with_opposition()`
   - Method `.test_consensus_weights_status_and_confidence()`
+  - Method `.test_uncovered_question_reports_insufficient_instead_of_a_number()`
+  - Method `.test_single_source_cannot_crown_a_claim()`
+  - Method `.test_covered_question_displays_its_consensus()`
   - Method `.test_report_contains_evidence_and_contradictions()`
   - Method `.test_report_pairs_answers_with_contradictions()`
   - Method `.test_scorecard_orders_failed_claims_first()`

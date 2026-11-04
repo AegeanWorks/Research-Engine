@@ -13,7 +13,7 @@ from engine.killtests import list_runs
 from engine.models import CLAIM_STATUSES
 from engine.questions import list_questions
 from engine.researches import get_research, research_counts
-from engine.synthesis import consensus, stance_claims
+from engine.synthesis import consensus_display, stance_claims
 
 CHARS_PER_TOKEN = 4
 DEFAULT_BUDGET = 800
@@ -110,7 +110,7 @@ def outline(conn: sqlite3.Connection, research_ref: str, budget: int = DEFAULT_B
         evidence = len(stance_claims(conn, question.id))
         lines.append(
             f"Q {question.id} [{question.status}] evidence={evidence}"
-            f" consensus={consensus(conn, question.id):+.2f} {_clip(question.text, 90)}"
+            f" consensus={consensus_display(conn, question.id)} {_clip(question.text, 90)}"
         )
     for row in conn.execute(
         "SELECT id, status, confidence, statement FROM hypothesis"
@@ -145,7 +145,7 @@ def brief(conn: sqlite3.Connection, research_ref: str, budget: int = DEFAULT_BUD
     for question in list_questions(conn, research.id):
         rows = stance_claims(conn, question.id)
         lines.append(
-            f"Q {question.id} consensus={consensus(conn, question.id):+.2f}"
+            f"Q {question.id} consensus={consensus_display(conn, question.id)}"
             f" evidence={len(rows)} {_clip(question.text, 80)}"
         )
         support = [row for _cid, rel, row in rows if rel in ("supports", "answers")]

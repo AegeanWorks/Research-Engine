@@ -83,8 +83,8 @@ engine hosts.
     closed-taxonomy reason; `source prisma` shows the flow, and citing an excluded source
     warns (`SCREEN-001`).
 15. **Measurements are recorded, not retyped.** `observation add` stores each value in a named
-    group, with optional instrument, rater, protocol and unit; `analysis stats` refuses
-    incomparable groups unless `--allow-incomparable` is explicit, and `--provenance-class
+   group, with optional instrument, rater, protocol and unit. Incomparable groups need
+   `--allow-incomparable` to compare, and `--provenance-class
     self_reported` quarantines a system-produced number. `observation void` retires one with a
     reason. Missing statistics warn (`OBS-001`), as do unprovenanced, unclassified and
     self-reported measurements (`OBS-002`..`OBS-004`).
@@ -355,10 +355,10 @@ research-engine/
 - **No literature crawling.** Sources are registered explicitly.
 - **Single writer.** One researcher or agent at a time.
 - **Consensus is a display heuristic.** It is not a posterior and never changes a verdict;
-  UNKNOWN contributes zero.
+  UNKNOWN contributes zero. Numbers need tested coverage from more than one source.
 - **Search is lexical.** No embeddings; ranking is an exact phrase, then matched terms.
-- **Calibration is descriptive.** It scores recorded probabilities, not the world; a small
-  resolved set is labelled descriptive rather than decisive.
+- **Calibration is descriptive.** It scores recorded probabilities, not the world; small
+  resolved sets read descriptive.
 - **Discovery is advisory.** `analysis` proposes; only `claim link` records a relation.
 - **Statistics describe the recorded numbers; independence is assumed.**
 - **Rank tests are exact for untied small samples, tie-corrected otherwise.**

@@ -657,3 +657,20 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   typo corrections no longer bypass the record. No integrity finding is attached to
   exploratory runs yet: verdict-time linkage of evidence groups to plans is the
   follow-up, not this milestone.
+
+### ADR-046: Coverage-gated consensus display
+- **Date**: 2026-11-04
+- **Status**: Accepted
+- **Context**: IDEA-978. The consensus number weighted status by confidence with no
+  coverage fraction: one untested stance, or a single cited source, could crown a
+  claim with a confident-looking score.
+- **Decision**: New `coverage()` (tested fraction over `PROVEN`/`NUMERIC`/
+  `FALSIFIED` stances plus distinct cited sources) and `consensus_display()`: a
+  number prints only with at least half the stances tested and never from exactly
+  one source (unsourced questions judge on tests alone). `consensus()` stays a pure
+  number for composition; the report, outline and brief views print the display
+  string, which names the shortfall when it refuses.
+- **Consequences**: Thin or single-sourced questions read as `insufficient coverage`
+  instead of a score; well-tested questions are unchanged. The half-coverage bar
+  and the source rule are tripwires, not proofs; tuning them is a calibration
+  follow-up, not this milestone.

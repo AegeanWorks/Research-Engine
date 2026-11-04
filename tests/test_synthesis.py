@@ -33,6 +33,43 @@ class SynthesisTests(DatabaseCase):
         _, question, _, _ = self._question_with_opposition()
         self.assertAlmostEqual(consensus(self.conn, question), 0.6364, places=4)
 
+    def test_uncovered_question_reports_insufficient_instead_of_a_number(self) -> None:
+        from engine.synthesis import consensus_display
+
+        research = self.add_research()
+        question = add_question(self.conn, research, "Does S drive O?")
+        lone = add_claim(
+            self.conn, research, "S drives O.", "assumption",
+            confidence=0.9, kill_test="A cohort in which O stays flat.",
+        )
+        link_to_question(self.conn, lone.id, question.id, "supports")
+        display = consensus_display(self.conn, question.id)
+        self.assertTrue(display.startswith("insufficient"))
+
+    def test_single_source_cannot_crown_a_claim(self) -> None:
+        from engine.synthesis import consensus, consensus_display
+
+        research = self.add_research()
+        question = add_question(self.conn, research, "Does S drive O?")
+        source = self.add_source(research)
+        for text in ("S rises with O.", "S rises with O again."):
+            claim = add_claim(
+                self.conn, research, text, "empirical", source_ref=source,
+                quote=text, locator="p.1", kill_test="A replicate.",
+            )
+            force_numeric(self.conn, claim.id)
+            link_to_question(self.conn, claim.id, question.id, "supports")
+        self.assertAlmostEqual(consensus(self.conn, question.id), 1.0, places=4)
+        self.assertTrue(
+            consensus_display(self.conn, question.id).startswith("insufficient")
+        )
+
+    def test_covered_question_displays_its_consensus(self) -> None:
+        from engine.synthesis import consensus_display
+
+        _, question, _, _ = self._question_with_opposition()
+        self.assertEqual(consensus_display(self.conn, question), "+0.6364")
+
     def test_report_contains_evidence_and_contradictions(self) -> None:
         research, question, support, against = self._question_with_opposition()
         text = report(self.conn, research)

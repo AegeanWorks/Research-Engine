@@ -34,6 +34,12 @@ LIMITS = (
     "Single-writer SQLite; concurrent authorship is out of scope.",
 )
 
+COVERED_STATUSES = ("PROVEN", "NUMERIC", "FALSIFIED")
+"""Stances that count as tested: verdicts which required an evidence path."""
+
+MIN_CONSENSUS_COVERAGE = 0.5
+"""Half the linked stances must be tested before a consensus number displays."""
+
 
 def stance_claims(conn: sqlite3.Connection, question_id: str) -> List[Tuple[str, str, sqlite3.Row]]:
     rows = conn.execute(
@@ -57,6 +63,46 @@ def consensus(conn: sqlite3.Connection, question_ref: str) -> float:
             against += weight
     total = support + against
     return 0.0 if total == 0 else round((support - against) / total, 4)
+
+
+def coverage(conn: sqlite3.Connection, question_ref: str) -> dict:
+    """Tested fraction and source breadth behind a question's stances.
+
+    A stance counts as tested when its verdict required an evidence path. A single
+    cited source never suffices on its own: one source can crown nothing, so a
+    lone-source question stays insufficient however tested it is. A question with
+    no sourced stances at all judges on tests alone.
+    """
+    stances = stance_claims(conn, question_ref)
+    total = len(stances)
+    covered = sum(
+        1 for _, _, row in stances if str(row["status"]) in COVERED_STATUSES
+    )
+    sources = {str(row["source_id"] or "") for _, _, row in stances} - {""}
+    sufficient = (
+        total > 0
+        and covered / total >= MIN_CONSENSUS_COVERAGE
+        and len(sources) != 1
+    )
+    return {
+        "total": total,
+        "covered": covered,
+        "distinct_sources": len(sources),
+        "sufficient": sufficient,
+    }
+
+
+def consensus_display(conn: sqlite3.Connection, question_ref: str) -> str:
+    """The reportable consensus: a number with coverage, or an explicit refusal."""
+    detail = coverage(conn, question_ref)
+    if detail["total"] == 0:
+        return "insufficient coverage (no linked claims)"
+    if not detail["sufficient"]:
+        note = f"{detail['covered']}/{detail['total']} tested"
+        if detail["distinct_sources"] == 1:
+            note += ", single source"
+        return f"insufficient coverage ({note})"
+    return f"{consensus(conn, question_ref):+.4f}"
 
 
 def _contradictions(conn: sqlite3.Connection, question_id: str) -> List[Tuple[str, str]]:
@@ -133,7 +179,7 @@ def report(conn: sqlite3.Connection, research_ref: str) -> str:
                 f"### {question.id}: {bullet(question.text, 160)}",
                 "",
                 f"- status: {question.status}",
-                f"- consensus: {consensus(conn, question.id):+.4f} (support vs contradiction, weighted)",
+                f"- consensus: {consensus_display(conn, question.id)} (support vs contradiction, weighted)",
                 f"- evidence: {len(stance_rows)} claim(s)",
                 "",
             ]
