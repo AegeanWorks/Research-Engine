@@ -9,8 +9,8 @@
 - **Total Python Modules**: `80`
 - **Total Classes**: `73`
 - **Total Top-Level Functions**: `250`
-- **Total Class Methods**: `527`
-- **Total Source Lines**: `15412`
+- **Total Class Methods**: `528`
+- **Total Source Lines**: `15439`
 
 ---
 
@@ -360,7 +360,7 @@
 ### [`engine/integrity.py`](engine/integrity.py)
 > *Graph integrity: provenance, evidence paths, dependency acyclicity and stale dependents.*
 
-**Size**: `810` lines (`31022` bytes)
+**Size**: `828` lines (`31621` bytes)
 
 **Functions:**
 - `def _finding(code, severity, subject, message, fix)`
@@ -980,7 +980,7 @@
 ### [`tests/test_docs.py`](tests/test_docs.py)
 > *Documentation and project memory stay discoverable and within budget.*
 
-**Size**: `107` lines (`3866` bytes)
+**Size**: `107` lines (`3880` bytes)
 
 **Classes:**
 - `class DocsTests`
@@ -1112,7 +1112,7 @@
 ### [`tests/test_integrity.py`](tests/test_integrity.py)
 > *Every integrity rule must detect the corruption it names.*
 
-**Size**: `353` lines (`15833` bytes)
+**Size**: `362` lines (`16314` bytes)
 
 **Classes:**
 - `class IntegrityTests`
@@ -1134,6 +1134,7 @@
   - Method `.test_stale_dependent_is_detected()`
   - Method `.test_both_failed_is_not_a_stale_dependent()`
   - Method `.test_title_variant_duplicate_warns()`
+  - Method `.test_corrupt_schema_ledger_is_an_error()`
   - Method `.test_rendered_table_escapes_untrusted_text()`
   - Method `.test_gaps_and_duplicates_are_warnings()`
   - Method `.test_empty_program_warns()`
