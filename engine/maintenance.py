@@ -46,20 +46,28 @@ def integrity_check(conn: sqlite3.Connection) -> dict:
     }
 
 
+def _refuse_if_exists(target: Path, because: str) -> None:
+    """Refuse to clobber an existing backup target."""
+    if target.exists():
+        raise EngineError(
+            f"backup target already exists: {target}",
+            because,
+            "choose a new path, or delete the old backup first.",
+        )
+
+
 def backup(conn: sqlite3.Connection, destination: Path) -> dict:
     """Copy the live database through SQLite's backup API and verify the copy.
 
     The copy is written to a temporary file in the destination directory, fsynced, verified with
     `PRAGMA integrity_check`, and only then moved into place with `os.replace`. A failed backup
-    therefore leaves no partial file that looks like a valid one.
+    therefore leaves no partial file that looks like a valid one. The pre-existing target check
+    runs again immediately before the move, so a file created during the backup is refused
+    instead of overwritten; a truly concurrent creator in the remaining microsecond window
+    is out of scope for a single-writer tool.
     """
     target = Path(destination)
-    if target.exists():
-        raise EngineError(
-            f"backup target already exists: {target}",
-            "an existing file is never overwritten by a backup.",
-            "choose a new path, or delete the old backup first.",
-        )
+    _refuse_if_exists(target, "an existing file is never overwritten by a backup.")
     if conn.in_transaction:
         raise EngineError(
             "the database has an open write transaction",
@@ -85,6 +93,9 @@ def backup(conn: sqlite3.Connection, destination: Path) -> dict:
             )
         with open(temporary, "rb+") as handle:
             os.fsync(handle.fileno())
+        _refuse_if_exists(
+            target, "a file appeared at the backup path while the backup was running."
+        )
         os.replace(temporary, target)
     except BaseException:
         with contextlib.suppress(OSError):

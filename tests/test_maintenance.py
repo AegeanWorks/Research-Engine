@@ -143,6 +143,15 @@ class MaintenanceTests(DatabaseCase):
         self.assertFalse(result["ok"])
         self.assertEqual(result["schema_version"], 0)
 
+    def test_backup_target_guard_refuses_existing_paths(self) -> None:
+        from engine.maintenance import _refuse_if_exists
+
+        target = self.dir / "taken.db"
+        target.write_text("x", encoding="utf-8")
+        with self.assertRaises(EngineError):
+            _refuse_if_exists(target, "taken")
+        _refuse_if_exists(self.dir / "free.db", "taken")
+
     def test_backup_of_a_database_with_events_copies_them(self) -> None:
         from engine.events import record
 
