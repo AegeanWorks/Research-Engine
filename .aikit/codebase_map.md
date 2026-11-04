@@ -8,9 +8,9 @@
 ## 📊 Codebase Metrics
 - **Total Python Modules**: `83`
 - **Total Classes**: `77`
-- **Total Top-Level Functions**: `271`
-- **Total Class Methods**: `574`
-- **Total Source Lines**: `17143`
+- **Total Top-Level Functions**: `272`
+- **Total Class Methods**: `576`
+- **Total Source Lines**: `17198`
 
 ---
 
@@ -655,7 +655,7 @@
 ### [`engine/synthesis.py`](engine/synthesis.py)
 > *Evidence synthesis: weighted consensus, contradiction pairs, and generated reports.*
 
-**Size**: `456` lines (`18608` bytes)
+**Size**: `478` lines (`19634` bytes)
 
 **Functions:**
 - `def stance_claims(conn, question_id)`
@@ -664,6 +664,7 @@
 - `def consensus_display(conn, question_ref)` - *The reportable consensus: a number with coverage, or an explicit refusal.*
 - `def _contradictions(conn, question_id)`
 - `def _provenance_cell(conn, row)`
+- `def _verdict_count(conn, research_id)` - *Verdicts adjudicating this program's claims or hypotheses.*
 - `def report(conn, research_ref)` - *Render a full, reproducible research report from the graph.*
 - `def scorecard(conn, research_ref)` - *Render one line per claim, ordered by status then identifier.*
 - `def claim_detail(conn, claim_ref)` - *Render one claim with provenance, dependencies, verdicts and linked tests.*
@@ -1078,7 +1079,7 @@
 ### [`tests/test_events.py`](tests/test_events.py)
 > *Event log: append-only record of actions that are not verdicts.*
 
-**Size**: `187` lines (`8224` bytes)
+**Size**: `190` lines (`8353` bytes)
 
 **Classes:**
 - `class EventTests`
@@ -1268,7 +1269,7 @@
 ### [`tests/test_manifest.py`](tests/test_manifest.py)
 > *Generated report manifests and drift detection.*
 
-**Size**: `188` lines (`8022` bytes)
+**Size**: `190` lines (`8101` bytes)
 
 **Classes:**
 - `class ManifestTests`
@@ -1315,7 +1316,7 @@
 ### [`tests/test_measurements.py`](tests/test_measurements.py)
 > *Measurement provenance and protocol comparability.*
 
-**Size**: `250` lines (`11038` bytes)
+**Size**: `253` lines (`11173` bytes)
 
 **Classes:**
 - `class MeasurementTests`
@@ -1669,7 +1670,7 @@
 ### [`tests/test_synthesis.py`](tests/test_synthesis.py)
 > *Consensus weighting and generated reports.*
 
-**Size**: `163` lines (`7512` bytes)
+**Size**: `188` lines (`8740` bytes)
 
 **Classes:**
 - `class SynthesisTests`
@@ -1679,6 +1680,8 @@
   - Method `.test_single_source_cannot_crown_a_claim()`
   - Method `.test_covered_question_displays_its_consensus()`
   - Method `.test_report_contains_evidence_and_contradictions()`
+  - Method `.test_report_without_any_verdict_is_refused()`
+  - Method `.test_empty_program_still_renders_scaffolding()`
   - Method `.test_report_pairs_answers_with_contradictions()`
   - Method `.test_scorecard_orders_failed_claims_first()`
   - Method `.test_claim_detail_shows_verdict_history()`

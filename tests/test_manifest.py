@@ -7,7 +7,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from engine.claims import add_claim
+from engine.claims import add_claim, set_verdict
 from engine.errors import EngineError
 from engine.manifest import (
     LICENSE_ID,
@@ -28,7 +28,10 @@ class ManifestTests(DatabaseCase):
         self.addCleanup(directory.cleanup)
         self.directory = Path(directory.name)
         self.research = self.add_research()
-        add_claim(self.conn, self.research, "Assumed premise.", "assumption", basis="a")
+        premise = add_claim(
+            self.conn, self.research, "Assumed premise.", "assumption", basis="a"
+        )
+        set_verdict(self.conn, premise.id, "FALSIFIED", "the premise failed")
 
     def test_write_report_creates_report_and_manifest(self) -> None:
         target = self.directory / "report.md"
@@ -142,7 +145,6 @@ class ManifestTests(DatabaseCase):
     def test_another_program_does_not_dirty_a_committed_report(self) -> None:
         from engine.demo import seed_demo
         from engine.researches import create_research
-        from engine.claims import add_claim
 
         demo = seed_demo(self.conn)
         target = self.directory / "scoped.md"

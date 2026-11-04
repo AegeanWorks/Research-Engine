@@ -65,8 +65,8 @@ engine hosts.
    contradictions, gaps and audit findings from the graph. `report --out` also writes a manifest
    with a content digest, an exact record digest, the report digest, counts, findings and limits.
    `report --check` compares content; `--strict` compares exact records. An export carries its own
-   digest, so `export --check` proves a snapshot intact and refuses an unread schema. No number is
-   hand-written.
+   digest, so    `export --check` proves a snapshot intact and refuses an unread schema. No number is
+   hand-written; verdict-less programs are refused, not rendered.
 9. **Sources can be retired.** `source status` notes concern; `source retract`
    retires every claim citing that work, twins included, and cascades.
 10. **Missing evidence is explicit.** `claim verdict --status UNKNOWN` records what evidence
@@ -77,9 +77,9 @@ engine hosts.
 12. **Duplicates merge; refinements revise.** `claim merge` repoints edges and bound tests to
     the survivor and records duplicates as RETRACTED. `claim revise` supersedes the old claim,
     moves its edges to the new head, and starts untested; old verdicts stay visible.
-13. **A test must be able to fail.** `test add --control CMD` declares a negative control that
-    must fail reproducibly. A test that has produced verified evidence without a control is a
-    warning (`EVID-008`); a declared control that does not fail is an error (`EVID-009`).
+13. **A test must be able to fail.** `test add --control CMD` declares a reproducibly-failing
+    negative control. A verified test without a control warns (`EVID-008`); a control that
+    never fails errors (`EVID-009`).
 14. **Sources are screened.** `source screen` moves a source through the lifecycle with a
     closed-taxonomy reason; `source prisma` shows the flow, and citing an excluded source
     warns (`SCREEN-001`).
@@ -93,8 +93,8 @@ engine hosts.
     migrations append to a hash-chained log; `events --verify` checks continuity,
     `events --tree`/`--path` render causality.
 17. **Discovery is lexical and bounded.** `search` ranks claims, sources, questions and hypotheses
-    by an exact phrase then matched terms, reports the matched field with a snippet, and packs
-    text output to `--budget`; `source duplicates` groups normalized DOI and title matches, and
+    by an exact phrase then matched terms, reports the matched field, and packs text to
+    `--budget`; `source duplicates` groups normalized DOI and title matches, and
     `DUP-002` warns on a hard duplicate.
 18. **Confidence is scored, not just stored.** `analysis calibration` computes Brier, log loss,
     reliability bins, coverage and a baseline skill score from preregistered confidence and

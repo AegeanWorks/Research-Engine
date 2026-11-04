@@ -230,10 +230,13 @@ class MeasurementTests(DatabaseCase):
             claim_statistics(self.conn, self.claim, "baseline", "treatment", resamples=50)
 
     def test_self_reported_measurements_are_separated_in_the_report(self) -> None:
+        from engine.claims import set_verdict
+
         for value in (1.0, 1.1, 1.2):
             self._add("baseline", value)
         self._add("baseline", 9.0, provenance_class="self_reported",
                   producer_path="engine/analysis.py")
+        set_verdict(self.conn, self.claim, "FALSIFIED", "the effect did not replicate")
         text = report(self.conn, self.research)
         self.assertIn("### Self-reported measurements", text)
 

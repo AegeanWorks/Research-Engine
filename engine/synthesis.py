@@ -7,6 +7,7 @@ from typing import Dict, List, Tuple
 
 from engine.calibration import summary as calibration_summary
 from engine.claims import get_claim
+from engine.errors import EngineError
 from engine.integrity import findings_for_research
 from engine.markdown import bullet, cell, code, sanitize
 from engine.questions import list_questions
@@ -124,10 +125,31 @@ def _provenance_cell(conn: sqlite3.Connection, row: sqlite3.Row) -> str:
     return "-"
 
 
+def _verdict_count(conn: sqlite3.Connection, research_id: str) -> int:
+    """Verdicts adjudicating this program's claims or hypotheses."""
+    row = conn.execute(
+        "SELECT COUNT(*) AS n FROM verdict WHERE"
+        " (subject_kind = 'claim' AND subject_id IN"
+        " (SELECT id FROM claim WHERE research_id = ?))"
+        " OR (subject_kind = 'hypothesis' AND subject_id IN"
+        " (SELECT id FROM hypothesis WHERE research_id = ?))",
+        (research_id, research_id),
+    ).fetchone()
+    return int(row["n"])
+
+
 def report(conn: sqlite3.Connection, research_ref: str) -> str:
     """Render a full, reproducible research report from the graph."""
     research = get_research(conn, research_ref)
     counts = research_counts(conn, research.id)
+    if counts["claim"] and not _verdict_count(conn, research.id):
+        raise EngineError(
+            "report has no answered items",
+            "the program records claims but no verdict adjudicates any of them, so a"
+            " report would present unjudged claims as findings.",
+            "record verdicts with `claim verdict` or `hypothesis outcome`, or read the"
+            " work-in-progress with `brief`, `outline` or `scorecard`.",
+        )
     findings = findings_for_research(conn, research.id)
     lines = [
         f"# {sanitize(research.title, 200)}",

@@ -691,3 +691,18 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Consequences**: Bound actions fail closed on drift instead of retiring a
   changed graph. Operators who skip the digest keep today's behavior with today's
   risk, stated in the refusal text.
+
+### ADR-048: Reports refuse verdict-less programs
+- **Date**: 2026-11-04
+- **Status**: Accepted
+- **Context**: IDEA-1103. `report()` rendered even with zero answered items: a
+  program of bare claims produced a trustworthy-looking document with no
+  adjudication behind it.
+- **Decision**: `report()` refuses when the program holds claims but no verdict
+  adjudicates any claim or hypothesis, naming `claim verdict` /
+  `hypothesis outcome` and the WIP views (`brief`, `outline`, `scorecard`) in the
+  fix. Empty programs still render scaffolding; `scorecard`, `brief` and
+  `outline` are untouched.
+- **Consequences**: Unadjudicated work can no longer ship as a report; WIP reading
+  moves to the summary views. Three report fixtures gained a `FALSIFIED` verdict
+  to keep exercising the rendered sections.

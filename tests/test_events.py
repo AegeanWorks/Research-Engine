@@ -98,8 +98,11 @@ class EventTests(DatabaseCase):
         self.assertIn(drop.id, events[0].detail)
 
     def test_report_generation_is_recorded(self) -> None:
+        from engine.claims import set_verdict
+
         research = self.add_research()
-        add_claim(self.conn, research, "A.", "assumption", basis="a")
+        claim = add_claim(self.conn, research, "A.", "assumption", basis="a")
+        set_verdict(self.conn, claim.id, "FALSIFIED", "the claim failed")
         directory = tempfile.TemporaryDirectory()
         self.addCleanup(directory.cleanup)
         write_report(self.conn, research, Path(directory.name) / "r.md")

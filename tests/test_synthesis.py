@@ -5,6 +5,7 @@ from __future__ import annotations
 import unittest
 
 from engine.claims import add_claim, link_to_question, set_verdict
+from engine.errors import EngineError
 from engine.questions import add_question
 from engine.claims import add_claim
 from engine.synthesis import claim_detail, consensus, inventory, report, scorecard
@@ -71,13 +72,34 @@ class SynthesisTests(DatabaseCase):
         self.assertEqual(consensus_display(self.conn, question), "+0.6364")
 
     def test_report_contains_evidence_and_contradictions(self) -> None:
+        from engine.claims import set_verdict
+
         research, question, support, against = self._question_with_opposition()
+        set_verdict(self.conn, support, "PROVEN", "the cohort held")
         text = report(self.conn, research)
         self.assertIn("Does S drive O?", text)
         self.assertIn(support, text)
         self.assertIn(against, text)
         self.assertIn("Contradictions", text)
         self.assertIn("consensus", text)
+
+    def test_report_without_any_verdict_is_refused(self) -> None:
+        research = self.add_research()
+        question = add_question(self.conn, research, "Does S drive O?")
+        lone = add_claim(
+            self.conn, research, "S drives O.", "assumption",
+            confidence=0.9, kill_test="A cohort in which O stays flat.",
+        )
+        link_to_question(self.conn, lone.id, question.id, "supports")
+        with self.assertRaises(EngineError) as caught:
+            report(self.conn, research)
+        self.assertIn("verdict", str(caught.exception.fix))
+
+    def test_empty_program_still_renders_scaffolding(self) -> None:
+        research = self.add_research()
+        text = report(self.conn, research)
+        self.assertIn("- claims: 0", text)
+        self.assertIn("_No questions recorded._", text)
 
     def test_report_pairs_answers_with_contradictions(self) -> None:
         research, question, _, against = self._question_with_opposition()
@@ -111,6 +133,7 @@ class SynthesisTests(DatabaseCase):
             "assumption", basis="b",
         )
         link_to_question(self.conn, claim.id, question.id, "supports")
+        set_verdict(self.conn, claim.id, "FALSIFIED", "the cohort rejected it")
         text = report(self.conn, research)
         rows = [line for line in text.splitlines() if line.startswith(f"| {claim.id}")]
         self.assertEqual(len(rows), 1)
@@ -133,7 +156,8 @@ class SynthesisTests(DatabaseCase):
 
     def test_report_excludes_another_programs_findings(self) -> None:
         research = self.add_research("Own program")
-        add_claim(self.conn, research, "Own claim.", "assumption", basis="a")
+        own = add_claim(self.conn, research, "Own claim.", "assumption", basis="a")
+        set_verdict(self.conn, own.id, "FALSIFIED", "the cohort rejected it")
         other = self.add_research("Other program")
         broken = add_claim(self.conn, other, "Foreign claim.", "assumption", basis="b")
         self.conn.execute("UPDATE claim SET kind = 'empirical' WHERE id = ?", (broken.id,))
@@ -153,6 +177,7 @@ class SynthesisTests(DatabaseCase):
         for value in (2.0, 2.2, 2.4):
             add_observation(self.conn, claim.id, "treatment", value)
         claim_statistics(self.conn, claim.id, "baseline", "treatment", resamples=50)
+        set_verdict(self.conn, claim.id, "FALSIFIED", "the effect did not replicate")
         text = report(self.conn, research)
         self.assertIn("## Measurements", text)
         self.assertIn("| baseline | 3 |", text)
