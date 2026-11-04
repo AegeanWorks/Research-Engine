@@ -9,8 +9,8 @@
 - **Total Python Modules**: `80`
 - **Total Classes**: `73`
 - **Total Top-Level Functions**: `250`
-- **Total Class Methods**: `526`
-- **Total Source Lines**: `15378`
+- **Total Class Methods**: `527`
+- **Total Source Lines**: `15412`
 
 ---
 
@@ -149,7 +149,7 @@
 ### [`engine/claims.py`](engine/claims.py)
 > *Claims: the unit of knowledge, with provenance and an append-only verdict history.*
 
-**Size**: `571` lines (`22359` bytes)
+**Size**: `588` lines (`23083` bytes)
 
 **Functions:**
 - `def _to_claim(row)`
@@ -833,7 +833,7 @@
 ### [`tests/test_claims.py`](tests/test_claims.py)
 > *Provenance requirements and the append-only verdict lifecycle.*
 
-**Size**: `209` lines (`8736` bytes)
+**Size**: `226` lines (`9687` bytes)
 
 **Classes:**
 - `class ClaimTests`
@@ -855,6 +855,7 @@
   - Method `.test_revision_of_must_exist_in_the_same_program()`
   - Method `.test_revise_refuses_itself_as_a_prerequisite()`
   - Method `.test_record_edge_validates_its_endpoints()`
+  - Method `.test_record_edge_validates_the_relation()`
 
 ---
 
