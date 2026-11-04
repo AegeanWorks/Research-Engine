@@ -9,8 +9,8 @@
 - **Total Python Modules**: `80`
 - **Total Classes**: `73`
 - **Total Top-Level Functions**: `250`
-- **Total Class Methods**: `536`
-- **Total Source Lines**: `15597`
+- **Total Class Methods**: `539`
+- **Total Source Lines**: `15644`
 
 ---
 
@@ -360,12 +360,12 @@
 ### [`engine/integrity.py`](engine/integrity.py)
 > *Graph integrity: provenance, evidence paths, dependency acyclicity and stale dependents.*
 
-**Size**: `828` lines (`31621` bytes)
+**Size**: `846` lines (`32176` bytes)
 
 **Functions:**
 - `def _finding(code, severity, subject, message, fix)`
 - `def _entity(conn, kind, ref)`
-- `def _cycles(conn)`
+- `def _cycles(conn, relations)`
 - `def _quote_quality(conn)` - *Warn when a live quote restates a question, duplicates another quote, or is empty.*
 - `def check(conn)` - *Return every integrity finding; an empty list means the graph is coherent.*
 - `def has_errors(findings)` - *Return True when at least one finding blocks a verdict.*
@@ -450,7 +450,7 @@
 ### [`engine/models.py`](engine/models.py)
 > *Frozen domain records and the engine's closed vocabularies.*
 
-**Size**: `248` lines (`5557` bytes)
+**Size**: `249` lines (`5621` bytes)
 
 **Classes:**
 - `class Research`
@@ -1114,7 +1114,7 @@
 ### [`tests/test_integrity.py`](tests/test_integrity.py)
 > *Every integrity rule must detect the corruption it names.*
 
-**Size**: `362` lines (`16314` bytes)
+**Size**: `390` lines (`17735` bytes)
 
 **Classes:**
 - `class IntegrityTests`
@@ -1131,6 +1131,9 @@
   - Method `.test_failed_status_needs_evidence()`
   - Method `.test_hypothesis_outcome_needs_verdict()`
   - Method `.test_dependency_cycle_is_detected()`
+  - Method `.test_mutual_support_cycle_is_flagged()`
+  - Method `.test_support_ring_is_flagged()`
+  - Method `.test_one_way_support_is_not_a_cycle()`
   - Method `.test_dangling_and_self_edges_are_detected()`
   - Method `.test_cross_program_edge_is_detected()`
   - Method `.test_stale_dependent_is_detected()`

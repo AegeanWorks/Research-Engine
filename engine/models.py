@@ -43,6 +43,7 @@ SCREENING_REASONS = (
 )
 AI_KINDS = ("sweep", "extraction", "idea", "draft")
 DEPENDENCY_RELATIONS = ("derived_from", "depends_on")
+CORROBORATION_RELATIONS = ("supports", "extends", "replicates")
 CLAIM_CLAIM_RELATIONS = (
     "supports",
     "contradicts",

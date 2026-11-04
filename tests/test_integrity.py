@@ -147,6 +147,34 @@ class IntegrityTests(DatabaseCase):
         link_claims(self.conn, second.id, first.id, "depends_on")
         self.assertIn("GRAPH-001", codes(check(self.conn)))
 
+    def test_mutual_support_cycle_is_flagged(self) -> None:
+        research = self.add_research()
+        first = add_claim(self.conn, research, "First.", "assumption", basis="a")
+        second = add_claim(self.conn, research, "Second.", "assumption", basis="b")
+        link_claims(self.conn, first.id, second.id, "supports")
+        link_claims(self.conn, second.id, first.id, "supports")
+        found = codes(check(self.conn))
+        self.assertIn("GRAPH-004", found)
+        self.assertNotIn("GRAPH-001", found)
+
+    def test_support_ring_is_flagged(self) -> None:
+        research = self.add_research()
+        made = [
+            add_claim(self.conn, research, f"Claim {name}.", "assumption", basis=name)
+            for name in ("a", "b", "c")
+        ]
+        link_claims(self.conn, made[0].id, made[1].id, "extends")
+        link_claims(self.conn, made[1].id, made[2].id, "replicates")
+        link_claims(self.conn, made[2].id, made[0].id, "supports")
+        self.assertIn("GRAPH-004", codes(check(self.conn)))
+
+    def test_one_way_support_is_not_a_cycle(self) -> None:
+        research = self.add_research()
+        first = add_claim(self.conn, research, "First.", "assumption", basis="a")
+        second = add_claim(self.conn, research, "Second.", "assumption", basis="b")
+        link_claims(self.conn, first.id, second.id, "supports")
+        self.assertNotIn("GRAPH-004", codes(check(self.conn)))
+
     def test_dangling_and_self_edges_are_detected(self) -> None:
         self.conn.execute(
             "INSERT INTO edge(id, src_kind, src_id, dst_kind, dst_id, rel, created_at)"

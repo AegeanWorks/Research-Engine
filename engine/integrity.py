@@ -16,6 +16,7 @@ from engine.evidence import (
 from engine.killtests import get_test
 from engine.models import (
     BROKEN_SOURCE_STATUSES,
+    CORROBORATION_RELATIONS,
     DEPENDENCY_RELATIONS,
     FAILED_STATUSES,
     Finding,
@@ -38,12 +39,15 @@ def _entity(conn: sqlite3.Connection, kind: str, ref: str) -> sqlite3.Row | None
     return conn.execute(f"SELECT * FROM {table} WHERE id = ?", (ref,)).fetchone()
 
 
-def _cycles(conn: sqlite3.Connection) -> List[List[str]]:
-    marks = ",".join("?" for _ in DEPENDENCY_RELATIONS)
+def _cycles(
+    conn: sqlite3.Connection, relations: Iterable[str] = DEPENDENCY_RELATIONS
+) -> List[List[str]]:
+    rels = tuple(relations)
+    marks = ",".join("?" for _ in rels)
     rows = conn.execute(
         f"SELECT src_id, dst_id FROM edge WHERE src_kind = 'claim' AND dst_kind = 'claim'"
         f" AND rel IN ({marks}) ORDER BY src_id, dst_id",
-        DEPENDENCY_RELATIONS,
+        rels,
     ).fetchall()
     graph: Dict[str, List[str]] = {}
     for row in rows:
@@ -385,6 +389,20 @@ def check(conn: sqlite3.Connection) -> List[Finding]:
                 cycle[0],
                 "dependency cycle: " + " -> ".join(cycle),
                 "remove one dependency edge so premises form a DAG.",
+            )
+        )
+
+    for cycle in _cycles(conn, CORROBORATION_RELATIONS):
+        if len(set(cycle)) < 2:
+            continue
+        findings.append(
+            _finding(
+                "GRAPH-004",
+                "warning",
+                cycle[0],
+                "corroboration cycle: " + " -> ".join(cycle),
+                "break the ring: mutual support is circular;"
+                " keep the stronger direction or route both through shared evidence.",
             )
         )
 

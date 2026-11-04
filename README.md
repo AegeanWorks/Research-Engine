@@ -225,37 +225,28 @@ present and 0 when only warnings remain. Domain errors print the `Error / Why / 
 - sources with no year, DOI or URL (`PROV-002`);
 - promoted claims without a kill test or evidence-backed verdict (`EVID-001`);
 - numeric claims without a two-run agreeing test (`EVID-002`);
-- numeric claims whose verified run no longer matches the current engine code, inputs or
-  command (`EVID-005`);
-- numeric claims whose promotion verdict cites a group that is not authoritative (`EVID-006`);
+- numeric claims whose verified run no longer matches the current engine code, inputs or command (`EVID-005`);
+- numeric claims citing a non-authoritative verdict group (`EVID-006`);
 - failed or invalidated claims without verdict evidence (`EVID-003`);
 - hypothesis outcomes without verdict evidence (`EVID-004`);
-- claims that cite a retracted source (`PROV-003`) or one under an expression of concern
-  (`PROV-004`, warning);
-- dependency cycles (`GRAPH-001`), dangling edges (`GRAPH-002`), self edges (`GRAPH-003`);
+- claims that cite a retracted source (`PROV-003`) or one under an expression of concern (`PROV-004`, warning);
+- dependency cycles (`GRAPH-001`), dangling edges (`GRAPH-002`), self edges (`GRAPH-003`),
+  support cycles (`GRAPH-004`, warning);
 - edges that cross program boundaries (`SCOPE-001`);
 - dependents left standing after a premise failed (`CASCADE-001`);
 - outcome timestamps before registration (`PRE-001`);
-- evidence gaps (`GAP-001`, `GAP-002`), duplicate claim text (`DUP-001`, live claims only),
-  empty programs (`EMPTY-001`);
+- evidence gaps (`GAP-001`, `GAP-002`), duplicate claim text (`DUP-001`, live claims only), empty programs (`EMPTY-001`);
 - duplicate source identity (`DUP-002`, warning);
-- a test that produced verified evidence without a negative control (`EVID-008`, warning) or
-  whose declared control never failed (`EVID-009`, error);
-- a live quote that restates a linked question, duplicates another live quote, or has no content
-  terms (`EVID-010`, warning);
-- observations with no statistics run, or changed after the last one (`OBS-001`,
-  warning);
+- a test that produced verified evidence without a negative control (`EVID-008`, warning) or whose declared control never failed (`EVID-009`, error);
+- a live quote that restates a linked question, duplicates another live quote, or has no content terms (`EVID-010`, warning);
+- observations with no statistics run, or changed after the last one (`OBS-001`, warning);
 - observations with no instrument, rater or protocol (`OBS-002`, warning);
-- observations not classified as independent or self-reported (`OBS-003`, warning), and
-  self-reported observations quarantined from independent comparisons (`OBS-004`, warning);
+- observations not classified as independent or self-reported (`OBS-003`, warning), and self-reported observations quarantined from independent comparisons (`OBS-004`, warning);
 - a live claim citing a source screened out of the review (`SCREEN-001`, warning);
-- a test still bound to a retired claim (`TEST-001`, warning), to a superseded claim
-  (`REV-002`, warning), or a dependent still pointing at a superseded claim (`REV-001`, warning);
+- a test still bound to a retired claim (`TEST-001`, warning), to a superseded claim (`REV-002`, warning), or a dependent still pointing at a superseded claim (`REV-001`, warning);
 - a test created after another test on the same claim failed (`TEST-002`, warning);
 - an UNKNOWN claim with no recorded reason (`EVID-007`, warning).
-- AI provenance: an AI citation that resolves nowhere (`AI-001`), an AI-origin
-  claim proven without a twice-passing test (`AI-002`), an AI test off its fixed
-  template (`AI-003`).
+- AI provenance: an AI citation that resolves nowhere (`AI-001`), an AI-origin claim proven without a twice-passing test (`AI-002`), an AI test off its fixed template (`AI-003`).
 - a corrupt schema ledger (`SCHEMA-001`).
 
 Warnings are research hygiene; errors block a trustworthy report.

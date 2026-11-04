@@ -5,29 +5,12 @@
     "last_phase": "phase 4",
     "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1793817836.7792394,
+    "updated_at": 1793818048.7078831,
     "owner": "kilo:goal",
     "started_by": "kilo:goal",
     "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "T-015-discovery-calibration",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/4] Hypothesis calibration scorecard: Brier, log loss, reliability bins, coverage, skill score; analysis calibration CLI and report section",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793314183.7370973,
-      "timestamp_str": "2026-10-30 01:49:43",
-      "agent": "opencode:research-engine",
-      "impact_assessment": {
-        "why": "Confidence is recorded on every hypothesis but never scored, so overconfidence is invisible; the source calibration log and muse rejudge discipline show the missing loop",
-        "benefits": "A research program can see whether its preregistered probabilities match observed outcomes, with small-n warnings and explicit coverage",
-        "risks": "contract: new analysis calibration command and report section, no schema change; dependency: stdlib only; concurrency: single writer, one calibration event; state: read-only over hypotheses, event appended",
-        "mitigation": "Failing-first unit and CLI tests with exact Brier/log-loss vectors, small-n warnings, empty and inconclusive cases; full suite and 4/4 project gates before commit"
-      }
-    },
     {
       "task_id": "T-015-discovery-calibration",
       "phase": "phase 3",
@@ -254,6 +237,17 @@
       "status": "in_progress",
       "timestamp": 1793817836.7792394,
       "timestamp_str": "2026-11-04 21:43:56",
+      "agent": "kilo:goal"
+    },
+    {
+      "task_id": "T-018-approved-wave1",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[4/6] IDEA-977 support-cycle shipped: GRAPH-004 corroboration ring warning over supports/extends/replicates, 490 tests pass, 4/4 gates pass, checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793818048.7078831,
+      "timestamp_str": "2026-11-04 21:47:28",
       "agent": "kilo:goal"
     }
   ]
