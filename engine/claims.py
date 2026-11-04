@@ -55,6 +55,14 @@ def add_claim(
 ) -> Claim:
     """Record a claim; empirical claims must carry a verbatim quote and a locator."""
     research = get_research(conn, research_ref)
+    if revision_of is not None:
+        origin = get_claim(conn, revision_of)
+        if origin.research_id != research.id:
+            raise EngineError(
+                "revision_of belongs to another research program",
+                "a revision must descend from a claim in the same program.",
+                "revise a claim from this program instead.",
+            )
     text = text.strip()
     if not text:
         raise EngineError("claim text is empty", "a claim is an assertion.", "pass --text.")
@@ -260,6 +268,12 @@ def revise_claim(
             "revision has no reason",
             "a later reader must know why the assertion changed.",
             "pass --reason with the new evidence or narrowing.",
+        )
+    if old.id in list(prerequisites):
+        raise EngineError(
+            f"revision lists {old.id} as its own prerequisite",
+            "the old claim is superseded by the revision; it cannot also support it.",
+            "remove the revised claim from --from, or depend on a different claim.",
         )
     with transaction(conn):
         new = add_claim(
@@ -481,6 +495,20 @@ def record_edge(
     rel: str,
 ) -> str:
     """Insert one typed edge, returning the existing id when the edge is already present."""
+    programs = set()
+    for kind, ref in ((src_kind, src_id), (dst_kind, dst_id)):
+        if kind == "claim":
+            programs.add(get_claim(conn, ref).research_id)
+        elif kind == "question":
+            from engine.questions import get_question
+
+            programs.add(get_question(conn, ref).research_id)
+    if len(programs) > 1:
+        raise EngineError(
+            "edge crosses research programs",
+            "the graph keeps program boundaries explicit.",
+            "link records from the same program.",
+        )
     existing = conn.execute(
         "SELECT id FROM edge WHERE src_kind = ? AND src_id = ? AND dst_kind = ?"
         " AND dst_id = ? AND rel = ?",

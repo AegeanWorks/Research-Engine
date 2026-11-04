@@ -62,6 +62,12 @@ def list_questions(
 def close_question(conn: sqlite3.Connection, ref: str) -> Question:
     """Mark a question resolved without deleting its evidence."""
     question = get_question(conn, ref)
+    if question.status == "closed":
+        raise EngineError(
+            f"question {question.id} is already closed",
+            "closing twice would hide when the question was actually resolved.",
+            "list open questions instead, or inspect this one's history.",
+        )
     with transaction(conn):
         conn.execute("UPDATE question SET status = 'closed' WHERE id = ?", (question.id,))
     return Question(**{**question.__dict__, "status": "closed"})

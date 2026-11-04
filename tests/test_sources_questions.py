@@ -38,6 +38,21 @@ class SourceQuestionTests(DatabaseCase):
         self.assertEqual(closed.status, "closed")
         self.assertEqual(len(list_questions(self.conn, research)), 1)
 
+    def test_source_year_must_be_an_integer(self) -> None:
+        research = self.add_research()
+        for bad in (2024.9, "2024", True):
+            with self.assertRaises(EngineError):
+                add_source(self.conn, research, "Bad year type", year=bad)
+        source = add_source(self.conn, research, "Good year", year=2024)
+        self.assertEqual(source.year, 2024)
+
+    def test_double_close_is_refused(self) -> None:
+        research = self.add_research()
+        question = add_question(self.conn, research, "Does S drive O?")
+        close_question(self.conn, question.id)
+        with self.assertRaises(EngineError):
+            close_question(self.conn, question.id)
+
     def test_empty_question_is_refused(self) -> None:
         research = self.add_research()
         with self.assertRaises(EngineError):

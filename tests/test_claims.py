@@ -158,5 +158,52 @@ class ClaimTests(DatabaseCase):
         self.assertEqual(retired.status, "RETRACTED")
 
 
+    def test_revision_of_must_exist_in_the_same_program(self) -> None:
+        research = self.add_research()
+        other = self.add_research("Other")
+        foreign = add_claim(
+            self.conn, other, "Elsewhere.", "assumption", basis="a"
+        )
+        with self.assertRaises(EngineError):
+            add_claim(
+                self.conn, research, "Nope.", "assumption", basis="a",
+                revision_of=foreign.id,
+            )
+        with self.assertRaises(EngineError):
+            add_claim(
+                self.conn, research, "Nope.", "assumption", basis="a",
+                revision_of="c_999999",
+            )
+
+    def test_revise_refuses_itself_as_a_prerequisite(self) -> None:
+        from engine.claims import revise_claim
+
+        research = self.add_research()
+        claim = add_claim(
+            self.conn, research, "Premise.", "assumption", basis="a"
+        )
+        with self.assertRaises(EngineError):
+            revise_claim(
+                self.conn, claim.id, "Narrower.", "narrower",
+                prerequisites=[claim.id],
+            )
+
+    def test_record_edge_validates_its_endpoints(self) -> None:
+        from engine.claims import record_edge
+
+        research = self.add_research()
+        claim = add_claim(
+            self.conn, research, "Here.", "assumption", basis="a"
+        )
+        other = self.add_research("Other")
+        foreign = add_claim(
+            self.conn, other, "There.", "assumption", basis="a"
+        )
+        with self.assertRaises(EngineError):
+            record_edge(self.conn, "claim", "c_999999", "claim", claim.id, "related")
+        with self.assertRaises(EngineError):
+            record_edge(self.conn, "claim", claim.id, "claim", foreign.id, "related")
+
+
 if __name__ == "__main__":
     unittest.main()

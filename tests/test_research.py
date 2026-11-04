@@ -36,5 +36,10 @@ class ResearchTests(DatabaseCase):
         self.assertEqual(len(list_researches(self.conn)), 1)
 
 
+    def test_counts_require_an_existing_program(self) -> None:
+        with self.assertRaises(NotFound):
+            research_counts(self.conn, "r_999999")
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -79,6 +79,7 @@ def list_researches(conn: sqlite3.Connection) -> List[Research]:
 
 def research_counts(conn: sqlite3.Connection, research_id: str) -> dict:
     """Return the record counts that summarise a program."""
+    get_research(conn, research_id)
     counts = {}
     for table in ("source", "question", "claim", "hypothesis", "killtest"):
         counts[table] = conn.execute(

@@ -9,6 +9,7 @@ from engine.claims import get_claim, record_edge, set_verdict
 from engine.database import transaction
 from engine.errors import EngineError
 from engine.events import record as record_event
+from engine.models import FAILED_STATUSES
 
 
 def merge_claims(
@@ -32,10 +33,10 @@ def merge_claims(
             "merging one claim into itself changes nothing.",
             "pass one or more claim identifiers to merge into the survivor.",
         )
-    if keep.status in ("RETRACTED", "INVALIDATED"):
+    if keep.status in FAILED_STATUSES:
         raise EngineError(
             f"survivor {keep.id} is {keep.status}",
-            "a merge must keep a live claim, not a retired one.",
+            "a merge must keep a live claim, not a failed or retired one.",
             "choose the claim that remains part of the argument as the survivor.",
         )
     if keep.superseded_by:
@@ -57,10 +58,10 @@ def merge_claims(
                 "a program boundary is never rewritten by a merge.",
                 "merge only claims from the same program.",
             )
-        if claim.status in ("RETRACTED", "INVALIDATED"):
+        if claim.status in FAILED_STATUSES:
             raise EngineError(
                 f"claim {claim.id} is already {claim.status}",
-                "a retired claim has no live edges to repoint.",
+                "a failed or retired claim has no live edges to repoint.",
                 "choose a live duplicate.",
             )
         if claim.superseded_by:
@@ -84,6 +85,19 @@ def merge_claims(
                 dst_id = keep.id if str(row["dst_id"]) == claim.id else str(row["dst_id"])
                 if src_id == dst_id:
                     continue
+                already = conn.execute(
+                    "SELECT id FROM edge WHERE src_kind = ? AND src_id = ?"
+                    " AND dst_kind = ? AND dst_id = ? AND rel = ?",
+                    (
+                        str(row["src_kind"]),
+                        src_id,
+                        str(row["dst_kind"]),
+                        dst_id,
+                        str(row["rel"]),
+                    ),
+                ).fetchone()
+                if already is not None:
+                    continue
                 record_edge(
                     conn,
                     str(row["src_kind"]),
@@ -103,6 +117,14 @@ def merge_claims(
             )
             if touched.rowcount:
                 rebound.append(claim.id)
+            conn.execute(
+                "UPDATE observation SET claim_id = ? WHERE claim_id = ?",
+                (keep.id, claim.id),
+            )
+            conn.execute(
+                "UPDATE ai_artifact SET claim_id = ? WHERE claim_id = ?",
+                (keep.id, claim.id),
+            )
         for claim in drops:
             set_verdict(
                 conn,

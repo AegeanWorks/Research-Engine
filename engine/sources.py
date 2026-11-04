@@ -38,7 +38,13 @@ def add_source(
             f"allowed kinds are {', '.join(SOURCE_KINDS)}.",
             "pass one of the listed kinds with --kind.",
         )
-    if year is not None and not 1000 <= int(year) <= 9999:
+    if year is not None and type(year) is not int:
+        raise EngineError(
+            f"year must be an integer: {year!r}",
+            "a four-digit calendar year keeps citation ranges and title grouping exact.",
+            "pass the publication year as an integer, for example --year 2024.",
+        )
+    if year is not None and not 1000 <= year <= 9999:
         raise EngineError(
             f"implausible year: {year}",
             "the year must be a four-digit calendar year.",

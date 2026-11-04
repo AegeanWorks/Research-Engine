@@ -79,6 +79,52 @@ class MergeTests(DatabaseCase):
         with self.assertRaises(EngineError):
             merge_claims(self.conn, self.keep.id, [foreign.id])
 
+    def test_falsified_survivor_and_duplicate_are_refused(self) -> None:
+        from engine.claims import set_verdict
+
+        set_verdict(self.conn, self.duplicate.id, "FALSIFIED", "direct replicate failed")
+        with self.assertRaises(EngineError):
+            merge_claims(self.conn, self.keep.id, [self.duplicate.id])
+        self.assertEqual(
+            get_claim(self.conn, self.duplicate.id).status, "FALSIFIED"
+        )
+        set_verdict(self.conn, self.keep.id, "FALSIFIED", "direct replicate failed")
+        fresh = add_claim(
+            self.conn, self.research, "Fresh duplicate.", "assumption", basis="c"
+        )
+        with self.assertRaises(EngineError):
+            merge_claims(self.conn, self.keep.id, [fresh.id])
+
+    def test_observations_and_artifacts_follow_the_survivor(self) -> None:
+        from engine.ai import record_artifact
+        from engine.observations import add_observation
+
+        add_observation(self.conn, self.duplicate.id, "baseline", 1.0, "n")
+        artifact = record_artifact(self.conn, self.research, "sweep", "m", "p", "o")
+        self.conn.execute(
+            "UPDATE ai_artifact SET claim_id = ? WHERE id = ?",
+            (self.duplicate.id, artifact.id),
+        )
+        merge_claims(self.conn, self.keep.id, [self.duplicate.id])
+        self.assertEqual(
+            self.conn.execute(
+                "SELECT COUNT(*) AS n FROM observation WHERE claim_id = ?",
+                (self.duplicate.id,),
+            ).fetchone()["n"],
+            0,
+        )
+        self.assertEqual(
+            self.conn.execute(
+                "SELECT claim_id FROM ai_artifact WHERE id = ?", (artifact.id,)
+            ).fetchone()["claim_id"],
+            self.keep.id,
+        )
+
+    def test_already_repointed_edges_are_not_double_counted(self) -> None:
+        link_to_question(self.conn, self.keep.id, self.question.id, "supports")
+        result = merge_claims(self.conn, self.keep.id, [self.duplicate.id])
+        self.assertEqual(result["edges_repointed"], [])
+
     def test_linking_two_merged_claims_does_not_leave_a_self_edge(self) -> None:
         related = add_claim(self.conn, self.research, "Related claim.", "assumption", basis="c")
         link_claims(self.conn, related.id, self.duplicate.id, "supports")
