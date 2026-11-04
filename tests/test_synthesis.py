@@ -47,6 +47,20 @@ class SynthesisTests(DatabaseCase):
         display = consensus_display(self.conn, question.id)
         self.assertTrue(display.startswith("insufficient"))
 
+    def test_single_tested_stance_cannot_crown_a_claim(self) -> None:
+        from engine.synthesis import consensus_display
+
+        research = self.add_research()
+        question = add_question(self.conn, research, "Does S drive O?")
+        lone = add_claim(
+            self.conn, research, "S drives O.", "assumption",
+            confidence=0.9, kill_test="A cohort in which O stays flat.",
+        )
+        link_to_question(self.conn, lone.id, question.id, "supports")
+        force_numeric(self.conn, lone.id)
+        display = consensus_display(self.conn, question.id)
+        self.assertTrue(display.startswith("insufficient"))
+
     def test_single_source_cannot_crown_a_claim(self) -> None:
         from engine.synthesis import consensus, consensus_display
 

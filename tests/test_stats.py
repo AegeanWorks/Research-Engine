@@ -132,6 +132,10 @@ class HolmTests(unittest.TestCase):
     def test_holm_empty(self) -> None:
         self.assertEqual(holm_adjust([]), [])
 
+    def test_holm_rejects_at_the_boundary(self) -> None:
+        adjusted = holm_adjust([0.025, 0.05])
+        self.assertTrue(all(item["reject"] for item in adjusted))
+
 
 class CompareTests(unittest.TestCase):
     def test_significant_difference_with_agreeing_tests(self) -> None:

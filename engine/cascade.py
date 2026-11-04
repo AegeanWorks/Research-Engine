@@ -324,9 +324,8 @@ def retract_source(
             "SELECT id, status FROM claim WHERE source_id = ? AND superseded_by IS NULL ORDER BY id", (target.id,)
         ).fetchall()
         plan.append((target, rows))
-    retiring = sum(
-        1 for _, rows in plan for row in rows if str(row["status"]) not in FAILED_STATUSES
-    )
+    claim_ids, entries = _retraction_plan(conn, targets)
+    retiring = sum(1 for entry in entries if entry["would_retire"])
     if retiring > CASCADE_BULK_LIMIT and not allow_bulk:
         raise EngineError(
             f"retraction would retire {retiring} claims",
@@ -335,7 +334,6 @@ def retract_source(
             " --allow-bulk when every citing claim really falls.",
         )
     if preview_digest:
-        claim_ids, _entries = _retraction_plan(conn, targets)
         current = _plan_digest(conn, claim_ids, [target.id for target in targets])
         if current != preview_digest:
             raise EngineError(

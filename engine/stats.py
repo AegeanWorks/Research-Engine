@@ -226,7 +226,7 @@ def holm_adjust(p_values: Sequence[float]) -> List[dict]:
         adjusted[index] = ceiling
     return [
         {"index": index, "p": p_values[index], "holm_p": adjusted[index],
-         "reject": adjusted[index] < ALPHA}
+         "reject": adjusted[index] <= ALPHA}
         for index in range(total)
     ]
 

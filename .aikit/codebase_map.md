@@ -9,8 +9,8 @@
 - **Total Python Modules**: `83`
 - **Total Classes**: `77`
 - **Total Top-Level Functions**: `274`
-- **Total Class Methods**: `580`
-- **Total Source Lines**: `17295`
+- **Total Class Methods**: `583`
+- **Total Source Lines**: `17356`
 
 ---
 
@@ -150,7 +150,7 @@
 ### [`engine/cascade.py`](engine/cascade.py)
 > *Transitive invalidation: when a premise collapses, everything built on it collapses too.*
 
-**Size**: `381` lines (`14551` bytes)
+**Size**: `379` lines (`14497` bytes)
 
 **Functions:**
 - `def _plan_digest(conn, claim_ids, source_ids)` - *Bind exactly the rows an action will retire: any change breaks the digest.*
@@ -401,7 +401,7 @@
 ### [`engine/killtests.py`](engine/killtests.py)
 > *Executable kill tests: two agreeing runs, bound to code, inputs and command.*
 
-**Size**: `388` lines (`14401` bytes)
+**Size**: `405` lines (`14976` bytes)
 
 **Functions:**
 - `def _to_test(row)`
@@ -413,7 +413,7 @@
 - `def _run_once(command, timeout_seconds)` - *Run one command in the project root and capture a deterministic fingerprint.*
 - `def _classify_attempt(results, control, runs, before, after)` - *Classify one execution into the attempt vocabulary, conservatively.*
 - `def run_test(conn, test_ref, runs)` - *Run a test one or more times, plus its negative control, recording each run's identity.*
-- `def _execute(conn, test, command, group, runs, role, tag_prefix, current)` - *Execute one command `runs` times and persist every run under its role.*
+- `def _execute(conn, test, command, group, runs, role, tag_prefix, current, commit, dirty, runtime)` - *Execute one command `runs` times and persist every run under its role.*
 - `def _summarise_control(results, expect_exit)` - *A control is falsified when every repetition fails the expectation identically.*
 - `def verify_test(conn, test_ref)` - *Run a test twice in separate processes; disagreement or drift is a failure.*
 - `def list_runs(conn, test_ref, limit)` - *List recent runs, optionally for one test.*
@@ -634,7 +634,7 @@
 ### [`engine/stats.py`](engine/stats.py)
 > *Deterministic statistics for recorded observations.*
 
-**Size**: `333` lines (`12464` bytes)
+**Size**: `333` lines (`12465` bytes)
 
 **Functions:**
 - `def sample_sd(values)` - *Sample standard deviation; zero for fewer than two values.*
@@ -657,7 +657,7 @@
 ### [`engine/synthesis.py`](engine/synthesis.py)
 > *Evidence synthesis: weighted consensus, contradiction pairs, and generated reports.*
 
-**Size**: `478` lines (`19634` bytes)
+**Size**: `479` lines (`19723` bytes)
 
 **Functions:**
 - `def stance_claims(conn, question_id)`
@@ -1611,7 +1611,7 @@
 ### [`tests/test_sources_retraction.py`](tests/test_sources_retraction.py)
 > *Source status and retraction cascade.*
 
-**Size**: `230` lines (`10176` bytes)
+**Size**: `257` lines (`11450` bytes)
 
 **Classes:**
 - `class SourceStatusTests`
@@ -1628,6 +1628,7 @@
   - Method `.test_retracted_source_is_clean_after_cascade()`
   - Method `.test_retraction_covers_twin_doi_rows()`
   - Method `.test_bulk_retraction_is_refused_without_override()`
+  - Method `.test_bulk_retraction_counts_transitive_dependents()`
   - Method `.test_stale_retract_preview_is_refused()`
   - Method `.test_reinstatement_requires_a_note_and_keeps_claim_verdicts()`
 
@@ -1636,7 +1637,7 @@
 ### [`tests/test_stats.py`](tests/test_stats.py)
 > *Statistics: values checked against an independent implementation, behaviour checked here.*
 
-**Size**: `158` lines (`6331` bytes)
+**Size**: `162` lines (`6501` bytes)
 
 **Classes:**
 - `class DistributionTests`
@@ -1665,6 +1666,7 @@
   - Method `.test_holm_adjusts_step_down()`
   - Method `.test_holm_enforces_monotonicity()`
   - Method `.test_holm_empty()`
+  - Method `.test_holm_rejects_at_the_boundary()`
 - `class CompareTests`
   - Method `.test_significant_difference_with_agreeing_tests()`
   - Method `.test_small_groups_warn()`
@@ -1676,13 +1678,14 @@
 ### [`tests/test_synthesis.py`](tests/test_synthesis.py)
 > *Consensus weighting and generated reports.*
 
-**Size**: `188` lines (`8740` bytes)
+**Size**: `202` lines (`9381` bytes)
 
 **Classes:**
 - `class SynthesisTests`
   - Method `._question_with_opposition()`
   - Method `.test_consensus_weights_status_and_confidence()`
   - Method `.test_uncovered_question_reports_insufficient_instead_of_a_number()`
+  - Method `.test_single_tested_stance_cannot_crown_a_claim()`
   - Method `.test_single_source_cannot_crown_a_claim()`
   - Method `.test_covered_question_displays_its_consensus()`
   - Method `.test_report_contains_evidence_and_contradictions()`

@@ -256,16 +256,17 @@ Warnings are research hygiene; errors block a trustworthy report.
 
 One SQLite file (default `research.db`), schema version 13. Tables: `research`, `source`,
 `question`, `claim`, `edge`, `hypothesis`, `killtest`, `test_run`, `test_attempt`, `verdict`,
-`invalidation`, `observation`, `protocol`, `ai_artifact`, `event`, plus `schema_meta` and
-`counters`. `claim`
-carries `revision_of`, `superseded_by` and `revision_reason`; a revision is a new row, never an
-edit. `observation` carries the instrument, rater, protocol, sample size, aggregation, unit and
-provenance class recorded with the value. `event` carries a per-program `seq`, `root_id`,
-`parent_id` and a hash chain (`prev_hash`, `event_hash`). Writes use `BEGIN IMMEDIATE`; WAL and `synchronous=FULL` are enabled for a durable
-state file. `verdict`, `test_run`, `test_attempt`, `event`, `observation` and `invalidation` are
+`invalidation`, `observation`, `protocol`, `ai_artifact`, `event`, `analysis_plan`,
+`amendment`, `schema_meta`, `counters`. `claim`
+carries `revision_of`, `superseded_by`, `revision_reason`; revisions are new rows.
+`observation` carries instrument, rater, protocol, sample size, aggregation, unit and
+provenance class. `event` carries `seq`, `root_id`,
+`parent_id`, `prev_hash`, `event_hash`. Writes use `BEGIN IMMEDIATE`; WAL, `synchronous=FULL`.
+`verdict`, `test_run`, `test_attempt`, `event`, `observation`, `invalidation`,
+`analysis_plan`, `amendment` are
 append-only (an observation is voided, never edited or deleted). `export` includes attempts,
-observations, protocols, AI artifacts and the event log; the manifest digests cover evidence records and
-exclude the log.
+observations, protocols, plans, amendments, AI artifacts and the event log; manifests digest evidence, not the
+log.
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Non-Negotiables

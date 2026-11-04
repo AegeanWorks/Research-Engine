@@ -71,8 +71,9 @@ def coverage(conn: sqlite3.Connection, question_ref: str) -> dict:
 
     A stance counts as tested when its verdict required an evidence path. A single
     cited source never suffices on its own: one source can crown nothing, so a
-    lone-source question stays insufficient however tested it is. A question with
-    no sourced stances at all judges on tests alone.
+    lone-source question stays insufficient however tested it is. A lone stance
+    never suffices either: consensus needs at least two linked claims, so a
+    single-claim question stays insufficient however tested it is.
     """
     stances = stance_claims(conn, question_ref)
     total = len(stances)
@@ -81,7 +82,7 @@ def coverage(conn: sqlite3.Connection, question_ref: str) -> dict:
     )
     sources = {str(row["source_id"] or "") for _, _, row in stances} - {""}
     sufficient = (
-        total > 0
+        total >= 2
         and covered / total >= MIN_CONSENSUS_COVERAGE
         and len(sources) != 1
     )

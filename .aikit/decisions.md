@@ -722,3 +722,26 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Consequences**: Skewed groups are visible in the summary dicts; negated
   opposition is flagged instead of outranked. No new gate, no refusals: both
   changes inform, they do not block.
+
+### ADR-050: Audit wave 1 - total blast radius, thin consensus, Holm boundary
+- **Date**: 2026-11-05
+- **Status**: Accepted
+- **Context**: Wave 1 audit of the pushed history found three verified gaps: (1)
+  `retract_source` counted only direct citing claims for the bulk tripwire, so
+  six direct claims with two dependents each retired 18 records without
+  `--allow-bulk`; (2) `coverage()` allowed a single tested stance with no source
+  to display `+1.0000` as consensus; (3) `holm_adjust` rejected only when
+  adjusted `< ALPHA`, so an adjusted `p == 0.05` did not reject, against the
+  standard Holm rule. The canonical gate also took 513s on Windows, and the
+  README/Data Model omitted the v13 `analysis_plan`/`amendment` tables.
+- **Decision**: (1) The retraction tripwire counts every `would_retire` entry
+  from `_retraction_plan` (direct plus transitive), matching the preview digest;
+  (2) `coverage()` requires at least two linked claims (`total >= 2`), so lone
+  stances read as insufficient however tested; (3) Holm rejects when adjusted
+  `<= ALPHA`. `run_test()` captures git/environment once per verification group
+  instead of once per role, halving process spawns; README and ARCHITECTURE now
+  list the v13 tables, with the README tightened to stay inside the 22_500-char
+  cold-start budget.
+- **Consequences**: Sharded retractions trip correctly; thin questions refuse;
+  boundary families reject per standard; the demo runs in ~1s warm and the full
+  suite drops proportionally. No binding change: git identity stays diagnostic.

@@ -54,6 +54,8 @@ readable and gap-free without `AUTOINCREMENT` surprises.
 | `event` | non-verdict action trail | append-only |
 | `verdict` | `previous -> new` with evidence, actor and time | append-only |
 | `invalidation` | root, reason, and the JSON list of affected dependents | append-only |
+| `analysis_plan` | preregistered comparison: baseline, treatment, prediction | append-only |
+| `amendment` | correction ledger: subject, field, before/after, reason | append-only |
 
 `claim.status` is a cached projection of its latest verdict. The verdict table is the source of
 truth for history; the cached column makes listings and consensus cheap. Integrity checks compare

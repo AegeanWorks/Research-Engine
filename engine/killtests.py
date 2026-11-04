@@ -255,11 +255,18 @@ def run_test(
     current = binding(test)
     before = fingerprint(test_inputs(test))
     group = next_id(conn, "g")
-    results = _execute(conn, test, test.command, group, runs, "main", "run", current)
+    from engine.provenance import environment as _environment, git_state as _git_state
+
+    commit, dirty = _git_state()
+    runtime = _environment()
+    results = _execute(
+        conn, test, test.command, group, runs, "main", "run", current, commit, dirty, runtime
+    )
     control = None
     if test.control_command:
         control_results = _execute(
-            conn, test, test.control_command, group, runs, "control", "control", current
+            conn, test, test.control_command, group, runs, "control", "control", current,
+            commit, dirty, runtime,
         )
         control = _summarise_control(control_results, test.expect_exit)
     after = fingerprint(test_inputs(test))
@@ -301,10 +308,20 @@ def _execute(
     role: str,
     tag_prefix: str,
     current: dict,
+    commit: str = "",
+    dirty: bool = False,
+    runtime: dict | None = None,
 ) -> list:
-    """Execute one command `runs` times and persist every run under its role."""
-    commit, dirty = git_state()
-    runtime = environment()
+    """Execute one command `runs` times and persist every run under its role.
+
+    `commit`, `dirty` and `runtime` are the workspace identity for the whole
+    verification group: `run_test()` captures them once so a main-plus-control
+    verification pays one git inspection instead of two.
+    """
+    if not commit:
+        commit, dirty = git_state()
+    if runtime is None:
+        runtime = environment()
     results = []
     for index in range(runs):
         outcome = _run_once(command, test.timeout_seconds)
