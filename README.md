@@ -20,7 +20,7 @@ A falsification-first research engine for provenance-backed claims, executable k
   python -m engine check
   python -m engine report r_000001
   ```
-  `demo` builds a labelled synthetic program and makes no scientific claim.
+   `demo` builds a synthetic program and makes no scientific claim.
 - **Start a real program**: see [Commands](#commands) for `research`, `question`, `source` and
   `claim add`.
 
@@ -59,7 +59,8 @@ engine hosts.
    `NUMERIC` promotion is refused unless the claim has a test whose earliest non-replaceable
    attempt passed twice and is bound to the current code, inputs and command; `--group` pins the group.
 7. **Collapse is transitive.** `claim invalidate` records the failed root and marks dependents
-   `INVALIDATED`, preserving the reason in the invalidation record.
+   `INVALIDATED`, preserving the reason in the invalidation record. `--preview-digest` binds
+   the action to a `cascade preview`.
 8. **Reports are generated and verifiable.** `report` and `scorecard` compute consensus,
    contradictions, gaps and audit findings from the graph. `report --out` also writes a manifest
    with a content digest, an exact record digest, the report digest, counts, findings and limits.
@@ -72,7 +73,7 @@ engine hosts.
     is missing and why. UNKNOWN carries no weight, never promotes, never cascades.
 11. **The graph is readable under a budget.** `outline` gives one line per question, hypothesis
     and test; `brief` gives the strongest support and contradiction per question; `claim context`
-    gives one claim with provenance, premises and history. Each states its omitted line count.
+    gives one claim with provenance, premises and history. Each states omitted lines.
 12. **Duplicates merge; refinements revise.** `claim merge` repoints edges and bound tests to
     the survivor and records duplicates as RETRACTED. `claim revise` supersedes the old claim,
     moves its edges to the new head, and starts untested; old verdicts stay visible.
@@ -84,7 +85,7 @@ engine hosts.
     warns (`SCREEN-001`).
 15. **Measurements are recorded, not retyped.** `observation add` stores each value in a named
    group, with optional instrument, rater, protocol and unit. Incomparable groups need
-   `--allow-incomparable` to compare, and `--provenance-class
+   `--allow-incomparable`, and `--provenance-class
     self_reported` quarantines a system-produced number. `observation void` retires one with a
     reason. Missing statistics warn (`OBS-001`), as do unprovenanced, unclassified and
     self-reported measurements (`OBS-002`..`OBS-004`).
@@ -139,7 +140,7 @@ python -m engine [--db PATH] source status REF --status active|expression_of_con
 python -m engine [--db PATH] source screen REF --status identified|screened_in|screened_out|included|excluded [--reason R]
 python -m engine [--db PATH] source prisma [--research REF]
 python -m engine [--db PATH] source duplicates [--research REF] [--limit N]
-python -m engine [--db PATH] source retract REF --reason TEXT --evidence TEXT [--allow-bulk]
+python -m engine [--db PATH] source retract REF --reason TEXT --evidence TEXT [--allow-bulk] [--preview-digest DIGEST]
 
 python -m engine [--db PATH] protocol add --id ID --measures TEXT [--includes-generation]
                         [--includes-judge] [--doc-digest SHA256] [--doc-path PATH]
@@ -167,7 +168,7 @@ python -m engine [--db PATH] claim show REF
 python -m engine [--db PATH] claim link SRC DST --rel REL
 python -m engine [--db PATH] claim link-question CLAIM QUESTION --stance STANCE
 python -m engine [--db PATH] claim verdict REF --status STATUS --evidence TEXT [--note TEXT] [--group GROUP]
-python -m engine [--db PATH] claim invalidate REF --status FALSIFIED|RETRACTED --reason TEXT --evidence TEXT [--allow-bulk]
+python -m engine [--db PATH] claim invalidate REF --status FALSIFIED|RETRACTED --reason TEXT --evidence TEXT [--allow-bulk] [--preview-digest DIGEST]
 python -m engine [--db PATH] claim merge KEEP DUP... [--note TEXT]
 python -m engine [--db PATH] claim context REF [--budget N]
 
@@ -274,7 +275,7 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 - No NUMERIC verdict without two agreeing runs; a single run is recorded as evidence, not proof.
 - The earliest non-replaceable attempt is authoritative; a later pass cannot displace an earlier
   subject failure.
-- A NUMERIC promotion must cite a current verified run group; there is no promotion without one.
+- A NUMERIC promotion cites a current verified run group.
 - Numeric evidence must still match the current engine code, declared inputs and command; stale
   evidence is an error, not a pass.
 - Retracting a source retires its claims across twin rows; a live claim citing one is an error.
@@ -288,7 +289,7 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 - A self-reported measurement is listed separately and needs a caveat to compare.
 - A failed premise invalidates its dependents; a report with `CASCADE-001` is not trustworthy.
 - Reports and scorecards are generated from the graph.
-- The engine is standard library only and makes no network calls. Sources are explicit.
+- The engine is standard library only and makes no network calls.
 
 ## What's Inside
 

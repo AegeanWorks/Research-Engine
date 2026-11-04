@@ -674,3 +674,20 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   instead of a score; well-tested questions are unchanged. The half-coverage bar
   and the source rule are tripwires, not proofs; tuning them is a calibration
   follow-up, not this milestone.
+
+### ADR-047: Preview-bound collapse and retraction
+- **Date**: 2026-11-04
+- **Status**: Accepted
+- **Context**: IDEA-975. `cascade preview` described the blast radius but the
+  action never verified it: a status, edge or claim change between preview and
+  action silently redefined what fell.
+- **Decision**: `preview()` carries a digest over exactly the rows the action
+  re-reads (claim id/status/supersession plus source id/status, canonical sorted
+  form). `invalidate` and `retract_source` accept an optional `preview_digest`
+  and refuse on mismatch, naming a fresh preview in the fix. The digest is opt-in
+  so existing flows keep working; `cascade preview` also accepts a source ref and
+  previews the retraction across twin rows. Single-writer scope means no lock is
+  needed between a verified preview and its transaction.
+- **Consequences**: Bound actions fail closed on drift instead of retiring a
+  changed graph. Operators who skip the digest keep today's behavior with today's
+  risk, stated in the refusal text.

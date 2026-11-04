@@ -184,6 +184,31 @@ class SourceStatusTests(DatabaseCase):
         self.assertEqual(get_source(self.conn, source).status, "retracted")
         self.assertEqual(len(result["affected"]), 11)
 
+    def test_stale_retract_preview_is_refused(self) -> None:
+        from engine.cascade import preview
+
+        research = self.add_research()
+        source = self.add_source(research)
+        first = add_claim(
+            self.conn, research, "Cites the source.", "empirical",
+            source_ref=source, quote="Cites the source.", locator="p.1",
+            kill_test="A replicate.",
+        )
+        digest = preview(self.conn, source)["digest"]
+        add_claim(
+            self.conn, research, "Cites it too.", "empirical",
+            source_ref=source, quote="Cites it too.", locator="p.2",
+            kill_test="A replicate.",
+        )
+        with self.assertRaises(EngineError):
+            retract_source(
+                self.conn, source, "notice", "evidence", preview_digest=digest,
+            )
+        result = retract_source(self.conn, source, "notice", "evidence")
+        self.assertEqual(get_source(self.conn, source).status, "retracted")
+        self.assertEqual(len(result["affected"]), 2)
+        self.assertEqual(first.id, result["affected"][0]["id"])
+
     def test_reinstatement_requires_a_note_and_keeps_claim_verdicts(self) -> None:
         research = self.add_research()
         source = self.add_source(research)

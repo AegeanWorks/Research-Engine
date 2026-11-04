@@ -586,6 +586,35 @@ class CliTests(unittest.TestCase):
         )
         self.assertEqual(code, 0)
 
+    def test_stale_preview_digest_is_refused(self) -> None:
+        self.run_cli("research", "add", "Digest program", "--scope", "test")
+        code, out, _ = self.run_cli(
+            "claim", "add", "r_000001", "--text", "Root.", "--kind", "assumption",
+            "--basis", "a",
+        )
+        self.assertEqual(code, 0)
+        code, _, _ = self.run_cli(
+            "claim", "add", "r_000001", "--text", "Leaf.", "--kind", "derived",
+            "--basis", "from root", "--from", "c_000001",
+        )
+        self.assertEqual(code, 0)
+        code, out, _ = self.run_cli("cascade", "preview", "c_000001")
+        self.assertEqual(code, 0)
+        digest = out.split("digest: ")[1].split()[0]
+        code, _, err = self.run_cli(
+            "claim", "invalidate", "c_000001", "--status", "FALSIFIED",
+            "--reason", "reason", "--evidence", "evidence",
+            "--preview-digest", "0" * 64,
+        )
+        self.assertEqual(code, 1)
+        self.assertIn("preview", err)
+        code, _, _ = self.run_cli(
+            "claim", "invalidate", "c_000001", "--status", "FALSIFIED",
+            "--reason", "reason", "--evidence", "evidence",
+            "--preview-digest", digest,
+        )
+        self.assertEqual(code, 0)
+
     def test_main_module_import_has_no_side_effects(self) -> None:
         import importlib.util
 

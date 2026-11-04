@@ -5,7 +5,7 @@ from __future__ import annotations
 import unittest
 
 from engine.cascade import dependents, invalidate, preview
-from engine.claims import add_claim, get_claim, link_claims
+from engine.claims import add_claim, get_claim, link_claims, set_verdict
 from engine.errors import EngineError
 from tests.support import DatabaseCase
 
@@ -113,6 +113,42 @@ class CascadeTests(DatabaseCase):
             invalidate(self.conn, root, "UNVERIFIED", "no reason", "evidence")
         with self.assertRaises(Exception):
             invalidate(self.conn, root, "FALSIFIED", "  ", "evidence")
+
+    def test_stale_preview_digest_is_refused(self) -> None:
+        root, _, leaf = self._chain()
+        digest = preview(self.conn, root)["digest"]
+        set_verdict(self.conn, leaf, "FALSIFIED", "the leaf failed first")
+        with self.assertRaises(EngineError) as caught:
+            invalidate(
+                self.conn, root, "FALSIFIED", "reason", "evidence",
+                preview_digest=digest,
+            )
+        self.assertIn("preview", str(caught.exception.fix))
+        self.assertEqual(get_claim(self.conn, root).status, "UNVERIFIED")
+
+    def test_current_preview_digest_allows_collapse(self) -> None:
+        root, mid, leaf = self._chain()
+        digest = preview(self.conn, root)["digest"]
+        result = invalidate(
+            self.conn, root, "FALSIFIED", "reason", "evidence",
+            preview_digest=digest,
+        )
+        self.assertEqual(
+            [item["id"] for item in result["affected"]], [mid, leaf]
+        )
+
+    def test_preview_digest_binds_new_dependents(self) -> None:
+        root, _, _ = self._chain()
+        digest = preview(self.conn, root)["digest"]
+        add_claim(
+            self.conn, get_claim(self.conn, root).research_id, "Late dependent.",
+            "derived", basis="from root", prerequisites=[root],
+        )
+        with self.assertRaises(EngineError):
+            invalidate(
+                self.conn, root, "FALSIFIED", "reason", "evidence",
+                preview_digest=digest,
+            )
 
 
 if __name__ == "__main__":

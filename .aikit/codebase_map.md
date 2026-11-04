@@ -8,9 +8,9 @@
 ## 📊 Codebase Metrics
 - **Total Python Modules**: `83`
 - **Total Classes**: `77`
-- **Total Top-Level Functions**: `267`
-- **Total Class Methods**: `569`
-- **Total Source Lines**: `16907`
+- **Total Top-Level Functions**: `271`
+- **Total Class Methods**: `574`
+- **Total Source Lines**: `17143`
 
 ---
 
@@ -148,13 +148,17 @@
 ### [`engine/cascade.py`](engine/cascade.py)
 > *Transitive invalidation: when a premise collapses, everything built on it collapses too.*
 
-**Size**: `241` lines (`9044` bytes)
+**Size**: `381` lines (`14551` bytes)
 
 **Functions:**
+- `def _plan_digest(conn, claim_ids, source_ids)` - *Bind exactly the rows an action will retire: any change breaks the digest.*
+- `def _retraction_targets(conn, source)` - *The source plus every live twin row sharing its normalized DOI work.*
 - `def dependents(conn, claim_id)` - *Return every claim that structurally depends on this claim, by depth.*
-- `def preview(conn, claim_ref)` - *Show what a collapse would invalidate without writing anything.*
-- `def invalidate(conn, claim_ref, status, reason, evidence, actor, allow_bulk)` - *Record a failed root claim, then invalidate every dependent in one transaction.*
-- `def retract_source(conn, ref, reason, evidence, actor, allow_bulk)` - *Retract a source and retire every empirical claim that cites it.*
+- `def preview(conn, ref)` - *Show what a collapse or retraction would retire without writing anything.*
+- `def _preview_retraction(conn, ref)`
+- `def _retraction_plan(conn, targets)` - *Claim ids plus display entries a retraction would read.*
+- `def invalidate(conn, claim_ref, status, reason, evidence, actor, allow_bulk, preview_digest)` - *Record a failed root claim, then invalidate every dependent in one transaction.*
+- `def retract_source(conn, ref, reason, evidence, actor, allow_bulk, preview_digest)` - *Retract a source and retire every empirical claim that cites it.*
 
 ---
 
@@ -185,7 +189,7 @@
 ### [`engine/cli.py`](engine/cli.py)
 > *Command-line surface: one entry point for every engine mechanic.*
 
-**Size**: `1308` lines (`63896` bytes)
+**Size**: `1314` lines (`64330` bytes)
 
 **Functions:**
 - `def _build_parser()`
@@ -852,7 +856,7 @@
 ### [`tests/test_cascade.py`](tests/test_cascade.py)
 > *A collapsed premise invalidates every dependent transitively.*
 
-**Size**: `119` lines (`5556` bytes)
+**Size**: `155` lines (`7049` bytes)
 
 **Classes:**
 - `class CascadeTests`
@@ -866,6 +870,9 @@
   - Method `.test_bulk_collapse_is_refused_without_override()`
   - Method `.test_collapse_requires_evidence()`
   - Method `.test_collapse_requires_reason_and_failed_status()`
+  - Method `.test_stale_preview_digest_is_refused()`
+  - Method `.test_current_preview_digest_allows_collapse()`
+  - Method `.test_preview_digest_binds_new_dependents()`
 
 ---
 
@@ -901,7 +908,7 @@
 ### [`tests/test_cli.py`](tests/test_cli.py)
 > *The CLI surface: JSON output, exit codes and the error triad.*
 
-**Size**: `599` lines (`24444` bytes)
+**Size**: `628` lines (`25692` bytes)
 
 **Classes:**
 - `class CliTests`
@@ -950,6 +957,7 @@
   - Method `.test_events_verify_reports_a_healthy_ledger()`
   - Method `.test_analysis_plan_is_cited_by_stats()`
   - Method `.test_amend_commands_correct_live_records()`
+  - Method `.test_stale_preview_digest_is_refused()`
   - Method `.test_main_module_import_has_no_side_effects()`
 
 ---
@@ -1596,7 +1604,7 @@
 ### [`tests/test_sources_retraction.py`](tests/test_sources_retraction.py)
 > *Source status and retraction cascade.*
 
-**Size**: `205` lines (`9087` bytes)
+**Size**: `230` lines (`10176` bytes)
 
 **Classes:**
 - `class SourceStatusTests`
@@ -1613,6 +1621,7 @@
   - Method `.test_retracted_source_is_clean_after_cascade()`
   - Method `.test_retraction_covers_twin_doi_rows()`
   - Method `.test_bulk_retraction_is_refused_without_override()`
+  - Method `.test_stale_retract_preview_is_refused()`
   - Method `.test_reinstatement_requires_a_note_and_keeps_claim_verdicts()`
 
 ---

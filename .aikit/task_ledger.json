@@ -5,22 +5,12 @@
     "last_phase": "phase 4",
     "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1793821269.3615093,
+    "updated_at": 1793821731.1142435,
     "owner": "kilo:goal",
     "started_by": "kilo:goal",
     "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "T-015-discovery-calibration",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'T-015-discovery-calibration' completed successfully.",
-      "status": "completed",
-      "timestamp": 1793498976.6531549,
-      "timestamp_str": "2026-11-01 05:09:36",
-      "agent": "kilo:research-engine"
-    },
     {
       "task_id": "T-016-ai-integration",
       "phase": "delivery",
@@ -247,6 +237,17 @@
       "status": "in_progress",
       "timestamp": 1793821269.3615093,
       "timestamp_str": "2026-11-04 22:41:09",
+      "agent": "kilo:goal"
+    },
+    {
+      "task_id": "T-019-approved-wave2",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[4/6] IDEA-975 preview-bound digest shipped: preview digests bind invalidate and retract across twin rows with ADR-047, 524 tests pass, 4/4 gates pass, checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793821731.1142435,
+      "timestamp_str": "2026-11-04 22:48:51",
       "agent": "kilo:goal"
     }
   ]

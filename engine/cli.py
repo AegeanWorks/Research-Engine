@@ -176,6 +176,8 @@ def _build_parser() -> argparse.ArgumentParser:
     retract_s.add_argument("--evidence", required=True)
     retract_s.add_argument("--allow-bulk", action="store_true",
                            help="retire more than 10 claims in one retraction")
+    retract_s.add_argument("--preview-digest", default="",
+                           help="refuse unless the graph still matches a cascade preview")
     screen_s = source_sub.add_parser("screen", help="record a screening decision")
     screen_s.add_argument("ref")
     screen_s.add_argument("--status", required=True, choices=SCREENING_STATUSES)
@@ -296,6 +298,8 @@ def _build_parser() -> argparse.ArgumentParser:
     inv_c.add_argument("--evidence", required=True)
     inv_c.add_argument("--allow-bulk", action="store_true",
                        help="retire more than 10 records in one collapse")
+    inv_c.add_argument("--preview-digest", default="",
+                       help="refuse unless the graph still matches a cascade preview")
 
     hypothesis = commands.add_parser("hypothesis", help="pre-register hypotheses and record outcomes")
     hypothesis_sub = hypothesis.add_subparsers(dest="action", required=True)
@@ -568,6 +572,7 @@ def _cmd_source(conn: sqlite3.Connection, args) -> int:
     if args.action == "retract":
         result = retract_source(
             conn, args.ref, args.reason, args.evidence, allow_bulk=args.allow_bulk,
+            preview_digest=args.preview_digest,
         )
         text = f"{result['source']} -> retracted\n"
         if result["siblings"]:
@@ -742,7 +747,7 @@ def _cmd_claim(conn: sqlite3.Connection, args) -> int:
     if args.action == "invalidate":
         result = invalidate(
             conn, args.ref, args.status, args.reason, args.evidence,
-            allow_bulk=args.allow_bulk,
+            allow_bulk=args.allow_bulk, preview_digest=args.preview_digest,
         )
         text = f"{result['root']} -> {result['status']}\n"
         for item in result["affected"]:
@@ -1232,6 +1237,7 @@ def main(argv: List[str] | None = None) -> int:
                 text = f"{result['root']} ({result['root_status']})\n"
                 for item in result["affected"]:
                     text += f"  {item['id']} depth {item['depth']} {item['status']} {item['text']}\n"
+                text += f"  digest: {result['digest']}\n"
                 return _emit(result, args.json, text)
             if args.command == "report":
                 if args.strict and not args.check:
