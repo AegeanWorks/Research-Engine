@@ -9,8 +9,8 @@
 - **Total Python Modules**: `80`
 - **Total Classes**: `73`
 - **Total Top-Level Functions**: `250`
-- **Total Class Methods**: `528`
-- **Total Source Lines**: `15439`
+- **Total Class Methods**: `529`
+- **Total Source Lines**: `15449`
 
 ---
 
@@ -815,11 +815,12 @@
 ### [`tests/test_cascade.py`](tests/test_cascade.py)
 > *A collapsed premise invalidates every dependent transitively.*
 
-**Size**: `91` lines (`4012` bytes)
+**Size**: `101` lines (`4676` bytes)
 
 **Classes:**
 - `class CascadeTests`
   - Method `._chain()`
+  - Method `.test_collapse_traverses_depends_on_edges()`
   - Method `.test_dependents_are_transitive_and_ordered_by_depth()`
   - Method `.test_preview_writes_nothing()`
   - Method `.test_collapse_invalidates_every_dependent()`
