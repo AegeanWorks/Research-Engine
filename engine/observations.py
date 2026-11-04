@@ -74,7 +74,14 @@ def add_observation(
             "group labels are letters, digits, hyphens and underscores.",
             "use a label such as `baseline` or `treatment-2`.",
         )
-    number = float(value)
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        raise EngineError(
+            f"observation value is not a number: {value!r}",
+            "a measurement must parse as a finite number.",
+            "pass a numeric value, or record the missing value as an observation note.",
+        )
     if not math.isfinite(number):
         raise EngineError(
             f"observation value is not finite: {value}",
@@ -139,13 +146,20 @@ def add_observation(
         rater_version = ""
         protocol_id = ""
     try:
-        sample_size = int(sample_size)
+        size_number = float(sample_size)
     except (TypeError, ValueError):
         raise EngineError(
             f"sample size is not an integer: {sample_size}",
             "sample size is the number of observations behind an aggregate.",
             "pass --sample-size with a positive integer.",
         )
+    if isinstance(sample_size, bool) or not size_number.is_integer():
+        raise EngineError(
+            f"sample size is not an integer: {sample_size}",
+            "a fractional observation count would silently truncate.",
+            "pass --sample-size with a positive integer.",
+        )
+    sample_size = int(size_number)
     if sample_size < 1:
         raise EngineError(
             f"sample size must be positive: {sample_size}",

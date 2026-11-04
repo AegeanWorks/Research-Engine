@@ -238,7 +238,10 @@ def bootstrap_ci(
 
 def linregress(xs: Sequence[float], ys: Sequence[float]) -> Dict[str, float]:
     """Least-squares slope, intercept, correlation and two-sided p for paired points."""
-    pairs = [(x, y) for x, y in zip(xs, ys) if not (math.isnan(x) or math.isnan(y))]
+    pairs = [
+        (x, y) for x, y in zip(xs, ys)
+        if math.isfinite(x) and math.isfinite(y)
+    ]
     n = len(pairs)
     if n < 3:
         return {"slope": 0.0, "intercept": 0.0, "r": 0.0, "p": 1.0, "n": n}

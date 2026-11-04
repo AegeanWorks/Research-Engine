@@ -42,11 +42,19 @@ def summary(
 ) -> dict:
     """Compute the calibration scorecard for one program without writing anything."""
     research = get_research(conn, research_ref)
-    if int(min_resolved) < 1:
+    try:
+        minimum = int(min_resolved)
+    except (TypeError, ValueError):
         raise EngineError(
-            f"minimum resolved set is {min_resolved}",
+            f"minimum resolved set is not an integer: {min_resolved}",
             "a calibration sample needs at least one resolved hypothesis.",
-            "pass --min-n 1 or more.",
+            "pass --min-n with a positive integer.",
+        )
+    if isinstance(min_resolved, bool) or minimum != float(min_resolved) or minimum < 1:
+        raise EngineError(
+            f"minimum resolved set is not a positive integer: {min_resolved}",
+            "a fractional sample size would silently truncate.",
+            "pass --min-n with a positive integer.",
         )
     rows = conn.execute(
         "SELECT id, confidence, status FROM hypothesis WHERE research_id = ? ORDER BY id",
@@ -117,9 +125,9 @@ def summary(
     warnings: List[str] = []
     if resolved == 0:
         warnings.append("no hypothesis has a recorded outcome; calibration is undefined")
-    elif resolved < int(min_resolved):
+    elif resolved < minimum:
         warnings.append(
-            f"{resolved} resolved hypothesis(es); scores are descriptive below {int(min_resolved)}"
+            f"{resolved} resolved hypothesis(es); scores are descriptive below {minimum}"
         )
     if resolved and base_rate in (0.0, 1.0):
         warnings.append(
@@ -137,7 +145,7 @@ def summary(
         "research": research.id,
         "counts": counts,
         "coverage": coverage,
-        "min_resolved": int(min_resolved),
+        "min_resolved": minimum,
         "brier": None if brier is None else round(brier, 6),
         "log_loss": None if log_loss is None else round(log_loss, 6),
         "base_rate": None if base_rate is None else round(base_rate, 6),

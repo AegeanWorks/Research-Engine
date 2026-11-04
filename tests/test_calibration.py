@@ -20,6 +20,17 @@ class CalibrationTests(DatabaseCase):
         record_outcome(self.conn, hypothesis.id, status, "recorded test evidence")
         return hypothesis.id
 
+    def test_min_resolved_must_be_a_positive_integer(self) -> None:
+        research = self.add_research()
+        with self.assertRaises(EngineError):
+            summary(self.conn, research, min_resolved="abc")
+        with self.assertRaises(EngineError):
+            summary(self.conn, research, min_resolved=2.5)
+        with self.assertRaises(EngineError):
+            summary(self.conn, research, min_resolved=True)
+        with self.assertRaises(EngineError):
+            summary(self.conn, research, min_resolved=0)
+
     def test_brier_log_loss_and_coverage(self) -> None:
         research = self.add_research()
         self.add_outcome(research, 0.9, "SUPPORTED", "A")

@@ -100,6 +100,12 @@ class RegressionTests(unittest.TestCase):
         self.assertAlmostEqual(result["r"], 0.8285714285714285, places=10)
         self.assertAlmostEqual(result["p"], 0.04156268221574349, places=10)
 
+    def test_linregress_ignores_non_finite_points(self) -> None:
+        result = linregress([float("inf"), 1.0, 2.0, 3.0], [1.0, 2.0, 3.0, 4.0])
+        for key in ("slope", "intercept", "r", "p"):
+            self.assertTrue(math.isfinite(result[key]), key)
+        self.assertEqual(result["n"], 3)
+
     def test_linregress_too_few_points(self) -> None:
         self.assertEqual(linregress([1, 2], [1, 2])["p"], 1.0)
 

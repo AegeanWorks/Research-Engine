@@ -42,6 +42,20 @@ class ObservationTests(DatabaseCase):
         with self.assertRaises(EngineError):
             add_observation(self.conn, self.claim, "baseline", float("inf"))
 
+    def test_non_numeric_values_are_refused(self) -> None:
+        with self.assertRaises(EngineError):
+            add_observation(self.conn, self.claim, "baseline", "abc")
+
+    def test_sample_size_must_be_a_positive_integer(self) -> None:
+        with self.assertRaises(EngineError):
+            add_observation(self.conn, self.claim, "baseline", 1.0, sample_size=2.5)
+        with self.assertRaises(EngineError):
+            add_observation(self.conn, self.claim, "baseline", 1.0, sample_size=True)
+        with self.assertRaises(EngineError):
+            add_observation(self.conn, self.claim, "baseline", 1.0, sample_size=0)
+        record = add_observation(self.conn, self.claim, "baseline", 1.0, sample_size=3)
+        self.assertEqual(record.sample_size, 3)
+
     def test_invalid_group_is_refused(self) -> None:
         with self.assertRaises(EngineError):
             add_observation(self.conn, self.claim, "  ", 1.0)

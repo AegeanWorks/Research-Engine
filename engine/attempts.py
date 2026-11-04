@@ -13,7 +13,7 @@ from typing import List, Optional
 
 from engine.artifacts import utc_now
 from engine.database import next_id, transaction
-from engine.errors import EngineError
+from engine.errors import EngineError, NotFound
 from engine.models import (
     ATTEMPT_OUTCOMES,
     REPLACEABLE_ATTEMPT_OUTCOMES,
@@ -46,6 +46,9 @@ def record(
             "a replaceable attempt is only replaceable for a recorded reason.",
             "pass the timeout, crash, drift or non-reproducibility reason.",
         )
+    exists = conn.execute("SELECT 1 FROM killtest WHERE id = ?", (test_id,)).fetchone()
+    if exists is None:
+        raise NotFound("test", test_id)
     with transaction(conn):
         row = conn.execute(
             "SELECT COALESCE(MAX(attempt_no), 0) + 1 AS next_no"
@@ -61,19 +64,26 @@ def record(
             reason=reason,
             created_at=utc_now(),
         )
-        conn.execute(
-            "INSERT INTO test_attempt(id, test_id, attempt_no, run_group, outcome, reason,"
-            " created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (
-                attempt.id,
-                attempt.test_id,
-                attempt.attempt_no,
-                attempt.run_group,
-                attempt.outcome,
-                attempt.reason,
-                attempt.created_at,
-            ),
-        )
+        try:
+            conn.execute(
+                "INSERT INTO test_attempt(id, test_id, attempt_no, run_group, outcome, reason,"
+                " created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (
+                    attempt.id,
+                    attempt.test_id,
+                    attempt.attempt_no,
+                    attempt.run_group,
+                    attempt.outcome,
+                    attempt.reason,
+                    attempt.created_at,
+                ),
+            )
+        except sqlite3.IntegrityError as error:
+            raise EngineError(
+                f"duplicate attempt for group {run_group}",
+                "two writers raced to record the same attempt number.",
+                "retry the verification so the next sequence number is allocated.",
+            ) from error
     return attempt
 
 

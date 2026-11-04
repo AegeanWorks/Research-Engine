@@ -8,7 +8,7 @@ from engine import attempts
 from engine.attempts import list_attempts
 from engine.claims import add_claim, set_verdict
 from engine.database import next_id, transaction
-from engine.errors import EngineError
+from engine.errors import EngineError, NotFound
 from engine.evidence import (
     authoritative_group,
     binding,
@@ -38,6 +38,15 @@ class AttemptAuthorityTests(DatabaseCase):
             'python -c "print(1)"',
             claim_ref=self.claim.id,
         )
+
+    def test_duplicate_attempt_is_an_engine_error(self) -> None:
+        attempts.record(self.conn, self.test.id, "g_dup", "completed")
+        with self.assertRaises(EngineError):
+            attempts.record(self.conn, self.test.id, "g_dup", "completed")
+
+    def test_attempt_for_a_missing_test_is_not_found(self) -> None:
+        with self.assertRaises(NotFound):
+            attempts.record(self.conn, "t_999999", "g1", "completed")
 
     def _insert_group(
         self,
