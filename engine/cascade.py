@@ -51,7 +51,7 @@ def preview(conn: sqlite3.Connection, claim_ref: str) -> dict:
                 "id": dependent.id,
                 "depth": depth,
                 "status": dependent.status,
-                "would_invalidate": dependent.status not in ("RETRACTED", "INVALIDATED"),
+                "would_invalidate": dependent.status not in FAILED_STATUSES,
                 "text": dependent.text,
             }
         )
@@ -79,6 +79,12 @@ def invalidate(
             "a dependent claim is only invalidated with an explicit reason.",
             "pass --reason with the failed premise.",
         )
+    if not evidence.strip():
+        raise EngineError(
+            "collapse has no evidence",
+            "a collapse records the root verdict with an evidence path.",
+            "pass --evidence naming the test run, derivation, or analysis.",
+        )
     root = get_claim(conn, claim_ref)
     planned = dependents(conn, root.id)
     affected = []
@@ -86,7 +92,7 @@ def invalidate(
         set_verdict(conn, root.id, status, evidence, note=reason, actor=actor)
         for dependent_id, depth in planned:
             dependent = get_claim(conn, dependent_id)
-            if dependent.status in ("RETRACTED", "INVALIDATED"):
+            if dependent.status in FAILED_STATUSES:
                 continue
             previous = dependent.status
             set_verdict(
@@ -135,6 +141,12 @@ def retract_source(
             "claims are only retired with a recorded reason.",
             "pass --reason with the retraction notice.",
         )
+    if not evidence.strip():
+        raise EngineError(
+            "retraction has no evidence",
+            "a retraction records each retired claim with an evidence path.",
+            "pass --evidence naming the retraction notice or review.",
+        )
     source = get_source(conn, ref)
     if source.status == "retracted":
         raise EngineError(
@@ -146,7 +158,7 @@ def retract_source(
     with transaction(conn):
         set_source_status(conn, source.id, "retracted", reason, actor)
         rows = conn.execute(
-            "SELECT id, status FROM claim WHERE source_id = ? ORDER BY id", (source.id,)
+            "SELECT id, status FROM claim WHERE source_id = ? AND superseded_by IS NULL ORDER BY id", (source.id,)
         ).fetchall()
         for row in rows:
             if str(row["status"]) in FAILED_STATUSES:

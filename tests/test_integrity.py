@@ -182,6 +182,17 @@ class IntegrityTests(DatabaseCase):
         self.conn.execute("UPDATE claim SET status = 'FALSIFIED' WHERE id = ?", (root,))
         self.assertIn("CASCADE-001", codes(check(self.conn)))
 
+    def test_both_failed_is_not_a_stale_dependent(self) -> None:
+        research = self.add_research()
+        root = self.add_empirical(research)
+        derived = add_claim(
+            self.conn, research, "Depends on root.", "derived", basis="from root",
+            prerequisites=[root],
+        )
+        self.conn.execute("UPDATE claim SET status = 'FALSIFIED' WHERE id = ?", (root,))
+        self.conn.execute("UPDATE claim SET status = 'FALSIFIED' WHERE id = ?", (derived.id,))
+        self.assertNotIn("CASCADE-001", codes(check(self.conn)))
+
     def test_gaps_and_duplicates_are_warnings(self) -> None:
         research = self.add_research()
         add_question(self.conn, research, "Unanswered?")

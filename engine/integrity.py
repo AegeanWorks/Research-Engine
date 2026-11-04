@@ -412,13 +412,14 @@ def check(conn: sqlite3.Connection) -> List[Finding]:
                 )
 
     marks = ",".join("?" for _ in _FAILED)
+    rel_marks = ",".join("?" for _ in DEPENDENCY_RELATIONS)
     for row in conn.execute(
         f"SELECT e.id, e.src_id, e.dst_id, src.status AS src_status, dst.status AS dst_status"
         f" FROM edge e JOIN claim src ON src.id = e.src_id JOIN claim dst ON dst.id = e.dst_id"
         f" WHERE e.src_kind = 'claim' AND e.dst_kind = 'claim'"
-        f" AND e.rel IN ('derived_from', 'depends_on') AND dst.status IN ({marks})"
-        f" AND src.status NOT IN ('INVALIDATED', 'RETRACTED')",
-        _FAILED,
+        f" AND e.rel IN ({rel_marks}) AND dst.status IN ({marks})"
+        f" AND src.status NOT IN ({marks})",
+        (*DEPENDENCY_RELATIONS, *_FAILED, *_FAILED),
     ):
         findings.append(
             _finding(

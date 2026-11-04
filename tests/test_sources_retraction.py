@@ -39,6 +39,33 @@ class SourceStatusTests(DatabaseCase):
         with self.assertRaises(EngineError):
             retract_source(self.conn, source, "  ", "evidence")
 
+    def test_retraction_requires_evidence(self) -> None:
+        research = self.add_research()
+        source = self.add_source(research)
+        with self.assertRaises(EngineError):
+            retract_source(self.conn, source, "notice", "   ")
+
+    def test_retraction_ignores_superseded_claims(self) -> None:
+        from engine.claims import revise_claim
+
+        research = self.add_research()
+        source = self.add_source(research)
+        claim = add_claim(
+            self.conn, research, "S rose with O.", "empirical",
+            source_ref=source, quote="S rose with O.", locator="p.1",
+            kill_test="A replicate.",
+        )
+        head = revise_claim(
+            self.conn, claim.id, "S rose with O, narrowly.", "narrower scope",
+            source_ref=source, quote="S rose with O.", locator="p.1",
+            kill_test="A replicate.",
+        )
+        result = retract_source(self.conn, source, "notice", "evidence")
+        self.assertEqual(get_source(self.conn, source).status, "retracted")
+        self.assertEqual(get_claim(self.conn, claim.id).status, "UNVERIFIED")
+        self.assertEqual(get_claim(self.conn, head.id).status, "RETRACTED")
+        self.assertEqual([item["id"] for item in result["affected"]], [head.id])
+
     def test_retraction_retires_claims_and_dependents(self) -> None:
         research = self.add_research()
         source = self.add_source(research)

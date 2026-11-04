@@ -56,6 +56,29 @@ class CascadeTests(DatabaseCase):
         self.assertEqual(get_claim(self.conn, leaf).status, "INVALIDATED")
         self.assertEqual([item["id"] for item in result["affected"]], [leaf])
 
+    def test_falsified_dependent_keeps_its_primary_failure(self) -> None:
+        root, middle, leaf = self._chain()
+        from engine.claims import set_verdict
+
+        set_verdict(self.conn, middle, "FALSIFIED", "direct replicate failed")
+        previewed = preview(self.conn, root)
+        self.assertFalse(
+            [item for item in previewed["affected"] if item["id"] == middle][0][
+                "would_invalidate"
+            ]
+        )
+        result = invalidate(
+            self.conn, root, "FALSIFIED", "the primary cohort failed", "replicate run 2"
+        )
+        self.assertEqual(get_claim(self.conn, middle).status, "FALSIFIED")
+        self.assertEqual(get_claim(self.conn, leaf).status, "INVALIDATED")
+        self.assertEqual([item["id"] for item in result["affected"]], [leaf])
+
+    def test_collapse_requires_evidence(self) -> None:
+        root, _, _ = self._chain()
+        with self.assertRaises(Exception):
+            invalidate(self.conn, root, "FALSIFIED", "a reason", "   ")
+
     def test_collapse_requires_reason_and_failed_status(self) -> None:
         root, _, _ = self._chain()
         with self.assertRaises(Exception):
