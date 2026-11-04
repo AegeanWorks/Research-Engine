@@ -5,7 +5,7 @@ from __future__ import annotations
 import unittest
 
 from engine.cascade import dependents, invalidate, preview
-from engine.claims import add_claim, get_claim
+from engine.claims import add_claim, get_claim, link_claims
 from tests.support import DatabaseCase
 
 
@@ -22,6 +22,16 @@ class CascadeTests(DatabaseCase):
             basis="from middle", prerequisites=[middle],
         ).id
         return root, middle, leaf
+
+    def test_collapse_traverses_depends_on_edges(self) -> None:
+        research = self.add_research()
+        root = add_claim(self.conn, research, "Root.", "assumption", basis="a")
+        middle = add_claim(self.conn, research, "Middle.", "derived", basis="b")
+        link_claims(self.conn, middle.id, root.id, "depends_on")
+        self.assertEqual(dependents(self.conn, root.id), [(middle.id, 1)])
+        result = invalidate(self.conn, root.id, "FALSIFIED", "reason", "evidence")
+        self.assertEqual(get_claim(self.conn, middle.id).status, "INVALIDATED")
+        self.assertEqual([item["id"] for item in result["affected"]], [middle.id])
 
     def test_dependents_are_transitive_and_ordered_by_depth(self) -> None:
         root, middle, leaf = self._chain()
