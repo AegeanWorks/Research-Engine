@@ -9,8 +9,8 @@
 - **Total Python Modules**: `80`
 - **Total Classes**: `73`
 - **Total Top-Level Functions**: `249`
-- **Total Class Methods**: `520`
-- **Total Source Lines**: `15257`
+- **Total Class Methods**: `525`
+- **Total Source Lines**: `15358`
 
 ---
 
@@ -56,7 +56,7 @@
 ### [`engine/analysis.py`](engine/analysis.py)
 > *Discovery and ranking over the graph: contradictions, coverage, keystones.*
 
-**Size**: `503` lines (`20742` bytes)
+**Size**: `509` lines (`20960` bytes)
 
 **Functions:**
 - `def keywords(text)` - *Content words of an assertion, lowercased and de-duplicated.*
@@ -136,7 +136,7 @@
 ### [`engine/cascade.py`](engine/cascade.py)
 > *Transitive invalidation: when a premise collapses, everything built on it collapses too.*
 
-**Size**: `181` lines (`6526` bytes)
+**Size**: `193` lines (`6906` bytes)
 
 **Functions:**
 - `def dependents(conn, claim_id)` - *Return every claim that structurally depends on this claim, by depth.*
@@ -173,7 +173,7 @@
 ### [`engine/cli.py`](engine/cli.py)
 > *Command-line surface: one entry point for every engine mechanic.*
 
-**Size**: `1208` lines (`58834` bytes)
+**Size**: `1225` lines (`59577` bytes)
 
 **Functions:**
 - `def _build_parser()`
@@ -579,7 +579,7 @@
 ### [`engine/sources.py`](engine/sources.py)
 > *Bibliographic sources: the only place literature text may enter the graph.*
 
-**Size**: `151` lines (`5293` bytes)
+**Size**: `157` lines (`5570` bytes)
 
 **Functions:**
 - `def _to_source(row)`
@@ -695,7 +695,7 @@
 ### [`tests/test_analysis.py`](tests/test_analysis.py)
 > *Discovery: contradictions, coverage matrix, keystone ranking, exposure.*
 
-**Size**: `113` lines (`5246` bytes)
+**Size**: `144` lines (`6909` bytes)
 
 **Classes:**
 - `class KeywordTests`
@@ -706,6 +706,7 @@
   - Method `.test_contradictions_pair_within_a_question()`
   - Method `.test_contradictions_are_ranked_by_score()`
   - Method `.test_min_score_filters()`
+  - Method `.test_pairings_ignore_withdrawn_and_superseded_claims()`
   - Method `.test_claims_on_different_questions_are_not_paired()`
   - Method `.test_unlinked_score_uses_both_confidences()`
   - Method `.test_unlinked_contradictions_skip_recorded_edges()`
@@ -859,7 +860,7 @@
 ### [`tests/test_cli.py`](tests/test_cli.py)
 > *The CLI surface: JSON output, exit codes and the error triad.*
 
-**Size**: `502` lines (`20249` bytes)
+**Size**: `517` lines (`20981` bytes)
 
 **Classes:**
 - `class CliTests`
@@ -895,6 +896,8 @@
   - Method `.test_export_check_detects_tampering()`
   - Method `.test_export_check_refuses_a_research_filter()`
   - Method `.test_export_check_fails_on_an_unsupported_schema()`
+  - Method `.test_closed_vocabularies_are_rejected_by_the_parser()`
+  - Method `.test_retracted_status_points_at_retract()`
   - Method `.test_non_positive_budgets_are_refused()`
   - Method `.test_demo_failure_reports_the_error_triad()`
   - Method `.test_events_tree_refuses_list_filters()`
@@ -1509,12 +1512,14 @@
 ### [`tests/test_sources_retraction.py`](tests/test_sources_retraction.py)
 > *Source status and retraction cascade.*
 
-**Size**: `145` lines (`6361` bytes)
+**Size**: `159` lines (`7010` bytes)
 
 **Classes:**
 - `class SourceStatusTests`
   - Method `.test_downgrade_requires_a_note()`
   - Method `.test_unknown_status_and_repeat_are_refused()`
+  - Method `.test_direct_retracted_status_routes_through_retraction()`
+  - Method `.test_retraction_path_retires_and_refuses_repeats()`
   - Method `.test_retraction_requires_a_reason()`
   - Method `.test_retraction_requires_evidence()`
   - Method `.test_retraction_ignores_superseded_claims()`
