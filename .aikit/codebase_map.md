@@ -9,8 +9,8 @@
 - **Total Python Modules**: `80`
 - **Total Classes**: `73`
 - **Total Top-Level Functions**: `250`
-- **Total Class Methods**: `533`
-- **Total Source Lines**: `15519`
+- **Total Class Methods**: `535`
+- **Total Source Lines**: `15550`
 
 ---
 
@@ -306,7 +306,7 @@
 ### [`engine/evidence.py`](engine/evidence.py)
 > *Evidence identity: which verified run groups are valid for a test right now.*
 
-**Size**: `214` lines (`7944` bytes)
+**Size**: `221` lines (`8354` bytes)
 
 **Functions:**
 - `def test_inputs(test)` - *The canonical declared input names of a test.*
@@ -1158,7 +1158,7 @@
 ### [`tests/test_killtests.py`](tests/test_killtests.py)
 > *Kill tests: binding, two-run agreement, expected exits and bounded teardown.*
 
-**Size**: `144` lines (`6210` bytes)
+**Size**: `168` lines (`7490` bytes)
 
 **Classes:**
 - `class KillTestTests`
@@ -1172,6 +1172,8 @@
   - Method `.test_timeout_kills_the_command_and_fails()`
   - Method `.test_binding_matches_after_verification()`
   - Method `.test_editing_the_command_invalidates_the_binding()`
+  - Method `.test_editing_expect_exit_invalidates_the_binding()`
+  - Method `.test_editing_timeout_invalidates_the_binding()`
   - Method `.test_changing_a_declared_input_invalidates_the_binding()`
   - Method `.test_run_records_the_binding_and_git_state()`
 
