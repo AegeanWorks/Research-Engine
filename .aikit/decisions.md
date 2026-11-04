@@ -571,3 +571,17 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   around `ai ingest` remains operator malfeasance, not a code path, and stays visible via
   the artifact join and `AI-002`. Raw payloads cannot enter the repo through the CLI.
   `AI-001` remains as the backstop for legacy rows and direct DB edits.
+
+### ADR-041: Test identity binds the expected exit and the timeout
+- **Date**: 2026-11-04
+- **Status**: Accepted
+- **Context**: IDEA-979: `evidence.binding()` covered the command, the negative control,
+  the engine code and the declared inputs, but not `expect_exit` or `timeout_seconds`.
+  A pass is `exit_code == expect_exit` inside a bounded run, so editing either after a
+  twice-passing verification silently redefined what the recorded evidence proved.
+- **Decision**: Fold `expect_exit` and `timeout_seconds` into the command-identity hash
+  in `evidence.binding()`; no schema change. Groups verified under the weaker identity
+  read as stale (`EVID-005`) until re-verified, exactly like a command edit today.
+- **Consequences**: Post-verdict edits to the expected exit or the timeout retire the
+  group instead of redefining the pass. One upgrade cost: pre-existing verified groups
+  need one fresh `test verify` to rebind under the stronger identity.

@@ -84,10 +84,12 @@ them.
 
 ## Evidence Binding
 
-Each run records four identities: `command_sha256` of the command string, `code_sha256` over
+Each run records four identities: `command_sha256` of the command string (folding in the
+negative control, the expected exit code and the timeout), `code_sha256` over
 `engine/**.py`, `inputs_sha256` over the test's declared `--input` paths, and the git commit plus
 runtime for diagnosis. `current_verified_groups` accepts only groups whose two runs agree and whose
-three binding hashes equal the values computed now. Editing the command, the engine code or a
+three binding hashes equal the values computed now. Editing the command, the control, the
+expected exit, the timeout, the engine code or a
 declared input therefore retires the evidence instead of silently reusing it. Files a test reads
 without declaring them are outside the guarantee; that limit is stated in the README.
 

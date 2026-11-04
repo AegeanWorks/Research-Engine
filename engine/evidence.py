@@ -38,11 +38,18 @@ def binding(test: KillTest) -> Dict[str, str]:
     """The identity a run must carry to count as evidence now.
 
     The negative control is part of the command identity: changing it changes what the test
-    proves, so old runs must stop counting.
+    proves, so old runs must stop counting. The expected exit code and the timeout are
+    verdict-affecting too (a pass is `exit_code == expect_exit` inside a bounded run), so
+    they are folded into the same hash: editing them after verification retires the group
+    instead of silently redefining the pass.
     """
     current = fingerprint(test_inputs(test))
     return {
-        "command_sha256": sha256_text(test.command + "\n--control--\n" + test.control_command),
+        "command_sha256": sha256_text(
+            test.command + "\n--control--\n" + test.control_command
+            + f"\n--expect-exit--\n{int(test.expect_exit)}"
+            + f"\n--timeout--\n{int(test.timeout_seconds)}"
+        ),
         "code_sha256": current.code_sha256,
         "inputs_sha256": current.inputs_sha256,
     }

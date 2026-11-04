@@ -111,6 +111,30 @@ class KillTestTests(DatabaseCase):
         self.assertIsNone(current_verified_group(self.conn, refreshed))
         self.assertEqual(len(verified_groups(self.conn, test.id)), 1)
 
+    def test_editing_expect_exit_invalidates_the_binding(self) -> None:
+        command = self._script("expect.py", "print('ok')\n")
+        test = add_test(self.conn, self.research, "Expect", command, claim_ref=self.claim)
+        verify_test(self.conn, test.id)
+        self.assertIsNotNone(current_verified_group(self.conn, test))
+        self.conn.execute(
+            "UPDATE killtest SET expect_exit = 1 WHERE id = ?", (test.id,),
+        )
+        refreshed = get_test(self.conn, test.id)
+        self.assertIsNone(current_verified_group(self.conn, refreshed))
+        self.assertEqual(len(verified_groups(self.conn, test.id)), 1)
+
+    def test_editing_timeout_invalidates_the_binding(self) -> None:
+        command = self._script("timing.py", "print('ok')\n")
+        test = add_test(self.conn, self.research, "Timing", command, claim_ref=self.claim)
+        verify_test(self.conn, test.id)
+        self.assertIsNotNone(current_verified_group(self.conn, test))
+        self.conn.execute(
+            "UPDATE killtest SET timeout_seconds = 600 WHERE id = ?", (test.id,),
+        )
+        refreshed = get_test(self.conn, test.id)
+        self.assertIsNone(current_verified_group(self.conn, refreshed))
+        self.assertEqual(len(verified_groups(self.conn, test.id)), 1)
+
     def test_changing_a_declared_input_invalidates_the_binding(self) -> None:
         data = self.dir / "data.txt"
         data.write_text("one", encoding="utf-8")
