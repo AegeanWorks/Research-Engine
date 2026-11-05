@@ -9,8 +9,8 @@
 - **Total Python Modules**: `84`
 - **Total Classes**: `86`
 - **Total Top-Level Functions**: `280`
-- **Total Class Methods**: `607`
-- **Total Source Lines**: `18273`
+- **Total Class Methods**: `608`
+- **Total Source Lines**: `18319`
 
 ---
 
@@ -68,7 +68,7 @@
 ### [`engine/analysis.py`](engine/analysis.py)
 > *Discovery and ranking over the graph: contradictions, coverage, keystones.*
 
-**Size**: `882` lines (`35944` bytes)
+**Size**: `896` lines (`36676` bytes)
 
 **Functions:**
 - `def _negated(text)` - *Whether an assertion carries an explicit negation marker.*
@@ -86,7 +86,7 @@
 - `def _comparability(baseline, treatment, allow_incomparable, allow_self_reported)` - *Whether two groups measure the same quantity under the same procedure.*
 - `def claim_statistics(conn, claim_ref, baseline, treatment, seed, resamples, allow_incomparable, allow_self_reported, actor, plan_ref, since, until)` - *Compare two observation groups of a claim and record that the comparison happened.*
 - `def observation_summary(conn, claim_ref)` - *Per-group counts and basic summaries for one claim.*
-- `def claim_trend(conn, claim_ref, group, actor)` - *Fit a least-squares trend over a group's observations in recording order.*
+- `def claim_trend(conn, claim_ref, group, actor, since, until)` - *Fit a least-squares trend over a group's observations in recording order.*
 - `def group_correlations(conn, claim_ref, groups, allow_incomparable, allow_self_reported, since, until)` - *Advisory pairwise Pearson correlations between a claim's observation groups.*
 - `def batch_statistics(conn, research_ref, baseline, treatment, seed, resamples, allow_incomparable, allow_self_reported, actor, since, until, holm)` - *Compare one baseline/treatment pair across every claim in a program.*
 
@@ -194,7 +194,7 @@
 ### [`engine/cli.py`](engine/cli.py)
 > *Command-line surface: one entry point for every engine mechanic.*
 
-**Size**: `1454` lines (`72327` bytes)
+**Size**: `1464` lines (`72945` bytes)
 
 **Functions:**
 - `def _build_parser()`
@@ -1120,7 +1120,7 @@
 ### [`tests/test_golden.py`](tests/test_golden.py)
 > *Golden run: the whole command surface, end to end, in a fresh database.*
 
-**Size**: `200` lines (`9727` bytes)
+**Size**: `205` lines (`9926` bytes)
 
 **Classes:**
 - `class GoldenRunTests`
@@ -1430,7 +1430,7 @@
 ### [`tests/test_n1_ports.py`](tests/test_n1_ports.py)
 > *N1 suitable ports: provenance-gated correlation, batch stats-all, CSV import.*
 
-**Size**: `285` lines (`12626` bytes)
+**Size**: `302` lines (`13492` bytes)
 
 **Classes:**
 - `class PearsonTests`
@@ -1460,6 +1460,7 @@
   - Method `.test_window_filters_by_record_time()`
   - Method `.test_invalid_bound_refused()`
   - Method `.test_correlation_respects_window()`
+  - Method `.test_trend_respects_window()`
 - `class DryRunTests`
   - Method `.test_dry_run_writes_nothing()`
 - `class HolmTests`

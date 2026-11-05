@@ -134,6 +134,11 @@ class GoldenRunTests(unittest.TestCase):
             "--since", "2000-01-01",
         )
         self.assertIn("window", windowed)
+        windowed_trend = self.must(
+            "analysis", "trend", "c_000001",
+            "--group", "baseline", "--since", "2000-01-01",
+        )
+        self.assertIn("window", windowed_trend)
 
         # 5. Kill test with a negative control, then the numeric verdict.
         self.must(

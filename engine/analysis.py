@@ -624,15 +624,26 @@ def claim_trend(
     claim_ref: str,
     group: str,
     actor: str = "agent",
+    since: str = "",
+    until: str = "",
 ) -> dict:
     """Fit a least-squares trend over a group's observations in recording order.
 
     The x axis is the recording position, not a timestamp: two observations in the same second
     would otherwise be indistinguishable. Fewer than three values yield no estimate and a warning.
+    `since`/`until` bound the fit to record time `at`; positions re-index within the window.
     """
     claim = get_claim(conn, claim_ref)
     group = group.strip().lower()
-    groups = group_values(conn, claim.id)
+    since_norm = _parse_time_bound(since, "since")
+    until_norm = _parse_time_bound(until, "until")
+    if since_norm and until_norm and since_norm > until_norm:
+        raise EngineError(
+            f"empty time window: {since_norm} is after {until_norm}",
+            "a trend over no record time has no values to fit.",
+            "pass --since at or before --until.",
+        )
+    groups = group_values_window(conn, claim.id, since_norm, until_norm)
     if group not in groups:
         available = ", ".join(sorted(groups)) or "none"
         raise EngineError(
@@ -646,6 +657,7 @@ def claim_trend(
     if len(values) < MIN_GROUP:
         warnings.append(f"fewer than {MIN_GROUP} observations; no trend is estimated")
     result.update({"claim": claim.id, "group": group, "warnings": warnings})
+    result["window"] = {"since": since_norm or "", "until": until_norm or ""}
     if len(values) < MIN_GROUP:
         detail = f"{group} n={len(values)} insufficient for a trend"
     else:
@@ -653,6 +665,8 @@ def claim_trend(
             f"{group} n={len(values)} slope={result['slope']:.6g} r={result['r']:.3f}"
             f" p={result['p']:.4g}"
         )
+    if since_norm or until_norm:
+        detail += f" window={since_norm or '-'}/{until_norm or '-'}"
     with transaction(conn):
         record_event(
             conn,

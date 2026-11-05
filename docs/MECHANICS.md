@@ -315,7 +315,8 @@ and a multiple-comparison warning beyond three claims. `import_from_csv` becomes
 **Follow-up (T-022).** `stats`/`stats-all`/`correlation --since/--until` bound the read to
 record time `at` with no domain model; `import-csv --dry-run` validates then rolls back
 so the preview writes nothing; `stats-all --holm` reuses `holm_adjust` for a display-only
-cross-claim table that changes no verdict.
+cross-claim table that changes no verdict. T-023 extends the same window to `trend`,
+re-indexing positions inside the window.
 
 ## 14. Deterministic lexical search (`lattice`)
 

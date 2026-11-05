@@ -790,3 +790,14 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   `stats-all --holm` reuses `holm_adjust` for a display-only cross-claim table.
 - **Consequences**: Temporal slicing without a domain model; safe migration preview;
   rigorous family view with no verdict change and unchanged default output.
+
+### ADR-054: Trend time window
+- **Date**: 2026-11-05
+- **Status**: Accepted
+- **Context**: T-022 gave windows to `stats`, `stats-all` and `correlation` but left
+  `trend` full-range, so paired analyses disagreed on `n`.
+- **Decision**: `trend --since/--until` bounds the fit to record time `at` with the
+  same parser, re-indexing recording positions inside the window; window stored in
+  the result and the `claim.trend` event detail.
+- **Consequences**: Consistent windowing across all analysis reads; report totals
+  stay all-time by design.

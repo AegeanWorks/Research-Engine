@@ -203,7 +203,7 @@ python -m engine [--db PATH] analysis stats CLAIM --baseline L --treatment L [--
 python -m engine [--db PATH] analysis stats-all REF --baseline L --treatment L [--seed N] [--resamples N] [--allow-*] [--since/until D] [--holm]
 python -m engine [--db PATH] analysis correlation CLAIM [--groups A,B] [--allow-*] [--since/until D]
 python -m engine [--db PATH] analysis plan CLAIM --baseline L --treatment L --prediction TEXT
-python -m engine [--db PATH] analysis trend CLAIM --group LABEL
+python -m engine [--db PATH] analysis trend CLAIM --group LABEL [--since/until D]
 python -m engine [--db PATH] diff OLD.jsonl NEW.jsonl [--exact]
 python -m engine [--db PATH] db integrity
 python -m engine [--db PATH] db backup PATH

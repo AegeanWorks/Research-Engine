@@ -459,6 +459,10 @@ def _build_parser() -> argparse.ArgumentParser:
     trend_c = analysis_sub.add_parser("trend", help="fit a trend over one observation group")
     trend_c.add_argument("claim")
     trend_c.add_argument("--group", required=True)
+    trend_c.add_argument("--since", default="",
+                         help="only observations recorded at or after this ISO time")
+    trend_c.add_argument("--until", default="",
+                         help="only observations recorded at or before this ISO time")
     calibration_c = analysis_sub.add_parser(
         "calibration", help="score hypothesis confidence against recorded outcomes"
     )
@@ -1254,12 +1258,18 @@ def main(argv: List[str] | None = None) -> int:
                     ) or "no claims\n"
                     return _emit(result, args.json, text)
                 if args.action == "trend":
-                    result = claim_trend(conn, args.claim, args.group)
+                    result = claim_trend(conn, args.claim, args.group, since=args.since, until=args.until)
                     text = (
                         f"{result['claim']} {result['group']} n={result['n']}"
                         f"  slope={result['slope']:+.6g}  r={result['r']:.3f}"
                         f"  p={result['p']:.4g}\n"
                     )
+                    window = result.get("window", {})
+                    if window.get("since") or window.get("until"):
+                        text += (
+                            f"  window {window.get('since') or '-'}"
+                            f"/{window.get('until') or '-'}\n"
+                        )
                     for warning in result["warnings"]:
                         text += f"  warning: {warning}\n"
                     return _emit(result, args.json, text)

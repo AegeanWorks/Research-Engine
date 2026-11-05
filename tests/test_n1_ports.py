@@ -241,6 +241,23 @@ class WindowTests(DatabaseCase):
         self.assertEqual(pairs[0]["n"], 1)
         self.assertTrue(any("fewer than" in warning for warning in pairs[0]["warnings"]))
 
+    def test_trend_respects_window(self) -> None:
+        from engine.analysis import claim_trend
+
+        research = self.add_research()
+        claim = add_claim(self.conn, research, "S rises.", "assumption", basis="b").id
+        for index, stamp in enumerate(
+            ["2026-01-01T00:00:00+00:00"] * 2 + ["2026-06-01T00:00:00+00:00"] * 3
+        ):
+            add_observation(self.conn, claim, "series", float(index + 1), at=stamp)
+        full = claim_trend(self.conn, claim, "series")
+        self.assertEqual(full["n"], 5)
+        late = claim_trend(self.conn, claim, "series", since="2026-06-01")
+        self.assertEqual(late["n"], 3)
+        self.assertEqual(late["window"]["since"], "2026-06-01T00:00:00+00:00")
+        with self.assertRaises(EngineError):
+            claim_trend(self.conn, claim, "series", since="2026-06-01", until="2026-01-01")
+
 
 class DryRunTests(DatabaseCase):
     def test_dry_run_writes_nothing(self) -> None:

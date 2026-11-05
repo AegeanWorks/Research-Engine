@@ -310,7 +310,8 @@ plus optional provenance columns) through `add_observation` validation with per-
 skip reasons. `analysis stats --since/--until` (and the same flags on `stats-all`
 and `correlation`) bound the comparison to record time `at`, not measurement date:
 a bare `YYYY-MM-DD` means start of day for `--since` and end of day for `--until`.
-The window is stored in the result and the event detail. `--dry-run` previews an
+The window is stored in the result and the event detail. `claim.trend` takes the same
+window and re-indexes recording positions inside it. `--dry-run` previews an
 import with zero writes; `--template` prints the header. `stats-all --holm` adds a
 display-only Holm table over per-claim Welch and Mann-Whitney p-values.
 

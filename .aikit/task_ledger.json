@@ -1,50 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "T-022-windows-dryrun-holm",
+    "task_id": "T-023-trend-window",
     "last_phase": "in_progress",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1793913377.0006294,
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1793913682.351185,
     "owner": "kilo:goal",
     "started_by": "kilo:goal",
-    "continuations": [],
-    "completed_at": 1793913385.978995
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "T-019-approved-wave2",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[2/6] IDEA-986 plans plus 993 amendments shipped: v13 preregistration with exploratory warnings plus ledger-backed corrections with ADR-045, 516 tests pass, 4/4 gates pass, checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793820831.3286917,
-      "timestamp_str": "2026-11-04 22:33:51",
-      "agent": "kilo:goal"
-    },
-    {
-      "task_id": "T-019-approved-wave2",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[3/6] IDEA-978 coverage-gated consensus shipped: consensus_display refuses thin or single-sourced questions with ADR-046, 519 tests pass, 4/4 gates pass, checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793821269.3615093,
-      "timestamp_str": "2026-11-04 22:41:09",
-      "agent": "kilo:goal"
-    },
-    {
-      "task_id": "T-019-approved-wave2",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[4/6] IDEA-975 preview-bound digest shipped: preview digests bind invalidate and retract across twin rows with ADR-047, 524 tests pass, 4/4 gates pass, checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793821731.1142435,
-      "timestamp_str": "2026-11-04 22:48:51",
-      "agent": "kilo:goal"
-    },
     {
       "task_id": "T-019-approved-wave2",
       "phase": "phase 4",
@@ -247,6 +213,46 @@
       "status": "completed",
       "timestamp": 1793913385.9789965,
       "timestamp_str": "2026-11-06 00:16:25",
+      "agent": "kilo:goal"
+    },
+    {
+      "task_id": "T-023-trend-window",
+      "phase": "in_progress",
+      "phase_num": 2,
+      "description": "[1/3] Planning trend since/until to close window asymmetry",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793913573.8118606,
+      "timestamp_str": "2026-11-06 00:19:33",
+      "agent": "kilo:goal",
+      "impact_assessment": {
+        "why": "Stats, batch and correlation slice by record time but trend reads the full group, so paired analyses disagree on n",
+        "benefits": "Consistent windowing across all analysis reads; window stored in result and event detail",
+        "risks": "contract: x stays recording position re-indexed within window; trend still records claim.trend event; dependency: stdlib only; concurrency: single writer; state: no schema change",
+        "mitigation": "Failing-first window tests; golden windowed trend before report out; full suite plus aikit check; explicit staging"
+      },
+      "plan_digest": "3919dfdcb20b5b4e87638d0f0406b62dd8c657cb9d0d63d056554c4a818130fd"
+    },
+    {
+      "task_id": "T-023-trend-window",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[2/3] Trend window shipped: since/until on claim_trend with re-indexed positions plus windowed event detail, tests green, checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793913682.2145815,
+      "timestamp_str": "2026-11-06 00:21:22",
+      "agent": "kilo:goal"
+    },
+    {
+      "task_id": "T-023-trend-window",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[3/3] Docs plus ADR shipped: README trend flags within 22500 plus ARCHITECTURE and MECHANICS plus ADR-054, golden extended, 4/4 gates pass, checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793913682.351185,
+      "timestamp_str": "2026-11-06 00:21:22",
       "agent": "kilo:goal"
     }
   ]
