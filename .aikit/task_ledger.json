@@ -3,25 +3,15 @@
   "active_task": {
     "task_id": "T-023-trend-window",
     "last_phase": "in_progress",
-    "active_phase": 4,
-    "status": "in_progress",
+    "active_phase": 5,
+    "status": "completed",
     "updated_at": 1793913682.351185,
     "owner": "kilo:goal",
     "started_by": "kilo:goal",
-    "continuations": []
+    "continuations": [],
+    "completed_at": 1793913687.1214209
   },
   "checkpoints": [
-    {
-      "task_id": "T-019-approved-wave2",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[5/6] IDEA-1103 no-evidence refusal gate shipped: report refuses verdict-less programs with ADR-048, 526 tests pass, 4/4 gates pass, checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793822427.8040638,
-      "timestamp_str": "2026-11-04 23:00:27",
-      "agent": "kilo:goal"
-    },
     {
       "task_id": "T-019-approved-wave2",
       "phase": "phase 4",
@@ -253,6 +243,16 @@
       "status": "in_progress",
       "timestamp": 1793913682.351185,
       "timestamp_str": "2026-11-06 00:21:22",
+      "agent": "kilo:goal"
+    },
+    {
+      "task_id": "T-023-trend-window",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'T-023-trend-window' completed successfully.",
+      "status": "completed",
+      "timestamp": 1793913687.1214223,
+      "timestamp_str": "2026-11-06 00:21:27",
       "agent": "kilo:goal"
     }
   ]
