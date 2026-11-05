@@ -155,7 +155,7 @@ python -m engine [--db PATH] observation add CLAIM --group LABEL --value F [--no
                         [--producer-path PATH] [--producer-digest SHA256]
 python -m engine [--db PATH] observation list CLAIM [--group LABEL] [--include-voided]
 python -m engine [--db PATH] observation void OBS --reason TEXT
-python -m engine [--db PATH] observation import-csv CLAIM PATH
+python -m engine [--db PATH] observation import-csv [--template] [CLAIM PATH]
 
 python -m engine [--db PATH] claim add RESEARCH --text TEXT --kind KIND [--source REF]
                         [--quote TEXT] [--locator TEXT] [--confidence C] [--kill-test TEXT]
@@ -361,7 +361,7 @@ research-engine/
 - **Single writer.** One researcher or agent at a time.
 - **Consensus is a display heuristic.** It is not a posterior and never changes a verdict;
   UNKNOWN contributes zero. Numbers need tested coverage from more than one source.
-- **Search is lexical.** No embeddings; ranking is an exact phrase, then matched terms.
+- **Search is lexical.** Exact phrase first, then matched terms.
 - **Calibration is descriptive.** It scores recorded probabilities, not the world; small
   resolved sets read descriptive.
 - **Discovery is advisory.** `analysis` proposes; only `claim link` records a relation.

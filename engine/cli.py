@@ -99,6 +99,7 @@ from engine.events import event_path, event_tree, list_events, verify_ledger
 from engine.maintenance import backup, integrity_check
 from engine.manifest import check_report, write_report
 from engine.observations import (
+    CSV_TEMPLATE_HEADER,
     add_observation,
     import_observations_csv,
     list_observations,
@@ -238,8 +239,11 @@ def _build_parser() -> argparse.ArgumentParser:
     import_o = observation_sub.add_parser(
         "import-csv", help="bulk-record measurements from a CSV file"
     )
-    import_o.add_argument("claim")
-    import_o.add_argument("path", help="CSV file with group_label,value columns")
+    import_o.add_argument("claim", nargs="?", default="")
+    import_o.add_argument("path", nargs="?", default="",
+                          help="CSV file with group_label,value columns")
+    import_o.add_argument("--template", action="store_true",
+                          help="print the CSV header and exit without writing")
 
     claim = commands.add_parser("claim", help="manage claims and verdicts")
     claim_sub = claim.add_subparsers(dest="action", required=True)
@@ -698,6 +702,17 @@ def _cmd_observation(conn: sqlite3.Connection, args) -> int:
         record = void_observation(conn, args.ref, args.reason)
         return _emit(record, args.json, f"{record.id} voided\n")
     if args.action == "import-csv":
+        if args.template:
+            return _emit(
+                {"template": CSV_TEMPLATE_HEADER}, args.json,
+                CSV_TEMPLATE_HEADER + "\n",
+            )
+        if not args.claim or not args.path:
+            raise EngineError(
+                "observation import-csv needs a claim and a path",
+                "a bulk import records named measurements on one live claim.",
+                "pass CLAIM PATH, or --template to print the CSV header.",
+            )
         result = import_observations_csv(conn, args.claim, args.path)
         text = (
             f"{result['claim']} imported {result['imported']}"

@@ -765,3 +765,15 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   batch runs cannot be aborted by one bad group; N1 legacy values migrate without
   breaking digests. GUI, date windows, HTML reports, SQLAlchemy models and
   mutable settings remain deliberately unported.
+
+### ADR-052: Golden coverage plus CSV template
+- **Date**: 2026-11-05
+- **Status**: Accepted
+- **Context**: T-020 shipped three CLI paths with unit tests but no end-to-end
+  composition proof; the CSV header contract lived in docs only.
+- **Decision**: (1) `test_golden` drives `import-csv --template`, bulk import to a
+  fresh claim, `analysis correlation` and `analysis stats-all` before `report --out`
+  so the manifest stays clean; (2) `observation import-csv --template` prints the
+  canonical header with no DB write (CLAIM/PATH optional when flagged).
+- **Consequences**: Full surface stays composable; template removes guesswork with
+  zero digest impact; default report bytes unchanged.

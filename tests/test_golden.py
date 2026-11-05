@@ -100,6 +100,27 @@ class GoldenRunTests(unittest.TestCase):
         self.assertEqual(stats["bootstrap"]["seed"], 7)
         self.assertIn("slope=", self.must("analysis", "trend", "c_000001", "--group", "baseline"))
 
+        # 4b. CSV template, bulk import, advisory correlation and batch stats.
+        template = self.must("observation", "import-csv", "--template")
+        self.assertIn("group_label,value", template)
+        csv_path = self.dir / "observations.csv"
+        csv_path.write_text(
+            "group_label,value\n"
+            "baseline,1.0\nbaseline,1.2\nbaseline,1.1\n"
+            "treatment,2.0\ntreatment,2.1\ntreatment,2.2\n",
+            encoding="utf-8",
+        )
+        imported = self.must("observation", "import-csv", "c_000003", str(csv_path))
+        self.assertIn("imported 6 skipped 0", imported)
+        correlations = self.must("analysis", "correlation", "c_000001")
+        self.assertIn("baseline <> treatment", correlations)
+        batch = self.must(
+            "analysis", "stats-all", "r_000001",
+            "--baseline", "baseline", "--treatment", "treatment",
+        )
+        self.assertIn("BATCH r_000001", batch)
+        self.assertIn("c_000001", batch)
+
         # 5. Kill test with a negative control, then the numeric verdict.
         self.must(
             "test", "add", "r_000001", "--name", "Measure", "--claim", "c_000001",

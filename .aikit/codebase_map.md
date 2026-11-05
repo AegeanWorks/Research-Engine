@@ -7,10 +7,10 @@
 
 ## 📊 Codebase Metrics
 - **Total Python Modules**: `84`
-- **Total Classes**: `81`
+- **Total Classes**: `82`
 - **Total Top-Level Functions**: `278`
-- **Total Class Methods**: `599`
-- **Total Source Lines**: `17924`
+- **Total Class Methods**: `600`
+- **Total Source Lines**: `17980`
 
 ---
 
@@ -193,7 +193,7 @@
 ### [`engine/cli.py`](engine/cli.py)
 > *Command-line surface: one entry point for every engine mechanic.*
 
-**Size**: `1399` lines (`69077` bytes)
+**Size**: `1414` lines (`69797` bytes)
 
 **Functions:**
 - `def _build_parser()`
@@ -499,7 +499,7 @@
 ### [`engine/observations.py`](engine/observations.py)
 > *Recorded observations: the raw measurements a numeric claim is computed from.*
 
-**Size**: `429` lines (`16704` bytes)
+**Size**: `436` lines (`17027` bytes)
 
 **Functions:**
 - `def _to_observation(row)`
@@ -1114,7 +1114,7 @@
 ### [`tests/test_golden.py`](tests/test_golden.py)
 > *Golden run: the whole command surface, end to end, in a fresh database.*
 
-**Size**: `165` lines (`8122` bytes)
+**Size**: `186` lines (`9111` bytes)
 
 **Classes:**
 - `class GoldenRunTests`
@@ -1424,7 +1424,7 @@
 ### [`tests/test_n1_ports.py`](tests/test_n1_ports.py)
 > *N1 suitable ports: provenance-gated correlation, batch stats-all, CSV import.*
 
-**Size**: `183` lines (`8171` bytes)
+**Size**: `196` lines (`8539` bytes)
 
 **Classes:**
 - `class PearsonTests`
@@ -1447,6 +1447,8 @@
   - Method `.test_valid_rows_import_and_bad_rows_skip()`
   - Method `.test_missing_header_refused()`
   - Method `.test_alternate_group_header_accepted()`
+- `class TemplateTests`
+  - Method `.test_header_names_required_columns_first()`
 
 ---
 

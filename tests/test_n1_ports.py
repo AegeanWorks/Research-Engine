@@ -10,7 +10,12 @@ from pathlib import Path
 from engine.analysis import batch_statistics, group_correlations
 from engine.claims import add_claim
 from engine.errors import EngineError
-from engine.observations import add_observation, group_values, import_observations_csv
+from engine.observations import (
+    CSV_TEMPLATE_HEADER,
+    add_observation,
+    group_values,
+    import_observations_csv,
+)
 from engine.protocols import register_protocol
 from engine.stats import pearson
 from tests.support import DatabaseCase
@@ -177,6 +182,14 @@ class CsvImportTests(DatabaseCase):
         self.addCleanup(lambda: tmp.unlink(missing_ok=True))
         result = import_observations_csv(self.conn, claim, tmp)
         self.assertEqual(result["imported"], 1)
+
+
+class TemplateTests(unittest.TestCase):
+    def test_header_names_required_columns_first(self) -> None:
+        header = CSV_TEMPLATE_HEADER.split(",")
+        self.assertEqual(header[:2], ["group_label", "value"])
+        for column in ("protocol_id", "unit", "provenance_class"):
+            self.assertIn(column, header)
 
 
 if __name__ == "__main__":

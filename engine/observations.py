@@ -332,6 +332,13 @@ def group_values(conn: sqlite3.Connection, claim_ref: str) -> Dict[str, List[flo
 _CSV_GROUP_KEYS = ("group_label", "group")
 _CSV_VALUE_KEYS = ("value",)
 
+CSV_TEMPLATE_HEADER = (
+    "group_label,value,note,instrument_kind,instrument_id,instrument_digest,"
+    "rater_kind,rater_id,rater_version,protocol_id,sample_size,aggregation,"
+    "unit,provenance_class,producer_path,producer_digest"
+)
+"""Canonical header for `observation import-csv`; required: group_label, value."""
+
 
 def import_observations_csv(
     conn: sqlite3.Connection,
