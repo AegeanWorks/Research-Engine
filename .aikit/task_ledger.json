@@ -3,32 +3,15 @@
   "active_task": {
     "task_id": "T-020-n1-port",
     "last_phase": "in_progress",
-    "active_phase": 4,
-    "status": "in_progress",
+    "active_phase": 5,
+    "status": "completed",
     "updated_at": 1793911951.2358472,
     "owner": "kilo:goal",
     "started_by": "kilo:goal",
-    "continuations": []
+    "continuations": [],
+    "completed_at": 1793911967.6314716
   },
   "checkpoints": [
-    {
-      "task_id": "T-018-approved-wave1",
-      "phase": "planning",
-      "phase_num": 2,
-      "description": "[1/6] Planning Wave-1 integrity: 987 protocol recompute, 979 test identity, 980 work identity, 977 support-cycle, 990 Holm, 982+974 volume guards",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793816842.545664,
-      "timestamp_str": "2026-11-04 21:27:22",
-      "agent": "kilo:goal",
-      "impact_assessment": {
-        "why": "Deep-checked Approved ideas with P1 integrity gaps unverified at runtime; forged protocol pins and mutable test bindings undermine NUMERIC trust",
-        "benefits": "Closes P1 forgery/mutation paths; adds cycle and volume guards; each milestone independently gated",
-        "risks": "contract: new refusals on protocol/test/cascade paths; dependency: stdlib only; concurrency: single writer; state: 980 needs UNIQUE migration",
-        "mitigation": "Failing-first tests per milestone; full suite plus aikit check per milestone; explicit staging; no push without gates"
-      },
-      "plan_digest": "22dfb770931981a3b1de3034d35b52df77df8efee15dfe126bbf46f13b9efb12"
-    },
     {
       "task_id": "T-018-approved-wave1",
       "phase": "phase 4",
@@ -248,6 +231,16 @@
       "status": "in_progress",
       "timestamp": 1793911951.2358472,
       "timestamp_str": "2026-11-05 23:52:31",
+      "agent": "kilo:goal"
+    },
+    {
+      "task_id": "T-020-n1-port",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'T-020-n1-port' completed successfully.",
+      "status": "completed",
+      "timestamp": 1793911967.6314728,
+      "timestamp_str": "2026-11-05 23:52:47",
       "agent": "kilo:goal"
     }
   ]
