@@ -745,3 +745,23 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Consequences**: Sharded retractions trip correctly; thin questions refuse;
   boundary families reject per standard; the demo runs in ~1s warm and the full
   suite drops proportionally. No binding change: git identity stays diagnostic.
+
+### ADR-051: N1 suitable ports - correlation, batch stats-all, CSV import
+- **Date**: 2026-11-05
+- **Status**: Accepted
+- **Context**: N1-Engine holds deterministic comparison mechanics plus CSV/GUI/domain
+  models. Only stdlib-compatible advisory patterns fit the provenance/digest
+  constraints; pandas, scipy, SQLAlchemy and PyQt are excluded by the
+  standard-library-only non-negotiable.
+- **Decision**: (1) `stats.pearson` plus `analysis correlation` computes advisory
+  pairwise Pearson r paired by recording order, provenance-gated, read-only, never
+  a `claim.stats` event so `OBS-001` still requires a real run; (2)
+  `analysis stats-all` batches one baseline/treatment pair across every claim in a
+  program with per-claim `EngineError` isolation and a multiple-comparison warning
+  beyond `MAX_SAFE_CLAIMS=3`; (3) `observation import-csv` bulk-records
+  `group_label,value` plus optional provenance columns through `add_observation`
+  validation with per-row skip reasons; no CSV export, JSONL digests stay canonical.
+- **Consequences**: Discovery gains a correlation view without a new gate;
+  batch runs cannot be aborted by one bad group; N1 legacy values migrate without
+  breaking digests. GUI, date windows, HTML reports, SQLAlchemy models and
+  mutable settings remain deliberately unported.

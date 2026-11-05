@@ -257,6 +257,31 @@ def bootstrap_ci(
     }
 
 
+def pearson(xs: Sequence[float], ys: Sequence[float]) -> Dict[str, float]:
+    """Pearson product-moment correlation for paired samples, stdlib-only.
+
+    Pairs with a non-finite member are dropped. Fewer than three pairs
+    yield r=0.0; zero variance in either side is degenerate and also
+    yields r=0.0. Never raises: advisory callers must not abort a batch.
+    """
+    pairs = [
+        (float(x), float(y)) for x, y in zip(xs, ys)
+        if math.isfinite(x) and math.isfinite(y)
+    ]
+    n = len(pairs)
+    if n < MIN_GROUP:
+        return {"r": 0.0, "n": n}
+    x_mean = mean(pair[0] for pair in pairs)
+    y_mean = mean(pair[1] for pair in pairs)
+    sxx = sum((pair[0] - x_mean) ** 2 for pair in pairs)
+    syy = sum((pair[1] - y_mean) ** 2 for pair in pairs)
+    if sxx == 0 or syy == 0:
+        return {"r": 0.0, "n": n}
+    sxy = sum((pair[0] - x_mean) * (pair[1] - y_mean) for pair in pairs)
+    r = sxy / math.sqrt(sxx * syy)
+    return {"r": max(min(r, 1.0), -1.0), "n": n}
+
+
 def linregress(xs: Sequence[float], ys: Sequence[float]) -> Dict[str, float]:
     """Least-squares slope, intercept, correlation and two-sided p for paired points."""
     pairs = [

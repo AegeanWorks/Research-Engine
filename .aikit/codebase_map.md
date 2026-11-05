@@ -6,11 +6,11 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `83`
-- **Total Classes**: `77`
-- **Total Top-Level Functions**: `274`
-- **Total Class Methods**: `583`
-- **Total Source Lines**: `17356`
+- **Total Python Modules**: `84`
+- **Total Classes**: `81`
+- **Total Top-Level Functions**: `278`
+- **Total Class Methods**: `599`
+- **Total Source Lines**: `17924`
 
 ---
 
@@ -68,7 +68,7 @@
 ### [`engine/analysis.py`](engine/analysis.py)
 > *Discovery and ranking over the graph: contradictions, coverage, keystones.*
 
-**Size**: `604` lines (`24828` bytes)
+**Size**: `779` lines (`31652` bytes)
 
 **Functions:**
 - `def _negated(text)` - *Whether an assertion carries an explicit negation marker.*
@@ -86,6 +86,8 @@
 - `def claim_statistics(conn, claim_ref, baseline, treatment, seed, resamples, allow_incomparable, allow_self_reported, actor, plan_ref)` - *Compare two observation groups of a claim and record that the comparison happened.*
 - `def observation_summary(conn, claim_ref)` - *Per-group counts and basic summaries for one claim.*
 - `def claim_trend(conn, claim_ref, group, actor)` - *Fit a least-squares trend over a group's observations in recording order.*
+- `def group_correlations(conn, claim_ref, groups, allow_incomparable, allow_self_reported)` - *Advisory pairwise Pearson correlations between a claim's observation groups.*
+- `def batch_statistics(conn, research_ref, baseline, treatment, seed, resamples, allow_incomparable, allow_self_reported, actor)` - *Compare one baseline/treatment pair across every claim in a program.*
 
 ---
 
@@ -191,7 +193,7 @@
 ### [`engine/cli.py`](engine/cli.py)
 > *Command-line surface: one entry point for every engine mechanic.*
 
-**Size**: `1316` lines (`64508` bytes)
+**Size**: `1399` lines (`69077` bytes)
 
 **Functions:**
 - `def _build_parser()`
@@ -497,7 +499,7 @@
 ### [`engine/observations.py`](engine/observations.py)
 > *Recorded observations: the raw measurements a numeric claim is computed from.*
 
-**Size**: `327` lines (`12165` bytes)
+**Size**: `429` lines (`16704` bytes)
 
 **Functions:**
 - `def _to_observation(row)`
@@ -506,6 +508,7 @@
 - `def list_observations(conn, claim_ref, group_label, include_voided)` - *Observations of a claim, oldest first, excluding voided rows by default.*
 - `def void_observation(conn, ref, reason, actor)` - *Retire a measurement without deleting it; the reason stays in the record.*
 - `def group_values(conn, claim_ref)` - *Non-voided values per group, in insertion order.*
+- `def import_observations_csv(conn, claim_ref, path, actor)` - *Bulk-record measurements from a CSV file with per-row error isolation.*
 
 ---
 
@@ -634,7 +637,7 @@
 ### [`engine/stats.py`](engine/stats.py)
 > *Deterministic statistics for recorded observations.*
 
-**Size**: `333` lines (`12465` bytes)
+**Size**: `358` lines (`13460` bytes)
 
 **Functions:**
 - `def sample_sd(values)` - *Sample standard deviation; zero for fewer than two values.*
@@ -649,6 +652,7 @@
 - `def mann_whitney(baseline, treatment)` - *Mann-Whitney U: exact for small untied samples, continuity-corrected asymptotic otherwise.*
 - `def holm_adjust(p_values)` - *Holm step-down adjustment for a family of p-values, in standard-library code.*
 - `def bootstrap_ci(baseline, treatment, seed, resamples)` - *Percentile bootstrap interval for the difference in means, reproducibly seeded.*
+- `def pearson(xs, ys)` - *Pearson product-moment correlation for paired samples, stdlib-only.*
 - `def linregress(xs, ys)` - *Least-squares slope, intercept, correlation and two-sided p for paired points.*
 - `def compare_groups(baseline, treatment, seed, resamples)` - *Compare two recorded groups and state the result, the agreement and the caveats.*
 
@@ -1414,6 +1418,35 @@
   - Method `.test_status_vocabulary_is_closed()`
   - Method `.test_dependency_relations_are_explicit()`
   - Method `.test_claim_is_frozen()`
+
+---
+
+### [`tests/test_n1_ports.py`](tests/test_n1_ports.py)
+> *N1 suitable ports: provenance-gated correlation, batch stats-all, CSV import.*
+
+**Size**: `183` lines (`8171` bytes)
+
+**Classes:**
+- `class PearsonTests`
+  - Method `.test_perfect_correlation()`
+  - Method `.test_anticorrelation()`
+  - Method `.test_degenerate_variance_yields_zero()`
+  - Method `.test_fewer_than_three_pairs_yields_zero()`
+- `class CorrelationTests`
+  - Method `._claim_with_groups()`
+  - Method `.test_correlated_groups_rank_first()`
+  - Method `.test_truncation_is_reported()`
+  - Method `.test_incomparable_protocols_are_recorded_not_raised()`
+  - Method `.test_fewer_than_two_groups_refused()`
+- `class BatchStatisticsTests`
+  - Method `._claim(research, baseline, treatment)`
+  - Method `.test_errors_are_isolated_per_claim()`
+  - Method `.test_many_claims_warn()`
+- `class CsvImportTests`
+  - Method `._write_csv(rows)`
+  - Method `.test_valid_rows_import_and_bad_rows_skip()`
+  - Method `.test_missing_header_refused()`
+  - Method `.test_alternate_group_header_accepted()`
 
 ---
 

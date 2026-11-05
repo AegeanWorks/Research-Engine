@@ -304,6 +304,14 @@ independent evidence.
 scipy, SQLAlchemy and PyQt. The port is stdlib-only and deterministic; the reference bootstrap is
 unseeded, which this project does not reproduce.
 
+**Follow-up ports (T-020).** `correlation_matrix` becomes `analysis correlation`: stdlib
+Pearson over two groups paired by recording order, provenance-gated, read-only, never
+a `claim.stats` event. `analyze_multiple_metrics` becomes `analysis stats-all`: one
+baseline/treatment pair across every claim in a program with per-claim error isolation
+and a multiple-comparison warning beyond three claims. `import_from_csv` becomes
+`observation import-csv`: stdlib `csv` bulk insert with per-row skip reasons reusing
+`add_observation` validation; no CSV export, so JSONL digests stay canonical.
+
 ## 14. Deterministic lexical search (`lattice`)
 
 **Mechanic.** A research graph is only usable if a reader can find the claim, source, question or

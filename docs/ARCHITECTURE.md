@@ -293,6 +293,7 @@ measurement is voided so the record keeps its history. `analysis stats` compares
 | rank test | Mann-Whitney U | exact DP for untied n1·n2 ≤ 400, tie-corrected normal otherwise |
 | interval | percentile bootstrap, seeded | the seed and resample count are recorded |
 | trend | least squares, t-based p | needs ≥ 3 points |
+| correlation | Pearson r, stdlib-only | paired by recording order, needs ≥ 3 pairs, 0 on degenerate variance |
 
 `compare_groups` returns the numbers, `tests_agree`, `significant`, and warnings: fewer than three
 observations, degenerate zero variance, the asymptotic rank method, and parametric/rank
@@ -300,7 +301,13 @@ disagreement at alpha 0.05. Group labels are normalised to lowercase, a group ca
 with itself, and fewer than ten bootstrap resamples are refused. A run appends a `claim.stats`
 or `claim.trend` event; `OBS-001` warns when no run exists **or when an observation was added or
 voided after the last run**. Timestamps have second resolution, so a change inside the same
-second as the run is not distinguished.
+second as the run is not distinguished. `analysis correlation` is advisory only: it pairs
+groups by recording order, gates provenance through the same comparability rule, and records
+no event, so it never silences `OBS-001`. `analysis stats-all` batches one group pair
+across every claim with per-claim error isolation and a multiple-comparison warning
+beyond three claims. `observation import-csv` bulk-records a CSV (`group_label,value`
+plus optional provenance columns) through `add_observation` validation with per-row
+skip reasons.
 
 ## Maintenance
 
@@ -377,7 +384,9 @@ two claims about different questions are not in conflict. The score is
 proposes pairs with no `contradicts` edge at a default overlap of 0.35; a human records the edge.
 `evidence_matrix` counts claims per source and question and reports uncovered questions.
 `keystone_claims` ranks by transitive dependents plus inbound edges, reusing `cascade.dependents`
-so the ranking matches what a collapse would actually do.
+so the ranking matches what a collapse would actually do. `group_correlations` ranks
+paired group values by absolute Pearson r with provenance gating; like the other
+discovery reads it proposes and never records.
 
 ## Snapshots and Merges
 

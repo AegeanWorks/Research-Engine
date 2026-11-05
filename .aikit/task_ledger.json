@@ -1,61 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "T-019-approved-wave2",
-    "last_phase": "phase 4",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1793822790.324477,
+    "task_id": "T-020-n1-port",
+    "last_phase": "in_progress",
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1793911951.2358472,
     "owner": "kilo:goal",
     "started_by": "kilo:goal",
-    "continuations": [],
-    "completed_at": 1793822820.017035
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "T-017-first30-audit",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[4/4] Waves 0/10/20/30 verified and delivered: diff non-object refusal with failing-first test; 422 tests pass; 4/4 gates pass; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793724153.8417718,
-      "timestamp_str": "2026-11-03 19:42:33",
-      "agent": "kilo:research-engine"
-    },
-    {
-      "task_id": "T-017-first30-audit",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "Take-over: verify T-017 delivered files, run gates, commit wave",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793816748.401829,
-      "timestamp_str": "2026-11-04 21:25:48",
-      "agent": "kilo:goal",
-      "continued_from": "kilo:research-engine"
-    },
-    {
-      "task_id": "T-017-first30-audit",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "Take-over verify: ai.py ingest gates plus ADR-040 reviewed, 480 tests pass, 4/4 gates pass, checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793816824.2592986,
-      "timestamp_str": "2026-11-04 21:27:04",
-      "agent": "kilo:goal"
-    },
-    {
-      "task_id": "T-017-first30-audit",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'T-017-first30-audit' completed successfully.",
-      "status": "completed",
-      "timestamp": 1793816838.910869,
-      "timestamp_str": "2026-11-04 21:27:18",
-      "agent": "kilo:goal"
-    },
     {
       "task_id": "T-018-approved-wave1",
       "phase": "planning",
@@ -242,6 +197,57 @@
       "status": "completed",
       "timestamp": 1793822820.0170379,
       "timestamp_str": "2026-11-04 23:07:00",
+      "agent": "kilo:goal"
+    },
+    {
+      "task_id": "T-020-n1-port",
+      "phase": "in_progress",
+      "phase_num": 2,
+      "description": "[1/4] Planning N1 suitable ports: provenance-gated correlation, batch stats-all isolation, CSV observation import adapter",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793911476.6486244,
+      "timestamp_str": "2026-11-05 23:44:36",
+      "agent": "kilo:goal",
+      "impact_assessment": {
+        "why": "N1-Engine holds deterministic comparison mechanics plus CSV/GUI/domain models; only stdlib-compatible advisory patterns fit research-engine provenance/digest constraints",
+        "benefits": "Advisory correlation fills discovery gap; batch isolation prevents one bad group aborting family; CSV adapter enables N1 legacy migration without breaking digests",
+        "risks": "contract: new analysis/observation CLI paths must stay read-only/pure; dependency: stdlib only, no pandas/scipy; concurrency: single writer transaction; state: no schema change, additive modules only",
+        "mitigation": "Failing-first tests per milestone; full unittest suite plus aikit check per milestone; explicit staging; clean-room reimplementation, no copied code"
+      },
+      "plan_digest": "611cc99c50046046353eed1c6aa6c7d3c82772d8962693a5ab404cd9928711d7"
+    },
+    {
+      "task_id": "T-020-n1-port",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[2/4] Correlation advisory shipped: stats.pearson plus analysis correlation with provenance gating, read-only, 13 new tests green, 4/4 gates pass, checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793911945.6867344,
+      "timestamp_str": "2026-11-05 23:52:25",
+      "agent": "kilo:goal"
+    },
+    {
+      "task_id": "T-020-n1-port",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[3/4] Batch stats-all plus CSV import shipped: per-claim isolation with MAX_SAFE_CLAIMS warning plus observation import-csv via add_observation, full suite 546 pass, 4/4 gates pass, checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793911947.892117,
+      "timestamp_str": "2026-11-05 23:52:27",
+      "agent": "kilo:goal"
+    },
+    {
+      "task_id": "T-020-n1-port",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[4/4] Docs and ADR shipped: README commands within 22500 budget plus MECHANICS 13 follow-up plus ARCHITECTURE discovery/stats, ADR-051, 546 tests pass, 4/4 gates pass, checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793911951.2358472,
+      "timestamp_str": "2026-11-05 23:52:31",
       "agent": "kilo:goal"
     }
   ]

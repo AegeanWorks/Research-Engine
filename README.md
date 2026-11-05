@@ -155,6 +155,7 @@ python -m engine [--db PATH] observation add CLAIM --group LABEL --value F [--no
                         [--producer-path PATH] [--producer-digest SHA256]
 python -m engine [--db PATH] observation list CLAIM [--group LABEL] [--include-voided]
 python -m engine [--db PATH] observation void OBS --reason TEXT
+python -m engine [--db PATH] observation import-csv CLAIM PATH
 
 python -m engine [--db PATH] claim add RESEARCH --text TEXT --kind KIND [--source REF]
                         [--quote TEXT] [--locator TEXT] [--confidence C] [--kill-test TEXT]
@@ -198,7 +199,9 @@ python -m engine [--db PATH] analysis matrix REF
 python -m engine [--db PATH] analysis keystone REF [--limit N]
 python -m engine [--db PATH] analysis expose REF
 python -m engine [--db PATH] analysis calibration REF [--min-n N]
-python -m engine [--db PATH] analysis stats CLAIM --baseline LABEL --treatment LABEL [--seed N] [--resamples N] [--allow-incomparable] [--allow-self-reported] [--plan PLAN]
+python -m engine [--db PATH] analysis stats CLAIM --baseline L --treatment L [--seed N] [--resamples N] [--allow-*] [--plan PLAN]
+python -m engine [--db PATH] analysis stats-all REF --baseline L --treatment L [--seed N] [--resamples N] [--allow-*]
+python -m engine [--db PATH] analysis correlation CLAIM [--groups A,B] [--allow-*]
 python -m engine [--db PATH] analysis plan CLAIM --baseline L --treatment L --prediction TEXT
 python -m engine [--db PATH] analysis trend CLAIM --group LABEL
 python -m engine [--db PATH] diff OLD.jsonl NEW.jsonl [--exact]
@@ -364,15 +367,13 @@ research-engine/
 - **Discovery is advisory.** `analysis` proposes; only `claim link` records a relation.
 - **Statistics describe the recorded numbers; independence is assumed.**
 - **Rank tests are exact for untied small samples, tie-corrected otherwise.**
-- **Multiple groups get a Holm family table; each pairwise test stays uncorrected on its own.**
-- **A control proves falsifiability, not correctness.** It shows the test can fail, not that the
-  assertion is right.
+- **Multiple groups get a Holm table; pairwise tests stay uncorrected.**
+- **A control proves falsifiability, not correctness.** It shows the test can fail.
 - **Screening is local.** States are recorded; correctness is not verified.
 - **Views are summaries.** Omitted lines are counted; the anchor line is kept, so a tiny budget
   yields one over-budget line, never an empty view.
 - **Human judgment stays in the loop.** Tests produce evidence; they never auto-promote.
-- **Undeclared inputs are invisible.** Evidence binds the engine code and declared `--input` paths;
-  an undeclared read is unseen.
+- **Undeclared inputs are invisible.** Only declared `--input` paths are bound.
 
 <!-- aegean:brand-assets:start -->
 ## 🎨 Brand Assets

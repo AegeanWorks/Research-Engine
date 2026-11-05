@@ -36,11 +36,13 @@ from engine.ai import (
     render_draft as render_ai_draft,
 )
 from engine.analysis import (
+    batch_statistics,
     claim_statistics,
     claim_trend,
     contradictions,
     evidence_matrix,
     expose,
+    group_correlations,
     keystone_claims,
     unlinked_contradictions,
 )
@@ -98,6 +100,7 @@ from engine.maintenance import backup, integrity_check
 from engine.manifest import check_report, write_report
 from engine.observations import (
     add_observation,
+    import_observations_csv,
     list_observations,
     void_observation,
 )
@@ -232,6 +235,11 @@ def _build_parser() -> argparse.ArgumentParser:
     void_o = observation_sub.add_parser("void", help="retire a measurement with a reason")
     void_o.add_argument("ref")
     void_o.add_argument("--reason", required=True)
+    import_o = observation_sub.add_parser(
+        "import-csv", help="bulk-record measurements from a CSV file"
+    )
+    import_o.add_argument("claim")
+    import_o.add_argument("path", help="CSV file with group_label,value columns")
 
     claim = commands.add_parser("claim", help="manage claims and verdicts")
     claim_sub = claim.add_subparsers(dest="action", required=True)
@@ -401,6 +409,28 @@ def _build_parser() -> argparse.ArgumentParser:
                          help="allow a self-reported measurement with a recorded caveat")
     stats_c.add_argument("--plan", default="",
                          help="cite a preregistered analysis plan for this comparison")
+    stats_all_c = analysis_sub.add_parser(
+        "stats-all", help="compare one group pair across every claim in a program"
+    )
+    stats_all_c.add_argument("ref", help="research program to batch over")
+    stats_all_c.add_argument("--baseline", required=True)
+    stats_all_c.add_argument("--treatment", required=True)
+    stats_all_c.add_argument("--seed", type=int, default=0)
+    stats_all_c.add_argument("--resamples", type=int, default=2000)
+    stats_all_c.add_argument("--allow-incomparable", action="store_true",
+                         help="compare different protocols/instruments with a recorded caveat")
+    stats_all_c.add_argument("--allow-self-reported", action="store_true",
+                         help="allow a self-reported measurement with a recorded caveat")
+    correlation_c = analysis_sub.add_parser(
+        "correlation", help="advisory pairwise correlations between a claim's groups"
+    )
+    correlation_c.add_argument("claim")
+    correlation_c.add_argument("--groups", default="",
+                               help="comma-separated group labels; default is every pair")
+    correlation_c.add_argument("--allow-incomparable", action="store_true",
+                         help="compare different protocols/instruments with a recorded caveat")
+    correlation_c.add_argument("--allow-self-reported", action="store_true",
+                         help="allow a self-reported measurement with a recorded caveat")
     plan_sub = analysis_sub.add_parser("plan", help="preregister an analysis comparison")
     plan_sub.add_argument("claim")
     plan_sub.add_argument("--baseline", required=True)
@@ -667,6 +697,15 @@ def _cmd_observation(conn: sqlite3.Connection, args) -> int:
     if args.action == "void":
         record = void_observation(conn, args.ref, args.reason)
         return _emit(record, args.json, f"{record.id} voided\n")
+    if args.action == "import-csv":
+        result = import_observations_csv(conn, args.claim, args.path)
+        text = (
+            f"{result['claim']} imported {result['imported']}"
+            f" skipped {result['skipped']} ({result['path']})\n"
+        )
+        for item in result["skipped_rows"]:
+            text += f"  row {item['row']}: {item['reason']}\n"
+        return _emit(result, args.json, text)
     records = list_observations(conn, args.claim, args.group, args.include_voided)
     text = "".join(
         f"{o.id}  {o.group_label:<12} {o.value:12.6g}  {o.unit or '-'}"
@@ -1227,6 +1266,50 @@ def main(argv: List[str] | None = None) -> int:
                         plan, args.json,
                         f"{plan.id} preregistered {plan.baseline}->{plan.treatment}\n",
                     )
+                if args.action == "stats-all":
+                    result = batch_statistics(
+                        conn, args.ref, args.baseline, args.treatment,
+                        seed=args.seed, resamples=args.resamples,
+                        allow_incomparable=args.allow_incomparable,
+                        allow_self_reported=args.allow_self_reported,
+                    )
+                    lines = [
+                        f"BATCH {result['research']} {result['baseline']}"
+                        f"->{result['treatment']}:"
+                        f" {len(result['results'])} ok, {len(result['errors'])} errors"
+                    ]
+                    for claim_id in sorted(result["results"]):
+                        detail = result["results"][claim_id]
+                        lines.append(
+                            f"  {claim_id} d={detail['cohens_d']:.3f}"
+                            f" welch_p={detail['welch']['p']:.4g}"
+                        )
+                    for claim_id in sorted(result["errors"]):
+                        lines.append(
+                            f"  {claim_id} ERROR {result['errors'][claim_id]['error']}"
+                        )
+                    for warning in result["global_warnings"]:
+                        lines.append(f"  warning: {warning}")
+                    return _emit(result, args.json, "\n".join(lines) + "\n")
+                if args.action == "correlation":
+                    wanted = (
+                        [item.strip() for item in args.groups.split(",") if item.strip()]
+                        if args.groups else None
+                    )
+                    result = group_correlations(
+                        conn, args.claim, wanted,
+                        allow_incomparable=args.allow_incomparable,
+                        allow_self_reported=args.allow_self_reported,
+                    )
+                    text = "".join(
+                        f"{item['left']} <> {item['right']} r={item['r']:+.3f}"
+                        f" n={item['n']}"
+                        + (" INCOMPARABLE" if not item["comparable"] else "")
+                        + "".join(f" [{warning}]" for warning in item["warnings"])
+                        + "\n"
+                        for item in result
+                    ) or "no correlations\n"
+                    return _emit(result, args.json, text)
                 result = expose(conn, args.ref)
                 text = f"{result['claim']} [{result['status']}]\n"
                 for item in result["dependents"]:

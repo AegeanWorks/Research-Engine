@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import csv
 import math
 import re
 import sqlite3
+from pathlib import Path
 from typing import Dict, List, Optional
 
 from engine.artifacts import utc_now
@@ -325,3 +327,103 @@ def group_values(conn: sqlite3.Connection, claim_ref: str) -> Dict[str, List[flo
     ):
         groups.setdefault(str(row["group_label"]), []).append(float(row["value"]))
     return groups
+
+
+_CSV_GROUP_KEYS = ("group_label", "group")
+_CSV_VALUE_KEYS = ("value",)
+
+
+def import_observations_csv(
+    conn: sqlite3.Connection,
+    claim_ref: str,
+    path: str | Path,
+    actor: str = "agent",
+) -> dict:
+    """Bulk-record measurements from a CSV file with per-row error isolation.
+
+    Required columns: one group column (`group_label` or `group`) and `value`.
+    Optional columns map one-to-one onto `add_observation`: note,
+    instrument_kind/id/digest, rater_kind/id/version, protocol_id, sample_size,
+    aggregation, unit, provenance_class, producer_path/digest. A bad row is
+    skipped with its reason so one bad cell does not fail the whole file (N1
+    `DataManager` pattern); a missing file or header is refused loudly.
+    """
+    claim = get_claim(conn, claim_ref)
+    csv_path = Path(str(path)).expanduser()
+    imported = 0
+    skipped: List[dict] = []
+    try:
+        with csv_path.open("r", encoding="utf-8-sig", newline="") as handle:
+            reader = csv.DictReader(handle)
+            if reader.fieldnames is None:
+                raise EngineError(
+                    f"observations CSV has no header: {csv_path}",
+                    "a bulk import needs named columns to mean anything.",
+                    "add a header row with group_label,value and retry.",
+                )
+            normalized = {str(name).strip().lower(): name for name in reader.fieldnames}
+            group_key = next(
+                (normalized[key] for key in _CSV_GROUP_KEYS if key in normalized), None
+            )
+            value_key = next(
+                (normalized[key] for key in _CSV_VALUE_KEYS if key in normalized), None
+            )
+            if group_key is None or value_key is None:
+                raise EngineError(
+                    f"observations CSV must contain columns {list(_CSV_GROUP_KEYS)} and value",
+                    "a measurement is only comparable inside a named group.",
+                    "add group_label,value columns and retry.",
+                )
+
+            def _cell(row: dict, *names: str) -> str:
+                for name in names:
+                    if name in row and row[name] not in (None, ""):
+                        return str(row[name])
+                return ""
+
+            for lineno, row in enumerate(reader, start=2):
+                # Resolve the actual header spellings back to values.
+                group_raw = row.get(group_key, "")
+                value_raw = row.get(value_key, "")
+                if (group_raw is None or str(group_raw).strip() == "") and (
+                    value_raw is None or str(value_raw).strip() == ""
+                ):
+                    continue
+                try:
+                    add_observation(
+                        conn,
+                        claim.id,
+                        str(group_raw or "").strip(),
+                        float(str(value_raw).strip()),
+                        _cell(row, "note"),
+                        instrument_kind=_cell(row, "instrument_kind"),
+                        instrument_id=_cell(row, "instrument_id"),
+                        instrument_digest=_cell(row, "instrument_digest"),
+                        rater_kind=_cell(row, "rater_kind"),
+                        rater_id=_cell(row, "rater_id"),
+                        rater_version=_cell(row, "rater_version"),
+                        protocol_id=_cell(row, "protocol_id", "protocol"),
+                        sample_size=_cell(row, "sample_size") or 1,
+                        aggregation=_cell(row, "aggregation") or "raw",
+                        unit=_cell(row, "unit"),
+                        provenance_class=_cell(row, "provenance_class") or "unclassified",
+                        producer_path=_cell(row, "producer_path"),
+                        producer_digest=_cell(row, "producer_digest"),
+                    )
+                    imported += 1
+                except (EngineError, ValueError, TypeError) as error:
+                    skipped.append({"row": lineno, "reason": str(error).splitlines()[0]})
+    except OSError as error:
+        raise EngineError(
+            f"cannot read observations CSV: {csv_path}",
+            "a bulk import reads exact bytes from a file that exists.",
+            "pass a path to a readable CSV file.",
+        ) from error
+    _ = actor
+    return {
+        "claim": claim.id,
+        "path": str(csv_path),
+        "imported": imported,
+        "skipped": len(skipped),
+        "skipped_rows": skipped,
+    }

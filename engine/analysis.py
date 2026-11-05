@@ -22,6 +22,7 @@ from engine.stats import (
     holm_adjust,
     linregress,
     mann_whitney,
+    pearson,
     welch_t,
 )
 from engine.questions import list_questions
@@ -602,3 +603,177 @@ def claim_trend(
             actor=actor,
         )
     return result
+
+
+MAX_SAFE_CLAIMS = 3
+"""Batch comparisons beyond this count warn of multiple-comparison risk (N1 MAX_SAFE_METRICS)."""
+
+
+def group_correlations(
+    conn: sqlite3.Connection,
+    claim_ref: str,
+    groups: Sequence[str] | None = None,
+    allow_incomparable: bool = False,
+    allow_self_reported: bool = False,
+) -> List[dict]:
+    """Advisory pairwise Pearson correlations between a claim's observation groups.
+
+    Pairs are aligned by recording order truncated to the shorter group; the
+    result states the truncation. Provenance is gated through `_comparability`:
+    hard mixing errors are recorded per pair instead of aborting the batch, and
+    an allowed incomparability is reported as a warning. Pure read: no event is
+    recorded, so `OBS-001` still requires a real `analysis stats` run.
+    """
+    claim = get_claim(conn, claim_ref)
+    values = group_values(conn, claim.id)
+    if groups:
+        wanted = [str(item).strip().lower() for item in groups if str(item).strip()]
+        missing = [item for item in wanted if item not in values]
+        if missing:
+            available = ", ".join(sorted(values)) or "none"
+            raise EngineError(
+                f"no observations in group(s) {', '.join(missing)} for {claim.id}",
+                "a correlation needs recorded values in each named group.",
+                f"add values with `observation add`, or choose one of: {available}.",
+            )
+        labels = wanted
+    else:
+        labels = sorted(values)
+    if len(labels) < 2:
+        available = ", ".join(labels) or "none"
+        raise EngineError(
+            f"fewer than two groups for {claim.id}: {available}",
+            "a correlation needs two recorded groups to mean anything.",
+            "record a second group with `observation add`.",
+        )
+    pairs: List[dict] = []
+    for position, left in enumerate(labels):
+        for right in labels[position + 1:]:
+            first = values[left]
+            second = values[right]
+            truncated = min(len(first), len(second))
+            try:
+                _comparable, _reason, details = _comparability(
+                    _group_provenance(conn, claim.id, left),
+                    _group_provenance(conn, claim.id, right),
+                    allow_incomparable,
+                    allow_self_reported,
+                )
+            except EngineError as error:
+                pairs.append(
+                    {
+                        "claim": claim.id,
+                        "left": left,
+                        "right": right,
+                        "n": 0,
+                        "r": 0.0,
+                        "comparable": False,
+                        "reason": str(error),
+                        "warnings": [str(error)],
+                    }
+                )
+                continue
+            warnings: List[str] = []
+            if len(first) != len(second):
+                warnings.append(
+                    f"groups truncated to {truncated} pairs by recording order"
+                    f" ({left} n={len(first)}, {right} n={len(second)})"
+                )
+            if truncated < MIN_GROUP:
+                warnings.append(
+                    f"fewer than {MIN_GROUP} paired observations; no correlation is estimated"
+                )
+                pairs.append(
+                    {
+                        "claim": claim.id,
+                        "left": left,
+                        "right": right,
+                        "n": truncated,
+                        "r": 0.0,
+                        "comparable": details["comparable"],
+                        "reason": details["reason"],
+                        "warnings": warnings,
+                    }
+                )
+                continue
+            if not details["comparable"]:
+                warnings.append(f"incomparable comparison allowed: {details['reason']}")
+            elif details["unprovenanced"]:
+                warnings.append(
+                    "one or both groups have no measurement provenance;"
+                    " the correlation is unverified"
+                )
+            outcome = pearson(first[:truncated], second[:truncated])
+            pairs.append(
+                {
+                    "claim": claim.id,
+                    "left": left,
+                    "right": right,
+                    "n": int(outcome["n"]),
+                    "r": float(outcome["r"]),
+                    "comparable": details["comparable"],
+                    "reason": details["reason"],
+                    "warnings": warnings,
+                }
+            )
+    pairs.sort(key=lambda item: (-abs(item["r"]), item["left"], item["right"]))
+    return pairs
+
+
+def batch_statistics(
+    conn: sqlite3.Connection,
+    research_ref: str,
+    baseline: str,
+    treatment: str,
+    seed: int = DEFAULT_SEED,
+    resamples: int = DEFAULT_RESAMPLES,
+    allow_incomparable: bool = False,
+    allow_self_reported: bool = False,
+    actor: str = "agent",
+) -> dict:
+    """Compare one baseline/treatment pair across every claim in a program.
+
+    Per-claim `EngineError` is isolated into `errors` so one bad group does not
+    abort the batch (N1 `analyze_multiple_metrics` pattern). Comparing more than
+    `MAX_SAFE_CLAIMS` claims carries a global multiple-comparison warning.
+    Each successful comparison records its own `claim.stats` event.
+    """
+    research = get_research(conn, research_ref)
+    rows = conn.execute(
+        "SELECT id FROM claim WHERE research_id = ? AND superseded_by IS NULL ORDER BY id",
+        (research.id,),
+    ).fetchall()
+    results: Dict[str, dict] = {}
+    errors: Dict[str, dict] = {}
+    for row in rows:
+        claim_id = str(row["id"])
+        try:
+            results[claim_id] = claim_statistics(
+                conn,
+                claim_id,
+                baseline,
+                treatment,
+                seed=seed,
+                resamples=resamples,
+                allow_incomparable=allow_incomparable,
+                allow_self_reported=allow_self_reported,
+                actor=actor,
+            )
+        except EngineError as error:
+            errors[claim_id] = {"error": str(error), "fix": error.fix, "why": error.why}
+    warnings: List[str] = []
+    compared = len(results) + len(errors)
+    if compared > MAX_SAFE_CLAIMS:
+        warnings.append(
+            f"Multiple Comparison Risk: you compared {compared} claims with one"
+            f" baseline/treatment pair. This increases the risk of false positives"
+            f" (Type I error)."
+        )
+    return {
+        "research": research.id,
+        "baseline": baseline.strip().lower(),
+        "treatment": treatment.strip().lower(),
+        "results": results,
+        "errors": errors,
+        "global_warnings": warnings,
+    }
