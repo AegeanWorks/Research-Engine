@@ -3,25 +3,15 @@
   "active_task": {
     "task_id": "T-021-followups",
     "last_phase": "in_progress",
-    "active_phase": 4,
-    "status": "in_progress",
+    "active_phase": 5,
+    "status": "completed",
     "updated_at": 1793912775.3451784,
     "owner": "kilo:goal",
     "started_by": "kilo:goal",
-    "continuations": []
+    "continuations": [],
+    "completed_at": 1793912784.3055878
   },
   "checkpoints": [
-    {
-      "task_id": "T-018-approved-wave1",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[4/6] IDEA-977 support-cycle shipped: GRAPH-004 corroboration ring warning over supports/extends/replicates, 490 tests pass, 4/4 gates pass, checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793818048.7078831,
-      "timestamp_str": "2026-11-04 21:47:28",
-      "agent": "kilo:goal"
-    },
     {
       "task_id": "T-018-approved-wave1",
       "phase": "phase 4",
@@ -247,6 +237,16 @@
       "status": "in_progress",
       "timestamp": 1793912775.3451784,
       "timestamp_str": "2026-11-06 00:06:15",
+      "agent": "kilo:goal"
+    },
+    {
+      "task_id": "T-021-followups",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'T-021-followups' completed successfully.",
+      "status": "completed",
+      "timestamp": 1793912784.305589,
+      "timestamp_str": "2026-11-06 00:06:24",
       "agent": "kilo:goal"
     }
   ]
