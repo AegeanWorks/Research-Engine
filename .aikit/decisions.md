@@ -801,3 +801,15 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   the result and the `claim.trend` event detail.
 - **Consequences**: Consistent windowing across all analysis reads; report totals
   stay all-time by design.
+
+### ADR-055: Audit fixes for time windows
+- **Date**: 2026-11-05
+- **Status**: Accepted
+- **Context**: Audit of T-021..T-023 found non-UTC `--since/--until` offsets compared
+  as raw strings against `+00:00` record times, and `stats-all` folded invalid
+  bounds into per-claim errors instead of refusing loudly.
+- **Decision**: Normalize every bound with `astimezone(UTC)` before comparison;
+  `batch_statistics` validates bounds once up front; flag hint names the offending
+  flag (`--since` vs `--until`).
+- **Consequences**: Correct cross-timezone windows; invalid batch flags exit loudly;
+  no schema or default-output change.

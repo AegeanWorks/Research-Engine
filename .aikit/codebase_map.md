@@ -9,8 +9,8 @@
 - **Total Python Modules**: `84`
 - **Total Classes**: `86`
 - **Total Top-Level Functions**: `280`
-- **Total Class Methods**: `608`
-- **Total Source Lines**: `18319`
+- **Total Class Methods**: `610`
+- **Total Source Lines**: `18352`
 
 ---
 
@@ -68,7 +68,7 @@
 ### [`engine/analysis.py`](engine/analysis.py)
 > *Discovery and ranking over the graph: contradictions, coverage, keystones.*
 
-**Size**: `896` lines (`36676` bytes)
+**Size**: `904` lines (`37096` bytes)
 
 **Functions:**
 - `def _negated(text)` - *Whether an assertion carries an explicit negation marker.*
@@ -1430,7 +1430,7 @@
 ### [`tests/test_n1_ports.py`](tests/test_n1_ports.py)
 > *N1 suitable ports: provenance-gated correlation, batch stats-all, CSV import.*
 
-**Size**: `302` lines (`13492` bytes)
+**Size**: `327` lines (`14588` bytes)
 
 **Classes:**
 - `class PearsonTests`
@@ -1459,6 +1459,8 @@
   - Method `._window_claim()`
   - Method `.test_window_filters_by_record_time()`
   - Method `.test_invalid_bound_refused()`
+  - Method `.test_non_utc_offset_normalized_to_utc()`
+  - Method `.test_batch_rejects_bad_bounds_loudly()`
   - Method `.test_correlation_respects_window()`
   - Method `.test_trend_respects_window()`
 - `class DryRunTests`

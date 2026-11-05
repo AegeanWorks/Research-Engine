@@ -233,6 +233,31 @@ class WindowTests(DatabaseCase):
                 since="2026-06-01", until="2026-01-01",
             )
 
+    def test_non_utc_offset_normalized_to_utc(self) -> None:
+        from engine.analysis import _parse_time_bound, claim_statistics
+
+        self.assertEqual(
+            _parse_time_bound("2026-01-01T00:00:00+02:00", "since"),
+            "2025-12-31T22:00:00+00:00",
+        )
+        claim = self._window_claim()
+        windowed = claim_statistics(
+            self.conn, claim, "baseline", "treatment", since="2026-01-01T00:00:00+02:00"
+        )
+        self.assertEqual(windowed["baseline"]["n"], 2)
+
+    def test_batch_rejects_bad_bounds_loudly(self) -> None:
+        research = self.add_research()
+        claim = add_claim(self.conn, research, "S rises.", "assumption", basis="b").id
+        add_observation(self.conn, claim, "baseline", 1.0)
+        with self.assertRaises(EngineError):
+            batch_statistics(self.conn, research, "baseline", "treatment", since="nope")
+        with self.assertRaises(EngineError):
+            batch_statistics(
+                self.conn, research, "baseline", "treatment",
+                since="2026-06-01", until="2026-01-01",
+            )
+
     def test_correlation_respects_window(self) -> None:
         from engine.analysis import group_correlations
 

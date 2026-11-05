@@ -285,11 +285,11 @@ def _parse_time_bound(value: object, name: str) -> Optional[str]:
         raise EngineError(
             f"invalid --{name} timestamp: {text!r}",
             "a time window bound must be ISO-8601 (`YYYY-MM-DD` or full timestamp).",
-            "pass --since 2026-01-01 or --since 2026-01-01T00:00:00+00:00.",
+            f"pass --{name} 2026-01-01 or --{name} 2026-01-01T00:00:00+00:00.",
         ) from error
     if parsed.tzinfo is None:
         parsed = parsed.replace(tzinfo=timezone.utc)
-    return parsed.replace(microsecond=0).isoformat()
+    return parsed.astimezone(timezone.utc).replace(microsecond=0).isoformat()
 
 
 def _group_provenance(
@@ -830,6 +830,14 @@ def batch_statistics(
     the Holm step-down procedure; the table is display-only and changes no verdict.
     """
     research = get_research(conn, research_ref)
+    since_norm = _parse_time_bound(since, "since")
+    until_norm = _parse_time_bound(until, "until")
+    if since_norm and until_norm and since_norm > until_norm:
+        raise EngineError(
+            f"empty time window: {since_norm} is after {until_norm}",
+            "a batch over no record time has no values in any claim.",
+            "pass --since at or before --until.",
+        )
     rows = conn.execute(
         "SELECT id FROM claim WHERE research_id = ? AND superseded_by IS NULL ORDER BY id",
         (research.id,),
