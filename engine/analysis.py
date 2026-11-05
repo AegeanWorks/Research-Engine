@@ -5,14 +5,15 @@ from __future__ import annotations
 import re
 import sqlite3
 import statistics
-from typing import Dict, List, Sequence, Tuple
+from datetime import datetime, timezone
+from typing import Dict, List, Optional, Sequence, Tuple
 
 from engine.cascade import dependents
 from engine.claims import get_claim
 from engine.database import transaction
 from engine.errors import EngineError
 from engine.events import record as record_event
-from engine.observations import group_values
+from engine.observations import group_values, group_values_window
 from engine.stats import (
     ALPHA,
     DEFAULT_RESAMPLES,
@@ -263,13 +264,55 @@ def expose(conn: sqlite3.Connection, claim_ref: str) -> dict:
     }
 
 
-def _group_provenance(conn: sqlite3.Connection, claim_id: str, label: str) -> dict:
+def _parse_time_bound(value: object, name: str) -> Optional[str]:
+    """Validate a `--since`/`--until` bound and normalize it to second-resolution UTC ISO.
+
+    Accepts a full ISO-8601 timestamp or a bare `YYYY-MM-DD` date (start of day
+    for `--since`, end of day for `--until`). Naive values are assumed UTC.
+    Empty means unbounded.
+    """
+    text = str(value or "").strip()
+    if not text:
+        return None
+    bare_date = len(text) == 10 and text[4] == "-" and text[7] == "-"
+    if bare_date and name == "until":
+        text = text + "T23:59:59+00:00"
+    elif bare_date:
+        text = text + "T00:00:00+00:00"
+    try:
+        parsed = datetime.fromisoformat(text)
+    except ValueError as error:
+        raise EngineError(
+            f"invalid --{name} timestamp: {text!r}",
+            "a time window bound must be ISO-8601 (`YYYY-MM-DD` or full timestamp).",
+            "pass --since 2026-01-01 or --since 2026-01-01T00:00:00+00:00.",
+        ) from error
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.replace(microsecond=0).isoformat()
+
+
+def _group_provenance(
+    conn: sqlite3.Connection,
+    claim_id: str,
+    label: str,
+    since: Optional[str] = None,
+    until: Optional[str] = None,
+) -> dict:
     """Protocols, instruments and units recorded for one observation group."""
+    clauses = ["claim_id = ?", "group_label = ?", "voided = 0"]
+    params: List[object] = [claim_id, label]
+    if since:
+        clauses.append("at >= ?")
+        params.append(since)
+    if until:
+        clauses.append("at <= ?")
+        params.append(until)
     rows = conn.execute(
         "SELECT protocol_id, instrument_id, instrument_digest, rater_id, rater_version, unit,"
         " provenance_class FROM observation"
-        " WHERE claim_id = ? AND group_label = ? AND voided = 0 ORDER BY id",
-        (claim_id, label),
+        f" WHERE {' AND '.join(clauses)} ORDER BY id",
+        params,
     ).fetchall()
     protocols = sorted({str(row["protocol_id"]) for row in rows if str(row["protocol_id"]).strip()})
     instruments = sorted(
@@ -396,8 +439,14 @@ def claim_statistics(
     allow_self_reported: bool = False,
     actor: str = "agent",
     plan_ref: str = "",
+    since: str = "",
+    until: str = "",
 ) -> dict:
-    """Compare two observation groups of a claim and record that the comparison happened."""
+    """Compare two observation groups of a claim and record that the comparison happened.
+
+    `since`/`until` bound the comparison to observations recorded in that window
+    (record time `at`, second resolution); empty means unfiltered.
+    """
     claim = get_claim(conn, claim_ref)
     baseline = baseline.strip().lower()
     treatment = treatment.strip().lower()
@@ -413,7 +462,15 @@ def claim_statistics(
             "a percentile interval from fewer than ten resamples is noise.",
             "pass --resamples 2000 or more.",
         )
-    groups = group_values(conn, claim.id)
+    since_norm = _parse_time_bound(since, "since")
+    until_norm = _parse_time_bound(until, "until")
+    if since_norm and until_norm and since_norm > until_norm:
+        raise EngineError(
+            f"empty time window: {since_norm} is after {until_norm}",
+            "a comparison over no record time has no values in either group.",
+            "pass --since at or before --until.",
+        )
+    groups = group_values_window(conn, claim.id, since_norm, until_norm)
     for label in (baseline, treatment):
         if label not in groups:
             available = ", ".join(sorted(groups)) or "none"
@@ -445,8 +502,8 @@ def claim_statistics(
     else:
         planned = bool(match_plan(conn, claim.id, baseline, treatment))
     comparable, reason, details = _comparability(
-        _group_provenance(conn, claim.id, baseline),
-        _group_provenance(conn, claim.id, treatment),
+        _group_provenance(conn, claim.id, baseline, since_norm, until_norm),
+        _group_provenance(conn, claim.id, treatment, since_norm, until_norm),
         allow_incomparable,
         allow_self_reported,
     )
@@ -488,6 +545,7 @@ def claim_statistics(
     result["baseline_label"] = baseline
     result["treatment_label"] = treatment
     result["plan"] = result_plan
+    result["window"] = {"since": since_norm or "", "until": until_norm or ""}
     if planned and not result_plan:
         result["warnings"].append(
             "exploratory: preregistered plans exist for this comparison and none"
@@ -503,6 +561,8 @@ def claim_statistics(
             f" protocol={details['baseline_protocol'] or '-'}"
             f"/{details['treatment_protocol'] or '-'}"
         )
+    if since_norm or until_norm:
+        detail += f" window={since_norm or '-'}/{until_norm or '-'}"
     with transaction(conn):
         record_event(
             conn,
@@ -615,6 +675,8 @@ def group_correlations(
     groups: Sequence[str] | None = None,
     allow_incomparable: bool = False,
     allow_self_reported: bool = False,
+    since: str = "",
+    until: str = "",
 ) -> List[dict]:
     """Advisory pairwise Pearson correlations between a claim's observation groups.
 
@@ -623,9 +685,18 @@ def group_correlations(
     hard mixing errors are recorded per pair instead of aborting the batch, and
     an allowed incomparability is reported as a warning. Pure read: no event is
     recorded, so `OBS-001` still requires a real `analysis stats` run.
+    `since`/`until` bound the comparison to record time `at`.
     """
     claim = get_claim(conn, claim_ref)
-    values = group_values(conn, claim.id)
+    since_norm = _parse_time_bound(since, "since")
+    until_norm = _parse_time_bound(until, "until")
+    if since_norm and until_norm and since_norm > until_norm:
+        raise EngineError(
+            f"empty time window: {since_norm} is after {until_norm}",
+            "a correlation over no record time has no values in either group.",
+            "pass --since at or before --until.",
+        )
+    values = group_values_window(conn, claim.id, since_norm, until_norm)
     if groups:
         wanted = [str(item).strip().lower() for item in groups if str(item).strip()]
         missing = [item for item in wanted if item not in values]
@@ -654,8 +725,8 @@ def group_correlations(
             truncated = min(len(first), len(second))
             try:
                 _comparable, _reason, details = _comparability(
-                    _group_provenance(conn, claim.id, left),
-                    _group_provenance(conn, claim.id, right),
+                    _group_provenance(conn, claim.id, left, since_norm, until_norm),
+                    _group_provenance(conn, claim.id, right, since_norm, until_norm),
                     allow_incomparable,
                     allow_self_reported,
                 )
@@ -730,6 +801,9 @@ def batch_statistics(
     allow_incomparable: bool = False,
     allow_self_reported: bool = False,
     actor: str = "agent",
+    since: str = "",
+    until: str = "",
+    holm: bool = False,
 ) -> dict:
     """Compare one baseline/treatment pair across every claim in a program.
 
@@ -737,6 +811,9 @@ def batch_statistics(
     abort the batch (N1 `analyze_multiple_metrics` pattern). Comparing more than
     `MAX_SAFE_CLAIMS` claims carries a global multiple-comparison warning.
     Each successful comparison records its own `claim.stats` event.
+    `since`/`until` bound every comparison to record time `at`.
+    With `holm`, per-claim Welch and Mann-Whitney p-values are adjusted with
+    the Holm step-down procedure; the table is display-only and changes no verdict.
     """
     research = get_research(conn, research_ref)
     rows = conn.execute(
@@ -758,6 +835,8 @@ def batch_statistics(
                 allow_incomparable=allow_incomparable,
                 allow_self_reported=allow_self_reported,
                 actor=actor,
+                since=since,
+                until=until,
             )
         except EngineError as error:
             errors[claim_id] = {"error": str(error), "fix": error.fix, "why": error.why}
@@ -769,11 +848,35 @@ def batch_statistics(
             f" baseline/treatment pair. This increases the risk of false positives"
             f" (Type I error)."
         )
+    holm_table: Optional[dict] = None
+    if holm and len(results) >= 2:
+        ordered = sorted(results)
+        welch_ps = [float(results[cid]["welch"]["p"]) for cid in ordered]
+        rank_ps = [float(results[cid]["mann_whitney"]["p"]) for cid in ordered]
+        holm_table = {
+            "claims": ordered,
+            "alpha": ALPHA,
+            "welch": [
+                {"claim": cid, "p": record["p"],
+                 "holm_p": record["holm_p"], "reject": record["reject"]}
+                for cid, record in zip(ordered, holm_adjust(welch_ps))
+            ],
+            "mann_whitney": [
+                {"claim": cid, "p": record["p"],
+                 "holm_p": record["holm_p"], "reject": record["reject"]}
+                for cid, record in zip(ordered, holm_adjust(rank_ps))
+            ],
+        }
     return {
         "research": research.id,
         "baseline": baseline.strip().lower(),
         "treatment": treatment.strip().lower(),
+        "window": {
+            "since": _parse_time_bound(since, "since") or "",
+            "until": _parse_time_bound(until, "until") or "",
+        },
         "results": results,
         "errors": errors,
         "global_warnings": warnings,
+        "holm": holm_table,
     }

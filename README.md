@@ -155,7 +155,7 @@ python -m engine [--db PATH] observation add CLAIM --group LABEL --value F [--no
                         [--producer-path PATH] [--producer-digest SHA256]
 python -m engine [--db PATH] observation list CLAIM [--group LABEL] [--include-voided]
 python -m engine [--db PATH] observation void OBS --reason TEXT
-python -m engine [--db PATH] observation import-csv [--template] [CLAIM PATH]
+python -m engine [--db PATH] observation import-csv [--template] [--dry-run] [CLAIM PATH]
 
 python -m engine [--db PATH] claim add RESEARCH --text TEXT --kind KIND [--source REF]
                         [--quote TEXT] [--locator TEXT] [--confidence C] [--kill-test TEXT]
@@ -199,9 +199,9 @@ python -m engine [--db PATH] analysis matrix REF
 python -m engine [--db PATH] analysis keystone REF [--limit N]
 python -m engine [--db PATH] analysis expose REF
 python -m engine [--db PATH] analysis calibration REF [--min-n N]
-python -m engine [--db PATH] analysis stats CLAIM --baseline L --treatment L [--seed N] [--resamples N] [--allow-*] [--plan PLAN]
-python -m engine [--db PATH] analysis stats-all REF --baseline L --treatment L [--seed N] [--resamples N] [--allow-*]
-python -m engine [--db PATH] analysis correlation CLAIM [--groups A,B] [--allow-*]
+python -m engine [--db PATH] analysis stats CLAIM --baseline L --treatment L [--seed N] [--resamples N] [--allow-*] [--plan PLAN] [--since/until D]
+python -m engine [--db PATH] analysis stats-all REF --baseline L --treatment L [--seed N] [--resamples N] [--allow-*] [--since/until D] [--holm]
+python -m engine [--db PATH] analysis correlation CLAIM [--groups A,B] [--allow-*] [--since/until D]
 python -m engine [--db PATH] analysis plan CLAIM --baseline L --treatment L --prediction TEXT
 python -m engine [--db PATH] analysis trend CLAIM --group LABEL
 python -m engine [--db PATH] diff OLD.jsonl NEW.jsonl [--exact]
@@ -362,17 +362,15 @@ research-engine/
 - **Consensus is a display heuristic.** It is not a posterior and never changes a verdict;
   UNKNOWN contributes zero. Numbers need tested coverage from more than one source.
 - **Search is lexical.** Exact phrase first, then matched terms.
-- **Calibration is descriptive.** It scores recorded probabilities, not the world; small
-  resolved sets read descriptive.
+- **Calibration is descriptive.** Small resolved sets read descriptive.
 - **Discovery is advisory.** `analysis` proposes; only `claim link` records a relation.
-- **Statistics describe the recorded numbers; independence is assumed.**
+- **Statistics describe the recorded numbers; independence is assumed.** Windows use record time.
 - **Rank tests are exact for untied small samples, tie-corrected otherwise.**
-- **Multiple groups get a Holm table; pairwise tests stay uncorrected.**
+- **Multiple groups get a Holm table.** `--holm` adds cross-claim, display-only.
 - **A control proves falsifiability, not correctness.** It shows the test can fail.
 - **Screening is local.** States are recorded; correctness is not verified.
-- **Views are summaries.** Omitted lines are counted; the anchor line is kept, so a tiny budget
-  yields one over-budget line, never an empty view.
-- **Human judgment stays in the loop.** Tests produce evidence; they never auto-promote.
+- **Views are summaries.** Omitted lines are counted; never an empty view.
+- **Judgment stays in the loop.** Tests never auto-promote.
 - **Undeclared inputs are invisible.** Only declared `--input` paths are bound.
 
 <!-- aegean:brand-assets:start -->

@@ -112,6 +112,9 @@ class GoldenRunTests(unittest.TestCase):
         )
         imported = self.must("observation", "import-csv", "c_000003", str(csv_path))
         self.assertIn("imported 6 skipped 0", imported)
+        dry = self.must("observation", "import-csv", "c_000003", str(csv_path), "--dry-run")
+        self.assertIn("dry run", dry)
+        self.assertIn("would import 6", dry)
         correlations = self.must("analysis", "correlation", "c_000001")
         self.assertIn("baseline <> treatment", correlations)
         batch = self.must(
@@ -120,6 +123,17 @@ class GoldenRunTests(unittest.TestCase):
         )
         self.assertIn("BATCH r_000001", batch)
         self.assertIn("c_000001", batch)
+        holm_batch = self.must(
+            "analysis", "stats-all", "r_000001",
+            "--baseline", "baseline", "--treatment", "treatment", "--holm",
+        )
+        self.assertIn("holm:", holm_batch)
+        windowed = self.must(
+            "analysis", "stats", "c_000001",
+            "--baseline", "baseline", "--treatment", "treatment",
+            "--since", "2000-01-01",
+        )
+        self.assertIn("window", windowed)
 
         # 5. Kill test with a negative control, then the numeric verdict.
         self.must(

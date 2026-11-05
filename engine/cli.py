@@ -244,6 +244,8 @@ def _build_parser() -> argparse.ArgumentParser:
                           help="CSV file with group_label,value columns")
     import_o.add_argument("--template", action="store_true",
                           help="print the CSV header and exit without writing")
+    import_o.add_argument("--dry-run", action="store_true",
+                          help="validate the CSV and report counts without writing")
 
     claim = commands.add_parser("claim", help="manage claims and verdicts")
     claim_sub = claim.add_subparsers(dest="action", required=True)
@@ -413,6 +415,10 @@ def _build_parser() -> argparse.ArgumentParser:
                          help="allow a self-reported measurement with a recorded caveat")
     stats_c.add_argument("--plan", default="",
                          help="cite a preregistered analysis plan for this comparison")
+    stats_c.add_argument("--since", default="",
+                         help="only observations recorded at or after this ISO time")
+    stats_c.add_argument("--until", default="",
+                         help="only observations recorded at or before this ISO time")
     stats_all_c = analysis_sub.add_parser(
         "stats-all", help="compare one group pair across every claim in a program"
     )
@@ -425,6 +431,12 @@ def _build_parser() -> argparse.ArgumentParser:
                          help="compare different protocols/instruments with a recorded caveat")
     stats_all_c.add_argument("--allow-self-reported", action="store_true",
                          help="allow a self-reported measurement with a recorded caveat")
+    stats_all_c.add_argument("--since", default="",
+                         help="only observations recorded at or after this ISO time")
+    stats_all_c.add_argument("--until", default="",
+                         help="only observations recorded at or before this ISO time")
+    stats_all_c.add_argument("--holm", action="store_true",
+                         help="add a Holm-adjusted table over per-claim p-values")
     correlation_c = analysis_sub.add_parser(
         "correlation", help="advisory pairwise correlations between a claim's groups"
     )
@@ -435,6 +447,10 @@ def _build_parser() -> argparse.ArgumentParser:
                          help="compare different protocols/instruments with a recorded caveat")
     correlation_c.add_argument("--allow-self-reported", action="store_true",
                          help="allow a self-reported measurement with a recorded caveat")
+    correlation_c.add_argument("--since", default="",
+                         help="only observations recorded at or after this ISO time")
+    correlation_c.add_argument("--until", default="",
+                         help="only observations recorded at or before this ISO time")
     plan_sub = analysis_sub.add_parser("plan", help="preregister an analysis comparison")
     plan_sub.add_argument("claim")
     plan_sub.add_argument("--baseline", required=True)
@@ -713,10 +729,12 @@ def _cmd_observation(conn: sqlite3.Connection, args) -> int:
                 "a bulk import records named measurements on one live claim.",
                 "pass CLAIM PATH, or --template to print the CSV header.",
             )
-        result = import_observations_csv(conn, args.claim, args.path)
+        result = import_observations_csv(conn, args.claim, args.path, dry_run=args.dry_run)
+        verb = "would import" if result.get("dry_run") else "imported"
+        marker = " (dry run, nothing written)" if result.get("dry_run") else ""
         text = (
-            f"{result['claim']} imported {result['imported']}"
-            f" skipped {result['skipped']} ({result['path']})\n"
+            f"{result['claim']} {verb} {result['imported']}"
+            f" skipped {result['skipped']} ({result['path']}){marker}\n"
         )
         for item in result["skipped_rows"]:
             text += f"  row {item['row']}: {item['reason']}\n"
@@ -1252,7 +1270,9 @@ def main(argv: List[str] | None = None) -> int:
                         allow_incomparable=args.allow_incomparable,
                         allow_self_reported=args.allow_self_reported,
                         plan_ref=args.plan,
+                        since=args.since, until=args.until,
                     )
+                    window = result.get("window", {})
                     text = (
                         f"{result['claim']} {result['baseline_label']} -> {result['treatment_label']}"
                         f"  n={result['baseline']['n']}/{result['treatment']['n']}\n"
@@ -1267,6 +1287,11 @@ def main(argv: List[str] | None = None) -> int:
                         f"  significant={result['significant']}"
                         f" agree={result['tests_agree']}\n"
                     )
+                    if window.get("since") or window.get("until"):
+                        text += (
+                            f"  window {window.get('since') or '-'}"
+                            f"/{window.get('until') or '-'}\n"
+                        )
                     for warning in result["warnings"]:
                         text += f"  warning: {warning}\n"
                     if result.get("plan"):
@@ -1287,12 +1312,18 @@ def main(argv: List[str] | None = None) -> int:
                         seed=args.seed, resamples=args.resamples,
                         allow_incomparable=args.allow_incomparable,
                         allow_self_reported=args.allow_self_reported,
+                        since=args.since, until=args.until, holm=args.holm,
                     )
                     lines = [
                         f"BATCH {result['research']} {result['baseline']}"
                         f"->{result['treatment']}:"
                         f" {len(result['results'])} ok, {len(result['errors'])} errors"
                     ]
+                    window = result.get("window", {})
+                    if window.get("since") or window.get("until"):
+                        lines.append(
+                            f"  window {window.get('since') or '-'}/{window.get('until') or '-'}"
+                        )
                     for claim_id in sorted(result["results"]):
                         detail = result["results"][claim_id]
                         lines.append(
@@ -1305,6 +1336,14 @@ def main(argv: List[str] | None = None) -> int:
                         )
                     for warning in result["global_warnings"]:
                         lines.append(f"  warning: {warning}")
+                    if result.get("holm"):
+                        lines.append("  holm:")
+                        for item in result["holm"]["welch"]:
+                            lines.append(
+                                f"    {item['claim']} welch p={item['p']:.4g}"
+                                f" holm_p={item['holm_p']:.4g}"
+                                f" {'reject' if item['reject'] else 'keep'}"
+                            )
                     return _emit(result, args.json, "\n".join(lines) + "\n")
                 if args.action == "correlation":
                     wanted = (
@@ -1315,6 +1354,7 @@ def main(argv: List[str] | None = None) -> int:
                         conn, args.claim, wanted,
                         allow_incomparable=args.allow_incomparable,
                         allow_self_reported=args.allow_self_reported,
+                        since=args.since, until=args.until,
                     )
                     text = "".join(
                         f"{item['left']} <> {item['right']} r={item['r']:+.3f}"

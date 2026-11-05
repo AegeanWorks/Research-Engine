@@ -307,7 +307,12 @@ no event, so it never silences `OBS-001`. `analysis stats-all` batches one group
 across every claim with per-claim error isolation and a multiple-comparison warning
 beyond three claims. `observation import-csv` bulk-records a CSV (`group_label,value`
 plus optional provenance columns) through `add_observation` validation with per-row
-skip reasons.
+skip reasons. `analysis stats --since/--until` (and the same flags on `stats-all`
+and `correlation`) bound the comparison to record time `at`, not measurement date:
+a bare `YYYY-MM-DD` means start of day for `--since` and end of day for `--until`.
+The window is stored in the result and the event detail. `--dry-run` previews an
+import with zero writes; `--template` prints the header. `stats-all --holm` adds a
+display-only Holm table over per-claim Welch and Mann-Whitney p-values.
 
 ## Maintenance
 

@@ -318,12 +318,34 @@ def void_observation(
 
 def group_values(conn: sqlite3.Connection, claim_ref: str) -> Dict[str, List[float]]:
     """Non-voided values per group, in insertion order."""
+    return group_values_window(conn, claim_ref)
+
+
+def group_values_window(
+    conn: sqlite3.Connection,
+    claim_ref: str,
+    since: str | None = None,
+    until: str | None = None,
+) -> Dict[str, List[float]]:
+    """Non-voided values per group in insertion order, optionally bounded by record time.
+
+    Bounds are normalized ISO-8601 timestamps (`at >= since`, `at <= until`);
+    callers validate them first. Empty bounds mean unfiltered.
+    """
     claim = get_claim(conn, claim_ref)
+    clauses = ["claim_id = ?", "voided = 0"]
+    params: List[object] = [claim.id]
+    if since:
+        clauses.append("at >= ?")
+        params.append(since)
+    if until:
+        clauses.append("at <= ?")
+        params.append(until)
     groups: Dict[str, List[float]] = {}
     for row in conn.execute(
-        "SELECT group_label, value FROM observation WHERE claim_id = ? AND voided = 0"
+        f"SELECT group_label, value FROM observation WHERE {' AND '.join(clauses)}"
         " ORDER BY id",
-        (claim.id,),
+        params,
     ):
         groups.setdefault(str(row["group_label"]), []).append(float(row["value"]))
     return groups
@@ -340,11 +362,21 @@ CSV_TEMPLATE_HEADER = (
 """Canonical header for `observation import-csv`; required: group_label, value."""
 
 
+class _DryRunComplete(Exception):
+    """Carry validated counts out of a rolled-back dry-run transaction."""
+
+    def __init__(self, imported: int, skipped: List[dict]):
+        super().__init__("dry run complete")
+        self.imported = imported
+        self.skipped = skipped
+
+
 def import_observations_csv(
     conn: sqlite3.Connection,
     claim_ref: str,
     path: str | Path,
     actor: str = "agent",
+    dry_run: bool = False,
 ) -> dict:
     """Bulk-record measurements from a CSV file with per-row error isolation.
 
@@ -388,38 +420,52 @@ def import_observations_csv(
                         return str(row[name])
                 return ""
 
-            for lineno, row in enumerate(reader, start=2):
-                # Resolve the actual header spellings back to values.
-                group_raw = row.get(group_key, "")
-                value_raw = row.get(value_key, "")
-                if (group_raw is None or str(group_raw).strip() == "") and (
-                    value_raw is None or str(value_raw).strip() == ""
-                ):
-                    continue
+            rows = list(reader)
+
+            def _process() -> None:
+                nonlocal imported
+                for lineno, row in enumerate(rows, start=2):
+                    # Resolve the actual header spellings back to values.
+                    group_raw = row.get(group_key, "")
+                    value_raw = row.get(value_key, "")
+                    if (group_raw is None or str(group_raw).strip() == "") and (
+                        value_raw is None or str(value_raw).strip() == ""
+                    ):
+                        continue
+                    try:
+                        add_observation(
+                            conn,
+                            claim.id,
+                            str(group_raw or "").strip(),
+                            float(str(value_raw).strip()),
+                            _cell(row, "note"),
+                            instrument_kind=_cell(row, "instrument_kind"),
+                            instrument_id=_cell(row, "instrument_id"),
+                            instrument_digest=_cell(row, "instrument_digest"),
+                            rater_kind=_cell(row, "rater_kind"),
+                            rater_id=_cell(row, "rater_id"),
+                            rater_version=_cell(row, "rater_version"),
+                            protocol_id=_cell(row, "protocol_id", "protocol"),
+                            sample_size=_cell(row, "sample_size") or 1,
+                            aggregation=_cell(row, "aggregation") or "raw",
+                            unit=_cell(row, "unit"),
+                            provenance_class=_cell(row, "provenance_class") or "unclassified",
+                            producer_path=_cell(row, "producer_path"),
+                            producer_digest=_cell(row, "producer_digest"),
+                        )
+                        imported += 1
+                    except (EngineError, ValueError, TypeError) as error:
+                        skipped.append({"row": lineno, "reason": str(error).splitlines()[0]})
+
+            if dry_run:
                 try:
-                    add_observation(
-                        conn,
-                        claim.id,
-                        str(group_raw or "").strip(),
-                        float(str(value_raw).strip()),
-                        _cell(row, "note"),
-                        instrument_kind=_cell(row, "instrument_kind"),
-                        instrument_id=_cell(row, "instrument_id"),
-                        instrument_digest=_cell(row, "instrument_digest"),
-                        rater_kind=_cell(row, "rater_kind"),
-                        rater_id=_cell(row, "rater_id"),
-                        rater_version=_cell(row, "rater_version"),
-                        protocol_id=_cell(row, "protocol_id", "protocol"),
-                        sample_size=_cell(row, "sample_size") or 1,
-                        aggregation=_cell(row, "aggregation") or "raw",
-                        unit=_cell(row, "unit"),
-                        provenance_class=_cell(row, "provenance_class") or "unclassified",
-                        producer_path=_cell(row, "producer_path"),
-                        producer_digest=_cell(row, "producer_digest"),
-                    )
-                    imported += 1
-                except (EngineError, ValueError, TypeError) as error:
-                    skipped.append({"row": lineno, "reason": str(error).splitlines()[0]})
+                    with transaction(conn):
+                        _process()
+                        raise _DryRunComplete(imported, skipped)
+                except _DryRunComplete as done:
+                    imported, skipped = done.imported, done.skipped
+            else:
+                _process()
     except OSError as error:
         raise EngineError(
             f"cannot read observations CSV: {csv_path}",
@@ -433,4 +479,5 @@ def import_observations_csv(
         "imported": imported,
         "skipped": len(skipped),
         "skipped_rows": skipped,
+        "dry_run": bool(dry_run),
     }

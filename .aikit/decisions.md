@@ -777,3 +777,16 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   canonical header with no DB write (CLAIM/PATH optional when flagged).
 - **Consequences**: Full surface stays composable; template removes guesswork with
   zero digest impact; default report bytes unchanged.
+
+### ADR-053: Time windows, import dry-run, cross-claim Holm
+- **Date**: 2026-11-05
+- **Status**: Accepted
+- **Context**: Stats could not slice by record time; CSV imports wrote before the
+  user saw skip reasons; `stats-all` warned about multiplicity without adjusting it.
+- **Decision**: (1) `--since/--until` on `stats`, `stats-all` and `correlation`
+  bound the read to record time `at` (bare date = start/end of day, naive = UTC),
+  stored in the result and event detail; (2) `import-csv --dry-run` reuses
+  `add_observation` validation inside a rolled-back transaction; (3)
+  `stats-all --holm` reuses `holm_adjust` for a display-only cross-claim table.
+- **Consequences**: Temporal slicing without a domain model; safe migration preview;
+  rigorous family view with no verdict change and unchanged default output.

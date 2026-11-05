@@ -1,67 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "T-021-followups",
+    "task_id": "T-022-windows-dryrun-holm",
     "last_phase": "in_progress",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1793912775.3451784,
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1793913377.0006294,
     "owner": "kilo:goal",
     "started_by": "kilo:goal",
-    "continuations": [],
-    "completed_at": 1793912784.3055878
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "T-018-approved-wave1",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[5/6] IDEA-990 Holm family shipped: step-down adjustment plus pairwise family table beyond two groups, 494 tests pass, 4/4 gates pass, checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793818227.6572607,
-      "timestamp_str": "2026-11-04 21:50:27",
-      "agent": "kilo:goal"
-    },
-    {
-      "task_id": "T-018-approved-wave1",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[6/6] IDEA-982 bulk tripwire plus IDEA-974 volume finding shipped with ADR-043, 499 tests pass, 4/4 gates pass, checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793818626.8963237,
-      "timestamp_str": "2026-11-04 21:57:06",
-      "agent": "kilo:goal"
-    },
-    {
-      "task_id": "T-018-approved-wave1",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'T-018-approved-wave1' completed successfully.",
-      "status": "completed",
-      "timestamp": 1793818647.0331402,
-      "timestamp_str": "2026-11-04 21:57:27",
-      "agent": "kilo:goal"
-    },
-    {
-      "task_id": "T-019-approved-wave2",
-      "phase": "planning",
-      "phase_num": 2,
-      "description": "[1/6] Planning Wave-2 audit foundations: 981 anchored ledger, 986 plan plus 993 amendments, 978 coverage consensus, 975 preview digest, 1103 refusal gate, 988 robust summary plus 989 polarity",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793819445.8892748,
-      "timestamp_str": "2026-11-04 22:10:45",
-      "agent": "kilo:goal",
-      "impact_assessment": {
-        "why": "Deep-checked Approved ideas with missing tamper-evidence and consensus gaps; events lack a hash chain, plans lack preregistration, consensus ignores coverage",
-        "benefits": "Tamper-evident event log; preregistered plans with amendments; coverage-aware verdicts; preview-bound execution; short M<=6 wave",
-        "risks": "contract: new refusals on report/promote paths; dependency: stdlib only; concurrency: single writer; state: 981 needs anchor columns migration",
-        "mitigation": "Failing-first tests per milestone; full suite plus aikit check per milestone; explicit staging; no push without gates"
-      },
-      "plan_digest": "acac96ec2ad14b49e4e4f9091d3958bb55a23753396d910260446a0236ea8a77"
-    },
     {
       "task_id": "T-019-approved-wave2",
       "phase": "phase 4",
@@ -247,6 +196,57 @@
       "status": "completed",
       "timestamp": 1793912784.305589,
       "timestamp_str": "2026-11-06 00:06:24",
+      "agent": "kilo:goal"
+    },
+    {
+      "task_id": "T-022-windows-dryrun-holm",
+      "phase": "in_progress",
+      "phase_num": 2,
+      "description": "[1/4] Planning time-window stats, import dry-run, cross-claim Holm",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793913065.762996,
+      "timestamp_str": "2026-11-06 00:11:05",
+      "agent": "kilo:goal",
+      "impact_assessment": {
+        "why": "Stats cannot slice by record time; CSV imports write before validation is visible; stats-all warns on multiplicity without adjustment",
+        "benefits": "Temporal slicing without domain model; safe migration preview; rigorous cross-claim family table reusing holm_adjust",
+        "risks": "contract: window filter must keep provenance gate and OBS-001 event; dry-run must write nothing; Holm is display-only; dependency: stdlib only; concurrency: single writer; state: no schema change",
+        "mitigation": "Failing-first tests per feature; golden ordering before report out; full suite plus aikit check per milestone; explicit staging"
+      },
+      "plan_digest": "bf24d38e6ff6cc9549e7d705ddf0a94ea72b00e522fc94735d94e4b875eebffa"
+    },
+    {
+      "task_id": "T-022-windows-dryrun-holm",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[2/4] Time windows shipped: since/until on stats, stats-all and correlation with provenance gating plus invalid-window refusal, tests green, checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793913376.6904955,
+      "timestamp_str": "2026-11-06 00:16:16",
+      "agent": "kilo:goal"
+    },
+    {
+      "task_id": "T-022-windows-dryrun-holm",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[3/4] Dry-run plus Holm shipped: import-csv dry-run rolls back with counts plus stats-all holm display table, golden extended, 4/4 gates pass, checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793913376.8482642,
+      "timestamp_str": "2026-11-06 00:16:16",
+      "agent": "kilo:goal"
+    },
+    {
+      "task_id": "T-022-windows-dryrun-holm",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[4/4] Docs plus ADR shipped: README within 22500 plus ARCHITECTURE and MECHANICS windows/dry-run/holm plus ADR-053, full suite pass, checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793913377.0006294,
+      "timestamp_str": "2026-11-06 00:16:17",
       "agent": "kilo:goal"
     }
   ]

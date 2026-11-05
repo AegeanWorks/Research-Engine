@@ -7,10 +7,10 @@
 
 ## 📊 Codebase Metrics
 - **Total Python Modules**: `84`
-- **Total Classes**: `82`
-- **Total Top-Level Functions**: `278`
-- **Total Class Methods**: `600`
-- **Total Source Lines**: `17980`
+- **Total Classes**: `86`
+- **Total Top-Level Functions**: `280`
+- **Total Class Methods**: `607`
+- **Total Source Lines**: `18273`
 
 ---
 
@@ -68,7 +68,7 @@
 ### [`engine/analysis.py`](engine/analysis.py)
 > *Discovery and ranking over the graph: contradictions, coverage, keystones.*
 
-**Size**: `779` lines (`31652` bytes)
+**Size**: `882` lines (`35944` bytes)
 
 **Functions:**
 - `def _negated(text)` - *Whether an assertion carries an explicit negation marker.*
@@ -81,13 +81,14 @@
 - `def evidence_matrix(conn, research_ref)` - *Sources x questions: how many claims each source contributes to each question.*
 - `def keystone_claims(conn, research_ref, limit)` - *Claims that the rest of the graph leans on, by transitive dependents and inbound edges.*
 - `def expose(conn, claim_ref)` - *What a claim would take down with it, plus what cites it.*
-- `def _group_provenance(conn, claim_id, label)` - *Protocols, instruments and units recorded for one observation group.*
+- `def _parse_time_bound(value, name)` - *Validate a `--since`/`--until` bound and normalize it to second-resolution UTC ISO.*
+- `def _group_provenance(conn, claim_id, label, since, until)` - *Protocols, instruments and units recorded for one observation group.*
 - `def _comparability(baseline, treatment, allow_incomparable, allow_self_reported)` - *Whether two groups measure the same quantity under the same procedure.*
-- `def claim_statistics(conn, claim_ref, baseline, treatment, seed, resamples, allow_incomparable, allow_self_reported, actor, plan_ref)` - *Compare two observation groups of a claim and record that the comparison happened.*
+- `def claim_statistics(conn, claim_ref, baseline, treatment, seed, resamples, allow_incomparable, allow_self_reported, actor, plan_ref, since, until)` - *Compare two observation groups of a claim and record that the comparison happened.*
 - `def observation_summary(conn, claim_ref)` - *Per-group counts and basic summaries for one claim.*
 - `def claim_trend(conn, claim_ref, group, actor)` - *Fit a least-squares trend over a group's observations in recording order.*
-- `def group_correlations(conn, claim_ref, groups, allow_incomparable, allow_self_reported)` - *Advisory pairwise Pearson correlations between a claim's observation groups.*
-- `def batch_statistics(conn, research_ref, baseline, treatment, seed, resamples, allow_incomparable, allow_self_reported, actor)` - *Compare one baseline/treatment pair across every claim in a program.*
+- `def group_correlations(conn, claim_ref, groups, allow_incomparable, allow_self_reported, since, until)` - *Advisory pairwise Pearson correlations between a claim's observation groups.*
+- `def batch_statistics(conn, research_ref, baseline, treatment, seed, resamples, allow_incomparable, allow_self_reported, actor, since, until, holm)` - *Compare one baseline/treatment pair across every claim in a program.*
 
 ---
 
@@ -193,7 +194,7 @@
 ### [`engine/cli.py`](engine/cli.py)
 > *Command-line surface: one entry point for every engine mechanic.*
 
-**Size**: `1414` lines (`69797` bytes)
+**Size**: `1454` lines (`72327` bytes)
 
 **Functions:**
 - `def _build_parser()`
@@ -499,7 +500,11 @@
 ### [`engine/observations.py`](engine/observations.py)
 > *Recorded observations: the raw measurements a numeric claim is computed from.*
 
-**Size**: `436` lines (`17027` bytes)
+**Size**: `483` lines (`18632` bytes)
+
+**Classes:**
+- `class _DryRunComplete` - *Carry validated counts out of a rolled-back dry-run transaction.*
+  - Method `.__init__(imported, skipped)`
 
 **Functions:**
 - `def _to_observation(row)`
@@ -508,7 +513,8 @@
 - `def list_observations(conn, claim_ref, group_label, include_voided)` - *Observations of a claim, oldest first, excluding voided rows by default.*
 - `def void_observation(conn, ref, reason, actor)` - *Retire a measurement without deleting it; the reason stays in the record.*
 - `def group_values(conn, claim_ref)` - *Non-voided values per group, in insertion order.*
-- `def import_observations_csv(conn, claim_ref, path, actor)` - *Bulk-record measurements from a CSV file with per-row error isolation.*
+- `def group_values_window(conn, claim_ref, since, until)` - *Non-voided values per group in insertion order, optionally bounded by record time.*
+- `def import_observations_csv(conn, claim_ref, path, actor, dry_run)` - *Bulk-record measurements from a CSV file with per-row error isolation.*
 
 ---
 
@@ -1114,7 +1120,7 @@
 ### [`tests/test_golden.py`](tests/test_golden.py)
 > *Golden run: the whole command surface, end to end, in a fresh database.*
 
-**Size**: `186` lines (`9111` bytes)
+**Size**: `200` lines (`9727` bytes)
 
 **Classes:**
 - `class GoldenRunTests`
@@ -1424,7 +1430,7 @@
 ### [`tests/test_n1_ports.py`](tests/test_n1_ports.py)
 > *N1 suitable ports: provenance-gated correlation, batch stats-all, CSV import.*
 
-**Size**: `196` lines (`8539` bytes)
+**Size**: `285` lines (`12626` bytes)
 
 **Classes:**
 - `class PearsonTests`
@@ -1449,6 +1455,15 @@
   - Method `.test_alternate_group_header_accepted()`
 - `class TemplateTests`
   - Method `.test_header_names_required_columns_first()`
+- `class WindowTests`
+  - Method `._window_claim()`
+  - Method `.test_window_filters_by_record_time()`
+  - Method `.test_invalid_bound_refused()`
+  - Method `.test_correlation_respects_window()`
+- `class DryRunTests`
+  - Method `.test_dry_run_writes_nothing()`
+- `class HolmTests`
+  - Method `.test_holm_table_opt_in()`
 
 ---
 

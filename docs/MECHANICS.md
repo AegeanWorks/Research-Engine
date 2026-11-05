@@ -312,6 +312,11 @@ and a multiple-comparison warning beyond three claims. `import_from_csv` becomes
 `observation import-csv`: stdlib `csv` bulk insert with per-row skip reasons reusing
 `add_observation` validation; no CSV export, so JSONL digests stay canonical.
 
+**Follow-up (T-022).** `stats`/`stats-all`/`correlation --since/--until` bound the read to
+record time `at` with no domain model; `import-csv --dry-run` validates then rolls back
+so the preview writes nothing; `stats-all --holm` reuses `holm_adjust` for a display-only
+cross-claim table that changes no verdict.
+
 ## 14. Deterministic lexical search (`lattice`)
 
 **Mechanic.** A research graph is only usable if a reader can find the claim, source, question or

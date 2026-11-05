@@ -192,5 +192,94 @@ class TemplateTests(unittest.TestCase):
             self.assertIn(column, header)
 
 
+class WindowTests(DatabaseCase):
+    def _window_claim(self) -> str:
+        from engine.observations import add_observation
+
+        research = self.add_research()
+        claim = add_claim(self.conn, research, "S rises.", "assumption", basis="b").id
+        add_observation(self.conn, claim, "baseline", 1.0, at="2026-01-01T00:00:00+00:00")
+        add_observation(self.conn, claim, "baseline", 2.0, at="2026-06-01T00:00:00+00:00")
+        add_observation(self.conn, claim, "treatment", 3.0, at="2026-01-01T00:00:00+00:00")
+        add_observation(self.conn, claim, "treatment", 4.0, at="2026-06-01T00:00:00+00:00")
+        return claim
+
+    def test_window_filters_by_record_time(self) -> None:
+        from engine.analysis import claim_statistics
+
+        claim = self._window_claim()
+        full = claim_statistics(self.conn, claim, "baseline", "treatment")
+        self.assertEqual(full["baseline"]["n"], 2)
+        late = claim_statistics(
+            self.conn, claim, "baseline", "treatment", since="2026-06-01"
+        )
+        self.assertEqual(late["baseline"]["n"], 1)
+        self.assertEqual(late["treatment"]["n"], 1)
+        self.assertEqual(late["window"]["since"], "2026-06-01T00:00:00+00:00")
+        early = claim_statistics(
+            self.conn, claim, "baseline", "treatment", until="2026-01-01"
+        )
+        self.assertEqual(early["baseline"]["n"], 1)
+
+    def test_invalid_bound_refused(self) -> None:
+        from engine.analysis import claim_statistics
+
+        claim = self._window_claim()
+        with self.assertRaises(EngineError):
+            claim_statistics(self.conn, claim, "baseline", "treatment", since="not-a-time")
+        with self.assertRaises(EngineError):
+            claim_statistics(
+                self.conn, claim, "baseline", "treatment",
+                since="2026-06-01", until="2026-01-01",
+            )
+
+    def test_correlation_respects_window(self) -> None:
+        from engine.analysis import group_correlations
+
+        claim = self._window_claim()
+        pairs = group_correlations(self.conn, claim, since="2026-06-01")
+        self.assertEqual(pairs[0]["n"], 1)
+        self.assertTrue(any("fewer than" in warning for warning in pairs[0]["warnings"]))
+
+
+class DryRunTests(DatabaseCase):
+    def test_dry_run_writes_nothing(self) -> None:
+        import tempfile
+
+        research = self.add_research()
+        claim = add_claim(self.conn, research, "S rises.", "assumption", basis="b").id
+        tmp = Path(tempfile.mkdtemp()) / "dry.csv"
+        tmp.write_text("group_label,value\nbaseline,1.0\ntreatment,2.0\n", encoding="utf-8")
+        self.addCleanup(lambda: tmp.unlink(missing_ok=True))
+        result = import_observations_csv(self.conn, claim, tmp, dry_run=True)
+        self.assertTrue(result["dry_run"])
+        self.assertEqual(result["imported"], 2)
+        self.assertEqual(group_values(self.conn, claim), {})
+        live = import_observations_csv(self.conn, claim, tmp)
+        self.assertFalse(live["dry_run"])
+        self.assertEqual(group_values(self.conn, claim)["baseline"], [1.0])
+
+
+class HolmTests(DatabaseCase):
+    def test_holm_table_opt_in(self) -> None:
+        research = self.add_research()
+        for first, second in (([1.0, 2.0, 3.0], [4.0, 5.0, 6.0]),
+                              ([1.0, 1.0, 1.0], [1.0, 1.0, 1.0])):
+            claim = add_claim(self.conn, research, "S rises.", "assumption", basis="b").id
+            for value in first:
+                add_observation(self.conn, claim, "baseline", value)
+            for value in second:
+                add_observation(self.conn, claim, "treatment", value)
+        plain = batch_statistics(self.conn, research, "baseline", "treatment")
+        self.assertIsNone(plain["holm"])
+        adjusted = batch_statistics(self.conn, research, "baseline", "treatment", holm=True)
+        self.assertIsNotNone(adjusted["holm"])
+        self.assertEqual(len(adjusted["holm"]["welch"]), 2)
+        self.assertEqual(
+            [item["claim"] for item in adjusted["holm"]["welch"]],
+            sorted(adjusted["results"]),
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
