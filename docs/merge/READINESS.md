@@ -64,7 +64,7 @@ Post-merge source re-checks (sources untouched):
 | N1-Engine | 20 passed, 7.58s | same SHA |
 | PNN | 222 tests OK, 1.979s | same SHA |
 | Atlas | 152 passed, 1 skipped, 20.80s | same SHA |
-| obezite | pinned checkout 9/10; current worktree 8/10 | see section 6 |
+| obezite | 10 tests OK, 2.422s | source advanced to `6776125…` (clean); host pin `18b5d4d8…` |
 | fluid-universe | 403 passed (M0 run) | rerun started at M5; source SHA unchanged |
 
 ## 3. Schema and migration
@@ -117,13 +117,14 @@ N1-Engine f2c488695b8c00b224e851cd6aa17eaee4e6960a clean
 fluid-universe 7b4efe141dfbcc267b0efceb82247f5004186c06 clean
 PNN 3b6e6c277552dcb2c3604483de1277307bc18c4d clean
 Atlas f3cd7470e99683bc95b05f49e404bb00bffa2663 clean
-obezite-mekanizma-projesi 23f2df6bd0f1fd8eef0c3e5b8810aa3c74c10f4f DIRTY
+obezite-mekanizma-projesi 6776125799d5939c762923c5dc95180fbb46a6d0 clean
 ```
 
 obezite advanced after the capture pin while this merge was running. The host pin remains
 `18b5d4d8e2196384f4e960f01b3031beb0a6315a`; every obezite file was re-read from that commit
 with `git show <pin>:08_ARACLAR/<file>` after the worktree moved, so no in-flight change entered
-the host.
+the host. The current source suite passes 10/10 at `6776125`; the pinned archive passes 9/10
+because archive extraction changes the inventory mtimes used by one freshness test.
 
 ## 6. Deliberate exclusions and residual gaps
 
@@ -131,11 +132,9 @@ the host.
    migration are ported. The source keeps the GUI runnable.
 2. **Atlas real-analysis corpus and uploaded media stay external.** 5 pytest tests that require
    `demo/real_analyses` skip in the host; the source still runs all 152.
-3. **obezite's canonical corpus and generated tables stay external.** The current worktree has
-   two in-flight projection failures (1910 vs 1906 claim rows and stale generated files). A clean
-   archive of the pinned commit passes 9/10: the only failure is `test_generated_files_are_fresh`
-   because archive extraction changes file mtimes used by the inventory. The baseline checkout was
-   10/10 before the source advanced.
+3. **obezite's canonical corpus and generated tables stay external.** The host contracts use a
+   small synthetic ledger fixture. The source advanced during the merge and its current HEAD
+   (`6776125…`) passes 10/10; the host pin remains `18b5d4d8…`.
 4. **fluid physics outputs stay external.** The host carries the code and verification rules; the
    generated `results/` are referenced by SHA-256, not copied.
 5. **obezite tool CLIs still use cwd-relative ledger paths.** The library functions and
