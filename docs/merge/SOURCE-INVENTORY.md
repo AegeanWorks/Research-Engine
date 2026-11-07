@@ -19,7 +19,7 @@ Every copied file records its source path and SHA in `docs/merge/PROVENANCE.md` 
 | N1-Engine | `f2c488695b8c00b224e851cd6aa17eaee4e6960a` | clean | AL-1.1 | 21 | 2,529 | `python -m pytest tests -q` |
 | fluid-universe | `7b4efe141dfbcc267b0efceb82247f5004186c06` | clean | ASL-1.1 | 137 | 26,922 | `python -m pytest -q` |
 | PNN | `3b6e6c277552dcb2c3604483de1277307bc18c4d` | clean | ASL-1.1 | 27 | 9,801 | `python -m unittest discover -s tests -t .` |
-| obezite-mekanizma-projesi | `18b5d4d8e2196384f4e960f01b3031beb0a6315a` | clean (two transient files seen before baselines) | ASL-1.1 | 9 | 1,319 | `python -m unittest discover -s tests -v` |
+| obezite-mekanizma-projesi | `18b5d4d8e2196384f4e960f01b3031beb0a6315a` | clean at capture; advanced to `23f2df6…` with its own in-flight work during the merge. The host pin stays `18b5d4d8…`; every copied file was re-read from that commit. | ASL-1.1 | 9 | 1,319 | `python -m unittest discover -s tests -v` |
 | Atlas | `f3cd7470e99683bc95b05f49e404bb00bffa2663` | clean | AL-1.1 | 20 | 4,855 | `python -m pytest tests -q` |
 | research-engine (host) | `563f27a0a1fb7bbc4093a86b934e5ac66c6961dc` | clean | ASL-1.1 | 40 | 11,088 | `python -m unittest discover -s tests -t .` |
 

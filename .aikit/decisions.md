@@ -859,3 +859,23 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   data root and manifest digest instead of importing another domain. Migration
   drops lattice edge kinds the host ontology cannot express and reports the
   count, rather than inventing a relation.
+
+### ADR-058: Ported packages keep their source namespaces and external roots
+- **Date**: 2026-11-07
+- **Status**: Accepted
+- **Context**: M2-M4 copied the lattice modules, the PNN pipeline, the
+  fluid-universe verification and physics packages, the obezite ledger tools
+  and the Atlas pack. Importing them as flat host modules would collide with
+  the host's own `models`, `analysis` and `web` names; copying their data would
+  freeze six running projects.
+- **Decision**: Use `adapters.lattice`, `studio`, `experiments`, `domains.pnn`,
+  `domains.fluid_universe`, `domains.obezite` and `domains.atlas`. Rewrite only
+  import paths and root resolution. Sources of truth stay external: fluid
+  `results/`, PNN `output/`, the obezite ledger/corpus and Atlas uploaded media
+  are referenced by path and digest. Each pack carries a `NOTICE.md` naming the
+  source SHA, license and modifications. `tests/test_domain_isolation.py`
+  fails on a cross-pack, adapter, studio or experiment import.
+- **Consequences**: 1,060+ host unittest contracts and 148 Atlas pytest
+  contracts run against the copied code. The only unported surface remains
+  N1's PyQt GUI; N1 models, analysis, CSV import and database migration are
+  ported. Packs remain independently removable.

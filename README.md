@@ -14,13 +14,8 @@ A falsification-first research engine for provenance-backed claims, executable k
   ```bash
   python -m unittest discover -s tests -t .
   ```
-- **Try every mechanic in 10 seconds**:
-  ```bash
-  python -m engine demo
-  python -m engine check
-  python -m engine report r_000001
-  ```
-   `demo` builds a synthetic program and makes no scientific claim.
+- **Try it in 10 seconds**: `python -m engine demo` builds a synthetic program and makes no
+  scientific claim; then run `check` and `report`.
 - **Start a real program**: see [Commands](#commands) for `research`, `question`, `source` and
   `claim add`.
 
@@ -34,10 +29,10 @@ A falsification-first research engine for provenance-backed claims, executable k
 
 ## Why this is not "just lattice"
 
-`lattice` is an evidence store, not a research lifecycle. The engine keeps its provenance rule and
-adds what a claim is allowed to mean. [docs/MECHANICS.md](docs/MECHANICS.md) records each
-clean-room source and what was deliberately not copied; domain content stays in the programs the
-engine hosts.
+`lattice` is an evidence store, not a lifecycle. The merged host adds `adapters/lattice`
+(discovery/ingest/extraction/snapshots), `studio` (web/MCP/API), `experiments` (N1) and
+isolated `domains/{pnn,fluid_universe,obezite,atlas}` packs. Data stays external; see
+[docs/merge/READINESS.md](docs/merge/READINESS.md).
 
 ## How It Works
 
@@ -62,15 +57,13 @@ engine hosts.
    `INVALIDATED`, preserving the reason in the invalidation record. `--preview-digest` binds
    the action to a `cascade preview`.
 8. **Reports are generated and verifiable.** `report` and `scorecard` compute consensus,
-   contradictions, gaps and audit findings from the graph. `report --out` also writes a manifest
-   with a content digest, an exact record digest, the report digest, counts, findings and limits.
-   `report --check` compares content; `--strict` compares exact records. An export carries its own
-   digest, so    `export --check` proves a snapshot intact and refuses an unread schema. No number is
-   hand-written; verdict-less programs are refused, not rendered.
+   contradictions, gaps and audit findings. `report --out` writes a manifest with content and
+   record digests; `--check` and `--strict` prove it; `export --check` proves a snapshot. No
+   number is hand-written; verdict-less programs are refused.
 9. **Sources can be retired.** `source status` notes concern; `source retract`
    retires every claim citing that work, twins included, and cascades.
-10. **Missing evidence is explicit.** `claim verdict --status UNKNOWN` records what evidence
-    is missing and why. UNKNOWN carries no weight, never promotes, never cascades.
+10. **Missing evidence is explicit.** `claim verdict --status UNKNOWN` records what is missing,
+    carries no weight, never promotes and never cascades.
 11. **The graph is readable under a budget.** `outline` gives one line per question, hypothesis
     and test; `brief` gives the strongest support and contradiction per question; `claim context`
     gives one claim with provenance, premises and history. Each states omitted lines.
@@ -310,7 +303,8 @@ research-engine/
 ├── README.md
 ├── docs/
 │   ├── ARCHITECTURE.md       <- layers, schema, transactions, extension points
-│   └── MECHANICS.md          <- reference mechanics and their clean-room rules
+│   ├── MECHANICS.md          <- reference mechanics and their clean-room rules
+│   └── merge/                <- source pins, parity, dry-run and readiness
 ├── engine/
 │   ├── __init__.py
 │   ├── __main__.py           <- `python -m engine`
@@ -351,24 +345,29 @@ research-engine/
 │   ├── search.py             <- lexical graph search
 │   ├── sources.py
 │   ├── stats.py
+│   ├── migrations.py         <- source snapshot inspection and dry-run
+│   ├── packs.py              <- domain-pack registry
 │   └── synthesis.py
-└── tests/                    <- regression shield plus a full golden run
+├── adapters/lattice/         <- lattice discovery, ingest, extraction, snapshots
+├── studio/                   <- lattice web studio, MCP and API
+├── experiments/              <- N1 models, metrics, events and analysis
+├── domains/                  <- pnn, fluid_universe, obezite and atlas packs
+└── tests/                    <- regression shield, ported contracts, golden run
 ```
 
 ## Deliberate Limits
 
 - **No literature crawling.** Sources are registered explicitly.
 - **Single writer.** One researcher or agent at a time.
-- **Consensus is a display heuristic.** It is not a posterior and never changes a verdict;
-  UNKNOWN contributes zero. Numbers need tested coverage from more than one source.
+- **Consensus is a display heuristic, not a posterior; UNKNOWN contributes zero.**
 - **Search is lexical.** Exact phrase first, then matched terms.
 - **Calibration is descriptive.** Small resolved sets read descriptive.
-- **Discovery is advisory.** `analysis` proposes; only `claim link` records a relation.
-- **Statistics describe the recorded numbers; independence is assumed.** Windows use record time.
+- **Discovery is advisory; only `claim link` records a relation.**
+- **Statistics describe recorded numbers; independence is assumed.**
 - **Rank tests are exact for untied small samples, tie-corrected otherwise.**
-- **Multiple groups get a Holm table.** `--holm` adds cross-claim, display-only.
-- **A control proves falsifiability, not correctness.** It shows the test can fail.
-- **Screening is local.** States are recorded; correctness is not verified.
+- **`--holm` adds a display-only cross-claim Holm table.**
+- **A control proves falsifiability, not correctness.**
+- **Screening is local; correctness is not verified.**
 - **Views are summaries.** Omitted lines are counted; never an empty view.
 - **Judgment stays in the loop.** Tests never auto-promote.
 - **Undeclared inputs are invisible.** Only declared `--input` paths are bound.

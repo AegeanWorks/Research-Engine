@@ -19,6 +19,25 @@ demo.py              (composes every write path for the golden path)
 No domain module imports `cli.py`; `integrity.py` and `synthesis.py` are read-only over the graph.
 `cascade.py` is the only writer that composes other writers, and it does so inside one transaction.
 
+## Merged Layers
+
+The lifecycle core is unchanged; the M3/M4 merge adds four sibling layers around it:
+
+```text
+adapters/lattice/     discovery, ingest, extraction, snapshots, analysis, inquiry, meta
+studio/               web studio, MCP server, HTTP API and Python client
+experiments/          N1 interventions, metric definitions, metrics, events and analysis
+domains/pnn/          PNN pipeline, screening, docking, assay, PK/PD, SAR and studio
+domains/fluid_universe/ verification audit, fingerprints, theory, phenomenology and sims
+domains/obezite/      claim-ledger parsing, chunking, projections and citation tools
+domains/atlas/        multimodal ingestion, graph store, materials, study pack and quality
+```
+
+`engine/` never imports a pack or a surface. Packs may import the public `engine.*` modules but
+never another pack; `tests/test_domain_isolation.py` enforces both directions. Every pack's data
+root is external and every copied file carries a `NOTICE.md` with its source SHA and license.
+
+
 ## Storage
 
 SQLite with WAL, `synchronous=FULL` and `foreign_keys=ON`. The connection runs in autocommit mode

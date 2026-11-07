@@ -19,6 +19,7 @@ from experiments.models import (
     list_metric_definitions,
     list_metrics,
 )
+from experiments.importer import import_metrics_csv
 from tests.support import DatabaseCase
 
 
@@ -102,6 +103,26 @@ class ExperimentModelTests(DatabaseCase):
             80.0,
             intervention_ref=intervention.id,
         )
+
+    def test_csv_import_counts_good_and_bad_rows(self) -> None:
+        import tempfile
+        from pathlib import Path
+
+        research = self.add_research()
+        directory = Path(tempfile.mkdtemp())
+        self.addCleanup(lambda: __import__("shutil").rmtree(directory, ignore_errors=True))
+        path = directory / "metrics.csv"
+        path.write_text(
+            "date,metric_name,value,note\n"
+            "2026-01-01,weight,80.1,baseline\n"
+            "not-a-date,weight,80.2,bad date\n"
+            "2026-01-03,weight,80.3,good\n",
+            encoding="utf-8",
+        )
+        result = import_metrics_csv(self.conn, research, path)
+        self.assertEqual(result["imported"], 2)
+        self.assertEqual(result["skipped"], 1)
+        self.assertEqual(len(list_metrics(self.conn, research)), 2)
 
 
 class ExperimentAnalysisTests(DatabaseCase):

@@ -5,22 +5,12 @@
     "last_phase": "in_progress",
     "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1794072055.7775176,
+    "updated_at": 1794073879.5991619,
     "owner": "opencode:goal",
     "started_by": "opencode:goal",
     "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "T-020-n1-port",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'T-020-n1-port' completed successfully.",
-      "status": "completed",
-      "timestamp": 1793911967.6314728,
-      "timestamp_str": "2026-11-05 23:52:47",
-      "agent": "kilo:goal"
-    },
     {
       "task_id": "T-021-followups",
       "phase": "in_progress",
@@ -259,6 +249,17 @@
       "status": "in_progress",
       "timestamp": 1794072055.7775176,
       "timestamp_str": "2026-11-07 20:20:55",
+      "agent": "opencode:goal"
+    },
+    {
+      "task_id": "T-025-research-functions-merge",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[6/6] M2-M5 shipped: fluid rigor+physics, lattice adapters/studio, N1 experiments+CSV, PNN/obezite/Atlas packs, schema 14, dry-run evidence; 1075 host tests pass, Atlas 148 passed/5 skipped, 4/4 gates pass, checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794073879.5991619,
+      "timestamp_str": "2026-11-07 20:51:19",
       "agent": "opencode:goal"
     }
   ]

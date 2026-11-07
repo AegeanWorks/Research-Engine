@@ -39,6 +39,25 @@ from experiments.models import (
 
 _LATTICE_TABLES = ("papers", "claims", "questions", "edges", "screening")
 _N1_TABLES = ("interventions", "metric_definitions", "metrics", "events")
+_RESEARCH_TABLES = (
+    "research",
+    "source",
+    "question",
+    "claim",
+    "hypothesis",
+    "killtest",
+    "test_run",
+    "verdict",
+    "observation",
+    "event",
+    "analysis_plan",
+    "amendment",
+    "experiment_intervention",
+    "experiment_metric",
+    "experiment_event",
+    "domain_pack",
+    "migration_run",
+)
 
 
 @dataclass(frozen=True)
@@ -122,6 +141,94 @@ def inspect_lattice(path: Path | str) -> MigrationReport:
 def inspect_n1(path: Path | str) -> MigrationReport:
     """Describe an N1 database without writing to it."""
     return _inspect(path, "n1", _N1_TABLES)
+
+
+def inspect_research(path: Path | str) -> MigrationReport:
+    """Describe a host research database without writing to it."""
+    return _inspect(path, "research", _RESEARCH_TABLES)
+
+
+def inspect_tree(
+    path: Path | str,
+    source: str,
+    suffixes: tuple = (".json", ".md", ".csv", ".svg", ".txt"),
+    excluded_dirs: tuple = (".git", "__pycache__", ".pytest_cache", "node_modules"),
+) -> MigrationReport:
+    """Fingerprint a source tree and count files by suffix."""
+    root = Path(path)
+    if not root.exists():
+        raise EngineError(
+            f"source tree does not exist: {root}",
+            "the readiness check reads an existing committed tree.",
+            "pass the path of the source checkout or fixture directory.",
+        )
+    counts = {suffix: 0 for suffix in suffixes}
+    total = 0
+    digest = hashlib.sha256()
+    for file_path in sorted(root.rglob("*")):
+        if not file_path.is_file():
+            continue
+        relative = file_path.relative_to(root)
+        if any(part in excluded_dirs for part in relative.parts):
+            continue
+        suffix = file_path.suffix.lower()
+        if suffixes and suffix not in suffixes:
+            continue
+        total += 1
+        counts[suffix] += 1
+        digest.update(relative.as_posix().encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(file_path.read_bytes())
+        digest.update(b"\0")
+    if total == 0:
+        raise EngineError(
+            f"no matching files under {root}",
+            "an empty manifest would hide missing evidence.",
+            "check the suffixes and the source path.",
+        )
+    return MigrationReport(
+        source=source,
+        source_digest=digest.hexdigest(),
+        target_research="",
+        tables={"files": total, **{key: value for key, value in counts.items() if value}},
+    )
+
+
+def inspect_obezite(path: Path | str) -> MigrationReport:
+    """Describe the obezite Markdown claim ledger without writing to it."""
+    ledger = Path(path)
+    if not ledger.is_file():
+        raise EngineError(
+            f"obezite ledger does not exist: {ledger}",
+            "the readiness check reads the canonical claim ledger.",
+            "pass the path of 02_LITERATUR/iddia-defteri.md.",
+        )
+    claims = 0
+    backfill = 0
+    verified = 0
+    for line in ledger.read_text(encoding="utf-8").splitlines():
+        if not line.startswith("| **"):
+            continue
+        text = line.strip()
+        if text.startswith("|"):
+            text = text[1:]
+        if text.endswith("|"):
+            text = text[:-1]
+        cells = text.replace("\\|", "\x00").split("|")
+        if len(cells) < 8:
+            continue
+        claims += 1
+        verdict = cells[6].replace("\x00", "|").lower()
+        if "backfill" in verdict:
+            backfill += 1
+        else:
+            verified += 1
+    return MigrationReport(
+        source="obezite",
+        source_digest=_file_digest(ledger),
+        target_research="",
+        tables={"claim": claims, "verified": verified, "backfill": backfill},
+    )
 
 
 def applied_migrations(conn: sqlite3.Connection) -> list:

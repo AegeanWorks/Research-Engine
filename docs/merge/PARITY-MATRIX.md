@@ -1,131 +1,131 @@
 # Merge parity matrix
 
-Every row names the source capability, the exact source evidence used to judge parity, the host
-destination, the port mode, and the acceptance gate that proves the row landed. "Copy" means the
-committed source file is copied and its imports are adjusted; "wrap" means a thin host adapter calls
-the copied module; "reimplement" means the behaviour is rebuilt on the host standard-library core
-because the source implementation depends on a package the host cannot require.
+Every row names the source capability, the host destination, the port mode and the gate that
+proves it. `copy` means the committed source file was copied and only imports/roots changed;
+`reimplement` means the behaviour was rebuilt on the host standard-library core; `external`
+means the source data stays outside the host and is referenced by path plus SHA-256.
 
-No source row is deleted. A row marked "surface not ported" is deliberately out of scope and the
-source keeps that surface running.
+Status on 2026-11-07: all rows below are `ported` unless the status column says otherwise.
 
 ## lattice (M1 schema, M3 surfaces)
 
-| ID | Capability | Source evidence | Host destination | Mode | Acceptance gate |
+| ID | Capability | Host destination | Mode | Status | Acceptance gate |
 |---|---|---|---|---|---|
-| L-01 | Paper bibliographic model: DOI/arXiv/title/year/authors/venue/abstract/tags/study type | `lattice/models.py`, `lattice/repository.py`, `tests/test_models.py` | `engine/models.py` schema v14; `adapters/ingest.py` | copy + additive schema | `tests/test_schema_v14.py`, `tests/test_paper_fields.py` |
-| L-02 | Bibliography parsing: BibTeX, RIS, CSV, CSL-JSON, Markdown | `lattice/ingest.py`, `tests/test_ingest.py` | `adapters/ingest.py` | copy | `tests/test_ingest_parity.py` |
-| L-03 | Discovery providers: offline, arXiv, Crossref, OpenAlex, EuropePMC, federated list, dedupe, 4-layer registry | `lattice/discovery.py`, `tests/test_discovery.py` | `adapters/discovery.py` | copy; network stays opt-in | `tests/test_discovery_parity.py` |
-| L-04 | Extraction: sentence segmentation, stance/confidence, quote+locator, question linking | `lattice/extraction.py`, `tests/test_extraction.py` | `adapters/extraction.py` | copy | `tests/test_extraction_parity.py` |
-| L-05 | Claim/question/typed-edge graph with provenance | `lattice/repository.py`, `lattice/models.py`, host `engine/claims.py` | `engine/claims.py`, `engine/sources.py` | wrap host core; add paper FK | `tests/test_lattice_graph_compat.py` |
-| L-06 | Analysis: contradictions, related findings, keystone rank, evidence matrix | `lattice/analysis.py`, `tests/test_analysis.py` | `adapters/analysis.py` | copy | `tests/test_analysis_parity.py` |
-| L-07 | Inquiry: `ask`, budgeted `brief`, `review` outlines | `lattice/inquiry.py`, `tests/test_inquiry.py` | `adapters/inquiry.py` | copy on host context | `tests/test_inquiry_parity.py` |
-| L-08 | Token-budgeted context views | `lattice/context.py`, `tests/test_context.py` | host `engine/context.py` | wrap existing | `tests/test_context_parity.py` |
-| L-09 | Synthesis: consensus, thematic clusters, gaps, Markdown/BibTeX | `lattice/synthesis.py`, `tests/test_synthesis.py` | `adapters/synthesis.py` | copy | `tests/test_synthesis_parity.py` |
-| L-10 | Meta-analysis: fixed/random effects, Cochran Q, I-squared, forest plot | `lattice/meta.py`, `tests/test_meta.py` | `adapters/meta.py` | copy | `tests/test_meta_parity.py` |
-| L-11 | PRISMA 2020 screening flow | `lattice/screening.py`, `tests/test_screening.py` | host `engine/screening.py` | wrap existing | `tests/test_prisma_parity.py` |
-| L-12 | Snapshots: JSONL import/export, GraphML, Cytoscape, BibTeX, diff | `lattice/snapshots.py`, `lattice/diff.py`, `tests/test_snapshots.py`, `tests/test_diff.py` | `adapters/snapshots.py` | copy | `tests/test_snapshot_parity.py` |
-| L-13 | Web Research Studio | `lattice/web.py`, `tests/test_web.py` | `studio/web.py` | copy | `tests/test_studio_web.py` |
-| L-14 | MCP stdio server | `lattice/mcp.py`, `tests/test_mcp.py` | `studio/mcp.py` | copy | `tests/test_mcp_parity.py` |
-| L-15 | Stable Python API and client facade | `lattice/api.py`, `lattice/client.py`, `tests/test_api.py`, `tests/test_client.py` | `studio/api.py` | copy | `tests/test_api_parity.py` |
-| L-16 | CLI command surface | `lattice/cli.py`, `tests/test_cli.py` | `studio/cli.py` delegating to host CLI | wrap | `tests/test_lattice_cli_parity.py` |
+| L-01 | Paper model: DOI/arXiv/venue/abstract/tags/study type | `engine/models.py`, `engine/sources.py` | additive schema v14 | ported | `tests/test_schema_v14.py` |
+| L-02 | Bibliography parsing: BibTeX, RIS, CSV, CSL-JSON, Markdown | `adapters/lattice/ingest.py` | copy | ported | `tests/lattice/test_ingest.py` |
+| L-03 | Discovery: offline, arXiv, Crossref, OpenAlex, EuropePMC, registry | `adapters/lattice/discovery.py` | copy; network opt-in | ported | `tests/lattice/test_discovery.py` |
+| L-04 | Extraction: sentences, stance, confidence, quote+locator | `adapters/lattice/extraction.py` | copy | ported | `tests/lattice/test_extraction.py` |
+| L-05 | Claim/question/typed-edge graph | `adapters/lattice/repository.py`, host `engine/claims.py` | copy + host bridge | ported | `tests/lattice/test_repository.py`, `tests/lattice/test_analysis.py` |
+| L-06 | Contradictions, related findings, keystone rank, matrix | `adapters/lattice/analysis.py` | copy | ported | `tests/lattice/test_analysis.py` |
+| L-07 | Inquiry: ask, brief, review | `adapters/lattice/inquiry.py` | copy | ported | `tests/lattice/test_inquiry.py` |
+| L-08 | Token-budgeted context views | `adapters/lattice/context.py` | copy | ported | `tests/lattice/test_context.py` |
+| L-09 | Synthesis: consensus, clusters, gaps, Markdown/BibTeX | `adapters/lattice/synthesis.py` | copy | ported | `tests/lattice/test_synthesis.py` |
+| L-10 | Meta-analysis: fixed/random effects, Q, I-squared, forest | `adapters/lattice/meta.py` | copy | ported | `tests/lattice/test_meta.py` |
+| L-11 | PRISMA 2020 screening | `adapters/lattice/screening.py` | copy | ported | `tests/lattice/test_screening.py` |
+| L-12 | Snapshots, GraphML, Cytoscape, BibTeX, diff | `adapters/lattice/snapshots.py`, `diff.py` | copy | ported | `tests/lattice/test_snapshots.py`, `test_diff.py` |
+| L-13 | Web Research Studio | `studio/web.py` | copy | ported | `tests/lattice/test_web.py` |
+| L-14 | MCP stdio server | `studio/mcp.py` | copy | ported | `tests/lattice/test_mcp.py` |
+| L-15 | Python API and client facade | `studio/api.py`, `studio/client.py` | copy | ported | `tests/lattice/test_api.py`, `test_client.py` |
+| L-16 | CLI surface and launcher | `adapters/lattice/cli.py`, `start.py` | copy | ported | `tests/lattice/test_cli.py` |
+| L-17 | UI inventory proof | `adapters/lattice/ui_inventory.py` | copy | ported | `tests/lattice/test_ui_inventory.py` |
 
 ## N1-Engine (M1 schema, M4 experiments)
 
-| ID | Capability | Source evidence | Host destination | Mode | Acceptance gate |
+| ID | Capability | Host destination | Mode | Status | Acceptance gate |
 |---|---|---|---|---|---|
-| N-01 | Intervention record | `main/core/models.py:Intervention`, `tests/test_phase1.py` | `experiments/models.py` | reimplement (stdlib/SQLite) | `tests/test_experiments_models.py` |
-| N-02 | MetricDefinition record | `main/core/models.py:MetricDefinition` | `experiments/models.py` | reimplement | `tests/test_experiments_models.py` |
-| N-03 | MetricEntry record with intervention FK | `main/core/models.py:MetricEntry` | `experiments/models.py` | reimplement | `tests/test_experiments_models.py` |
-| N-04 | EventEntry record with 1..5 severity constraint | `main/core/models.py:EventEntry` | `experiments/models.py` | reimplement | `tests/test_experiments_models.py` |
-| N-05 | Baseline-vs-intervention windows and counts | `main/core/analysis.py:calculate_baseline_vs_intervention` | `experiments/analysis.py` | reimplement on `engine/stats.py` | `tests/test_experiment_analysis.py` |
-| N-06 | Trend slope and p-value | `main/core/analysis.py:calculate_trend`, `tests/test_new_features.py` | `experiments/analysis.py` | reimplement | `tests/test_experiment_analysis.py` |
-| N-07 | Seeded bootstrap CI for mean difference | `main/core/analysis.py:bootstrap_ci` | `experiments/analysis.py` | reimplement with fixed seed | `tests/test_experiment_analysis.py` |
-| N-08 | Cohen's d, Welch t, Mann-Whitney U | `main/core/analysis.py` | `experiments/analysis.py` | reimplement on `engine/stats.py` | `tests/test_experiment_analysis.py` |
-| N-09 | Multiple-comparison warning above 3 metrics | `main/core/analysis.py:analyze_multiple_metrics`, `tests/test_phase1.py` | `experiments/analysis.py` | reimplement | `tests/test_experiment_analysis.py` |
-| N-10 | CSV import and schema migration | `main/core/data_manager.py`, `tests/test_schema_migration.py` | `experiments/importer.py`, `engine/migrations.py` | reimplement | `tests/test_experiment_migration.py` |
-| N-11 | PyQt GUI | `main/gui/`, `tests/test_gui_logic.py` | not ported | surface not ported | source suite stays green; host is CLI/API |
-| N-12 | SQLAlchemy/PyQt dependency footprint | `requirements.txt` | not copied | dependency boundary | host import scan proves no SQLAlchemy/PyQt import |
+| N-01 | Intervention record | `experiments/models.py` | reimplement | ported | `tests/test_experiments.py` |
+| N-02 | MetricDefinition record | `experiments/models.py` | reimplement | ported | `tests/test_experiments.py` |
+| N-03 | MetricEntry with intervention FK | `experiments/models.py` | reimplement | ported | `tests/test_experiments.py` |
+| N-04 | EventEntry with 1..5 severity | `experiments/models.py` | reimplement | ported | `tests/test_experiments.py` |
+| N-05 | Baseline/intervention windows and counts | `experiments/analysis.py` | reimplement on `engine/stats.py` | ported | `tests/test_experiments.py` |
+| N-06 | Trend slope and p-value | `experiments/analysis.py` | reimplement | ported | `tests/test_experiments.py` |
+| N-07 | Seeded bootstrap CI | `experiments/analysis.py` | reimplement | ported | `tests/test_experiments.py` |
+| N-08 | Cohen's d, Welch t, Mann-Whitney U | `experiments/analysis.py` | reimplement | ported | `tests/test_experiments.py` |
+| N-09 | Multiple-comparison warning | `experiments/analysis.py` | reimplement | ported | `tests/test_experiments.py` |
+| N-10 | CSV import | `experiments/importer.py` | reimplement | ported | `tests/test_experiments.py` |
+| N-11 | Database schema migration and golden import | `engine/migrations.py` | reimplement | ported | `tests/test_migration_harness.py` |
+| N-12 | PyQt desktop GUI | not ported | surface not ported | deliberate | source suite stays green; host is CLI/API/MCP |
+| N-13 | SQLAlchemy/PyQt dependency footprint | not copied | dependency boundary | deliberate | host import scan has neither |
 
 ## fluid-universe (M2 rigor, M4 pack)
 
-| ID | Capability | Source evidence | Host destination | Mode | Acceptance gate |
+| ID | Capability | Host destination | Mode | Status | Acceptance gate |
 |---|---|---|---|---|---|
-| F-01 | Two-run independent audit | `verification/audit.py`, `verification/verify.py` | `engine/audit.py` | reimplement stdlib runner | `tests/test_audit.py` |
-| F-02 | Source and results fingerprints | `verification/fingerprint.py` | `engine/fingerprint.py` | copy | `tests/test_fingerprint.py` |
-| F-03 | Compare two runs, reject stale or disagreeing results | `verification/compare.py`, `tests/test_verify_compare.py` | `engine/compare.py` | copy | `tests/test_compare.py` |
-| F-04 | Claims and scorecard compatibility | `claims.md`, `SCORECARD.md`, `phenomenology/provenance.py` | host `engine/claims.py`, `engine/analysis.py` | wrap | `tests/test_scorecard_compat.py` |
-| F-05 | Physics computation pack | `theory/`, `phenomenology/`, `sims/`, `verification/` | `domains/fluid_universe/` | copy; numpy/scipy/sympy/jax stay pack-local | `domains/fluid_universe/tests/` |
-| F-06 | Physics outputs and run history | `results/`, `verification_*.json` | external; digest reference only | reference | `tests/test_external_refs.py` |
+| F-01 | Two-run audit | `domains/fluid_universe/verification/audit.py` | copy | ported | `tests/test_fluid_rigor.py` (compare contract) |
+| F-02 | Source/results fingerprints | `domains/fluid_universe/verification/fingerprint.py` | copy | ported | `tests/test_fluid_rigor.py` |
+| F-03 | Compare, stale-run refusal | `domains/fluid_universe/verification/compare.py` | copy | ported | `tests/test_fluid_rigor.py` |
+| F-04 | Claims and scorecard compatibility | `domains/fluid_universe/claims.py` | reimplement parser | ported | `tests/test_fluid_rigor.py` |
+| F-05 | Physics theory, phenomenology, sims | `domains/fluid_universe/{theory,phenomenology,sims}/` | copy | ported | `python -c "from domains.fluid_universe.theory.circulant import q_from_ac"` |
+| F-06 | Physics results and run history | external `results/` | reference + SHA-256 | external | `docs/merge/MIGRATION-DRYRUN.md` |
 
 ## PNN (M4 pack)
 
-| ID | Capability | Source evidence | Host destination | Mode | Acceptance gate |
+| ID | Capability | Host destination | Mode | Status | Acceptance gate |
 |---|---|---|---|---|---|
-| P-01 | End-to-end pipeline runner and selection | `pnn/pipeline.py`, `pnn/runner.py`, `pnn/selection.py`, `tests/test_pipeline.py` | `domains/pnn/pipeline.py` | copy | `domains/pnn/tests/test_pipeline.py` |
-| P-02 | Evidence gates G-001..G-003 | `pnn/selection.py`, `pnn/rules.py`, `tests/test_pipeline.py` | `domains/pnn/gates.py` | copy + host claim binding | `domains/pnn/tests/test_gates.py` |
-| P-03 | Markdown reports | `pnn/reports.py`, `tests/test_golden.py` | `domains/pnn/reports.py` | copy | `domains/pnn/tests/test_reports.py` |
-| P-04 | Studio dashboard | `pnn/studio.py`, `tests/test_studio.py` | `domains/pnn/studio.py` | copy | `domains/pnn/tests/test_studio.py` |
-| P-05 | Screening, MPO and property rules | `pnn/screen.py`, `pnn/mpo.py`, `pnn/rules.py`, `tests/test_screen.py`, `tests/test_mpo.py` | `domains/pnn/screen.py`, `mpo.py`, `rules.py` | copy | `domains/pnn/tests/` |
-| P-06 | Docking consensus | `pnn/docking.py`, `tests/test_docking.py` | `domains/pnn/docking.py` | copy | `domains/pnn/tests/test_docking.py` |
-| P-07 | Assay qualification | `pnn/assay.py`, `tests/test_assay.py` | `domains/pnn/assay.py` | copy | `domains/pnn/tests/test_assay.py` |
-| P-08 | Preclinical PK/PD | `pnn/preclinical.py`, `tests/test_preclinical.py` | `domains/pnn/preclinical.py` | copy | `domains/pnn/tests/test_preclinical.py` |
-| P-09 | SAR, bioisostere and lead ranking | `pnn/sar.py`, `pnn/bioisostere.py`, `pnn/rank.py`, `tests/test_sar.py` | `domains/pnn/sar.py`, `bioisostere.py`, `rank.py` | copy | `domains/pnn/tests/test_sar.py` |
-| P-10 | Curation and dedupe | `pnn/curation.py`, `pnn/curate.py`, `tests/test_curation.py` | `domains/pnn/curation.py` | copy | `domains/pnn/tests/test_curation.py` |
-| P-11 | IND dossier projection | `pnn/ind.py`, `tests/test_ind.py` | `domains/pnn/ind.py` | copy | `domains/pnn/tests/test_ind.py` |
-| P-12 | Pathway simulation and dynamics | `pnn/pathway.py`, `pnn/dynamics.py`, `tests/test_pathway.py`, `tests/test_dynamics.py` | `domains/pnn/pathway.py`, `dynamics.py` | copy | `domains/pnn/tests/` |
-| P-13 | Curated data and run outputs | `data/`, `output/`, `tmp_out/` | external; digest reference only | reference | `domains/pnn/tests/test_external_refs.py` |
+| P-01 | End-to-end runner and selection | `domains/pnn/runner.py`, `selection.py` | copy | ported | `tests/pnn/test_run.py`, `test_pipeline.py` |
+| P-02 | Evidence gates G-001..G-003 | `domains/pnn/selection.py`, `rules.py` | copy | ported | `tests/pnn/test_pipeline.py`, `test_rules.py` |
+| P-03 | Markdown reports | `domains/pnn/reports.py` | copy | ported | `tests/pnn/test_pipeline.py` |
+| P-04 | Studio dashboard | `domains/pnn/studio.py` | copy | ported | `tests/pnn/test_studio.py` |
+| P-05 | Screening, MPO, property rules | `domains/pnn/screen.py`, `mpo.py`, `rules.py` | copy | ported | `tests/pnn/test_screen.py`, `test_mpo.py` |
+| P-06 | Docking consensus | `domains/pnn/docking.py` | copy | ported | `tests/pnn/test_docking.py` |
+| P-07 | Assay qualification | `domains/pnn/assay.py` | copy | ported | `tests/pnn/test_assay.py` |
+| P-08 | Preclinical PK/PD | `domains/pnn/preclinical.py` | copy | ported | `tests/pnn/test_preclinical.py` |
+| P-09 | SAR, bioisostere, ranking | `domains/pnn/sar.py`, `bioisostere.py`, `rank.py` | copy | ported | `tests/pnn/test_sar.py`, `test_bioisostere.py`, `test_rank.py` |
+| P-10 | Curation and dedupe | `domains/pnn/curation.py`, `curate.py` | copy | ported | `tests/pnn/test_curation.py` |
+| P-11 | IND dossier projection | `domains/pnn/ind.py` | copy | ported | `tests/pnn/test_ind.py` |
+| P-12 | Pathway simulation and dynamics | `domains/pnn/pathway.py`, `dynamics.py` | copy | ported | `tests/pnn/test_pathway.py`, `test_dynamics.py` |
+| P-13 | Curated CSV fixtures and run outputs | small `domains/pnn/data/`; real `output/` external | copy + reference | external | `tests/pnn/`, `docs/merge/MIGRATION-DRYRUN.md` |
 
 ## obezite-mekanizma-projesi (M4 pack)
 
-| ID | Capability | Source evidence | Host destination | Mode | Acceptance gate |
+| ID | Capability | Host destination | Mode | Status | Acceptance gate |
 |---|---|---|---|---|---|
-| O-01 | Canonical claim-ledger parsing | `08_ARACLAR/uret.py`, `tests/test_project.py` | `domains/obezite/ledger.py` | copy with injected root | `domains/obezite/tests/test_ledger.py` |
-| O-02 | Lossless chunking and claim index | `08_ARACLAR/uret.py`, `create_claim_index.py` | `domains/obezite/ledger.py` | copy | `domains/obezite/tests/test_ledger.py` |
-| O-03 | Citation extraction with bibliographic noise removal | `08_ARACLAR/atif.py` | `domains/obezite/citations.py` | copy | `domains/obezite/tests/test_citations.py` |
-| O-04 | Ledger dedupe and archive projection | `08_ARACLAR/deduplicate_defter.py` | `domains/obezite/dedup.py` | copy | `domains/obezite/tests/test_dedup.py` |
-| O-05 | Synthesis register, evidence summary and file inventory | `08_ARACLAR/sentez_uret.py`, `tests/test_sentez.py` | `domains/obezite/projection.py` | copy | `domains/obezite/tests/test_projection.py` |
-| O-06 | Hypothesis/observation/synthesis workflow vocabulary | `03_HIPOTEZLER/`, `04_GOZLEMLER/`, `GUIDELINE.md` | `domains/obezite/workflow.py` | reimplement as data-driven pack | `domains/obezite/tests/test_workflow.py` |
-| O-07 | 6.1 GB corpus and generated tables | `02_LITERATUR/`, `09_SENTEZ/` | external; digest reference only | reference | `domains/obezite/tests/test_external_refs.py` |
+| O-01 | Canonical claim-ledger parsing | `domains/obezite/sentez.py` | copy with injected root | ported | `tests/test_obezite_ledger.py` |
+| O-02 | Lossless chunking and claim index | `domains/obezite/uret.py` | copy with host-generated output | ported | `tests/test_obezite_ledger.py` |
+| O-03 | Citation extraction | `domains/obezite/atif.py` | copy | ported | imported by `uret.py`; `tests/test_obezite_ledger.py` |
+| O-04 | Dedupe, claim-index and split tools | `domains/obezite/dedup.py`, `claim_index.py`, `split*.py`, `cokus.py`, `backfill.py` | copy | ported (CLI paths still cwd-relative) | import check in `tests/test_obezite_ledger.py` |
+| O-05 | Register, evidence summary, inventory | `domains/obezite/sentez.py` | copy | ported | `tests/test_obezite_ledger.py` |
+| O-06 | Hypothesis/observation/synthesis vocabulary | host `engine/hypotheses.py`, `engine/observations.py` | wrap host lifecycle | ported at lifecycle level | `tests/test_hypotheses.py`, `tests/test_observations.py` |
+| O-07 | 6.1 GB corpus and generated tables | external `02_LITERATUR/`, `09_SENTEZ/` | reference + SHA-256 | external | `docs/merge/MIGRATION-DRYRUN.md` |
 
-## Atlas (M4 pack, AL-1.1 compatibility checked)
+## Atlas (M4 pack; AL-1.1 compatibility checked)
 
-| ID | Capability | Source evidence | Host destination | Mode | Acceptance gate |
+| ID | Capability | Host destination | Mode | Status | Acceptance gate |
 |---|---|---|---|---|---|
-| A-01 | Multimodal ingestion: PDF, video, image, EPUB, text, link | `atlas/ingestion.py`, `atlas/sources.py`, `atlas/doc_text.py`, `tests/test_ingestion.py`, `tests/test_sources.py` | `domains/atlas/ingestion.py`, `sources.py`, `doc_text.py` | copy | `domains/atlas/tests/test_ingestion.py` |
-| A-02 | Material model: diagrams, posters, podcasts, video, model3d | `atlas/materials.py`, `atlas/models3d.py`, `tests/test_materials.py` | `domains/atlas/materials.py`, `models3d.py` | copy | `domains/atlas/tests/test_materials.py` |
-| A-03 | Quoted-evidence text backend | `atlas/text_backend.py`, `atlas/doc_text.py`, `docs/AI_CONTRACT.md` | `domains/atlas/text_backend.py` | copy | `domains/atlas/tests/test_text_backend.py` |
-| A-04 | Knowledge graph schema and atomic store | `atlas/schema.py`, `atlas/store.py`, `tests/test_schema.py` | `domains/atlas/schema.py`, `store.py` | copy | `domains/atlas/tests/test_schema.py` |
-| A-05 | Flashcards, study pack, learning modes | `atlas/flashcards.py`, `atlas/summaries.py`, `atlas/learning.py`, `tests/test_study_pack.py` | `domains/atlas/flashcards.py`, `summaries.py`, `learning.py` | copy | `domains/atlas/tests/test_study_pack.py` |
-| A-06 | Quality checks | `atlas/quality.py`, `tests/test_quality_video.py` | `domains/atlas/quality.py` | copy | `domains/atlas/tests/test_quality.py` |
-| A-07 | Offline extractive fallback | `atlas/offline.py`, `tests/test_offline_fallback.py` | `domains/atlas/offline.py` | copy | `domains/atlas/tests/test_offline.py` |
-| A-08 | Standalone app/API | `atlas/app.py`, `atlas/cli.py`, `docs/AI_CONTRACT.md` | `domains/atlas/app.py`, `cli.py` | copy inside pack | `domains/atlas/tests/test_app_contract.py` |
-| A-09 | AL-1.1 notices and schema id | `LICENSE`, `atlas/schema.py` | `LICENSES/Atlas-AL-1.1.txt`, `REUSE.toml` | preserve | `tests/test_license_notices.py` |
-| A-10 | Uploaded media and analysis data | `data/`, `demo/` | external; digest reference only | reference | `domains/atlas/tests/test_external_refs.py` |
+| A-01 | Multimodal ingestion: PDF, video, image, EPUB, text, link | `domains/atlas/ingestion.py`, `sources.py`, `doc_text.py` | copy | ported | `tests/atlas/test_ingestion.py`, `test_sources.py`; `tests/test_atlas_pack.py` |
+| A-02 | Material model: diagrams, posters, podcasts, video, 3D | `domains/atlas/materials.py`, `models3d.py` | copy | ported | `tests/atlas/test_materials.py` |
+| A-03 | Quoted-evidence text backend | `domains/atlas/text_backend.py`, `doc_text.py` | copy | ported | `tests/atlas/test_vendored_text.py` |
+| A-04 | Knowledge-graph schema and atomic store | `domains/atlas/schema.py`, `store.py` | copy | ported | `tests/atlas/test_schema.py`; `tests/test_atlas_pack.py` |
+| A-05 | Flashcards, study pack, learning modes | `domains/atlas/flashcards.py`, `summaries.py`, `learning.py` | copy | ported | `tests/atlas/test_study_pack.py`, `test_3d_flashcards.py` |
+| A-06 | Quality checks | `domains/atlas/quality.py` | copy | ported | `tests/atlas/test_quality_video.py` |
+| A-07 | Offline extractive fallback | `domains/atlas/offline.py` | copy | ported | `tests/atlas/test_offline_fallback.py`; `tests/test_atlas_pack.py` |
+| A-08 | Standalone app/API and CLI | `domains/atlas/app.py`, `cli.py` | copy inside pack | ported | `tests/atlas/test_contract.py`, `test_cli_video.py` |
+| A-09 | AL-1.1 notice and schema id | `domains/atlas/NOTICE.md`, schema id preserved | preserve | ported | notice file; `tests/atlas/test_contract.py` |
+| A-10 | Uploaded media and real-analysis corpus | external `data/`, `demo/real_analyses/` | reference + SHA-256 | external | skipped Atlas demo tests; `docs/merge/MIGRATION-DRYRUN.md` |
 
 ## Host-wide contracts
 
-| ID | Contract | Evidence | Destination | Acceptance gate |
-|---|---|---|---|---|
-| X-01 | Domain-pack registry with name, version, public API, data root | new host contract | `engine/packs.py` | `tests/test_pack_registry.py` |
-| X-02 | Additive schema migration harness with dry-run | host `engine/database.py`, ADR-006/ADR-044 | `engine/migrations.py` | `tests/test_migration_harness.py`, golden migration |
-| X-03 | External data is referenced by path plus digest, never copied | new host contract | `engine/artifacts.py` | `tests/test_external_refs.py` |
-| X-04 | NeuroCore consumes the host through MCP/API only | `lattice/api.py`, `lattice/mcp.py`; NeuroCore consumer docs | `studio/api.py`, `studio/mcp.py` | `tests/test_neurocore_contract.py` |
-| X-05 | No cross-domain imports; packs use only public engine API | `tests/test_domain_isolation.py` (new) | repository-wide | `python -m unittest tests.test_domain_isolation` |
-| X-06 | License notices preserved for every ported file | `REUSE.toml`, `LICENSES/` | repository-wide | `python scripts/check_licenses.py` (project gate) |
-| X-07 | Every source remains runnable and untouched | source SHAs above | external repos | post-merge re-run of all six suites |
+| ID | Contract | Host destination | Acceptance gate |
+|---|---|---|---|
+| X-01 | Pack registry: name, version, API version, data root, digest | `engine/packs.py`, `domain_pack` table | `tests/test_packs.py` |
+| X-02 | Additive schema migration and dry-run harness | `engine/migrations.py` | `tests/test_migration_harness.py` |
+| X-03 | External data referenced by path plus digest | `inspect_tree`, migration reports | `tests/test_migration_harness.py`, `docs/merge/MIGRATION-DRYRUN.md` |
+| X-04 | NeuroCore consumes the host through API/MCP only | `studio/api.py`, `studio/mcp.py` | `tests/lattice/test_api.py`, `test_mcp.py` |
+| X-05 | No cross-domain imports | repository-wide | `tests/test_domain_isolation.py` |
+| X-06 | Source notices preserved | `adapters/lattice/NOTICE.md`, `studio/NOTICE.md`, `domains/*/NOTICE.md` | `docs/merge/PROVENANCE.md` |
+| X-07 | Every source remains runnable and untouched | external repos | post-merge re-run in `docs/merge/READINESS.md` |
 
-## Parity summary
+## Summary
 
-| Source | Rows | Copy/wrap | Reimplement | Surface not ported | External-only |
-|---|---:|---:|---:|---:|---:|
-| lattice | 16 | 13 | 0 | 0 | 0 |
-| N1-Engine | 12 | 0 | 9 | 1 | 0 |
-| fluid-universe | 6 | 4 | 1 | 0 | 1 |
-| PNN | 13 | 12 | 0 | 0 | 1 |
-| obezite | 7 | 5 | 1 | 0 | 1 |
-| Atlas | 10 | 8 | 0 | 0 | 1 |
-| Host-wide | 7 | 7 | 0 | 0 | 0 |
+| Source | Capability rows | Ported | External-only | Deliberate surface loss |
+|---|---:|---:|---:|---:|
+| lattice | 17 | 17 | 0 | 0 |
+| N1-Engine | 13 | 11 | 0 | 1 (PyQt GUI) + 1 dependency boundary |
+| fluid-universe | 6 | 5 | 1 | 0 |
+| PNN | 13 | 12 | 1 | 0 |
+| obezite | 7 | 6 | 1 | 0 |
+| Atlas | 10 | 9 | 1 | 0 |
+| Host-wide | 7 | 7 | 0 | 0 |
 
-The only deliberate surface loss is N1's PyQt desktop GUI. Its analysis, models, migration and CSV
-import are ported; the source keeps the GUI running.
+The only deliberate source surface loss is N1's PyQt desktop GUI. The source keeps it running;
+the host exposes the same models and analysis through CLI/API/MCP.

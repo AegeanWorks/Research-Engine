@@ -1,8 +1,8 @@
 # Mechanics and Their Sources
 
-This project is a clean-room composition of mechanics observed across the AIKit portfolio. No
-source code was copied. The goal is to keep the transferable discipline and drop the domain
-content and pipeline weight.
+This project began as a clean-room composition of mechanics observed across the AIKit portfolio.
+The M3/M4 merge now also copies source packages under dapters/lattice, studio, experiments
+and domains/; every copy keeps a NOTICE and the lifecycle core still has no pack dependency.
 
 ## 1. Provenance-first claims (`lattice`)
 
@@ -12,8 +12,8 @@ a locator. Questions collect claims with a stance (`supports`, `contradicts`, `a
 **Rule here.** `kind=empirical` refuses to save without `source_ref`, `quote` and `locator`. Quotes
 are refused on derived or assumed claims, so an argument cannot masquerade as a quotation.
 
-**Deliberately not copied.** Literature discovery, full-text extraction, web studio, MCP server.
-The engine is a ledger, not a crawler.
+**Merged copy.** Literature discovery, extraction, web studio and MCP now live in
+dapters/lattice and studio; the lifecycle core still does not import them.
 
 ## 2. Falsification-first ledger (`fluid-universe`)
 
@@ -24,8 +24,8 @@ Negative results are first-class. A correction is a new record, never a silent e
 `RETRACTED`, `INVALIDATED`. Promotion requires a kill test and evidence. Failed states require
 evidence. `verdict` rows preserve `previous -> new`, evidence, note, actor and time.
 
-**Deliberately not copied.** The physics content, the claim ledger as prose, and the Make targets
-for that project's simulations.
+**Merged copy.** Physics content lives in domains/fluid_universe; generated results and run
+history stay external and are referenced by SHA-256.
 
 ## 3. Two-run independent verification (`fluid-universe`)
 
@@ -36,7 +36,8 @@ agree.
 and stdout/stderr hashes. `NUMERIC` integrity requires a run group with at least two passing runs
 and one distinct fingerprint. A single run is evidence; it is not numeric proof.
 
-**Deliberately not copied.** The project-specific audit harness and its claim list.
+**Merged copy.** The audit harness and claim/scorecard parser live in
+domains/fluid_universe/verification and domains/fluid_universe/claims.py.
 
 ## 3b. Evidence binding (extension of the same mechanic)
 
@@ -80,8 +81,9 @@ the search or experiment. This prevents post-hoc storytelling.
 `hypothesis outcome` can close it once, with evidence. Integrity checks that the outcome is not
 dated before registration. `hypothesis card` renders the K13-style card.
 
-**Deliberately not copied.** Turkish-language domain files, the chunked claim register, and the
-project's intervention boundaries. Only the pre-registration discipline moved.
+**Merged copy.** Turkish-language ledger tooling and lossless chunking live in
+domains/obezite; the corpus and generated tables stay external. The lifecycle keeps the
+pre-registration discipline.
 
 ## 4b. Claim revisions (extension of the same discipline)
 
@@ -110,7 +112,8 @@ suspect. The collapse must propagate rather than leave a silent stale claim.
 dependent `INVALIDATED` in the same transaction, with a reason and a link to the root. A dependent
 that was deliberately retracted is left as retracted.
 
-**Deliberately not copied.** The prose ledger and its manual audit scripts.
+**Merged copy.** The prose ledger tooling lives in domains/obezite; the canonical ledger is
+read by path, never rewritten.
 
 ## 5c. Explicit UNKNOWN (`PNN`)
 
@@ -122,7 +125,8 @@ not exist and why. UNKNOWN carries zero consensus weight, blocks the promotion o
 (`NON_SUPPORTING_STATUSES`, alongside the failure states), and does **not** cascade: an absent
 measurement is not a refutation. `EVID-007` warns when the reason was never recorded.
 
-**Deliberately not copied.** The domain screening tiers and their threshold rules.
+**Merged copy.** PNN screening tiers and threshold rules live in domains/pnn; the lifecycle
+still uses explicit UNKNOWN for missing evidence.
 
 ## 5b. Source retraction (`obezite-mekanizma-projesi` + `lattice` screening)
 
@@ -136,7 +140,7 @@ source, retires every empirical claim citing it as `RETRACTED`, and cascades to 
 `INVALIDATED`. A claim already failed is left untouched. Integrity reports `PROV-003` for a live
 claim on a retracted source and a warning (`PROV-004`) for one under concern.
 
-**Deliberately not copied.** PMID lookup and the prose audit tables; the engine has no network
+**Merged copy.** PMID lookup stays in the source adapter; the engine itself has no network
 access, so the retraction notice is recorded by the researcher.
 
 ## 6. Gate and golden path (`PNN`)
@@ -151,7 +155,7 @@ program that exercises every writer and is expected to pass `check` with zero fi
 `report --out` writes a manifest with a schema id, graph and report digests, counts, findings and an
 explicit limits block; `report --check` exits 1 on drift.
 
-**Deliberately not copied.** The drug-discovery phases and their CSV contracts.
+**Merged copy.** The drug-discovery phases and CSV contracts live in domains/pnn.
 
 ## 6b. Deterministic projections (`obezite-mekanizma-projesi`)
 
@@ -202,7 +206,7 @@ truncated read must say so.
 reserves 40 tokens, and reports the number of omitted lines, which every view appends as
 `OMITTED: n`. `outline`, `brief` and `claim context` cover the three reading depths.
 
-**Deliberately not copied.** The search/expand MCP surface and the web studio; this is a CLI
+**Merged copy.** The MCP surface and web studio live in studio/; the lifecycle keeps its CLI
 over the same store.
 
 ## 8. Contradiction and coverage analysis (`lattice`)
@@ -229,8 +233,8 @@ runs the control twice and requires an identical failure. A test with verified e
 control is a warning (`EVID-008`); a declared control that passes is an error (`EVID-009`). The
 control is part of the command binding, so editing it retires the evidence.
 
-**Deliberately not copied.** The Turkish prose ledger, the annotation-marker convention and its
-per-row audit script.
+**Merged copy.** The Turkish ledger tooling lives in `domains/obezite`; the annotation-marker
+convention and its per-row audit script stay in the source project.
 
 ## 10. Screening and PRISMA (`lattice`)
 
@@ -241,8 +245,8 @@ criteria, then included or excluded for a recorded reason, and the flow is repor
 `source prisma` and the report show counts, reasons and the included fraction. A claim citing an
 excluded source warns (`SCREEN-001`).
 
-**Deliberately not copied.** Database search, deduplication against external indexes and the web
-screening UI.
+**Merged copy.** Database search and the web screening UI live in dapters/lattice and
+studio/; the lifecycle keeps its own bounded search.
 
 ## 11. Domain-separated digests and pinned licence identity (`aegean-licensing`)
 
@@ -300,9 +304,9 @@ list self-reported measurements separately. A comparison involving one is refuse
 `--allow-self-reported` is explicit, so a system cannot quietly cite its own generator as
 independent evidence.
 
-**Deliberately not copied.** The intervention/baseline domain model, the medical metrics, pandas,
-scipy, SQLAlchemy and PyQt. The port is stdlib-only and deterministic; the reference bootstrap is
-unseeded, which this project does not reproduce.
+**Merged copy.** Intervention records, metric definitions, events and baseline-vs-intervention
+analysis live in `experiments/`. pandas/scipy/SQLAlchemy and the PyQt GUI stay unported; the host
+port is stdlib-only, the bootstrap is seeded, and the GUI remains a source-only surface.
 
 **Follow-up ports (T-020).** `correlation_matrix` becomes `analysis correlation`: stdlib
 Pearson over two groups paired by recording order, provenance-gated, read-only, never
@@ -335,8 +339,8 @@ line. Superseded claim revisions are hidden unless `--all` is explicit. There is
 index, so a result cannot be stale, and no FTS5 dependency, so the engine remains standard-library
 only on every Python 3.10 build.
 
-**Deliberately not copied.** The MCP server, web studio, semantic embeddings and a persistent
-inverted index. The engine is a ledger, not a search appliance; a scan is fast at ledger scale.
+**Merged copy.** The MCP server, web studio, embeddings and persistent index live outside the
+lifecycle core; a scan is still fast at ledger scale.
 
 ## 15. Split-source detection (`lattice` + `dupefinder`)
 

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atlas — Visual Knowledge Workspace</title>
+<link rel="stylesheet" href="/static/styles.css">
+<link rel="icon" type="image/svg+xml" href="/static/logo.svg">
+<meta name="description" content="Atlas: turn any learning material into explorable visual knowledge.">
+<meta name="theme-color" content="#0b1220">
+</head>
+<body>
+<header>
+  <div class="brand"><img src="/static/logo.svg" alt="Atlas mark">ATLAS</div>
+  <div class="sub">An interactive visual knowledge platform for learning material — easy drag-and-drop</div>
+  <div class="status" id="status">connecting…</div>
+</header>
+<main>
+  <section class="panel hero" id="explore-panel">
+    <div class="hero-head">
+      <h2>Explore — canvas &amp; knowledge graph share one model</h2>
+    </div>
+    <div class="explore-grid">
+      <div class="canvas-col">
+        <div class="canvas-wrap">
+          <div class="canvas-toolbar">
+            <span class="tb-group">
+              <button id="btn-tour-play" class="primary" title="Cinematic guided tour (offline)">▶ Tour</button>
+              <button id="btn-tour-prev" title="Previous tour stop">‹</button>
+              <button id="btn-tour-next" title="Next tour stop">›</button>
+            </span>
+            <span class="tb-group">
+              <button id="btn-reveal" title="AI-vision reveal (offline staged scan)">✦ Reveal</button>
+              <button id="btn-narrate" title="Narrate selected with browser voice (offline)">🔊 Narrate</button>
+              <button id="btn-quiz" class="primary" title="On-figure quiz">Quiz</button>
+            </span>
+            <span class="tb-group">
+              <button id="zoom-in" title="Zoom in">+</button>
+              <button id="zoom-out" title="Zoom out">−</button>
+              <button id="reset-view" title="Reset zoom">Reset</button>
+              <button id="toggle-3d" title="Toggle isometric 3D">3D</button>
+              <label id="layer-wrap" style="display:none">Layer <input id="layer" type="range" min="0" max="8" value="8"></label>
+              <a id="download-obj" href="#">OBJ ↓</a>
+            </span>
+            <span class="tb-group prefs">
+              <label><input type="checkbox" id="toggle-labels" checked> Labels</label>
+              <label><input type="checkbox" id="toggle-masks" checked> Masks</label>
+              <label><input type="checkbox" id="narrate-toggle" checked> Voice</label>
+              <select id="voice-select" title="Browser voice (offline, on-device)"><option value="">Auto voice</option></select>
+            </span>
+          </div>
+          <div id="viewport">
+            <img id="figure" alt="Selected figure appears here">
+            <svg id="overlay"></svg>
+            <div id="scanline" hidden></div>
+            <div id="tour-caption" hidden></div>
+            <div id="empty-hint"><strong>Nothing loaded yet.</strong><span>Drop a figure below, paste a link, or hit <b>Try the basal-ganglia demo</b> — then Tour, Reveal and Narrate light up.</span></div>
+          </div>
+        </div>
+        <div id="tour-status" class="hint">Tour: press ▶ Tour (works on the demo fixture, fully offline).</div>
+        <div id="quiz-box" class="mono"></div>
+      </div>
+      <aside class="side-col">
+        <div class="side-block">
+          <h3>Entities</h3>
+          <label class="filter">Filter by category
+            <select id="category-filter"><option value="">All categories</option></select>
+          </label>
+          <ul id="entity-list"></ul>
+          <div class="row">
+            <button id="btn-segment">Segment selected (SAM)</button>
+          </div>
+          <div id="segment-status" class="mono"></div>
+        </div>
+        <div class="side-block">
+          <h3>Knowledge graph</h3>
+          <svg id="graph" width="100%" height="300"></svg>
+          <div id="detail" class="mono">Select a structure on the canvas or in the graph.</div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <div class="dock-row">
+  <section class="panel" id="import-panel">
+    <h2>1 · Upload → Select</h2>
+    <div id="dropzone" class="drop" tabindex="0" role="button" aria-label="Drop a learning file here, or press Enter to choose">Drop anything here — PDF, video, image, book (EPUB), text — and a model is created. Tip: narration-heavy videos learn best paired with their transcript.</div>
+    <div class="row">
+      <input id="link-input" placeholder="…or paste an article / YouTube link">
+      <button id="btn-link">Create from link</button>
+    </div>
+    <div class="row">
+      <button id="btn-demo">Try the basal-ganglia demo</button>
+    </div>
+    <div id="provenance" class="mono">No setup needed — drop a file, paste a link, or try the demo.</div>
+    <details class="advanced">
+      <summary>Advanced: server paths &amp; manual crop</summary>
+      <label>Document or image path (server-local)
+        <input id="doc-path" placeholder="C:\path\to\figure.png or paper.pdf">
+      </label>
+      <div class="row">
+        <button id="btn-import">Import</button>
+        <input id="page" placeholder="PDF page (default 1)" style="max-width:160px">
+        <button id="btn-render">Render page → figure</button>
+        <button id="btn-pdf-figure" class="primary" title="One click: render the PDF page and analyze it as a figure">PDF page → figure overlay</button>
+      </div>
+      <label>Figure crop (normalized x0,y0,x1,y1)
+        <input id="crop" value="0.05,0.05,0.95,0.95">
+      </label>
+      <div class="row">
+        <button id="btn-figure">Select figure</button>
+        <button id="btn-analyze" class="primary">Analyze with Muse</button>
+      </div>
+      <label>Context note (accompanying text, optional)
+        <textarea id="note" rows="2" placeholder="Paste the figure caption or paragraph here"></textarea>
+      </label>
+    </details>
+  </section>
+
+  <section class="panel">
+    <h2>3 · Study pack — every format from one model</h2>
+    <div class="row">
+      <button id="btn-summary" class="primary">Study pack</button>
+      <button id="btn-study-all" class="primary" title="One click: summary + 3D tour + deck + quality">Build all ↓</button>
+      <button id="btn-tour">3D tour</button>
+      <button id="btn-quality">Check quality</button>
+      <a id="link-video" href="#">Study video ↓</a>
+    </div>
+    <div class="row">
+      <a id="link-diagram-svg" href="#">Diagram SVG ↓</a>
+      <a id="link-diagram-png" href="#">Diagram PNG ↓</a>
+      <a id="link-podcast" href="#">Podcast script ↓</a>
+      <a id="link-questions" href="#">Questions ↓</a>
+    </div>
+    <div id="summary" class="mono"></div>
+  </section>
+
+  <section class="panel">
+    <h2>4 · Learn — flashcards</h2>
+    <div class="row">
+      <button id="btn-deck" class="primary">Build deck</button>
+      <a id="anki-link" href="#">Anki TSV ↓</a>
+    </div>
+    <div id="card">
+      <div id="card-front" class="card-face"></div>
+      <div id="card-back" class="card-face hidden"></div>
+    </div>
+    <div class="row">
+      <button id="btn-flip">Flip</button>
+      <button id="btn-know">Know ✓</button>
+      <button id="btn-dunno">Still learning</button>
+    </div>
+    <div id="deck-score" class="mono"></div>
+  </section>
+
+  <section class="panel">
+    <h2>5 · Learn — spatial recall</h2>
+    <div class="row">
+      <select id="learn-mode">
+        <option value="spatial-recall">Spatial recall</option>
+        <option value="pathway-tracing">Pathway tracing</option>
+        <option value="visual-identification">Visual identification</option>
+        <option value="relationship-recall">Relationship recall</option>
+      </select>
+      <button id="btn-learn">New challenge</button>
+    </div>
+    <div id="challenge"></div>
+  </section>
+  </div>
+</main>
+<footer>Atlas workspace · original figure stays the centerpiece · evidence preserved per entity</footer>
+<script src="/static/app.js"></script>
+</body>
+</html>

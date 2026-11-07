@@ -1,0 +1,13 @@
+name,value,unit,ordering,source
+dm21_sq,7.41e-5,eV^2,both,NuFit 5.2 (2022) with SK-atm; http://www.nu-fit.org/sites/default/files/v52.tbl-parameters.pdf
+dm21_sq_3sigma_low,6.82e-5,eV^2,both,NuFit 5.2 3sigma range
+dm21_sq_3sigma_high,8.03e-5,eV^2,both,NuFit 5.2 3sigma range
+dm31_sq,2.507e-3,eV^2,NO,NuFit 5.2 with SK-atm (Delta m^2_31)
+dm31_sq_3sigma_low,2.427e-3,eV^2,NO,NuFit 5.2 3sigma range
+dm31_sq_3sigma_high,2.590e-3,eV^2,NO,NuFit 5.2 3sigma range
+dm31_sq,-2.486e-3,eV^2,IO,NuFit 5.2 with SK-atm (Delta m^2_32)
+dm31_sq_3sigma_low,-2.570e-3,eV^2,IO,NuFit 5.2 3sigma range
+dm31_sq_3sigma_high,-2.406e-3,eV^2,IO,NuFit 5.2 3sigma range
+theta12_deg,33.41,deg,both,NuFit 5.2 with SK-atm
+theta13_deg,8.58,deg,NO,NuFit 5.2 with SK-atm
+theta23_deg,42.2,deg,NO,NuFit 5.2 with SK-atm

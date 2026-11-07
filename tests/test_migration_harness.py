@@ -11,6 +11,9 @@ from engine.migrations import (
     applied_migrations,
     inspect_lattice,
     inspect_n1,
+    inspect_obezite,
+    inspect_research,
+    inspect_tree,
     migrate_lattice,
     migrate_n1,
 )
@@ -192,3 +195,34 @@ class MigrationHarnessTests(DatabaseCase):
             ).fetchone()["n"],
             0,
         )
+
+    def test_inspect_tree_counts_and_fingerprints_files(self) -> None:
+        root = self._lattice().parent
+        (root / "notes.md").write_text("note\n", encoding="utf-8")
+        (root / "data.json").write_text("{}\n", encoding="utf-8")
+        report = inspect_tree(root, "fixture", suffixes=(".md", ".json"))
+        self.assertEqual(report.tables, {"files": 2, ".json": 1, ".md": 1})
+        self.assertEqual(len(report.source_digest), 64)
+
+    def test_inspect_obezite_counts_verified_and_backfill(self) -> None:
+        root = self._lattice().parent
+        ledger = root / "iddia-defteri.md"
+        ledger.write_text(
+            "| **1** | A | L1 | D1 | up | none | **kanitli** | PMID:1 |\n"
+            "| **2** | B | L2 | D? | down | q | **backfill** | none |\n",
+            encoding="utf-8",
+        )
+        report = inspect_obezite(ledger)
+        self.assertEqual(report.tables, {"claim": 2, "verified": 1, "backfill": 1})
+
+    def test_inspect_research_reads_a_host_database(self) -> None:
+        from engine.database import connect, initialize
+
+        path = self._lattice().parent / "research.db"
+        conn = connect(path)
+        initialize(conn)
+        conn.close()
+        report = inspect_research(path)
+        self.assertEqual(report.tables["research"], 0)
+        self.assertEqual(report.tables["source"], 0)
+        self.assertEqual(len(report.source_digest), 64)

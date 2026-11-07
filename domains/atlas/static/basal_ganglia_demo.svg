@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+  <rect width="800" height="600" fill="#0b1530"/>
+  <text x="400" y="28" fill="#dbe7ff" font-size="22" text-anchor="middle">Basal ganglia — direct / indirect pathways (demo schematic)</text>
+  <g font-size="16" text-anchor="middle">
+    <rect x="240" y="40" width="320" height="70" rx="10" fill="#1b2b52" stroke="#8b5cf6"/>
+    <text x="400" y="80" fill="#dbe7ff">Cortex</text>
+    <rect x="256" y="132" width="288" height="84" rx="10" fill="#1b2b52" stroke="#8b5cf6"/>
+    <text x="400" y="180" fill="#dbe7ff">Striatum (D1/D2)</text>
+    <rect x="80" y="264" width="192" height="84" rx="10" fill="#1b2b52" stroke="#8b5cf6"/>
+    <text x="176" y="312" fill="#dbe7ff">GPe</text>
+    <rect x="304" y="360" width="192" height="72" rx="10" fill="#1b2b52" stroke="#8b5cf6"/>
+    <text x="400" y="404" fill="#dbe7ff">STN</text>
+    <rect x="528" y="264" width="192" height="84" rx="10" fill="#1b2b52" stroke="#8b5cf6"/>
+    <text x="624" y="312" fill="#dbe7ff">GPi</text>
+    <rect x="528" y="372" width="192" height="72" rx="10" fill="#1b2b52" stroke="#8b5cf6"/>
+    <text x="624" y="416" fill="#dbe7ff">SNr</text>
+    <rect x="288" y="480" width="224" height="72" rx="10" fill="#1b2b52" stroke="#22d3ee"/>
+    <text x="400" y="524" fill="#dbe7ff">Thalamus</text>
+  </g>
+  <g stroke="#22d3ee" stroke-width="2" fill="none" marker-end="url(#a)">
+    <defs><marker id="a" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6" fill="none" stroke="#22d3ee"/></marker></defs>
+    <line x1="400" y1="110" x2="400" y2="132"/>
+    <line x1="400" y1="216" x2="560" y2="264"/>
+    <line x1="300" y1="216" x2="200" y2="264"/>
+  </g>
+  <text x="400" y="580" fill="#7d8db0" font-size="13" text-anchor="middle">Hand-authored fixture schematic for offline demo — not a model result</text>
+</svg>
