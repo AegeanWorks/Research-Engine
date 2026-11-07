@@ -9,6 +9,8 @@ import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
+from engine.errors import EngineError
+
 
 def utc_now() -> str:
     """Return a second-resolution UTC timestamp in ISO-8601 form."""
@@ -32,6 +34,52 @@ def digest(kind: str, payload: str | bytes) -> str:
 def sha256_text(value: str) -> str:
     """Hash extracted output so reproducibility is checked without storing it all."""
     return hashlib.sha256(value.encode("utf-8", errors="replace")).hexdigest()
+
+
+def digest_tree(
+    root: Path | str,
+    suffixes: tuple = (),
+    excluded_dirs: tuple = (".git", "__pycache__", ".pytest_cache", "node_modules"),
+) -> dict:
+    """Stream a directory into one path-and-content digest.
+
+    The digest covers relative POSIX paths and file bytes in sorted order, so a renamed file
+    changes it even when the bytes are identical. This is the reference form used for external
+    data roots that must not be copied into the host.
+    """
+    base = Path(root)
+    if not base.is_dir():
+        raise EngineError(
+            f"not a directory: {base}",
+            "an external data root is a directory of files to fingerprint.",
+            "pass an existing directory.",
+        )
+    digest = hashlib.sha256()
+    files = 0
+    total = 0
+    allowed = tuple(suffix.lower() for suffix in suffixes)
+    for path in sorted(base.rglob("*")):
+        if not path.is_file():
+            continue
+        relative = path.relative_to(base)
+        if any(part in excluded_dirs for part in relative.parts):
+            continue
+        if allowed and path.suffix.lower() not in allowed:
+            continue
+        payload = path.read_bytes()
+        digest.update(relative.as_posix().encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(payload)
+        digest.update(b"\0")
+        files += 1
+        total += len(payload)
+    if files == 0:
+        raise EngineError(
+            f"no matching files under {base}",
+            "an empty manifest would hide missing evidence.",
+            "check the suffix filter and the data root.",
+        )
+    return {"sha256": digest.hexdigest(), "files": files, "bytes": total}
 
 
 def atomic_write_text(path: Path, text: str) -> None:

@@ -8,9 +8,9 @@
 ## 📊 Codebase Metrics
 - **Total Python Modules**: `409`
 - **Total Classes**: `301`
-- **Total Top-Level Functions**: `1940`
-- **Total Class Methods**: `1469`
-- **Total Source Lines**: `88204`
+- **Total Top-Level Functions**: `1942`
+- **Total Class Methods**: `1471`
+- **Total Source Lines**: `88303`
 
 ---
 
@@ -3787,12 +3787,13 @@
 ### [`engine/artifacts.py`](engine/artifacts.py)
 > *Artifact I/O: timestamps, output digests and atomic file replacement.*
 
-**Size**: `51` lines (`1755` bytes)
+**Size**: `99` lines (`3462` bytes)
 
 **Functions:**
 - `def utc_now()` - *Return a second-resolution UTC timestamp in ISO-8601 form.*
 - `def digest(kind, payload)` - *Domain-separated digest: the artifact kind is hashed before the payload.*
 - `def sha256_text(value)` - *Hash extracted output so reproducibility is checked without storing it all.*
+- `def digest_tree(root, suffixes, excluded_dirs)` - *Stream a directory into one path-and-content digest.*
 - `def atomic_write_text(path, text)` - *Write UTF-8 text through a flushed temp file and an atomic replace.*
 
 ---
@@ -4249,7 +4250,7 @@
 ### [`engine/packs.py`](engine/packs.py)
 > *Domain-pack registry: declared boundaries, never cross-domain imports.*
 
-**Size**: `142` lines (`4889` bytes)
+**Size**: `163` lines (`5438` bytes)
 
 **Classes:**
 - `class Pack`
@@ -4257,6 +4258,7 @@
 **Functions:**
 - `def _to_pack(row)`
 - `def register_pack(conn, name, version, api_version, data_root, manifest_sha256, status)` - *Register one domain pack; the name is the isolation boundary.*
+- `def register_pack_from_tree(conn, name, version, root, suffixes, api_version)` - *Register a pack whose external data root is fingerprinted in place.*
 - `def get_pack(conn, name)`
 - `def list_packs(conn)`
 - `def set_pack_status(conn, name, status)` - *Enable or disable a pack without deleting its registration.*
@@ -7215,7 +7217,7 @@
 ### [`tests/test_packs.py`](tests/test_packs.py)
 > *Domain-pack registry: an isolated pack is declared, not imported across domains.*
 
-**Size**: `54` lines (`1889` bytes)
+**Size**: `84` lines (`3339` bytes)
 
 **Classes:**
 - `class PackRegistryTests`
@@ -7224,6 +7226,8 @@
   - Method `.test_invalid_api_version_is_refused()`
   - Method `.test_invalid_manifest_digest_is_refused()`
   - Method `.test_pack_data_root_is_a_reference_not_a_copy()`
+  - Method `.test_register_pack_from_tree_fingerprints_external_data()`
+  - Method `.test_register_pack_from_empty_tree_is_refused()`
 
 ---
 

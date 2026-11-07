@@ -10,9 +10,10 @@ from __future__ import annotations
 import re
 import sqlite3
 from dataclasses import dataclass
+from pathlib import Path
 from typing import List
 
-from engine.artifacts import utc_now
+from engine.artifacts import digest_tree, utc_now
 from engine.database import transaction
 from engine.errors import EngineError, NotFound
 
@@ -111,6 +112,26 @@ def register_pack(
                 "register a new version under a new name, or inspect the existing pack.",
             ) from exc
     return record
+
+
+def register_pack_from_tree(
+    conn: sqlite3.Connection,
+    name: str,
+    version: str,
+    root: str | Path,
+    suffixes: tuple = (),
+    api_version: str = PACK_API_VERSION,
+) -> Pack:
+    """Register a pack whose external data root is fingerprinted in place."""
+    summary = digest_tree(root, suffixes=suffixes)
+    return register_pack(
+        conn,
+        name,
+        version,
+        api_version=api_version,
+        data_root=str(Path(root)),
+        manifest_sha256=summary["sha256"],
+    )
 
 
 def get_pack(conn: sqlite3.Connection, name: str) -> Pack:

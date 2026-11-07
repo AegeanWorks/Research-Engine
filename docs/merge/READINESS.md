@@ -24,7 +24,8 @@ The source repositories were never stopped, finished, archived, deleted, moved, 
 modified. Their pins are in `SOURCE-INVENTORY.md`; copied files and modifications are listed in
 `PROVENANCE.md` and each destination's `NOTICE.md`. The second-pass function inventory and the
 N1 gaps it found are in `GAP-ANALYSIS.md`; the N1 archive decision matrix is
-`N1-COMPLETENESS.md`; the lattice archive decision matrix is `LATTICE-COMPLETENESS.md`.
+`N1-COMPLETENESS.md`; the lattice archive decision matrix is `LATTICE-COMPLETENESS.md`; the
+four active projects' worth-implementing review is `OTHER-PROJECTS-ANALYSIS.md`.
 
 ## 2. Baseline and post-merge test evidence
 
@@ -44,7 +45,7 @@ Post-merge host gate:
 
 ```text
 python -m unittest discover -s tests -t .
-Ran 1105 tests in 228.733s
+Ran 1107 tests in 201.956s
 OK
 ```
 
@@ -134,6 +135,11 @@ roots, inverse fit and the Koide identity), so the audit module is not merely pr
 
 `python -m adapters.lattice.dogfood` drives the real lattice CLI and live studio server over
 HTTP, including chaos requests, and reports **25/25 steps passed** with the tracked tree unchanged.
+
+`engine.packs.register_pack_from_tree` fingerprints external data roots without copying them.
+The four active packs were registered against their real external roots:
+fluid results `1b8afb04…c1f4`, PNN output `bce1add0…cf90`, Atlas demo `0b5ebd6c…1ddc`, and
+obezite `02_LITERATUR` `097b722c…19db`.
 
 ## 5. Source integrity
 

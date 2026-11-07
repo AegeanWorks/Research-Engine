@@ -118,11 +118,12 @@ Status on 2026-11-07: all rows below are `ported` unless the status column says 
 |---|---|---|---|
 | X-01 | Pack registry: name, version, API version, data root, digest | `engine/packs.py`, `domain_pack` table | `tests/test_packs.py` |
 | X-02 | Additive schema migration and dry-run harness | `engine/migrations.py` | `tests/test_migration_harness.py` |
-| X-03 | External data referenced by path plus digest | `inspect_tree`, migration reports | `tests/test_migration_harness.py`, `docs/merge/MIGRATION-DRYRUN.md` |
+| X-03 | External data referenced by path plus digest | `inspect_tree`, migration reports, `digest_tree` | `tests/test_migration_harness.py`, `tests/test_packs.py` |
 | X-04 | NeuroCore consumes the host through API/MCP only | `studio/api.py`, `studio/mcp.py` | `tests/test_neurocore_contract.py` |
 | X-05 | No cross-domain imports | repository-wide | `tests/test_domain_isolation.py` |
 | X-06 | Source notices preserved | `adapters/lattice/NOTICE.md`, `studio/NOTICE.md`, `domains/*/NOTICE.md` | `docs/merge/PROVENANCE.md` |
 | X-07 | Every source remains runnable and untouched | external repos | post-merge re-run in `docs/merge/READINESS.md` |
+| X-08 | External pack data root fingerprinted and registered in place | `engine/artifacts.digest_tree`, `engine/packs.register_pack_from_tree` | `tests/test_packs.py` |
 
 ## Summary
 
