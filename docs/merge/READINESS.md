@@ -64,7 +64,7 @@ Post-merge source re-checks (sources untouched):
 | N1-Engine | 20 passed, 7.58s | same SHA |
 | PNN | 222 tests OK, 1.979s | same SHA |
 | Atlas | 152 passed, 1 skipped, 20.80s | same SHA |
-| obezite | 10 tests OK, 2.422s | source advanced to `6776125…` (clean); host pin `18b5d4d8…` |
+| obezite | 10 tests OK, 2.422s | source advanced to `6776125…`; its worktree has its own later changes, not imported; host pin `18b5d4d8…` |
 | fluid-universe | 403 passed, 1728.43s (28:48) | same SHA, clean |
 
 ## 3. Schema and migration
@@ -121,14 +121,15 @@ N1-Engine f2c488695b8c00b224e851cd6aa17eaee4e6960a clean
 fluid-universe 7b4efe141dfbcc267b0efceb82247f5004186c06 clean
 PNN 3b6e6c277552dcb2c3604483de1277307bc18c4d clean
 Atlas f3cd7470e99683bc95b05f49e404bb00bffa2663 clean
-obezite-mekanizma-projesi 6776125799d5939c762923c5dc95180fbb46a6d0 clean
+obezite-mekanizma-projesi 6776125799d5939c762923c5dc95180fbb46a6d0 DIRTY (its own later work)
 ```
 
-obezite advanced after the capture pin while this merge was running. The host pin remains
-`18b5d4d8e2196384f4e960f01b3031beb0a6315a`; every obezite file was re-read from that commit
-with `git show <pin>:08_ARACLAR/<file>` after the worktree moved, so no in-flight change entered
-the host. The current source suite passes 10/10 at `6776125`; the pinned archive passes 9/10
-because archive extraction changes the inventory mtimes used by one freshness test.
+obezite advanced after the capture pin while this merge was running and its worktree now carries
+its own uncommitted work. The host pin remains `18b5d4d8e2196384f4e960f01b3031beb0a6315a`; every
+obezite file was re-read from that commit with `git show <pin>:08_ARACLAR/<file>` after the
+worktree moved, so no in-flight change entered the host. The source suite passed 10/10 at
+`6776125`; the pinned archive passes 9/10 because archive extraction changes the inventory mtimes
+used by one freshness test.
 
 ## 6. Deliberate exclusions and residual gaps
 
