@@ -13,7 +13,7 @@ from adapters.lattice.database import open_database
 from adapters.lattice.repository import Repository
 
 NON_SURFACE_MODULES = frozenset(
-    {"api", "cli", "__main__", "start", "ui_inventory"}
+    {"api", "cli", "__main__", "start", "ui_inventory", "dogfood"}
 )
 CONDITIONAL_BLOCKS = tuple(
     block for block in (ast.If, ast.Try, getattr(ast, "TryStar", None)) if block is not None
