@@ -65,7 +65,7 @@ Post-merge source re-checks (sources untouched):
 | PNN | 222 tests OK, 1.979s | same SHA |
 | Atlas | 152 passed, 1 skipped, 20.80s | same SHA |
 | obezite | 10 tests OK, 2.422s | source advanced to `6776125…` (clean); host pin `18b5d4d8…` |
-| fluid-universe | 403 passed (M0 run) | rerun started at M5; source SHA unchanged |
+| fluid-universe | M0 full run `403 passed`; source SHA unchanged and clean | M5 rerun reached 89% then stopped making progress; not used as evidence |
 
 ## 3. Schema and migration
 
@@ -136,7 +136,9 @@ because archive extraction changes the inventory mtimes used by one freshness te
    small synthetic ledger fixture. The source advanced during the merge and its current HEAD
    (`6776125…`) passes 10/10; the host pin remains `18b5d4d8…`.
 4. **fluid physics outputs stay external.** The host carries the code and verification rules; the
-   generated `results/` are referenced by SHA-256, not copied.
+   generated `results/` are referenced by SHA-256, not copied. The full source suite passed 403
+   tests at M0; the M5 rerun reached 89% and then stopped making progress, so the M0 run plus the
+   unchanged clean SHA is the evidence.
 5. **obezite tool CLIs still use cwd-relative ledger paths.** The library functions and
    `sentez`/`uret` are host-wired with injected roots; the remaining operator scripts are copied
    but not re-rooted.
