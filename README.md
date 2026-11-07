@@ -257,19 +257,19 @@ Warnings are research hygiene; errors block a trustworthy report.
 
 ## Data Model
 
-One SQLite file (default `research.db`), schema version 13. Tables: `research`, `source`,
+One SQLite file (default `research.db`), schema version 14. Tables: `research`, `source`,
 `question`, `claim`, `edge`, `hypothesis`, `killtest`, `test_run`, `test_attempt`, `verdict`,
 `invalidation`, `observation`, `protocol`, `ai_artifact`, `event`, `analysis_plan`,
-`amendment`, `schema_meta`, `counters`. `claim`
+`amendment`, `experiment_intervention`, `experiment_metric_definition`, `experiment_metric`,
+`experiment_event`, `domain_pack`, `migration_run`. `source`
+adds paper metadata (`arxiv`, `venue`, `abstract`, `tags`, `study_type`); `claim`
 carries `revision_of`, `superseded_by`, `revision_reason`; revisions are new rows.
-`observation` carries instrument, rater, protocol, sample size, aggregation, unit and
-provenance class. `event` carries `seq`, `root_id`,
-`parent_id`, `prev_hash`, `event_hash`. Writes use `BEGIN IMMEDIATE`; WAL, `synchronous=FULL`.
+`migration_run` deduplicates a source snapshot by SHA-256.
+`observation` carries its instrument, rater and protocol. `event` carries `seq`, `root_id`,
+`parent_id`, `prev_hash`, `event_hash`.
 `verdict`, `test_run`, `test_attempt`, `event`, `observation`, `invalidation`,
-`analysis_plan`, `amendment` are
-append-only (an observation is voided, never edited or deleted). `export` includes attempts,
-observations, protocols, plans, amendments, AI artifacts and the event log; manifests digest evidence, not the
-log.
+`analysis_plan`, `amendment` are append-only. `export` includes evidence, plans,
+AI artifacts and the event log.
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Non-Negotiables

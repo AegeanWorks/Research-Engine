@@ -1,39 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "T-024-audit-fixes",
+    "task_id": "T-025-research-functions-merge",
     "last_phase": "in_progress",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1793913825.8317425,
-    "owner": "kilo:goal",
-    "started_by": "kilo:goal",
-    "continuations": [],
-    "completed_at": 1793913882.9623241
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1794072055.7775176,
+    "owner": "opencode:goal",
+    "started_by": "opencode:goal",
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "T-020-n1-port",
-      "phase": "in_progress",
-      "phase_num": 4,
-      "description": "[3/4] Batch stats-all plus CSV import shipped: per-claim isolation with MAX_SAFE_CLAIMS warning plus observation import-csv via add_observation, full suite 546 pass, 4/4 gates pass, checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793911947.892117,
-      "timestamp_str": "2026-11-05 23:52:27",
-      "agent": "kilo:goal"
-    },
-    {
-      "task_id": "T-020-n1-port",
-      "phase": "in_progress",
-      "phase_num": 4,
-      "description": "[4/4] Docs and ADR shipped: README commands within 22500 budget plus MECHANICS 13 follow-up plus ARCHITECTURE discovery/stats, ADR-051, 546 tests pass, 4/4 gates pass, checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793911951.2358472,
-      "timestamp_str": "2026-11-05 23:52:31",
-      "agent": "kilo:goal"
-    },
     {
       "task_id": "T-020-n1-port",
       "phase": "completed",
@@ -254,6 +231,35 @@
       "timestamp": 1793913882.9623256,
       "timestamp_str": "2026-11-06 00:24:42",
       "agent": "kilo:goal"
+    },
+    {
+      "task_id": "T-025-research-functions-merge",
+      "phase": "phase 2",
+      "phase_num": 2,
+      "description": "[1/6] M0 baseline and inventory: branch, six source SHAs, baseline suites, parity matrix, ADR",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794069846.048022,
+      "timestamp_str": "2026-11-07 19:44:06",
+      "agent": "opencode:goal",
+      "impact_assessment": {
+        "why": "Six sibling projects hold research mechanics that duplicate or fragment the lifecycle; the host needs one evidence-backed map before any code moves",
+        "benefits": "Reproducible pre-merge baseline, immutable source SHAs, and a capability matrix that bounds every later port",
+        "risks": "contract: source repos must remain untouched; dependency: read committed HEAD only, no in-flight work; concurrency: none, sources are read-only; state: no host schema change in M0",
+        "mitigation": "Create a dedicated merge branch, pin SHAs in docs, rerun each source suite, and map every listed capability to a target module before editing"
+      },
+      "plan_digest": "3dac8b7bb93c5c8adf889a2a21c6a47f12420362cce773e5139689b9302acf2b"
+    },
+    {
+      "task_id": "T-025-research-functions-merge",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[2/6] M1 schema 14 shipped: paper fields, experiment tables, pack registry, migration harness, golden test; M0 baseline complete (lattice 252, N1 20, fluid 403, PNN 222, obezite 10, Atlas 152); 577 host tests pass, 4/4 gates pass, checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794072055.7775176,
+      "timestamp_str": "2026-11-07 20:20:55",
+      "agent": "opencode:goal"
     }
   ]
 }

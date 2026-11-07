@@ -83,6 +83,11 @@ class Source:
     screening: str = "identified"
     screening_reason: str = ""
     screening_at: str = ""
+    arxiv: str = ""
+    venue: str = ""
+    abstract: str = ""
+    tags: str = ""
+    study_type: str = ""
 
 
 @dataclass(frozen=True)

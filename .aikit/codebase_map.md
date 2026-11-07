@@ -6,11 +6,11 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `84`
-- **Total Classes**: `86`
-- **Total Top-Level Functions**: `280`
-- **Total Class Methods**: `610`
-- **Total Source Lines**: `18352`
+- **Total Python Modules**: `93`
+- **Total Classes**: `98`
+- **Total Top-Level Functions**: `325`
+- **Total Class Methods**: `637`
+- **Total Source Lines**: `20321`
 
 ---
 
@@ -239,7 +239,7 @@
 ### [`engine/database.py`](engine/database.py)
 > *SQLite connection, schema versioning and atomic transactions.*
 
-**Size**: `467` lines (`18053` bytes)
+**Size**: `557` lines (`21352` bytes)
 
 **Functions:**
 - `def connect(path)` - *Open a database with durability pragmas suitable for a state file.*
@@ -473,10 +473,42 @@
 
 ---
 
+### [`engine/migrations.py`](engine/migrations.py)
+> *Migration harness for lattice and N1 source databases.*
+
+**Size**: `497` lines (`17488` bytes)
+
+**Classes:**
+- `class MigrationReport` - *What one inspection or application observed and inserted.*
+  - Method `.as_dict()`
+
+**Functions:**
+- `def _file_digest(path)`
+- `def _read_only(path)` - *Open a source database with SQLite's read-only URI mode.*
+- `def _table_count(conn, table)`
+- `def _inspect(path, source, tables)`
+- `def inspect_lattice(path)` - *Describe a lattice database without writing to it.*
+- `def inspect_n1(path)` - *Describe an N1 database without writing to it.*
+- `def applied_migrations(conn)` - *List migration runs in application order.*
+- `def _refuse_repeat(conn, source, digest)`
+- `def _year(value)`
+- `def _text(value)`
+- `def _claim_kind(row)`
+- `def _as_date(value)`
+- `def _as_timestamp(value)`
+- `def _lattice_rows(path)`
+- `def _n1_rows(path)`
+- `def _lattice_screening(screening_rows)`
+- `def _record_migration(conn, report, mapping)`
+- `def migrate_lattice(conn, research_ref, path, dry_run)` - *Import a lattice snapshot into one host program without touching the source.*
+- `def migrate_n1(conn, research_ref, path, dry_run)` - *Import an N1 snapshot into one host program without touching the source.*
+
+---
+
 ### [`engine/models.py`](engine/models.py)
 > *Frozen domain records and the engine's closed vocabularies.*
 
-**Size**: `274` lines (`6000` bytes)
+**Size**: `279` lines (`6107` bytes)
 
 **Classes:**
 - `class Research`
@@ -515,6 +547,23 @@
 - `def group_values(conn, claim_ref)` - *Non-voided values per group, in insertion order.*
 - `def group_values_window(conn, claim_ref, since, until)` - *Non-voided values per group in insertion order, optionally bounded by record time.*
 - `def import_observations_csv(conn, claim_ref, path, actor, dry_run)` - *Bulk-record measurements from a CSV file with per-row error isolation.*
+
+---
+
+### [`engine/packs.py`](engine/packs.py)
+> *Domain-pack registry: declared boundaries, never cross-domain imports.*
+
+**Size**: `142` lines (`4889` bytes)
+
+**Classes:**
+- `class Pack`
+
+**Functions:**
+- `def _to_pack(row)`
+- `def register_pack(conn, name, version, api_version, data_root, manifest_sha256, status)` - *Register one domain pack; the name is the isolation boundary.*
+- `def get_pack(conn, name)`
+- `def list_packs(conn)`
+- `def set_pack_status(conn, name, status)` - *Enable or disable a pack without deleting its registration.*
 
 ---
 
@@ -629,11 +678,11 @@
 ### [`engine/sources.py`](engine/sources.py)
 > *Bibliographic sources: the only place literature text may enter the graph.*
 
-**Size**: `157` lines (`5570` bytes)
+**Size**: `173` lines (`6090` bytes)
 
 **Functions:**
 - `def _to_source(row)`
-- `def add_source(conn, research_ref, title, year, doi, url, authors, kind)` - *Register a source; claims cannot cite it before it exists.*
+- `def add_source(conn, research_ref, title, year, doi, url, authors, kind, arxiv, venue, abstract, tags, study_type)` - *Register a source; claims cannot cite it before it exists.*
 - `def get_source(conn, ref)` - *Fetch one source by identifier.*
 - `def list_sources(conn, research_ref)` - *List sources, optionally filtered by program.*
 - `def set_source_status(conn, ref, status, note, actor)` - *Change a source's evidence status without deleting the record.*
@@ -681,6 +730,57 @@
 - `def scorecard(conn, research_ref)` - *Render one line per claim, ordered by status then identifier.*
 - `def claim_detail(conn, claim_ref)` - *Render one claim with provenance, dependencies, verdicts and linked tests.*
 - `def inventory(conn)` - *Return engine-wide counts used by the CLI overview.*
+
+---
+
+### [`experiments/__init__.py`](experiments/__init__.py)
+> *N1 experiment records and baseline-vs-intervention analysis.*
+
+**Size**: `37` lines (`801` bytes)
+
+---
+
+### [`experiments/analysis.py`](experiments/analysis.py)
+> *Baseline-vs-intervention analysis for N1 experiment records.*
+
+**Size**: `249` lines (`8938` bytes)
+
+**Functions:**
+- `def _start_date(value)`
+- `def _days(value, field)`
+- `def _summary(rows)`
+- `def _trend(rows)`
+- `def _window_warnings(baseline, intervention, baseline_days, intervention_days)`
+- `def analyze_baseline_vs_intervention(conn, research_ref, metric_name, start_date, baseline_days, intervention_days)` - *Compare one metric before and after the declared intervention start.*
+- `def analyze_multiple_metrics(conn, research_ref, metric_names, start_date, baseline_days, intervention_days)` - *Analyze several metrics and report the multiple-comparison risk as a global warning.*
+
+---
+
+### [`experiments/models.py`](experiments/models.py)
+> *Experiment records: N1 interventions, metric definitions, measurements and events.*
+
+**Size**: `413` lines (`13219` bytes)
+
+**Classes:**
+- `class Intervention`
+- `class MetricDefinition`
+- `class MetricEntry`
+- `class EventEntry`
+
+**Functions:**
+- `def _date(value, field)`
+- `def _timestamp(value)`
+- `def _finite(value)`
+- `def _intervention(conn, research_id, ref)`
+- `def add_intervention(conn, research_ref, name, start_date, projected_end_date, end_date, dosage, notes)`
+- `def add_metric_definition(conn, research_ref, name, description, unit)`
+- `def add_metric(conn, research_ref, metric_name, date_value, value, intervention_ref, note)`
+- `def add_event(conn, research_ref, event_name, timestamp, severity, notes, intervention_ref)`
+- `def _rows(conn, sql, params)`
+- `def list_interventions(conn, research_ref)`
+- `def list_metric_definitions(conn, research_ref)`
+- `def list_metrics(conn, research_ref, metric_name, intervention_ref)`
+- `def list_events(conn, research_ref)`
 
 ---
 
@@ -1117,6 +1217,26 @@
 
 ---
 
+### [`tests/test_experiments.py`](tests/test_experiments.py)
+> *N1 experiment records and baseline-vs-intervention analysis on the host core.*
+
+**Size**: `165` lines (`5836` bytes)
+
+**Classes:**
+- `class ExperimentModelTests`
+  - Method `.test_intervention_round_trip()`
+  - Method `.test_metric_definition_is_unique_per_program()`
+  - Method `.test_metric_entry_links_intervention_and_validates_finite_value()`
+  - Method `.test_event_severity_is_bounded()`
+  - Method `.test_intervention_from_another_program_is_refused()`
+- `class ExperimentAnalysisTests`
+  - Method `._rows(research, values, start_day, metric)`
+  - Method `.test_baseline_and_intervention_windows()`
+  - Method `.test_insufficient_data_returns_counts_not_an_exception()`
+  - Method `.test_multiple_metric_warning_above_three()`
+
+---
+
 ### [`tests/test_golden.py`](tests/test_golden.py)
 > *Golden run: the whole command surface, end to end, in a fresh database.*
 
@@ -1414,6 +1534,27 @@
 
 ---
 
+### [`tests/test_migration_harness.py`](tests/test_migration_harness.py)
+> *Migration harness: inspect first, then apply a source fixture without losing provenance.*
+
+**Size**: `194` lines (`8735` bytes)
+
+**Classes:**
+- `class MigrationHarnessTests`
+  - Method `._lattice()`
+  - Method `._n1()`
+  - Method `.test_lattice_inspect_is_read_only_and_counts_rows()`
+  - Method `.test_lattice_dry_run_writes_nothing()`
+  - Method `.test_lattice_apply_preserves_paper_fields_provenance_and_screening()`
+  - Method `.test_lattice_apply_is_recorded_once()`
+  - Method `.test_n1_manifest_and_apply_link_metrics_to_interventions()`
+  - Method `.test_golden_both_sources_share_one_program()`
+
+**Functions:**
+- `def _fixture(sql, name)`
+
+---
+
 ### [`tests/test_models.py`](tests/test_models.py)
 > *Vocabularies are closed and records are immutable.*
 
@@ -1509,6 +1650,21 @@
 
 ---
 
+### [`tests/test_packs.py`](tests/test_packs.py)
+> *Domain-pack registry: an isolated pack is declared, not imported across domains.*
+
+**Size**: `54` lines (`1889` bytes)
+
+**Classes:**
+- `class PackRegistryTests`
+  - Method `.test_register_and_read_a_pack()`
+  - Method `.test_duplicate_pack_is_refused()`
+  - Method `.test_invalid_api_version_is_refused()`
+  - Method `.test_invalid_manifest_digest_is_refused()`
+  - Method `.test_pack_data_root_is_a_reference_not_a_copy()`
+
+---
+
 ### [`tests/test_plans.py`](tests/test_plans.py)
 > *Analysis plans are preregistered; unmatched comparisons read as exploratory.*
 
@@ -1600,6 +1756,21 @@
   - Method `.test_a_superseded_claim_refuses_a_new_test()`
   - Method `.test_a_superseded_claim_refuses_a_new_prerequisite()`
   - Method `.test_a_superseded_claim_refuses_new_links()`
+
+---
+
+### [`tests/test_schema_v14.py`](tests/test_schema_v14.py)
+> *Schema 14: lattice paper fields, N1 experiment tables and the pack registry.*
+
+**Size**: `107` lines (`3743` bytes)
+
+**Classes:**
+- `class Schema14MigrationTests`
+  - Method `._v13()`
+  - Method `.test_version_13_source_gains_paper_columns_and_keeps_rows()`
+  - Method `.test_version_14_creates_experiment_and_pack_tables()`
+- `class PaperFieldTests`
+  - Method `.test_source_round_trips_paper_metadata()`
 
 ---
 

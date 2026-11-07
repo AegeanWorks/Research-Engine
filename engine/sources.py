@@ -26,6 +26,11 @@ def add_source(
     url: str = "",
     authors: str = "",
     kind: str = "paper",
+    arxiv: str = "",
+    venue: str = "",
+    abstract: str = "",
+    tags: str = "",
+    study_type: str = "",
 ) -> Source:
     """Register a source; claims cannot cite it before it exists."""
     research = get_research(conn, research_ref)
@@ -67,10 +72,16 @@ def add_source(
             doi=doi.strip(),
             url=url.strip(),
             retrieved_at=utc_now(),
+            arxiv=arxiv.strip(),
+            venue=venue.strip(),
+            abstract=abstract.strip(),
+            tags=tags.strip(),
+            study_type=study_type.strip(),
         )
         conn.execute(
-            "INSERT INTO source(id, research_id, kind, title, authors, year, doi, url, retrieved_at)"
-            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            "INSERT INTO source(id, research_id, kind, title, authors, year, doi, url,"
+            " retrieved_at, arxiv, venue, abstract, tags, study_type)"
+            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
                 record.id,
                 record.research_id,
@@ -81,6 +92,11 @@ def add_source(
                 record.doi,
                 record.url,
                 record.retrieved_at,
+                record.arxiv,
+                record.venue,
+                record.abstract,
+                record.tags,
+                record.study_type,
             ),
         )
     return record
