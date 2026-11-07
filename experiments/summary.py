@@ -60,9 +60,8 @@ def summarize_period(
         selected_name = chosen.name
         metrics = list_metrics(conn, research.id, intervention_ref=chosen.id)
         events = [
-            row
-            for row in list_events(conn, research.id)
-            if row.intervention_id == chosen.id and start <= row.timestamp[:10] <= end
+            row for row in list_events(conn, research.id)
+            if row.intervention_id == chosen.id
         ]
     else:
         interventions = [

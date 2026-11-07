@@ -10,7 +10,7 @@
 - **Total Classes**: `317`
 - **Total Top-Level Functions**: `1959`
 - **Total Class Methods**: `1544`
-- **Total Source Lines**: `89299`
+- **Total Source Lines**: `89310`
 
 ---
 
@@ -3787,7 +3787,7 @@
 ### [`engine/artifacts.py`](engine/artifacts.py)
 > *Artifact I/O: timestamps, output digests and atomic file replacement.*
 
-**Size**: `99` lines (`3462` bytes)
+**Size**: `103` lines (`3663` bytes)
 
 **Functions:**
 - `def utc_now()` - *Return a second-resolution UTC timestamp in ISO-8601 form.*
@@ -4607,7 +4607,7 @@
 ### [`experiments/summary.py`](experiments/summary.py)
 > *Daily/weekly N1 summary, extracted from the source SummarizerWidget.*
 
-**Size**: `161` lines (`5546` bytes)
+**Size**: `160` lines (`5495` bytes)
 
 **Functions:**
 - `def _date(value, field)`
@@ -7195,7 +7195,7 @@
 ### [`tests/test_n1_surfaces.py`](tests/test_n1_surfaces.py)
 > *N1 surfaces that were missing after the first merge: correlation, CSV, report.*
 
-**Size**: `276` lines (`12186` bytes)
+**Size**: `284` lines (`12396` bytes)
 
 **Classes:**
 - `class ExperimentSurfaceTests`

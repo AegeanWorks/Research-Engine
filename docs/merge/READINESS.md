@@ -27,7 +27,7 @@ modified. Their pins are in `SOURCE-INVENTORY.md`; copied files and modification
 N1 gaps it found are in `GAP-ANALYSIS.md`; the N1 archive decision matrix is
 `N1-COMPLETENESS.md`; the lattice archive decision matrix is `LATTICE-COMPLETENESS.md`; the
 four active projects' worth-implementing review is `OTHER-PROJECTS-ANALYSIS.md`; the full
-50-project scan is `PROJECTS-SCAN.md`.
+50-project scan is `PROJECTS-SCAN.md`; the cumulative push-window review is `PUSH-REVIEW.md`.
 
 ## 2. Baseline and post-merge test evidence
 
@@ -47,7 +47,7 @@ Post-merge host gate:
 
 ```text
 python -m unittest discover -s tests -t .
-Ran 1179 tests in 124.387s
+Ran 1179 tests in 348.856s
 OK
 ```
 

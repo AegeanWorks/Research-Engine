@@ -66,13 +66,17 @@ def digest_tree(
             continue
         if allowed and path.suffix.lower() not in allowed:
             continue
-        payload = path.read_bytes()
         digest.update(relative.as_posix().encode("utf-8"))
         digest.update(b"\0")
-        digest.update(payload)
+        size = 0
+        # hygiene: allow binary streaming read; text encoding does not apply
+        with path.open("rb") as handle:
+            for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+                digest.update(chunk)
+                size += len(chunk)
         digest.update(b"\0")
         files += 1
-        total += len(payload)
+        total += size
     if files == 0:
         raise EngineError(
             f"no matching files under {base}",

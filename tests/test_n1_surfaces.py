@@ -238,6 +238,14 @@ class ExperimentSurfaceTests(DatabaseCase):
             severity=2,
             intervention_ref=intervention.id,
         )
+        add_event(
+            self.conn,
+            research,
+            "follow-up",
+            "2026-03-01T10:00:00+00:00",
+            severity=1,
+            intervention_ref=intervention.id,
+        )
         summary = summarize_period(
             self.conn,
             research,
@@ -247,7 +255,7 @@ class ExperimentSurfaceTests(DatabaseCase):
         )
         self.assertEqual(summary["intervention_name"], "Sleep")
         self.assertEqual(len(summary["metrics"]), 2)
-        self.assertEqual(len(summary["events"]), 1)
+        self.assertEqual(len(summary["events"]), 2)
         text = render_summary_html(summary)
         self.assertIn("Summary for Intervention: Sleep", text)
         self.assertIn("headache", text)
