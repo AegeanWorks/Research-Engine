@@ -29,6 +29,19 @@ in a window are named in the last column.
 - The project-coverage test ignores transient `*-baseline*` copies and the scan table records
   `archive/iris`.
 
+## Push
+
+The reviewed branch plus the review fix `c44afcd` was pushed to
+`origin/merge/research-functions`; local and remote heads match:
+
+```text
+c44afcdd46343ad653213d0fc1a650d94fbbeaa2  HEAD -> merge/research-functions
+c44afcdd46343ad653213d0fc1a650d94fbbeaa2  origin/merge/research-functions
+```
+
+GitHub reports the branch and a pull-request link:
+`https://github.com/AegeanWorks/Research-Engine/pull/new/merge/research-functions`.
+
 ## Verification
 
 ```text
@@ -37,5 +50,4 @@ Ran 20 tests in 0.615s
 OK
 ```
 
-The full suite and strict gate are run before the push; the push is recorded separately in the
-session report.
+The full suite and strict gate were run before the push: **1179 tests OK**, 4/4 gates passed.
