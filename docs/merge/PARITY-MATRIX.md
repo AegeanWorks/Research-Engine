@@ -28,6 +28,7 @@ Status on 2026-11-07: all rows below are `ported` unless the status column says 
 | L-15 | Python API and client facade | `studio/api.py`, `studio/client.py` | copy | ported | `tests/lattice/test_api.py`, `test_client.py` |
 | L-16 | CLI surface and launcher | `adapters/lattice/cli.py`, `start.py` | copy | ported | `tests/lattice/test_cli.py` |
 | L-17 | UI inventory proof | `adapters/lattice/ui_inventory.py` | copy | ported | `tests/lattice/test_ui_inventory.py` |
+| L-18 | Dogfood runner: real CLI + live studio + chaos | `adapters/lattice/dogfood.py` | copy + host paths | ported | `python -m adapters.lattice.dogfood` (25/25) |
 
 ## N1-Engine (M1 schema, M4 experiments)
 

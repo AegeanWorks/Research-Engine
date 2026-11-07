@@ -6,11 +6,11 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `408`
-- **Total Classes**: `300`
-- **Total Top-Level Functions**: `1927`
-- **Total Class Methods**: `1467`
-- **Total Source Lines**: `87904`
+- **Total Python Modules**: `409`
+- **Total Classes**: `301`
+- **Total Top-Level Functions**: `1940`
+- **Total Class Methods**: `1469`
+- **Total Source Lines**: `88204`
 
 ---
 
@@ -238,6 +238,33 @@
 - `def _validate_search_args(query, limit)` - *Ensure a discovery query is non-empty and `limit` is positive.*
 - `def _format_crossref_authors(authors)` - *Join Crossref author objects into `Given Family; Given Family`.*
 - `def _extract_crossref_year(item)` - *Extract a 4-digit publication year from Crossref date-parts.*
+
+---
+
+### [`adapters/lattice/dogfood.py`](adapters/lattice/dogfood.py)
+> *Lattice's dogfood runner: research the way a user does, then attack the surface.*
+
+**Size**: `300` lines (`12968` bytes)
+
+**Classes:**
+- `class Report` - *Collects step outcomes: the console sees a summary, the log sees everything.*
+  - Method `.__init__()`
+  - Method `.step(ok, label, detail)` - *Record one step's outcome and hand back whether it passed.*
+
+**Functions:**
+- `def terminate_process_tree(process)` - *Kill a process and everything it started, on Windows and POSIX alike.*
+- `def supervised(command, log)` - *Run a command with stdin closed, killing its whole tree on the way out.*
+- `def free_port()` - *A port the operating system says is free right now.*
+- `def fingerprint()` - *A digest of every tracked file, so a run that dirties the repository fails.*
+- `def run_cli(db, *arguments, log)` - *Drive the real CLI in-process and capture both streams into the log.*
+- `def http(method, url, body, headers)` - *One HTTP request; an HTTP error status is returned instead of raised.*
+- `def post_json(base, route, payload)` - *POST one JSON object to the studio.*
+- `def wait_for_server(base)` - *Poll the studio until it answers or the start budget runs out.*
+- `def golden_cli(report, sandbox, log)` - *The research workflow a user actually runs, end to end on one database.*
+- `def golden_studio(report, sandbox, log)` - *The real Research Studio server, driven over HTTP like the browser does.*
+- `def chaos_studio(report, base, log)` - *Malformed and hostile requests the browser never sends but a bug or a bot might.*
+- `def chaos_cli(report, sandbox, log)` - *CLI failures must be the documented Error/Why/Fix triad, not tracebacks.*
+- `def main(argv)` - *Run the golden and chaos tracks, print a summary, keep the full log on disk.*
 
 ---
 

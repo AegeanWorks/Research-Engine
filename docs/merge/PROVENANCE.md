@@ -6,7 +6,7 @@ SHA, license and modifications.
 
 | Host destination | Source | Source SHA | Files | Lines | Modifications |
 |---|---|---|---:|---:|---|
-| `adapters/lattice/` | `lattice/lattice/*.py`, `tools/ui_inventory.py`, `start.py` | `d3f0502b…e868` | 21 | 6,639 | package path, imports, launcher root |
+| `adapters/lattice/` | `lattice/lattice/*.py`, `tools/ui_inventory.py`, `tools/dogfood.py`, `start.py` | `d3f0502b…e868` | 22 | 6,894 | package path, imports, host roots and dogfood command |
 | `studio/` | `lattice/lattice/{web,mcp,api,client}.py` | `d3f0502b…e868` | 5 | 3,472 | package path, imports |
 | `experiments/` | N1 `main/core/*` and GUI backend behaviour | `f2c48869…960a` | 9 | 1,478 | reimplemented on stdlib + SQLite, including compatibility and summary surfaces |
 | `domains/pnn/` | `PNN/pnn/*.py` + small `data/` fixtures | `3b6e6c27…8c4d` | 27 | 8,580 | package path, pack-local data root |

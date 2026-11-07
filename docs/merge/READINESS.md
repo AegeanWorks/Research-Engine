@@ -12,7 +12,7 @@ deliberate exclusions listed in section 6.**
 |---|---|---|---|
 | Lifecycle core | host | `engine/` | 577 host tests before merge; schema v14 |
 | Literature adapters | lattice `d3f0502b` | `adapters/lattice/` | 252 ported tests pass |
-| Studio surfaces | lattice `d3f0502b` | `studio/` | web, MCP, API, client tests pass |
+| Studio surfaces | lattice `d3f0502b` | `studio/` | web, MCP, API, client tests pass; dogfood 25/25 |
 | Experiments | N1 `f2c48869` | `experiments/` | models, analysis, correlation, settings, CSV, intervention/metric lifecycle, summary and reporting tests pass |
 | Rigor | fluid-universe `7b4efe14` | `domains/fluid_universe/verification/` | fingerprint/compare/claims tests pass |
 | Physics pack | fluid-universe `7b4efe14` | `domains/fluid_universe/{theory,phenomenology,sims}/` | import smoke test passes |
@@ -24,7 +24,7 @@ The source repositories were never stopped, finished, archived, deleted, moved, 
 modified. Their pins are in `SOURCE-INVENTORY.md`; copied files and modifications are listed in
 `PROVENANCE.md` and each destination's `NOTICE.md`. The second-pass function inventory and the
 N1 gaps it found are in `GAP-ANALYSIS.md`; the N1 archive decision matrix is
-`N1-COMPLETENESS.md`.
+`N1-COMPLETENESS.md`; the lattice archive decision matrix is `LATTICE-COMPLETENESS.md`.
 
 ## 2. Baseline and post-merge test evidence
 
@@ -131,6 +131,9 @@ that the NeuroCore application itself was run.
 `tests/test_fluid_audit.py` exercises the copied audit primitives (circulant matrix, analytic
 roots, inverse fit and the Koide identity), so the audit module is not merely present.
 `tests/test_license_notices.py` proves every ported package carries its source SHA and notice.
+
+`python -m adapters.lattice.dogfood` drives the real lattice CLI and live studio server over
+HTTP, including chaos requests, and reports **25/25 steps passed** with the tracked tree unchanged.
 
 ## 5. Source integrity
 
