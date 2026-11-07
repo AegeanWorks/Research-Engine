@@ -14,6 +14,10 @@ function in the pinned source (`f2c488695b8c00b224e851cd6aa17eaee4e6960a`) is ma
 | `core/models.py` | `Intervention`, `MetricDefinition`, `MetricEntry`, `EventEntry` | `experiments/models.py` (frozen dataclasses + CRUD) | **ported** |
 | `core/reporting.py` | `ReportGenerator.generate_html_report` | `experiments/reporting.py`; `experiments/compat.py:ReportGenerator` | **ported** |
 | `core/settings_manager.py` | `SettingsManager.load_settings`, `save_settings`, `get`, `set` | `experiments/settings.py:SettingsManager` (atomic save) | **ported** |
+| GUI `InterventionsWidget` backend | add, edit, close and status display | `experiments/models.py` (`add_intervention`, `update_intervention`, `close_intervention`, `intervention_status`) | **ported** |
+| GUI `MetricDefinitionWidget` backend | add, rename (and rewrite entries), delete | `experiments/models.py` (`add_metric_definition`, `update_metric_definition`, `delete_metric_definition`) | **ported** |
+| GUI `SummarizerWidget` backend | intervention/date-range summary and HTML rendering | `experiments/summary.py` (`summarize_period`, `render_summary_html`) | **ported** |
+| GUI `AnalysisWidget` backend | JSON report save, HTML report export | `experiments/reporting.py` (`save_report_json`, `generate_html_report`) | **ported** |
 | `config.py` | `MIN_BASELINE_DAYS`, `MIN_INTERVENTION_DAYS`, `MIN_DATA_POINTS`, `MAX_SAFE_METRICS` | `experiments/models.py`, `experiments/settings.py:DEFAULTS` | **ported** |
 | `config.py` | `DATABASE_URL` | host database path (`engine/database.py`) | **replaced** |
 | `gui/analysis.py` | `AnalysisWidget.*` | not ported | **GUI only** |
@@ -29,14 +33,16 @@ function in the pinned source (`f2c488695b8c00b224e851cd6aa17eaee4e6960a`) is ma
 
 ## What is actually left
 
-Only the PyQt desktop layer:
+Only **presentation code** remains:
 
-- all widgets/dialogs under `main/gui/`;
+- the PyQt widget/dialog classes under `main/gui/`;
 - `run_gui.py`;
 - the SQLAlchemy `get_db` session generator and `ensure_schema` in-place upgrade, which the host
   replaces with `engine/database.py` and the read-only `migrate_n1` harness.
 
-No non-GUI analysis, data import/export, reporting, settings or model function remains unported.
+The operational logic those widgets contained has been extracted: intervention edit/close/status,
+metric-definition rename/delete, period summarization, JSON report saving and HTML export are host
+functions now. No analysis, data, settings, reporting or model function remains unported.
 
 ## Gaps closed in this audit
 
@@ -44,6 +50,9 @@ No non-GUI analysis, data import/export, reporting, settings or model function r
   `AnalysisEngine` names.
 - Added `SettingsManager` with load/save/get/set and atomic file replacement.
 - Added `DataManager` and `ReportGenerator` compatibility classes for source-style callers.
+- Extracted intervention edit/close/status and metric-definition rename/delete from the GUI.
+- Extracted the daily/weekly summarizer into `experiments/summary.py`.
+- Added JSON report saving alongside HTML export.
 - Added CSV export/import of intervention links, `success` flags, and out-of-range severity
   coercion to `None`.
 - `migrate_n1` now reads legacy N1 databases that lack `projected_end_date` and
@@ -55,7 +64,7 @@ No non-GUI analysis, data import/export, reporting, settings or model function r
 
 ```text
 python -m unittest tests.test_n1_surfaces tests.test_migration_harness -q
-Ran 19 tests in 3.446s
+Ran 23 tests in 2.421s
 OK
 
 python C:\Users\Yunus-Emre\AppData\Local\Temp\n1_inventory.py

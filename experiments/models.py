@@ -411,3 +411,169 @@ def list_events(
     else:
         rows = _rows(conn, "SELECT * FROM experiment_event ORDER BY timestamp, id", ())
     return [EventEntry(**{key: row[key] for key in EventEntry.__dataclass_fields__}) for row in rows]
+
+
+def get_intervention(conn: sqlite3.Connection, ref: str) -> Intervention:
+    row = conn.execute(
+        "SELECT * FROM experiment_intervention WHERE id = ?", (str(ref),)
+    ).fetchone()
+    if row is None:
+        raise NotFound("intervention", ref)
+    return Intervention(**{key: row[key] for key in Intervention.__dataclass_fields__})
+
+
+def get_metric_definition(conn: sqlite3.Connection, ref: str) -> MetricDefinition:
+    row = conn.execute(
+        "SELECT * FROM experiment_metric_definition WHERE id = ?", (str(ref),)
+    ).fetchone()
+    if row is None:
+        raise NotFound("metric definition", ref)
+    return MetricDefinition(**{key: row[key] for key in MetricDefinition.__dataclass_fields__})
+
+
+def update_intervention(
+    conn: sqlite3.Connection,
+    research_ref: str,
+    ref: str,
+    name: str,
+    start_date: str,
+    projected_end_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    dosage: str = "",
+    notes: str = "",
+) -> Intervention:
+    """Replace an intervention's editable fields; the source dialog's edit path."""
+    research = get_research(conn, research_ref)
+    record = get_intervention(conn, ref)
+    if record.research_id != research.id:
+        raise EngineError(
+            "intervention belongs to another research program",
+            "an edit cannot cross a program boundary.",
+            "edit the intervention from the program that owns it.",
+        )
+    name = str(name).strip()
+    if not name:
+        raise EngineError(
+            "intervention name is empty",
+            "an intervention needs a stable name.",
+            "pass the intervention name.",
+        )
+    start = _date(start_date, "start_date")
+    projected = _date(projected_end_date, "projected_end_date") if projected_end_date else None
+    ended = _date(end_date, "end_date") if end_date else None
+    for value, field in ((projected, "projected_end_date"), (ended, "end_date")):
+        if value is not None and value < start:
+            raise EngineError(
+                f"{field} precedes start_date",
+                "an intervention cannot end before it starts.",
+                "correct the dates.",
+            )
+    with transaction(conn):
+        conn.execute(
+            "UPDATE experiment_intervention SET name = ?, start_date = ?,"
+            " projected_end_date = ?, end_date = ?, dosage = ?, notes = ? WHERE id = ?",
+            (
+                name,
+                start,
+                projected,
+                ended,
+                str(dosage).strip(),
+                str(notes).strip(),
+                record.id,
+            ),
+        )
+    return get_intervention(conn, record.id)
+
+
+def close_intervention(
+    conn: sqlite3.Connection, ref: str, end_date: Optional[str] = None
+) -> Intervention:
+    """Close an open intervention, defaulting to today like the source GUI."""
+    record = get_intervention(conn, ref)
+    if record.end_date:
+        raise EngineError(
+            f"intervention already closed on {record.end_date}",
+            "closing twice would hide the real end date.",
+            "edit the intervention if the end date is wrong.",
+        )
+    ended = _date(end_date, "end_date") if end_date else date.today().isoformat()
+    if ended < record.start_date:
+        raise EngineError(
+            "end_date precedes start_date",
+            "an intervention cannot end before it starts.",
+            "pass a later end date.",
+        )
+    with transaction(conn):
+        conn.execute(
+            "UPDATE experiment_intervention SET end_date = ? WHERE id = ?",
+            (ended, record.id),
+        )
+    return get_intervention(conn, record.id)
+
+
+def intervention_status(record: Intervention, today: Optional[str] = None) -> str:
+    """Return the source GUI's display status for one intervention."""
+    current = today or date.today().isoformat()
+    if record.end_date and record.end_date <= current:
+        return f"Ended {record.end_date}"
+    if record.projected_end_date:
+        return f"Ongoing (Projected end: {record.projected_end_date})"
+    return "Ongoing"
+
+
+def update_metric_definition(
+    conn: sqlite3.Connection,
+    research_ref: str,
+    ref: str,
+    name: Optional[str] = None,
+    description: Optional[str] = None,
+    unit: Optional[str] = None,
+) -> MetricDefinition:
+    """Edit a metric definition and rename its existing entries in one transaction."""
+    research = get_research(conn, research_ref)
+    record = get_metric_definition(conn, ref)
+    if record.research_id != research.id:
+        raise EngineError(
+            "metric definition belongs to another research program",
+            "an edit cannot cross a program boundary.",
+            "edit the definition from the program that owns it.",
+        )
+    new_name = str(name).strip() if name is not None else record.name
+    if not new_name:
+        raise EngineError(
+            "metric name is empty",
+            "a metric definition needs a stable name.",
+            "pass the metric name.",
+        )
+    with transaction(conn):
+        try:
+            if new_name != record.name:
+                conn.execute(
+                    "UPDATE experiment_metric SET metric_name = ?"
+                    " WHERE research_id = ? AND metric_name = ?",
+                    (new_name, research.id, record.name),
+                )
+            conn.execute(
+                "UPDATE experiment_metric_definition SET name = ?, description = ?, unit = ?"
+                " WHERE id = ?",
+                (
+                    new_name,
+                    record.description if description is None else str(description).strip(),
+                    record.unit if unit is None else str(unit).strip(),
+                    record.id,
+                ),
+            )
+        except sqlite3.IntegrityError as exc:
+            raise EngineError(
+                f"metric already defined in this program: {new_name}",
+                "one metric name has one definition per program.",
+                "choose a distinct name.",
+            ) from exc
+    return get_metric_definition(conn, record.id)
+
+
+def delete_metric_definition(conn: sqlite3.Connection, ref: str) -> None:
+    """Delete a metric definition; recorded metric entries keep their name."""
+    record = get_metric_definition(conn, ref)
+    with transaction(conn):
+        conn.execute("DELETE FROM experiment_metric_definition WHERE id = ?", (record.id,))

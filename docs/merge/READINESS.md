@@ -13,7 +13,7 @@ deliberate exclusions listed in section 6.**
 | Lifecycle core | host | `engine/` | 577 host tests before merge; schema v14 |
 | Literature adapters | lattice `d3f0502b` | `adapters/lattice/` | 252 ported tests pass |
 | Studio surfaces | lattice `d3f0502b` | `studio/` | web, MCP, API, client tests pass |
-| Experiments | N1 `f2c48869` | `experiments/` | models, analysis, correlation, CSV import/export, HTML report tests pass |
+| Experiments | N1 `f2c48869` | `experiments/` | models, analysis, correlation, settings, CSV, intervention/metric lifecycle, summary and reporting tests pass |
 | Rigor | fluid-universe `7b4efe14` | `domains/fluid_universe/verification/` | fingerprint/compare/claims tests pass |
 | Physics pack | fluid-universe `7b4efe14` | `domains/fluid_universe/{theory,phenomenology,sims}/` | import smoke test passes |
 | Drug-discovery pack | PNN `3b6e6c27` | `domains/pnn/` | 219 ported tests pass |
@@ -44,7 +44,7 @@ Post-merge host gate:
 
 ```text
 python -m unittest discover -s tests -t .
-Ran 1101 tests in 343.636s
+Ran 1105 tests in 228.733s
 OK
 ```
 
@@ -154,8 +154,9 @@ because archive extraction changes the inventory mtimes used by one freshness te
 ## 6. Deliberate exclusions and residual gaps
 
 1. **N1 PyQt GUI is not ported.** Models, metrics, events, analysis, correlation, settings,
-   CSV import/export, HTML reporting, compatibility class names and database migration are
-   ported. The source keeps the GUI runnable.
+   CSV import/export, intervention/metric-definition lifecycle, period summaries, JSON/HTML
+   reporting, compatibility class names and database migration are ported. The source keeps the
+   GUI runnable.
 2. **Atlas real-analysis corpus and uploaded media stay external.** The 4 demo-integrity tests
    and the real-video frame test read the sibling Atlas checkout in place; when that checkout is
    absent they skip. No Atlas media was copied into the host.

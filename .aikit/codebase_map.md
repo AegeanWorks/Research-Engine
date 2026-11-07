@@ -6,11 +6,11 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `407`
+- **Total Python Modules**: `408`
 - **Total Classes**: `300`
-- **Total Top-Level Functions**: `1916`
-- **Total Class Methods**: `1463`
-- **Total Source Lines**: `87462`
+- **Total Top-Level Functions**: `1927`
+- **Total Class Methods**: `1467`
+- **Total Source Lines**: `87904`
 
 ---
 
@@ -4405,7 +4405,7 @@
 ### [`experiments/__init__.py`](experiments/__init__.py)
 > *N1 experiment records and baseline-vs-intervention analysis.*
 
-**Size**: `45` lines (`1005` bytes)
+**Size**: `64` lines (`1603` bytes)
 
 ---
 
@@ -4475,7 +4475,7 @@
 ### [`experiments/models.py`](experiments/models.py)
 > *Experiment records: N1 interventions, metric definitions, measurements and events.*
 
-**Size**: `413` lines (`13219` bytes)
+**Size**: `579` lines (`19640` bytes)
 
 **Classes:**
 - `class Intervention`
@@ -4497,15 +4497,23 @@
 - `def list_metric_definitions(conn, research_ref)`
 - `def list_metrics(conn, research_ref, metric_name, intervention_ref)`
 - `def list_events(conn, research_ref)`
+- `def get_intervention(conn, ref)`
+- `def get_metric_definition(conn, ref)`
+- `def update_intervention(conn, research_ref, ref, name, start_date, projected_end_date, end_date, dosage, notes)` - *Replace an intervention's editable fields; the source dialog's edit path.*
+- `def close_intervention(conn, ref, end_date)` - *Close an open intervention, defaulting to today like the source GUI.*
+- `def intervention_status(record, today)` - *Return the source GUI's display status for one intervention.*
+- `def update_metric_definition(conn, research_ref, ref, name, description, unit)` - *Edit a metric definition and rename its existing entries in one transaction.*
+- `def delete_metric_definition(conn, ref)` - *Delete a metric definition; recorded metric entries keep their name.*
 
 ---
 
 ### [`experiments/reporting.py`](experiments/reporting.py)
 > *HTML report generation for N1 baseline-vs-intervention results.*
 
-**Size**: `90` lines (`3907` bytes)
+**Size**: `102` lines (`4310` bytes)
 
 **Functions:**
+- `def save_report_json(results, filepath)` - *Save the raw analysis result as JSON, matching the source save_report action.*
 - `def _number(value, digits)`
 - `def generate_html_report(results, filepath, intervention_name, metric_name)` - *Write the source-style HTML report and return whether it was written.*
 
@@ -4523,6 +4531,18 @@
   - Method `.save_settings()`
   - Method `.get(key, default)`
   - Method `.set(key, value)`
+
+---
+
+### [`experiments/summary.py`](experiments/summary.py)
+> *Daily/weekly N1 summary, extracted from the source SummarizerWidget.*
+
+**Size**: `161` lines (`5546` bytes)
+
+**Functions:**
+- `def _date(value, field)`
+- `def summarize_period(conn, research_ref, start_date, end_date, intervention_ref)` - *Collect interventions, metrics and events for a date range or one intervention.*
+- `def render_summary_html(summary)` - *Format a summary the way the source widget displayed it, with escaping.*
 
 ---
 
@@ -7059,7 +7079,7 @@
 ### [`tests/test_n1_surfaces.py`](tests/test_n1_surfaces.py)
 > *N1 surfaces that were missing after the first merge: correlation, CSV, report.*
 
-**Size**: `192` lines (`8790` bytes)
+**Size**: `276` lines (`12186` bytes)
 
 **Classes:**
 - `class ExperimentSurfaceTests`
@@ -7072,6 +7092,10 @@
   - Method `.test_all_bad_rows_report_failure()`
   - Method `.test_settings_round_trip_and_custom_minimum()`
   - Method `.test_compatibility_names_cover_trend_bootstrap_and_data_manager()`
+  - Method `.test_intervention_edit_close_and_status()`
+  - Method `.test_metric_definition_rename_updates_entries_and_delete()`
+  - Method `.test_summary_period_and_html()`
+  - Method `.test_report_json_save()`
   - Method `.test_html_report_writes_escape_safe_summary()`
 
 ---

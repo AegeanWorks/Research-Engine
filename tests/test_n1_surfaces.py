@@ -16,9 +16,24 @@ from experiments.analysis import (
 from experiments.compat import AnalysisEngine, DataManager, ReportGenerator
 from experiments.exporter import export_csv
 from experiments.importer import import_csv, import_events_csv, import_interventions_csv
-from experiments.models import add_intervention, add_metric, list_events, list_interventions, list_metrics
-from experiments.reporting import generate_html_report
+from experiments.models import (
+    add_event,
+    add_intervention,
+    add_metric,
+    add_metric_definition,
+    close_intervention,
+    delete_metric_definition,
+    get_metric_definition,
+    intervention_status,
+    list_events,
+    list_interventions,
+    list_metrics,
+    update_intervention,
+    update_metric_definition,
+)
+from experiments.reporting import generate_html_report, save_report_json
 from experiments.settings import SettingsManager
+from experiments.summary import render_summary_html, summarize_period
 from tests.support import DatabaseCase
 
 
@@ -172,6 +187,75 @@ class ExperimentSurfaceTests(DatabaseCase):
             "I",
             "M",
         ))
+
+    def test_intervention_edit_close_and_status(self) -> None:
+        research = self.add_research()
+        intervention = add_intervention(self.conn, research, "Run-in", "2026-01-01")
+        updated = update_intervention(
+            self.conn,
+            research,
+            intervention.id,
+            "Sleep extension",
+            "2026-01-02",
+            projected_end_date="2026-02-01",
+            notes="edited",
+        )
+        self.assertEqual(updated.name, "Sleep extension")
+        self.assertEqual(intervention_status(updated, today="2026-01-15"),
+                         "Ongoing (Projected end: 2026-02-01)")
+        closed = close_intervention(self.conn, updated.id, end_date="2026-01-20")
+        self.assertEqual(closed.end_date, "2026-01-20")
+        self.assertEqual(intervention_status(closed, today="2026-01-21"),
+                         "Ended 2026-01-20")
+        with self.assertRaises(EngineError):
+            close_intervention(self.conn, closed.id)
+
+    def test_metric_definition_rename_updates_entries_and_delete(self) -> None:
+        research = self.add_research()
+        definition = add_metric_definition(self.conn, research, "weight", unit="kg")
+        add_metric(self.conn, research, "weight", "2026-01-02", 81.5)
+        renamed = update_metric_definition(
+            self.conn, research, definition.id, name="body mass", unit="kg"
+        )
+        self.assertEqual(renamed.name, "body mass")
+        self.assertEqual(list_metrics(self.conn, research)[0].metric_name, "body mass")
+        delete_metric_definition(self.conn, definition.id)
+        with self.assertRaises(Exception):
+            get_metric_definition(self.conn, definition.id)
+
+    def test_summary_period_and_html(self) -> None:
+        research = self.add_research()
+        intervention = add_intervention(self.conn, research, "Sleep", "2026-01-01")
+        add_metric(self.conn, research, "weight", "2026-01-02", 81.5,
+                   intervention_ref=intervention.id)
+        add_metric(self.conn, research, "weight", "2026-02-01", 79.0,
+                   intervention_ref=intervention.id)
+        add_event(
+            self.conn,
+            research,
+            "headache",
+            "2026-01-02T10:00:00+00:00",
+            severity=2,
+            intervention_ref=intervention.id,
+        )
+        summary = summarize_period(
+            self.conn,
+            research,
+            "2026-01-01",
+            "2026-01-31",
+            intervention_ref=intervention.id,
+        )
+        self.assertEqual(summary["intervention_name"], "Sleep")
+        self.assertEqual(len(summary["metrics"]), 2)
+        self.assertEqual(len(summary["events"]), 1)
+        text = render_summary_html(summary)
+        self.assertIn("Summary for Intervention: Sleep", text)
+        self.assertIn("headache", text)
+
+    def test_report_json_save(self) -> None:
+        output = self.directory / "result.json"
+        self.assertTrue(save_report_json({"a": 1, "when": "2026-01-01"}, output))
+        self.assertIn('"a": 1', output.read_text(encoding="utf-8"))
 
     def test_html_report_writes_escape_safe_summary(self) -> None:
         research = self.add_research()

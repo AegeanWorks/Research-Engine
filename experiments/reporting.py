@@ -3,8 +3,20 @@
 from __future__ import annotations
 
 import html as html_lib
+import json
 from pathlib import Path
 from typing import Any, Dict
+
+
+def save_report_json(results: Dict[str, Any], filepath: str | Path) -> bool:
+    """Save the raw analysis result as JSON, matching the source save_report action."""
+    target = Path(filepath)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(
+        json.dumps(results, indent=4, default=str, ensure_ascii=False),
+        encoding="utf-8",
+    )
+    return True
 
 
 def _number(value, digits: int = 2) -> str:

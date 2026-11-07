@@ -12,7 +12,7 @@ the host destination by module and by basename where the host adds a package lev
 | PNN | 26 | 171 | 26 | 171 | 0 |
 | Atlas | 19 | 94 | 21 | 97 | 0 |
 | fluid-universe | 133 | 681 | 134 | 690 | 0 after basename matching |
-| N1-Engine | 16 (incl. GUI) | 26 | 7 (experiments) | 30 | GUI only |
+| N1-Engine | 16 (incl. GUI) | 26 | 8 (experiments) | 40 | GUI only |
 | obezite `08_ARACLAR` | 9 | 50 | 9 | 50 | 0 after renaming/re-rooting |
 
 The first raw comparison showed false gaps where the host adds a directory level
@@ -34,6 +34,10 @@ The source exposed these reusable functions that the host did not yet have:
 | `ReportGenerator.generate_html_report` | `experiments/reporting.py:generate_html_report` | implemented |
 | `SettingsManager.load/save/get/set` | `experiments/settings.py:SettingsManager` | implemented |
 | `AnalysisEngine` / `DataManager` / `ReportGenerator` class names | `experiments/compat.py` | implemented |
+| GUI intervention edit/close/status | `experiments/models.py` (`update_intervention`, `close_intervention`, `intervention_status`) | implemented |
+| GUI metric-definition rename/delete | `experiments/models.py` (`update_metric_definition`, `delete_metric_definition`) | implemented |
+| GUI summarizer | `experiments/summary.py` | implemented |
+| GUI JSON report save | `experiments/reporting.py:save_report_json` | implemented |
 | legacy N1 schema without link columns | `engine/migrations.py:migrate_n1` | implemented |
 
 Tests: `tests/test_n1_surfaces.py` and `tests/test_migration_harness.py`. The complete
@@ -57,8 +61,8 @@ module-by-module archive decision is in `N1-COMPLETENESS.md`.
 python C:\Users\Yunus-Emre\AppData\Local\Temp\refined_gap.py
 fluid: 133 source modules, 134 host modules, 0 missing names
 N1 source: AnalysisEngine, DataManager, ReportGenerator, models, SettingsManager
-N1 host: analysis.py (5), importer.py (4), exporter.py (4), reporting.py (1),
-         settings.py (1), compat.py (3), models.py (12)
+N1 host: analysis.py (5), importer.py (4), exporter.py (4), reporting.py (2),
+         settings.py (1), compat.py (3), summary.py (2), models.py (19)
 obezite: 9 tool files in 08_ARACLAR; 137 one-off scripts in 07_ANALIZ; 3 in 06_MAKALELER
 
 python -m unittest tests.test_n1_surfaces -v

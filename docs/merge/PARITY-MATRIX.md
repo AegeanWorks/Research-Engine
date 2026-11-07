@@ -48,8 +48,12 @@ Status on 2026-11-07: all rows below are `ported` unless the status column says 
 | N-13 | HTML analysis report | `experiments/reporting.py:generate_html_report` | reimplement | ported | `tests/test_n1_surfaces.py` |
 | N-14 | Analysis settings manager | `experiments/settings.py:SettingsManager` | reimplement | ported | `tests/test_n1_surfaces.py` |
 | N-15 | Source-compatible class names (`AnalysisEngine`, `DataManager`, `ReportGenerator`) | `experiments/compat.py` | reimplement | ported | `tests/test_n1_surfaces.py` |
-| N-16 | PyQt desktop GUI | not ported | surface not ported | deliberate | source suite stays green; host is CLI/API/MCP |
-| N-17 | SQLAlchemy/PyQt dependency footprint | not copied | dependency boundary | deliberate | host import scan has neither |
+| N-16 | Intervention edit, close and status display | `experiments/models.py` (`update_intervention`, `close_intervention`, `intervention_status`) | reimplement | ported | `tests/test_n1_surfaces.py` |
+| N-17 | Metric-definition rename and delete, including entry rename | `experiments/models.py` (`update_metric_definition`, `delete_metric_definition`) | reimplement | ported | `tests/test_n1_surfaces.py` |
+| N-18 | Period/intervention summary and HTML rendering | `experiments/summary.py` | reimplement | ported | `tests/test_n1_surfaces.py` |
+| N-19 | JSON report save | `experiments/reporting.py:save_report_json` | reimplement | ported | `tests/test_n1_surfaces.py` |
+| N-20 | PyQt desktop GUI | not ported | surface not ported | deliberate | source suite stays green; host is CLI/API/MCP |
+| N-21 | SQLAlchemy/PyQt dependency footprint | not copied | dependency boundary | deliberate | host import scan has neither |
 
 ## fluid-universe (M2 rigor, M4 pack)
 
