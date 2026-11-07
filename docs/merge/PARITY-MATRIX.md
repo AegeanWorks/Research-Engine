@@ -51,7 +51,7 @@ Status on 2026-11-07: all rows below are `ported` unless the status column says 
 
 | ID | Capability | Host destination | Mode | Status | Acceptance gate |
 |---|---|---|---|---|---|
-| F-01 | Two-run audit | `domains/fluid_universe/verification/audit.py` | copy | ported | `tests/test_fluid_rigor.py` (compare contract) |
+| F-01 | Two-run audit | `domains/fluid_universe/verification/audit.py` | copy | ported | `tests/test_fluid_rigor.py`, `tests/test_fluid_audit.py` |
 | F-02 | Source/results fingerprints | `domains/fluid_universe/verification/fingerprint.py` | copy | ported | `tests/test_fluid_rigor.py` |
 | F-03 | Compare, stale-run refusal | `domains/fluid_universe/verification/compare.py` | copy | ported | `tests/test_fluid_rigor.py` |
 | F-04 | Claims and scorecard compatibility | `domains/fluid_universe/claims.py` | reimplement parser | ported | `tests/test_fluid_rigor.py` |
@@ -101,7 +101,7 @@ Status on 2026-11-07: all rows below are `ported` unless the status column says 
 | A-07 | Offline extractive fallback | `domains/atlas/offline.py` | copy | ported | `tests/atlas/test_offline_fallback.py`; `tests/test_atlas_pack.py` |
 | A-08 | Standalone app/API and CLI | `domains/atlas/app.py`, `cli.py` | copy inside pack | ported | `tests/atlas/test_contract.py`, `test_cli_video.py` |
 | A-09 | AL-1.1 notice and schema id | `domains/atlas/NOTICE.md`, schema id preserved | preserve | ported | notice file; `tests/atlas/test_contract.py` |
-| A-10 | Uploaded media and real-analysis corpus | external `data/`, `demo/real_analyses/` | reference + SHA-256 | external | skipped Atlas demo tests; `docs/merge/MIGRATION-DRYRUN.md` |
+| A-10 | Uploaded media and real-analysis corpus | external `data/`, `demo/real_analyses/` | reference + SHA-256 | external | Atlas tests read the sibling checkout in place; `docs/merge/MIGRATION-DRYRUN.md` |
 
 ## Host-wide contracts
 

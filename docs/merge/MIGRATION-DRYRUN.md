@@ -77,6 +77,30 @@ The inspection reports v14-only tables as 0 because they do not exist in the v11
 migration was applied to the user's database; the v14 migration is exercised by the fixture
 tests and the temporary target in section 2.
 
+## 3a. Migration of a copy of the existing database
+
+```text
+copy research.db -> temp/research_copy.db
+python -c "from engine.database import connect, initialize; ... initialize(conn)"
+```
+
+```json
+{
+  "report": {"migrated_from": 11, "migrated_to": 14, "unbound_numeric_claims": 1},
+  "version": 14,
+  "before": {"research": 5, "source": 5, "question": 5, "claim": 25,
+             "hypothesis": 5, "killtest": 5, "test_run": 18, "verdict": 15, "event": 2},
+  "after":  {"research": 5, "source": 5, "question": 5, "claim": 25,
+             "hypothesis": 5, "killtest": 5, "test_run": 18, "verdict": 15, "event": 3},
+  "new_tables": ["experiment_intervention", "experiment_metric_definition",
+                 "experiment_metric", "experiment_event", "domain_pack", "migration_run"]
+}
+```
+
+Every existing row is preserved. The event count rises by one because `initialize` appends its
+own `db.migrate` ledger event; that is the documented migration record, not data loss. The
+original `research.db` is untouched.
+
 ## 4. Golden apply on fixtures
 
 `tests/test_migration_harness.py::test_golden_both_sources_share_one_program` applies a

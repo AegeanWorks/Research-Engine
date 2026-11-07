@@ -21,8 +21,8 @@ SHA, license and modifications.
 - fluid `results/`, `verification_*.json`: referenced by SHA-256; no copy.
 - PNN `output/`, `tmp_out/`: referenced; only the small `data/` CSV fixtures are copied.
 - obezite 6.1 GB corpus and `09_SENTEZ/`: referenced; only the tooling is copied.
-- Atlas uploaded media and `demo/real_analyses/`: referenced; demo corpus tests are skipped
-  when the external folder is absent.
+- Atlas uploaded media and `demo/real_analyses/`: referenced; the host tests read the sibling
+  checkout in place and skip only when it is absent.
 
 ## Test provenance
 
@@ -31,8 +31,9 @@ SHA, license and modifications.
   the source workspace); 219 tests pass.
 - fluid: the source suite stays in place (403 tests); the host adds 9 contract tests for
   fingerprint/compare/claims.
-- Atlas: all 31 source test modules copied to `tests/atlas/`; 148 pass, 5 are skipped because
-  the real-analysis corpus stays external; a 4-test unittest contract covers the canonical gate.
+- Atlas: all 31 source test modules copied to `tests/atlas/`; 153 pass against the external
+  real-analysis corpus and demo videos, with 0 skips; a 4-test unittest contract covers the
+  canonical gate.
 - N1: PyQt GUI tests stay in the source; host contracts cover models, analysis and migration.
 - obezite: source data-dependent projections stay in the source; host contracts use a small
   synthetic ledger fixture.

@@ -18,7 +18,7 @@ deliberate exclusions listed in section 6.**
 | Physics pack | fluid-universe `7b4efe14` | `domains/fluid_universe/{theory,phenomenology,sims}/` | import smoke test passes |
 | Drug-discovery pack | PNN `3b6e6c27` | `domains/pnn/` | 219 ported tests pass |
 | Claim-ledger pack | obezite `18b5d4d8` | `domains/obezite/` | 7 host contract tests pass |
-| Learning pack | Atlas `f3cd7470` | `domains/atlas/` | 148 ported pytest tests pass, 5 skipped |
+| Learning pack | Atlas `f3cd7470` | `domains/atlas/` | 153 ported pytest tests pass, 0 skipped |
 
 The source repositories were never stopped, finished, archived, deleted, moved, tagged or
 modified. Their pins are in `SOURCE-INVENTORY.md`; copied files and modifications are listed in
@@ -42,7 +42,7 @@ Post-merge host gate:
 
 ```text
 python -m unittest discover -s tests -t .
-Ran 1086 tests in 162.360s
+Ran 1091 tests in 505.844s
 OK
 ```
 
@@ -50,11 +50,11 @@ Post-merge Atlas pack gate (pytest tier, because Atlas tests are pytest function
 
 ```text
 python -m pytest tests/atlas -q
-148 passed, 5 skipped, 1 warning in 20.37s
+153 passed, 1 warning in 28.23s
 ```
 
-The 5 skips are the external `demo/real_analyses` corpus; the pack still validates on the
-committed small fixture and the source corpus is referenced by digest.
+The 1 warning is a Pillow deprecation in a test helper. The external `demo/real_analyses` corpus
+and two demo videos are read in place, so no data was copied into the host.
 
 Post-merge source re-checks (sources untouched):
 
@@ -95,6 +95,10 @@ root: dedup found 0 duplicates, the claim index covered 995 claims, backfill wro
 rows, the collapse audit reported `TEMIZ`, the range split produced 500/97 claim chunks, and the
 quarantine split produced 2,396 active / 584 quarantined lines. No source file was written.
 
+A copy of the existing `research.db` was migrated v11 -> v14 in a temporary directory: all
+existing rows were preserved, the new v14 tables were created, and the only row delta was the
+expected `db.migrate` event (+1). The original database was not modified.
+
 ## 4. Exact host verification
 
 ```text
@@ -122,6 +126,10 @@ evidence matrix), MCP `initialize`, `tools/list`, `resources/list`, `prompts/lis
 `resources/read`, graph writes/reads and synthesis calls. It is a contract test, not a claim
 that the NeuroCore application itself was run.
 
+`tests/test_fluid_audit.py` exercises the copied audit primitives (circulant matrix, analytic
+roots, inverse fit and the Koide identity), so the audit module is not merely present.
+`tests/test_license_notices.py` proves every ported package carries its source SHA and notice.
+
 ## 5. Source integrity
 
 At final capture:
@@ -145,8 +153,9 @@ because archive extraction changes the inventory mtimes used by one freshness te
 
 1. **N1 PyQt GUI is not ported.** Models, metrics, events, analysis, CSV import and database
    migration are ported. The source keeps the GUI runnable.
-2. **Atlas real-analysis corpus and uploaded media stay external.** 5 pytest tests that require
-   `demo/real_analyses` skip in the host; the source still runs all 152.
+2. **Atlas real-analysis corpus and uploaded media stay external.** The 4 demo-integrity tests
+   and the real-video frame test read the sibling Atlas checkout in place; when that checkout is
+   absent they skip. No Atlas media was copied into the host.
 3. **obezite's canonical corpus and generated tables stay external.** The host contracts use a
    small synthetic ledger fixture. The source advanced during the merge and its current HEAD
    (`6776125…`) passes 10/10; the host pin remains `18b5d4d8…`.

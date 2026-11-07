@@ -13,11 +13,15 @@ import pytest
 
 from domains.atlas.schema import VisualAnalysis
 
-DEMO = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "domains", "atlas", "demo", "real_analyses")
+DEMO_CANDIDATES = (
+    os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "domains", "atlas", "demo", "real_analyses"),
+    os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "..", "Atlas", "demo", "real_analyses"),
+)
+DEMO = next((path for path in DEMO_CANDIDATES if os.path.isdir(path)), DEMO_CANDIDATES[0])
 
 pytestmark = pytest.mark.skipif(
     not os.path.isdir(DEMO),
-    reason="source demo corpus stays external",
+    reason="external source demo corpus is absent",
 )
 
 
@@ -34,7 +38,7 @@ def test_all_committed_analyses_validate():
         with open(path, encoding="utf-8") as fh:
             raw = json.load(fh)
         assert VisualAnalysis.from_dict(raw).validate() == []
-        assert raw["analysis_version"].startswith("domains.atlas.visual-knowledge/")
+        assert raw["analysis_version"].startswith("atlas.visual-knowledge/")
 
 
 def test_tsvs_are_anki_shaped():

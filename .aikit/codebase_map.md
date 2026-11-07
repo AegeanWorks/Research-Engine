@@ -6,11 +6,11 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `400`
-- **Total Classes**: `293`
+- **Total Python Modules**: `402`
+- **Total Classes**: `295`
 - **Total Top-Level Functions**: `1900`
-- **Total Class Methods**: `1438`
-- **Total Source Lines**: `86615`
+- **Total Class Methods**: `1443`
+- **Total Source Lines**: `86689`
 
 ---
 
@@ -4712,7 +4712,7 @@
 ### [`tests/atlas/test_demo_integrity.py`](tests/atlas/test_demo_integrity.py)
 > *Demo-data integrity: every committed real analysis and artifact stays valid.*
 
-**Size**: `65` lines (`2436` bytes)
+**Size**: `69` lines (`2679` bytes)
 
 **Functions:**
 - `def _load(name)`
@@ -4726,7 +4726,7 @@
 ### [`tests/atlas/test_frames.py`](tests/atlas/test_frames.py)
 > *Frame quality: blank cards, duplicates, sharpness (my own viewing, automated).*
 
-**Size**: `75` lines (`2852` bytes)
+**Size**: `77` lines (`3005` bytes)
 
 **Functions:**
 - `def _img(path, color, size, noise)`
@@ -6562,6 +6562,19 @@
 
 ---
 
+### [`tests/test_fluid_audit.py`](tests/test_fluid_audit.py)
+> *Fluid-universe audit primitives stay callable after the port.*
+
+**Size**: `36` lines (`1374` bytes)
+
+**Classes:**
+- `class FluidAuditPrimitiveTests`
+  - Method `.test_circulant_is_hermitian_and_has_the_analytic_roots()`
+  - Method `.test_koide_identity_and_inverse_fit()`
+  - Method `.test_mass_definition_matches_the_square_root_convention()`
+
+---
+
 ### [`tests/test_fluid_rigor.py`](tests/test_fluid_rigor.py)
 > *Fluid-universe rigor contracts: fingerprints, two-run compare and claim statuses.*
 
@@ -6724,6 +6737,18 @@
   - Method `.test_editing_timeout_invalidates_the_binding()`
   - Method `.test_changing_a_declared_input_invalidates_the_binding()`
   - Method `.test_run_records_the_binding_and_git_state()`
+
+---
+
+### [`tests/test_license_notices.py`](tests/test_license_notices.py)
+> *Ported packages keep their source notice, SHA and license text.*
+
+**Size**: `32` lines (`1416` bytes)
+
+**Classes:**
+- `class LicenseNoticeTests`
+  - Method `.test_every_ported_package_has_a_notice_with_its_pin()`
+  - Method `.test_al_and_asl_license_texts_are_present()`
 
 ---
 
