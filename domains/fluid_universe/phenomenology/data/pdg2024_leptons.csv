@@ -1,0 +1,4 @@
+name,value_MeV,uncertainty_MeV,definition,source
+m_e,0.51099895000,0.00000000015,pole,PDG 2024 S. Navas et al. PRD 110 030001; https://pdg.lbl.gov/2024/tables/rpp2024-sum-leptons.pdf
+m_mu,105.6583755,0.0000023,pole,PDG 2024 S. Navas et al. PRD 110 030001; https://pdg.lbl.gov/2024/tables/rpp2024-sum-leptons.pdf
+m_tau,1776.93,0.09,pole,PDG 2024 S. Navas et al. PRD 110 030001; https://pdg.lbl.gov/2024/tables/rpp2024-sum-leptons.pdf

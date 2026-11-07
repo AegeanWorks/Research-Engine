@@ -813,3 +813,85 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   flag (`--since` vs `--until`).
 - **Consequences**: Correct cross-timezone windows; invalid batch flags exit loudly;
   no schema or default-output change.
+
+### ADR-056: Merge six research projects into one host without forking them
+- **Date**: 2026-11-07
+- **Status**: Accepted
+- **Context**: lattice, N1-Engine, fluid-universe, PNN, obezite-mekanizma-projesi and
+  Atlas each hold research mechanics that the lifecycle host lacks, while the host
+  already owns programs, sources, claims, hypotheses, kill tests, verdicts,
+  observations, reports and audit. Forking or moving the sources would freeze six
+  running projects and lose their history. The host is ASL-1.1; the sources are
+  AL-1.1 or ASL-1.1 and all name the same licensor.
+- **Decision**: Grow this repository in place as the host and copy committed source
+  code into five explicit layers: `engine/` (stdlib-only lifecycle), `adapters/`
+  (lattice discovery, ingest, extraction, analysis, synthesis, inquiry, meta and
+  snapshots), `studio/` (lattice web, MCP, API and CLI surfaces), `experiments/`
+  (N1 models, analysis, importer) and `domains/` (isolated PNN, fluid_universe,
+  obezite and atlas packs). Packs use only the public engine API and may not import
+  another domain. External data (obezite corpus, PNN outputs, fluid results, Atlas
+  media, source databases) stays outside the host and is referenced by path plus
+  digest. Every source stays runnable; only committed `HEAD` is copied, pinned in
+  `docs/merge/SOURCE-INVENTORY.md`, and every copied file keeps its notice.
+- **Consequences**: One lifecycle graph can cite domain evidence without importing
+  domain data; the four domain packs remain independently removable. The host keeps
+  its standard-library-only core, while a pack's optional scientific dependencies are
+  declared and confined to that pack. N1's PyQt GUI is the only deliberately
+  unported surface. The source repositories are read-only inputs whose SHAs and
+  suites are re-checked after the merge. Rollback is the pre-merge branch point
+  `563f27a` on `master`.
+
+### ADR-057: Schema 14 carries portable papers, experiments and pack boundaries
+- **Date**: 2026-11-07
+- **Status**: Accepted
+- **Context**: The merge must absorb lattice paper metadata, N1 experiment
+  records and isolated domain packs without forcing source databases into the
+  host. Existing graph columns cannot model paper venue/arXiv/tags, repeated
+  intervention metrics, or a pack's external data root.
+- **Decision**: Raise the host schema to 14. Add `source.arxiv`, `venue`,
+  `abstract`, `tags`, `study_type`; add `experiment_intervention`,
+  `experiment_metric_definition`, `experiment_metric` and `experiment_event`;
+  add `domain_pack` and `migration_run`. Inspect a source database read-only,
+  hash the file, then apply rows in one transaction and record
+  `(source, source_digest)` once. Source data stays external.
+- **Consequences**: A lattice or N1 snapshot imports without modifying its
+  origin; a repeated snapshot is refused; packs declare a version, API version,
+  data root and manifest digest instead of importing another domain. Migration
+  drops lattice edge kinds the host ontology cannot express and reports the
+  count, rather than inventing a relation.
+
+### ADR-058: Ported packages keep their source namespaces and external roots
+- **Date**: 2026-11-07
+- **Status**: Accepted
+- **Context**: M2-M4 copied the lattice modules, the PNN pipeline, the
+  fluid-universe verification and physics packages, the obezite ledger tools
+  and the Atlas pack. Importing them as flat host modules would collide with
+  the host's own `models`, `analysis` and `web` names; copying their data would
+  freeze six running projects.
+- **Decision**: Use `adapters.lattice`, `studio`, `experiments`, `domains.pnn`,
+  `domains.fluid_universe`, `domains.obezite` and `domains.atlas`. Rewrite only
+  import paths and root resolution. Sources of truth stay external: fluid
+  `results/`, PNN `output/`, the obezite ledger/corpus and Atlas uploaded media
+  are referenced by path and digest. Each pack carries a `NOTICE.md` naming the
+  source SHA, license and modifications. `tests/test_domain_isolation.py`
+  fails on a cross-pack, adapter, studio or experiment import.
+- **Consequences**: 1,060+ host unittest contracts and 148 Atlas pytest
+  contracts run against the copied code. The only unported surface remains
+  N1's PyQt GUI; N1 models, analysis, CSV import and database migration are
+  ported. Packs remain independently removable.
+
+
+### ADR-059: Port gauge series and terminal chart primitives
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: The 50-project scan found one reusable primitive missing from the
+  lifecycle host: gauge's numeric series parsing, summaries, percentiles,
+  histograms, box plots and terminal charts. The host has statistical tests but
+  no compact display primitives for reports and experiment summaries.
+- **Decision**: Copy gauge's series.py and 
+ender.py into engine/series.py
+  and engine/charts.py, preserving the source contracts and tests. Keep gauge
+  active; store its SHA and notice in engine/NOTICE-gauge.md.
+- **Consequences**: Reports and experiment summaries can use one stdlib-only
+  series vocabulary. No third-party dependency is added. Other scanned projects
+  (games, compilers, chains, model harnesses) are not lifted into the core.

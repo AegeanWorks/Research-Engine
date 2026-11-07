@@ -19,6 +19,25 @@ demo.py              (composes every write path for the golden path)
 No domain module imports `cli.py`; `integrity.py` and `synthesis.py` are read-only over the graph.
 `cascade.py` is the only writer that composes other writers, and it does so inside one transaction.
 
+## Merged Layers
+
+The lifecycle core is unchanged; the M3/M4 merge adds four sibling layers around it:
+
+```text
+adapters/lattice/     discovery, ingest, extraction, snapshots, analysis, inquiry, meta
+studio/               web studio, MCP server, HTTP API and Python client
+experiments/          N1 interventions, metric definitions, metrics, events and analysis
+domains/pnn/          PNN pipeline, screening, docking, assay, PK/PD, SAR and studio
+domains/fluid_universe/ verification audit, fingerprints, theory, phenomenology and sims
+domains/obezite/      claim-ledger parsing, chunking, projections and citation tools
+domains/atlas/        multimodal ingestion, graph store, materials, study pack and quality
+```
+
+`engine/` never imports a pack or a surface. Packs may import the public `engine.*` modules but
+never another pack; `tests/test_domain_isolation.py` enforces both directions. Every pack's data
+root is external and every copied file carries a `NOTICE.md` with its source SHA and license.
+
+
 ## Storage
 
 SQLite with WAL, `synchronous=FULL` and `foreign_keys=ON`. The connection runs in autocommit mode
@@ -187,7 +206,12 @@ adds the event sequence and causal links; version 10 adds the observation proven
 producer identity. Version 11 adds the `ai_artifact` table; existing graphs simply have
 no AI rows. Existing run groups are not backfilled and remain on the legacy path until they
 are re-run; existing claims are revision heads with empty links; existing observations are
-unclassified legacy rows and warn `OBS-002`/`OBS-003`; existing events keep `seq` 0 and no root. Each version step is separate, so
+unclassified legacy rows and warn `OBS-002`/`OBS-003`; existing events keep `seq` 0 and no root.
+Version 12 adds the `analysis_plan` and `amendment` tables; version 13 records observation
+provenance classes; version 14 adds the lattice paper metadata columns on `source`, the N1
+experiment tables (`experiment_intervention`, `experiment_metric_definition`,
+`experiment_metric`, `experiment_event`), the `domain_pack` registry and the `migration_run`
+ledger. Each version step is separate, so
 a version-1 database passes through the version-2 step and then the version-3 step. A version
 newer than the build is refused without modification, and the migration preserves existing rows,
 including legacy runs whose binding columns are empty.

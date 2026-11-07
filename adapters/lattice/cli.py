@@ -1,0 +1,863 @@
+"""Command-line interface: ingest, assert, link, ask, brief, review, check and serve MCP."""
+
+import argparse
+import json
+import sys
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Sequence
+
+from adapters.lattice.analysis import (
+    build_evidence_matrix,
+    detect_contradictions,
+    find_path,
+    find_related_findings,
+    link_related_findings,
+    propose_hypotheses,
+    rank_influential_entities,
+    related_findings,
+)
+from adapters.lattice.checks import run_checks
+from adapters.lattice.context import (
+    build_context_pack,
+    compact_related,
+    compact_search,
+    compact_subgraph,
+    outline,
+)
+from adapters.lattice.database import SCHEMA_VERSION, open_database
+from adapters.lattice.diff import diff_snapshot, diff_snapshots
+from adapters.lattice.discovery import DiscoveryService
+from adapters.lattice.errors import LatticeError, fail
+from adapters.lattice.extraction import extract_all, extract_from_paper
+from adapters.lattice.ingest import parse_paths
+from adapters.lattice.inquiry import ask, brief, review
+from studio.mcp import serve
+from adapters.lattice.repository import Repository
+from adapters.lattice.screening import (
+    SCREENING_STATUSES,
+    compute_prisma_flow,
+    get_screening_decision,
+    record_screening_decision,
+    render_prisma_markdown,
+    render_prisma_svg,
+)
+from adapters.lattice.snapshots import (
+    export_bibtex_file,
+    export_cytoscape_file,
+    export_graphml_file,
+    export_snapshot,
+    import_snapshot,
+)
+from adapters.lattice.synthesis import synthesize
+from studio.web import dispatch_web_request, serve_web
+
+DEFAULT_DB = "lattice.db"
+
+
+def build_parser() -> argparse.ArgumentParser:
+    """The complete command grammar."""
+    parser = argparse.ArgumentParser(
+        prog="lattice",
+        description="A provenance-first research knowledge graph for humans and AI agents.",
+    )
+    parser.add_argument("--db", default=DEFAULT_DB,
+                        help=f"SQLite database file (default: {DEFAULT_DB})")
+    parser.add_argument("--json", action="store_true", help="print machine-readable JSON")
+    commands = parser.add_subparsers(dest="command", required=True)
+
+    init = commands.add_parser("init", help="create the database and report its schema")
+    init.set_defaults(handler=_run_init)
+
+    ingest = commands.add_parser("ingest", help="import BibTeX, RIS, CSV, Markdown or text")
+    ingest.add_argument("paths", nargs="+", help="one or more files to ingest")
+    ingest.set_defaults(handler=_run_ingest)
+
+    fetch = commands.add_parser(
+        "fetch",
+        help="discover papers from offline, arxiv, crossref, openalex, europepmc, or comma-separated list",
+    )
+    fetch.add_argument("query", help="scientific search query")
+    fetch.add_argument(
+        "--source",
+        default="offline",
+        help="offline, arxiv, crossref, openalex, europepmc, or comma-separated list",
+    )
+    fetch.add_argument("--limit", type=int, default=10, help="maximum candidate papers")
+    fetch.add_argument("--no-ingest", action="store_true", help="preview without storing")
+    fetch.set_defaults(handler=_run_fetch)
+
+    extract = commands.add_parser("extract", help="extract quote-backed claims from papers")
+    extract.add_argument("paper", nargs="?", default=None, help="paper reference or bare p_ id")
+    extract.add_argument("--all", action="store_true", dest="extract_all",
+                         help="extract across every ingested paper")
+    extract.add_argument("--question", default=None, help="question reference to link claims to")
+    extract.set_defaults(handler=_run_extract)
+
+    claim = commands.add_parser("claim", help="record a claim with its source quote")
+    claim.add_argument("--paper", required=True, help="paper reference or bare p_ id")
+    claim.add_argument("--text", required=True, help="the asserted claim")
+    claim.add_argument("--quote", required=True, help="exact sentence from the source")
+    claim.add_argument("--locator", required=True, help="page, section or paragraph (e.g. abstract:s1)")
+    claim.add_argument("--stance", default="mentions", help="supports, contradicts or mentions")
+    claim.add_argument("--confidence", type=float, default=0.5, help="weight in [0, 1]")
+    claim.set_defaults(handler=_run_claim)
+
+    question = commands.add_parser("question", help="record a research question")
+    question.add_argument("text", help="the question")
+    question.set_defaults(handler=_run_question)
+
+    link = commands.add_parser("link", help="add a typed relation between entities")
+    link.add_argument("src", help="source reference")
+    link.add_argument("dst", help="target reference")
+    link.add_argument("--type", required=True, dest="kind", help="edge kind")
+    link.add_argument("--note", default="", help="why the relation holds")
+    link.set_defaults(handler=_run_link)
+
+    search = commands.add_parser("search", help="search papers, claims and questions")
+    search.add_argument("query", help="word or phrase")
+    search.add_argument("--limit", type=int, default=20, help="maximum rows per section")
+    search.add_argument("--stance", default=None, help="filter claims by stance")
+    search.add_argument("--min-confidence", type=float, default=None, help="minimum claim confidence")
+    search.add_argument("--year", default=None, help="filter papers and claims by publication year")
+    search.add_argument("--tokens", type=int, default=0,
+                        help="compact JSON token budget (0 = full payload)")
+    search.set_defaults(handler=_run_search)
+
+    show = commands.add_parser("show", help="show one entity and its edges")
+    show.add_argument("ref", help="paper, claim or question reference")
+    show.set_defaults(handler=_run_show)
+
+    subgraph = commands.add_parser("subgraph", help="traverse multi-hop neighborhood around an entity")
+    subgraph.add_argument("ref", help="paper, claim or question reference")
+    subgraph.add_argument("--depth", type=int, default=1, help="traversal depth (1 to 3)")
+    subgraph.add_argument("--tokens", type=int, default=0,
+                          help="compact JSON token budget (0 = full payload)")
+    subgraph.set_defaults(handler=_run_subgraph)
+
+    path_cmd = commands.add_parser("path", help="trace the shortest relation path between two entities")
+    path_cmd.add_argument("src", help="source entity reference or id")
+    path_cmd.add_argument("dst", help="target entity reference or id")
+    path_cmd.add_argument("--depth", type=int, default=5, help="maximum search depth (default: 5, max: 10)")
+    path_cmd.add_argument("--directed", action="store_true", help="follow directed edges only")
+    path_cmd.add_argument("--kinds", help="comma-separated edge kinds to allow (e.g. 'supports,contradicts')")
+    path_cmd.set_defaults(handler=_run_path)
+
+    related = commands.add_parser(
+        "related", help="list findings connected to a claim, paper or question")
+    related.add_argument("ref", help="paper, claim or question reference")
+    related.add_argument("--limit", type=int, default=10,
+                         help="maximum related findings to return (default: 10)")
+    related.add_argument("--tokens", type=int, default=0,
+                         help="compact JSON token budget (0 = full payload)")
+    related.set_defaults(handler=_run_related)
+
+    outline_parser = commands.add_parser(
+        "outline", help="cheap graph index: counts, study types and evidenced questions")
+    outline_parser.add_argument("--tokens", type=int, default=400,
+                                help="question-list token budget (default: 400)")
+    outline_parser.set_defaults(handler=_run_outline)
+
+    ask_parser = commands.add_parser("ask", help="assemble evidence for a question")
+    ask_parser.add_argument("target", help="question reference, question text or phrase")
+    ask_parser.add_argument("--limit", type=int, default=20, help="suggestion search limit")
+    ask_parser.set_defaults(handler=_run_ask)
+
+    brief_parser = commands.add_parser("brief", help="token-budgeted evidence pack")
+    brief_parser.add_argument("target", help="question reference, question text or phrase")
+    brief_parser.add_argument("--tokens", type=int, default=2000, help="approximate token budget")
+    brief_parser.set_defaults(handler=_run_brief)
+
+    review_parser = commands.add_parser("review", help="Markdown literature-review outline")
+    review_parser.add_argument("target", help="question reference, question text or phrase")
+    review_parser.add_argument("--out", default=None, help="write the outline to this file")
+    review_parser.set_defaults(handler=_run_review)
+
+    synth_parser = commands.add_parser("synthesize", help="consensus-scored scientific synthesis")
+    synth_parser.add_argument("target", help="question reference, question text or phrase")
+    synth_parser.add_argument("--tokens", type=int, default=2500, help="approximate token budget")
+    synth_parser.add_argument("--out", default=None, help="write the synthesis Markdown to this file")
+    synth_parser.set_defaults(handler=_run_synthesize)
+
+    export_cmd = commands.add_parser(
+        "export", help="export portable JSONL snapshot, BibTeX, GraphML, or Cytoscape")
+    export_cmd.add_argument("path", help="output file path (.jsonl, .bib, .graphml, .cyjs)")
+    export_cmd.add_argument("--format", choices=["jsonl", "bibtex", "graphml", "cytoscape"], default=None,
+                            help="output format (default: auto-detected from suffix, else jsonl)")
+    export_cmd.set_defaults(handler=_run_export)
+
+    import_cmd = commands.add_parser("import", help="import portable JSONL graph snapshot")
+    import_cmd.add_argument("path", help="input JSONL file path")
+    import_cmd.set_defaults(handler=_run_import)
+
+    diff_cmd = commands.add_parser(
+        "diff", help="compare a JSONL snapshot against another snapshot or the live graph")
+    diff_cmd.add_argument("old", help="baseline JSONL snapshot file path")
+    diff_cmd.add_argument("new", nargs="?", default=None,
+                          help="newer JSONL snapshot (default: the live database)")
+    diff_cmd.set_defaults(handler=_run_diff)
+
+    stats = commands.add_parser("stats", help="entity and edge counts")
+    stats.set_defaults(handler=_run_stats)
+
+    check = commands.add_parser("check", help="run the integrity gate")
+    check.set_defaults(handler=_run_check)
+
+    mcp = commands.add_parser("mcp", help="serve the graph over MCP stdio JSON-RPC")
+    mcp.set_defaults(handler=_run_mcp)
+
+    web = commands.add_parser("web", help="launch the human-friendly Research Studio web UI")
+    web.add_argument("--host", default="127.0.0.1", help="bind address (default: 127.0.0.1)")
+    web.add_argument("--port", type=int, default=8765, help="port number (default: 8765)")
+    web.add_argument("--open", action="store_true", dest="open_browser",
+                     help="open the Research Studio in the default web browser")
+    web.add_argument("--demo", action="store_true",
+                     help="seed the built-in demo corpus and claims before starting")
+    web.add_argument("--dump-html", action="store_true",
+                     help="print the self-contained Studio HTML and exit")
+    web.set_defaults(handler=_run_web)
+
+    analyze = commands.add_parser(
+        "analyze",
+        help="detect contradictions, rank keystone papers/claims, and build evidence matrix",
+    )
+    analyze.add_argument(
+        "--auto-link",
+        action="store_true",
+        help="automatically add contradicts and related edges between detected pairs",
+    )
+    analyze.add_argument(
+        "--limit",
+        type=int,
+        default=10,
+        help="maximum keystone papers and claims to rank (default: 10)",
+    )
+    analyze.set_defaults(handler=_run_analyze)
+
+    hypo_cmd = commands.add_parser("hypothesize", help="formulate testable hypotheses from evidence gaps and contradictions")
+    hypo_cmd.add_argument("target", nargs="?", default=None, help="optional question reference or id")
+    hypo_cmd.add_argument("--limit", type=int, default=5, help="maximum hypotheses to propose (default: 5)")
+    hypo_cmd.set_defaults(handler=_run_hypothesize)
+
+    screen_cmd = commands.add_parser("screen", help="record or query paper screening decisions for systematic reviews")
+    screen_cmd.add_argument("paper", help="paper reference or bare p_ id")
+    screen_cmd.add_argument("--status", choices=list(SCREENING_STATUSES), default=None, help="screening status")
+    screen_cmd.add_argument("--reason", default="", help="exclusion reason")
+    screen_cmd.add_argument("--notes", default="", help="reviewer notes")
+    screen_cmd.set_defaults(handler=_run_screen)
+
+    prisma_cmd = commands.add_parser("prisma", help="generate PRISMA 2020 flow diagram and attrition statistics")
+    prisma_cmd.add_argument("--format", choices=["markdown", "svg", "json"], default="markdown",
+                            help="output format (default: markdown)")
+    prisma_cmd.add_argument("--out", default=None, help="write diagram or report to this file")
+    prisma_cmd.set_defaults(handler=_run_prisma)
+
+    pack_cmd = commands.add_parser("pack", help="generate a token-bounded GraphRAG context pack for LLM agents")
+    pack_cmd.add_argument("targets", nargs="*", default=None, help="question, paper or claim references, or search phrases")
+    pack_cmd.add_argument("--tokens", type=int, default=2000, help="maximum token budget (default: 2000)")
+    pack_cmd.add_argument("--format", choices=["markdown", "json"], default="markdown", help="output format (default: markdown)")
+    pack_cmd.add_argument("--out", default=None, help="write context pack to this file")
+    pack_cmd.set_defaults(handler=_run_pack)
+
+    meta_cmd = commands.add_parser("meta", help="run quantitative meta-analysis and generate ASCII/SVG forest plots")
+    meta_cmd.add_argument("target", help="question reference or JSON file containing studies")
+    meta_cmd.add_argument("--model", choices=["random", "fixed"], default="random", help="meta-analysis model (default: random)")
+    meta_cmd.add_argument("--format", choices=["ascii", "svg", "json"], default="ascii", help="output format (default: ascii)")
+    meta_cmd.add_argument("--out", default=None, help="write forest plot or JSON to this file")
+    meta_cmd.set_defaults(handler=_run_meta)
+    return parser
+
+
+def main(argv: Optional[Sequence[str]] = None) -> int:
+    """Parse arguments, open the database and dispatch one command."""
+    parser = build_parser()
+    args = parser.parse_args(argv)
+    connection = open_database(args.db)
+    repository = Repository(connection)
+    try:
+        return int(args.handler(args, repository))
+    except LatticeError as exc:
+        print(exc.render(), file=sys.stderr)
+        return 1
+    finally:
+        connection.close()
+
+
+def _emit(payload: Dict[str, Any], lines: List[str], as_json: bool) -> None:
+    """Print either stable JSON or human text."""
+    if as_json:
+        print(json.dumps(payload, indent=2, sort_keys=True))
+    else:
+        print("\n".join(lines))
+
+
+def _run_init(args: argparse.Namespace, repository: Repository) -> int:
+    """Create the schema, which opening the database already did."""
+    payload = {"database": args.db, "schema": SCHEMA_VERSION, "stats": repository.stats()}
+    _emit(payload, [f"[OK] database ready at {args.db}",
+                    f"     schema {payload['schema']}; {payload['stats']['papers']} papers, "
+                    f"{payload['stats']['claims']} claims, "
+                    f"{payload['stats']['questions']} questions"], args.json)
+    return 0
+
+
+def _run_ingest(args: argparse.Namespace, repository: Repository) -> int:
+    """Import every file and report created versus merged records."""
+    records = parse_paths([Path(path) for path in args.paths])
+    imported = []
+    for record in records:
+        paper, created = repository.add_paper(record)
+        imported.append({"id": paper.id, "title": paper.title, "created": created})
+    created_count = sum(1 for item in imported if item["created"])
+    payload = {"imported": len(imported), "created": created_count, "records": imported}
+    lines = [f"[OK] parsed {len(imported)} record(s); {created_count} new, "
+             f"{len(imported) - created_count} merged"]
+    lines += [f"     {item['id']}  {'new    ' if item['created'] else 'merged '}  {item['title']}"
+              for item in imported]
+    _emit(payload, lines, args.json)
+    return 0
+
+
+def _run_fetch(args: argparse.Namespace, repository: Repository) -> int:
+    """Discover candidate papers and optionally ingest them."""
+    service = DiscoveryService(repository)
+    result = service.discover(
+        args.query,
+        source=args.source,
+        limit=args.limit,
+        ingest=not args.no_ingest,
+    )
+    lines = [
+        f"[OK] discovered {result['count']} paper(s) from {result['source']}; "
+        f"{result['created']} new, {result['count'] - result['created']} existing/preview"
+    ]
+    for item in result["records"]:
+        pid = item.get("id", "preview")
+        status = "new    " if item.get("created") else "merged "
+        lines.append(f"     {pid}  {status}  {item['title']}")
+    _emit(result, lines, args.json)
+    return 0
+
+
+def _run_extract(args: argparse.Namespace, repository: Repository) -> int:
+    """Extract quote-backed claims and question links from one or all papers."""
+    if args.extract_all:
+        summary = extract_all(repository, question_ref=args.question)
+        lines = [
+            f"[OK] extracted {summary['claims_created']} claim(s) and "
+            f"{summary['edges_created']} edge(s) across {summary['papers_processed']} paper(s)"
+        ]
+        _emit(summary, lines, args.json)
+        return 0
+    if not args.paper:
+        fail("extract requires a paper reference or --all",
+             "claim extraction must know which paper(s) to process",
+             "pass a p_xxx reference or --all")
+    outcome = extract_from_paper(repository, args.paper, question_ref=args.question)
+    payload = outcome.to_dict()
+    lines = [
+        f"[OK] extracted {len(outcome.claims)} claim(s) and "
+        f"{len(outcome.edges)} edge(s) from {outcome.paper_id}"
+    ]
+    _emit(payload, lines, args.json)
+    return 0
+
+
+def _run_claim(args: argparse.Namespace, repository: Repository) -> int:
+    """Record one claim."""
+    claim = repository.add_claim(args.paper, args.text, args.quote, args.locator,
+                                 args.stance, args.confidence)
+    _emit({"claim": claim.to_dict()},
+          [f"[OK] added {claim.id} to {claim.paper_id} ({claim.stance}, "
+           f"confidence {claim.confidence:.2f})"], args.json)
+    return 0
+
+
+def _run_question(args: argparse.Namespace, repository: Repository) -> int:
+    """Record one question."""
+    question = repository.add_question(args.text)
+    _emit({"question": question.to_dict()},
+          [f"[OK] added {question.id}: {question.text}"], args.json)
+    return 0
+
+
+def _run_link(args: argparse.Namespace, repository: Repository) -> int:
+    """Record one typed edge."""
+    edge = repository.add_edge(args.src, args.dst, args.kind, args.note)
+    _emit({"edge": edge.to_dict()},
+          [f"[OK] {edge.src} -{edge.kind}-> {edge.dst}"], args.json)
+    return 0
+
+
+def _run_search(args: argparse.Namespace, repository: Repository) -> int:
+    """Search and print the three result sections."""
+    result = repository.search(
+        args.query,
+        args.limit,
+        stance=args.stance,
+        min_confidence=args.min_confidence,
+        year=args.year,
+    )
+    lines = [f"Papers ({len(result['papers'])}):"]
+    lines += [
+        f"  [{paper['id']}] {paper['title']} ({paper.get('year') or 'n.d.'})"
+        f" - {paper.get('study_type') or 'General Study'}"
+        for paper in result["papers"]
+    ] or ["  none"]
+    lines += [f"Claims ({len(result['claims'])}):"]
+    lines += [f"  [{claim['id']}] {claim['text']}" for claim in result["claims"]] or ["  none"]
+    lines += [f"Questions ({len(result['questions'])}):"]
+    lines += [f"  [{question['id']}] {question['text']}"
+              for question in result["questions"]] or ["  none"]
+    payload = compact_search(result, args.tokens) if args.tokens else result
+    _emit(payload, lines, args.json)
+    return 0
+
+
+def _run_show(args: argparse.Namespace, repository: Repository) -> int:
+    """Show one entity and each attached edge."""
+    result = repository.get(args.ref)
+    entity = result["entity"]
+    lines = [f"{result['ref']}: {entity.get('title') or entity.get('text', '')}"]
+    for edge in result["edges"]:
+        other = edge["details"].get("other", {})
+        lines.append(f"  {edge['src']} -{edge['kind']}-> {edge['dst']}  "
+                     f"({other.get('type', 'missing')})")
+    _emit(result, lines, args.json)
+    return 0
+
+
+def _run_subgraph(args: argparse.Namespace, repository: Repository) -> int:
+    """Traverse and print the multi-hop neighborhood around an entity."""
+    result = repository.subgraph(args.ref, depth=args.depth)
+    lines = [
+        f"Subgraph around {result['root']} (depth {result['depth']}):",
+        f"Nodes ({len(result['nodes'])}):",
+    ]
+    for node in result["nodes"]:
+        label = node.get("title") or node.get("text") or node.get("ref")
+        study_type = node.get("study_type") or "General Study"
+        lines.append(f"  [{node['ref']}] {label} - {study_type}")
+    lines.append(f"Edges ({len(result['edges'])}):")
+    for edge in result["edges"]:
+        lines.append(f"  {edge['src']} -{edge['kind']}-> {edge['dst']}")
+    payload = compact_subgraph(result, args.tokens) if args.tokens else result
+    _emit(payload, lines, args.json)
+    return 0
+
+
+def _run_path(args: argparse.Namespace, repository: Repository) -> int:
+    """Trace and print the shortest relation path between two entities."""
+    edge_kinds = None
+    if getattr(args, "kinds", None):
+        edge_kinds = [k.strip() for k in str(args.kinds).split(",") if k.strip()]
+    result = find_path(
+        repository,
+        args.src,
+        args.dst,
+        max_depth=int(args.depth),
+        directed=bool(args.directed),
+        edge_kinds=edge_kinds,
+    )
+    if not result["found"]:
+        lines = [f"No path: {result['narrative']}"]
+        _emit(result, lines, args.json)
+        return 1
+    lines = [
+        f"Path found ({result['length']} hops):",
+        f"  {result['narrative']}",
+    ]
+    for i, step in enumerate(result["steps"], 1):
+        rel = f"--[{step['kind']}]-->" if step["direction"] == "forward" else f"<--[{step['kind']}]--"
+        lines.append(f"  {i}. {step['from']} {rel} {step['to']}")
+    _emit(result, lines, args.json)
+    return 0
+
+
+def _run_related(args: argparse.Namespace, repository: Repository) -> int:
+    """List findings connected to an entity, with the reason for each connection."""
+    result = related_findings(repository, args.ref, args.limit)
+    lines = [
+        f"Related findings around {result['root']} ({result['type']}, {result['count']}):"
+    ]
+    for item in result["related"]:
+        study_type = item["study_type"] or "General Study"
+        lines.append(f"  {item['relation']:<12} [{item['id']}] ({item['stance']}, "
+                     f"{item['confidence']}) {item['text']}")
+        lines.append(f"    paper {item['paper']} ({study_type}): {item['paper_title']}")
+        lines.append(f"    why: {item['reason']}")
+    if not result["related"]:
+        lines.append("  none")
+    payload = compact_related(result, args.tokens) if args.tokens else result
+    _emit(payload, lines, args.json)
+    return 0
+
+
+def _run_outline(args: argparse.Namespace, repository: Repository) -> int:
+    """Print a cheap orientation index before an agent expands a reference."""
+    result = outline(repository, args.tokens)
+    counts = result["counts"]
+    lines = [f"Graph: {counts['papers']} papers, {counts['claims']} claims, "
+             f"{counts['questions']} questions, {counts['edges']} edges"]
+    if result["edge_kinds"]:
+        kinds = ", ".join(f"{kind} ({count})" for kind, count in result["edge_kinds"].items())
+        lines.append(f"Edges: {kinds}")
+    if result["study_types"]:
+        types = ", ".join(f"{item['study_type']} ({item['papers']})"
+                          for item in result["study_types"])
+        lines.append(f"Study types: {types}")
+    lines.append(f"Questions ({len(result['questions'])} shown, "
+                 f"{result['omitted_questions']} omitted):")
+    for item in result["questions"]:
+        lines.append(f"  [{item['ref']}] {item['text']} - {item['status']}, "
+                     f"{item['evidence']} evidence")
+    if not result["questions"]:
+        lines.append("  none")
+    lines.append(result["next"])
+    _emit(result, lines, args.json)
+    return 0
+
+
+def _run_ask(args: argparse.Namespace, repository: Repository) -> int:
+    """Assemble and print evidence."""
+    result = ask(repository, args.target, args.limit)
+    if result["mode"] == "question":
+        lines = [f"Question {result['question']['id']}: {result['question']['text']}"]
+        for group, label in (("supports", "Supports"), ("contradicts", "Contradicts"),
+                             ("answers", "Answers")):
+            lines.append(f"{label} ({len(result[group])}):")
+            lines += [f"  [{item['claim']['id']}] {item['claim']['text']}"
+                      for item in result[group]] or ["  none"]
+        lines.append("Gaps:")
+        lines += [f"  - {gap}" for gap in result["gaps"]] or ["  none"]
+        lines.append("Suggested unlinked claims:")
+        lines += [f"  [{claim['id']}] {claim['text']}" for claim in result["suggestions"]] \
+            or ["  none"]
+    else:
+        lines = [f"No tracked question matched; search mode for {args.target!r}."]
+        lines += [f"  claim [{claim['id']}] {claim['text']}" for claim in result["claims"]]
+        lines += [f"  paper [{paper['id']}] {paper['title']}" for paper in result["papers"]]
+    _emit(result, lines, args.json)
+    return 0
+
+
+def _run_brief(args: argparse.Namespace, repository: Repository) -> int:
+    """Print a token-budgeted evidence pack."""
+    result = brief(repository, args.target, args.tokens)
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+    else:
+        print(result["text"])
+    return 0
+
+
+def _run_review(args: argparse.Namespace, repository: Repository) -> int:
+    """Print or write a review outline."""
+    result = review(repository, args.target)
+    if args.out:
+        target = Path(args.out)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(result["markdown"], encoding="utf-8")
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+    elif args.out:
+        print(f"[OK] wrote {len(result['markdown'])} characters to {args.out}")
+    else:
+        print(result["markdown"])
+    return 0
+
+
+def _run_synthesize(args: argparse.Namespace, repository: Repository) -> int:
+    """Generate a consensus-scored scientific synthesis report."""
+    report = synthesize(repository, args.target, tokens=args.tokens)
+    payload = report.to_dict()
+    if args.out:
+        target = Path(args.out)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(report.markdown, encoding="utf-8")
+    if args.json:
+        print(json.dumps(payload, indent=2, sort_keys=True))
+    elif args.out:
+        print(f"[OK] wrote {len(report.markdown)} characters to {args.out}")
+    else:
+        print(report.markdown)
+    return 0
+
+
+def _run_export(args: argparse.Namespace, repository: Repository) -> int:
+    """Export the graph to an atomic JSONL snapshot, BibTeX, GraphML, or Cytoscape file."""
+    path = Path(args.path)
+    fmt = args.format
+    if not fmt:
+        suf = path.suffix.lower()
+        if suf in (".bib", ".bibtex"):
+            fmt = "bibtex"
+        elif suf in (".graphml", ".xml"):
+            fmt = "graphml"
+        elif suf in (".cyjs", ".cytoscape"):
+            fmt = "cytoscape"
+        else:
+            fmt = "jsonl"
+    if fmt == "bibtex":
+        result = export_bibtex_file(repository, path)
+        lines = [f"[OK] exported {result['papers']} paper(s) in BibTeX format to {result['path']}"]
+        _emit(result, lines, args.json)
+        return 0
+    if fmt == "graphml":
+        result = export_graphml_file(repository, path)
+        lines = [
+            f"[OK] exported {result['papers']} paper(s), {result['claims']} claim(s), "
+            f"{result['questions']} question(s), {result['edges']} edge(s) in GraphML format to {result['path']}"
+        ]
+        _emit(result, lines, args.json)
+        return 0
+    if fmt == "cytoscape":
+        result = export_cytoscape_file(repository, path)
+        lines = [
+            f"[OK] exported {result['papers']} paper(s), {result['claims']} claim(s), "
+            f"{result['questions']} question(s), {result['edges']} edge(s) in Cytoscape format to {result['path']}"
+        ]
+        _emit(result, lines, args.json)
+        return 0
+    result = export_snapshot(repository, path)
+    lines = [
+        f"[OK] exported {result['papers']} paper(s), {result['claims']} claim(s), "
+        f"{result['questions']} question(s), {result['edges']} edge(s) to {result['path']}"
+    ]
+    _emit(result, lines, args.json)
+    return 0
+
+
+def _run_import(args: argparse.Namespace, repository: Repository) -> int:
+    """Import a JSONL snapshot idempotently."""
+    result = import_snapshot(repository, Path(args.path))
+    lines = [
+        f"[OK] imported {result['papers']} paper(s), {result['claims']} claim(s), "
+        f"{result['questions']} question(s), {result['edges']} edge(s) from {result['path']}"
+    ]
+    _emit(result, lines, args.json)
+    return 0
+
+
+def _run_diff(args: argparse.Namespace, repository: Repository) -> int:
+    """Diff snapshots, or a snapshot against the live graph; exit 1 when they differ."""
+    if args.new:
+        result = diff_snapshots(Path(args.old), Path(args.new))
+    else:
+        result = diff_snapshot(repository, Path(args.old))
+    summary = result["summary"]
+    lines = [
+        f"Diff {result['old']['label']} -> {result['new']['label']}: "
+        f"{summary['added']} added, {summary['removed']} removed, "
+        f"{summary['changed']} changed, {summary['unchanged']} unchanged"
+    ]
+    for title, section in (("Added", result["added"]), ("Removed", result["removed"])):
+        for plural, ids in section.items():
+            for item in ids:
+                lines.append(f"  {title:<7} {plural[:-1]} {item}")
+    for plural, items in result["changed"].items():
+        for item in items:
+            lines.append(f"  Changed {plural[:-1]} {item['id']}: {', '.join(item['fields'])}")
+    _emit(result, lines, args.json)
+    return 1 if summary["added"] + summary["removed"] + summary["changed"] else 0
+
+
+def _run_stats(args: argparse.Namespace, repository: Repository) -> int:
+    """Print counts and evidence health."""
+    result = repository.stats()
+    lines = [f"papers: {result['papers']}", f"claims: {result['claims']}",
+             f"questions: {result['questions']}", f"edges: {result['edges']}"]
+    lines += [f"  {kind}: {count}" for kind, count in result["edge_kinds"].items()]
+    evidence = result["evidence"]
+    lines.append(
+        f"evidence: {evidence['claims_per_paper']} claims/paper, "
+        f"{evidence['questions_answered']} answered, {evidence['questions_open']} open, "
+        f"{evidence['contested_questions']} contested, "
+        f"{evidence['coverage_gaps']} coverage gaps")
+    _emit(result, lines, args.json)
+    return 0
+
+
+def _run_check(args: argparse.Namespace, repository: Repository) -> int:
+    """Run the integrity gate and return 1 on any error."""
+    report = run_checks(repository)
+    lines = [f"[{'OK' if report.passed else 'FAIL'}] {len(report.errors)} error(s), "
+             f"{len(report.warnings)} warning(s)"]
+    lines += [f"  {issue.level.upper():7} {issue.code}: {issue.message}" for issue in report.issues]
+    _emit(report.to_dict(), lines, args.json)
+    return 0 if report.passed else 1
+
+
+def _run_mcp(args: argparse.Namespace, repository: Repository) -> int:
+    """Serve MCP on stdio; stdout carries protocol messages only."""
+    serve(repository)
+    return 0
+
+
+def _run_web(args: argparse.Namespace, repository: Repository) -> int:
+    """Launch the Research Studio web UI, optionally seeding demo data or dumping HTML."""
+    if args.demo:
+        dispatch_web_request(repository, "POST", "/api/demo", "{}")
+    if args.dump_html:
+        response = dispatch_web_request(repository, "GET", "/")
+        print(response.body)
+        return 0
+    serve_web(
+        db_path=args.db,
+        host=args.host,
+        port=args.port,
+        open_browser=args.open_browser,
+    )
+    return 0
+
+
+def _run_analyze(args: argparse.Namespace, repository: Repository) -> int:
+    """Detect contradictions and related findings, rank keystones, and build the matrix."""
+    contradictions = [
+        item.to_dict() for item in detect_contradictions(repository, auto_link=bool(args.auto_link))
+    ]
+    related_pairs = find_related_findings(repository)
+    related_links = link_related_findings(repository) if args.auto_link else []
+    keystone = rank_influential_entities(repository, limit=int(args.limit))
+    matrix = build_evidence_matrix(repository)
+    payload = {
+        "contradictions": contradictions,
+        "related_pairs": len(related_pairs),
+        "related_links_created": len(related_links),
+        "keystone": keystone,
+        "matrix": matrix,
+    }
+    lines = [
+        f"Contradictions detected: {len(contradictions)}",
+        f"Related finding pairs detected: {len(related_pairs)} "
+        f"(linked: {len(related_links)})",
+        f"Keystone papers ranked: {len(keystone['papers'])}",
+        f"Evidence matrix cells: {len(matrix['cells'])} (gaps: {len(matrix['gaps'])})",
+    ]
+    for pair in contradictions[:5]:
+        lines.append(
+            f"  [CONTRADICTION {pair['score']}] {pair['claim_a_id']} vs {pair['claim_b_id']}"
+        )
+    for paper in keystone["papers"][:5]:
+        lines.append(
+            f"  [KEYSTONE {paper['score']}] {paper['id']}  {paper['title']}"
+        )
+    _emit(payload, lines, args.json)
+    return 0
+
+
+def _run_hypothesize(args: argparse.Namespace, repository: Repository) -> int:
+    """Propose testable research hypotheses based on contradictions and coverage gaps."""
+    results = propose_hypotheses(repository, question_ref=args.target, limit=args.limit)
+    lines = [f"Proposed Hypotheses ({len(results)}):"]
+    for i, h in enumerate(results, 1):
+        lines.append(f"  {i}. [{h['kind']}] {h['statement']}")
+        lines.append(f"     IV: {h['independent_variable']} | DV: {h['dependent_variable']} | Effect: {h['predicted_effect']}")
+        lines.append(f"     Design: {h['recommended_study_type']} | Question: {h['question_id']}")
+        lines.append(f"     Why: {h['rationale']}")
+    if not results:
+        lines.append("  none")
+    _emit(results, lines, args.json)
+    return 0
+
+
+def _run_screen(args: argparse.Namespace, repository: Repository) -> int:
+    """Record or query a screening decision for a paper."""
+    if args.status:
+        decision = record_screening_decision(
+            repository,
+            args.paper,
+            status=args.status,
+            reason=args.reason,
+            notes=args.notes,
+        )
+        lines = [
+            f"Screened {decision.paper_id}: status={decision.status}"
+            + (f" reason={decision.reason}" if decision.reason else "")
+            + (f" notes={decision.notes}" if decision.notes else "")
+        ]
+        _emit(decision.to_dict(), lines, args.json)
+        return 0
+    else:
+        decision = get_screening_decision(repository, args.paper)
+        if decision:
+            lines = [
+                f"{decision.paper_id}: status={decision.status}"
+                + (f" reason={decision.reason}" if decision.reason else "")
+                + (f" notes={decision.notes}" if decision.notes else "")
+                + f" (at {decision.screened_at})"
+            ]
+            _emit(decision.to_dict(), lines, args.json)
+        else:
+            payload = {"paper_id": args.paper, "status": "unscreened"}
+            _emit(payload, [f"{args.paper}: unscreened"], args.json)
+        return 0
+
+
+def _run_prisma(args: argparse.Namespace, repository: Repository) -> int:
+    """Generate PRISMA 2020 flow statistics and diagram."""
+    flow = compute_prisma_flow(repository)
+    if args.json or args.format == "json":
+        output = json.dumps(flow.to_dict(), indent=2, sort_keys=True)
+    elif args.format == "svg":
+        output = render_prisma_svg(flow)
+    else:
+        output = render_prisma_markdown(flow)
+
+    if args.out:
+        Path(args.out).write_text(output, encoding="utf-8")
+        lines = [f"PRISMA 2020 flow ({args.format}) written to {args.out}"]
+        _emit({"out": args.out, "format": args.format, "flow": flow.to_dict()}, lines, args.json)
+    else:
+        print(output)
+    return 0
+
+
+def _run_pack(args: argparse.Namespace, repository: Repository) -> int:
+    """Generate a token-bounded GraphRAG context pack for LLM agents."""
+    fmt = "json" if args.json else args.format
+    pack = build_context_pack(
+        repository,
+        targets=args.targets if args.targets else None,
+        max_tokens=args.tokens,
+        format=fmt,
+    )
+    if args.out:
+        Path(args.out).write_text(pack.content, encoding="utf-8")
+        lines = [f"Context pack ({pack.format}, {pack.estimated_tokens} tokens) written to {args.out}"]
+        _emit({"out": args.out, "format": pack.format, "tokens": pack.estimated_tokens, "pack": pack.data}, lines, args.json)
+    else:
+        print(pack.content)
+    return 0
+
+
+def _run_meta(args: argparse.Namespace, repository: Repository) -> int:
+    """Execute quantitative meta-analysis and render forest plot."""
+    from adapters.lattice.meta import (
+        compute_meta_analysis,
+        meta_analyze_question,
+        render_forest_ascii,
+        render_forest_svg,
+    )
+    target = args.target.strip()
+    if Path(target).is_file():
+        data = json.loads(Path(target).read_text(encoding="utf-8"))
+        studies = data if isinstance(data, list) else data.get("studies", [])
+        result = compute_meta_analysis(studies, model=args.model)
+    else:
+        result = meta_analyze_question(repository, target, model=args.model)
+
+    if args.json or args.format == "json":
+        output = json.dumps(result.to_dict(), indent=2, sort_keys=True)
+    elif args.format == "svg":
+        output = render_forest_svg(result, title=f"Meta-Analysis Forest Plot: {target}")
+    else:
+        output = render_forest_ascii(result)
+
+    if args.out:
+        Path(args.out).write_text(output, encoding="utf-8")
+        lines = [f"Meta-analysis forest plot ({args.format}) written to {args.out}"]
+        _emit({"out": args.out, "format": args.format, "result": result.to_dict()}, lines, args.json)
+    else:
+        print(output)
+    return 0
+

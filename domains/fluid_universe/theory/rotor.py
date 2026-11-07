@@ -1,0 +1,177 @@
+"""Quantum rotor H = L^2/(2I) + mu (1 - cos 3 phi) and its spectra.
+
+Fourier basis
+-------------
+n in Z, <phi|n> = exp(i n phi)/sqrt(2 pi), L = -i d/dphi, so
+
+    <n|H|m> = n^2/(2I) delta_nm
+              + mu [ delta_nm - (1/2) delta_{n,m+3} - (1/2) delta_{n,m-3} ].
+
+The potential is real and even, so the k=1 and k=2 sectors (n = k + 3j) are
+exactly degenerate: complex conjugation maps n -> -n, which maps sector 1 to
+sector 2.  Consequently a map that assigns one eigenvalue per sector can
+produce at most two distinct values, never three lepton masses.
+"""
+
+from __future__ import annotations
+
+import math
+from dataclasses import dataclass
+
+import numpy as np
+
+
+@dataclass(frozen=True)
+class RotorSpectrum:
+    I: float
+    mu: float
+    n_cutoff: int
+    sector_energies: dict[int, np.ndarray]
+
+    def lowest(self, sector: int, count: int = 5) -> np.ndarray:
+        values = self.sector_energies[sector]
+        if count > values.size:
+            raise ValueError("not enough computed levels")
+        return values[:count]
+
+
+def sector_matrix(I: float, mu: float, sector: int, n_cutoff: int) -> np.ndarray:
+    """Dense Hamiltonian in the truncated sector n = sector + 3j, |n| <= n_cutoff."""
+    if sector not in (0, 1, 2):
+        raise ValueError("sector must be 0, 1 or 2")
+    if I <= 0.0:
+        raise ValueError("moment of inertia must be positive")
+    if n_cutoff < 0:
+        raise ValueError("n_cutoff must be non-negative")
+    n = np.arange(-n_cutoff, n_cutoff + 1)
+    keep = n[np.mod(n, 3) == sector % 3]
+    size = keep.size
+    H = np.diag(keep.astype(float) ** 2 / (2.0 * I))
+    index = {int(value): i for i, value in enumerate(keep)}
+    for i, value in enumerate(keep):
+        H[i, i] += mu
+        for shift in (+3, -3):
+            j = index.get(int(value + shift))
+            if j is not None:
+                H[i, j] += -0.5 * mu
+    return H
+
+
+def spectrum(I: float = 1.0, mu: float = 1.0, n_cutoff: int = 60) -> RotorSpectrum:
+    """Low-lying levels in each of the three Fourier sectors."""
+    n = np.arange(-n_cutoff, n_cutoff + 1)
+    size = int(np.sum(np.mod(n, 3) == 0))
+    count = min(8, size)
+    out: dict[int, np.ndarray] = {}
+    for sector in (0, 1, 2):
+        H = sector_matrix(I, mu, sector, n_cutoff)
+        values = np.linalg.eigvalsh(H)
+        out[sector] = values[:count]
+    return RotorSpectrum(I=I, mu=mu, n_cutoff=n_cutoff, sector_energies=out)
+
+
+def convergence(I: float = 1.0, mu: float = 1.0, cutoffs=(10, 20, 40, 80, 160)) -> list[dict]:
+    rows = []
+    for n_cutoff in cutoffs:
+        spec = spectrum(I=I, mu=mu, n_cutoff=n_cutoff)
+        rows.append(
+            {
+                "n_cutoff": n_cutoff,
+                "E0": float(spec.lowest(0, 1)[0]),
+                "E1": float(spec.lowest(1, 1)[0]),
+                "E2": float(spec.lowest(2, 1)[0]),
+                "E1_minus_E2": float(spec.lowest(1, 1)[0] - spec.lowest(2, 1)[0]),
+            }
+        )
+    return rows
+
+
+def free_rotor_levels(sector: int, count: int = 5, I: float = 1.0) -> np.ndarray:
+    """Exact mu=0 levels n^2/(2I) in sector n = sector + 3j."""
+    n = np.arange(-1000, 1001)
+    n = n[np.mod(n, 3) == sector % 3]
+    energies = np.sort(n.astype(float) ** 2 / (2.0 * I))
+    return energies[:count]
+
+
+def grid_spectrum(
+    I: float = 1.0,
+    mu: float = 1.0,
+    n_grid: int = 1024,
+    count: int = 5,
+) -> np.ndarray:
+    """Finite-difference cross-check on a periodic grid phi_j = 2 pi j / N.
+
+    The second-difference operator approximates L^2; the comparison is only
+    meaningful in the continuum limit, so the grid result is not a precision
+    substitute for the Fourier basis.
+    """
+    if n_grid < 16:
+        raise ValueError("grid too small")
+    phi = 2.0 * np.pi * np.arange(n_grid) / n_grid
+    spacing = 2.0 * np.pi / n_grid
+    main = 1.0 / spacing**2
+    off = -1.0 / spacing**2
+    # (L^2 psi)_j ~ -(psi_{j+1} - 2 psi_j + psi_{j-1})/dphi^2
+    L2 = np.diag(np.full(n_grid, 2.0 * main)) + np.diag(np.full(n_grid - 1, off), 1)
+    L2 += np.diag(np.full(n_grid - 1, off), -1)
+    L2[0, -1] = off
+    L2[-1, 0] = off
+    H = L2 / (2.0 * I) + np.diag(mu * (1.0 - np.cos(3.0 * phi)))
+    values = np.linalg.eigvalsh(H)
+    return values[:count]
+
+
+def mode_map(sector_energies: tuple[float, float, float]) -> tuple[float, float]:
+    """The prompt's naive map a=(l0+2 l1)/3, c=(l1-l0)/3.
+
+    With delta=0 the implied roots are ((4 l1 - l0)/3, (2 l0 + l1)/3,
+    (2 l0 + l1)/3), not (l0, l1, l1).  The opposite sign
+    c=(l0-l1)/3 would reproduce (l0, l1, l1) exactly.  Either convention
+    gives only two distinct roots when l1 == l2, and the map has only two
+    parameters for three masses.  Return (a, c) only.
+    """
+    l0, l1, l2 = sector_energies
+    a = (l0 + 2.0 * l1) / 3.0
+    c = (l1 - l0) / 3.0
+    return a, c
+
+
+def implied_roots(sector_energies: tuple[float, float, float]) -> np.ndarray:
+    """Roots generated by the circulant map from three sector levels."""
+    a, c = mode_map(sector_energies)
+    k = np.arange(3)
+    delta = 0.0
+    return a + 2.0 * c * np.cos(delta + 2.0 * np.pi * k / 3.0)
+
+
+def parity_obstruction() -> dict[str, object]:
+    """State the exact degeneracy argument and return it as data."""
+    return {
+        "reason": "H(phi) = H(-phi); complex conjugation maps n -> -n, sector 1 <-> sector 2",
+        "exact_degeneracy": True,
+        "distinct_roots_from_naive_map": 2,
+        "needed_for_three_masses": 3,
+        "conclusion": "the naive rotor-to-circulant map cannot give three lepton masses",
+    }
+
+
+def domain_wall_tension(mu: float) -> float:
+    """Analytic tension T = (8/3) sqrt(mu) of the 1-cos(3 phi) wall."""
+    if mu < 0.0:
+        raise ValueError("mu must be non-negative")
+    return (8.0 / 3.0) * math.sqrt(mu)
+
+
+def domain_wall_tension_quad(mu: float) -> float:
+    """Numerical quadrature of int_0^{2pi/3} sqrt(2 mu (1-cos 3 phi)) dphi."""
+    from scipy.integrate import quad
+
+    value, _err = quad(
+        lambda phi: math.sqrt(max(0.0, 2.0 * mu * (1.0 - math.cos(3.0 * phi)))),
+        0.0,
+        2.0 * math.pi / 3.0,
+        epsabs=1e-13,
+        epsrel=1e-13,
+    )
+    return value

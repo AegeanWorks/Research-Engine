@@ -1,0 +1,797 @@
+compound_id,supplier,catalog_no,approval_ref,evidence,verified_date
+W1-SL-01,Selleck,S7430,,Selleck SB-3CT In Stock + MCE HY-12354 In-stock BBB-permeable,2026-11-05
+W1-SL-01,MCE,HY-12354,,MCE HY-12354 BBB permeability statement In-stock,2026-11-05
+W1-SL-01,Tocris,6088,,Tocris 6088 SB-3CT BBB-permeable,2026-11-05
+W1-SL-01,Sigma,444274,,Sigma 444274 MMP-2/MMP-9 Inhibitor IV,2026-11-05
+W1-SL-02,MCE,HY-103482,,MCE HY-103482 In-stock JNJ0966 brain/plasma 6.2 Scannevin JBC 2017,2026-11-05
+W1-SL-02,Tocris,6439,,Tocris 6439 JNJ0966 Brain penetrant,2026-11-05
+W1-SL-03,Selleck,S0769,,Selleck S0769 MMP-9-IN-1 In Stock,2026-11-05
+W1-SL-03,MCE,HY-135232,,MCE HY-135232 MMP-9 PEX,2026-11-05
+W1-SL-04,Selleck,S1573,,Selleck S1573 Fasudil HCl,2026-11-05
+W1-SL-04,MCE,HY-10341,,MCE HY-10341 Fasudil HCl In-stock,2026-11-05
+W1-SL-04,Tocris,0541,,Tocris 0541 Fasudil HCl,2026-11-05
+W1-SL-04,Sigma,CDS021620,,Sigma CDS021620 Fasudil,2026-11-05
+W1-SL-05,Selleck,S6388,,Selleck S6388 SHP099 In Stock,2026-11-05
+W1-SL-05,MCE,HY-100388,,MCE HY-100388 SHP099,2026-11-05
+W1-SL-06,Selleck,S9909,,Selleck S9909 ARP 100 In Stock,2026-11-05
+W1-SL-06,MCE,HY-103444,,MCE HY-103444 ARP 100,2026-11-05
+W1-TC-03,Tocris,3807,,Tocris 3807 Disulfiram,2026-11-05
+W1-TC-03,Sigma,86720,,Sigma 86720 Disulfiram + Antabuse approval,2026-11-05
+W1-TC-05,Sigma,SML1299,,Sigma SML1299 TC-2153,2026-11-05
+W1-RX-01,Selleck,S5073,DrugBank DB00843,Selleck S5073 + DailyMed Aricept FDA1996,2026-11-05
+W1-RX-01,Sigma,D6821,DrugBank DB00843,Sigma D6821 Donepezil HCl,2026-11-05
+W1-RX-02,Selleck,S1614,DrugBank DB00740,Selleck S1614 Riluzole + DailyMed Rilutek,2026-11-05
+W1-RX-02,Sigma,557324,DrugBank DB00740,Sigma Riluzole + Tocris 0768,2026-11-05
+W1-RX-03,Selleck,S1693,DrugBank DB00564,Selleck S1693 + DailyMed Tegretol,2026-11-05
+W1-RX-03,Sigma,C4024,DrugBank DB00564,Sigma C4024 Carbamazepine + Tocris 4098,2026-11-05
+W1-RX-04,Selleck,Oxcarbazepine,DrugBank DB00776,Selleck Oxcarbazepine CAS 28721-07-5 + DailyMed Trileptal,2026-11-05
+W1-RX-05,Selleck,S4113,DrugBank DB06700,Selleck S4113 Desvenlafaxine + DailyMed Pristiq,2026-11-05
+W1-RX-06,Sigma,Q102,DrugBank DB01206-fragment,Sigma Q102 Quinpirole + bromocriptine Cycloset rationale,2026-11-05
+W1-RX-06,Tocris,1061,DrugBank DB01206-fragment,Tocris 1061 Quinpirole,2026-11-05
+W1-RX-07,Selleck,S1643,DrugBank DB01586,Selleck S1643 Ursodiol + DailyMed Ursodiol 1987,2026-11-05
+W1-RX-07,Sigma,PHR1579,DrugBank DB01586,Sigma PHR1579 Ursodiol + MCE HY-13771,2026-11-05
+W1-RX-08,,,DrugBank DB01186,Permax DailyMed 2002 withdrawn 2007 tool-use-only no-vendor-catalog-claimed,2026-11-05
+W2-CNS-01,,,DrugBank DB01156,DailyMed Wellbutrin/Contrave + routine Selleck/Sigma/Tocris/MCE research-grade confirm-SKU,2026-11-05
+W2-CNS-02,,,DrugBank SSRI escitalopram,DailyMed Lexapro + routine vendor research-grade confirm-oxalate-SKU,2026-11-05
+W2-CNS-03,,,DrugBank DB00656,DailyMed Desyrel/Oleptro + routine vendor research-grade confirm-HCl-SKU,2026-11-05
+W2-CNS-04,,,DrugBank phenytoin,DailyMed Dilantin + routine vendor research-grade confirm-salt-SKU,2026-11-05
+W2-CNS-05,,,DrugBank risperidone,DailyMed Risperdal + routine vendor research-grade,2026-11-05
+W2-CNS-06,,,DrugBank mirtazapine,DailyMed Remeron + routine vendor research-grade,2026-11-05
+W2-MET-01,,,DrugBank DB00731,DailyMed Nateglinide 60/120mg ANDAs + Sigma/MCE/Selleck API,2026-11-05
+W2-MET-03,,,DrugBank DB00704,DailyMed ReVia/Vivitrol/Contrave + Sigma/MCE,2026-11-05
+W2-MET-04,Ambeed,,DrugBank DB01252,PMDA Glufast Japan-only + Ambeed CAS145375-43-5/APExBIO B2193,2026-11-05
+W2-MET-05,MCE,HY-B0664,DrugBank DB09064,UK MHRA Lipanor not-FDA + MCE HY-B0664/Sigma,2026-11-05
+W2-PH-01,Sigma,SML3000,PMDA Glanatec 2014,Sigma SML3000 ripasudil-HCl + Probechem PC-27872,2026-11-05
+W2-PH-02,MCE,HY-15720,,MCE HY-15720 H-1152 + Tocris 2414 + Probechem PC-44656 provisional-logP/TPSA-VERIFY,2026-11-05
+W2-PH-04,Selleck,E0073,,Selleck E0073 CL-82198 99.93% + Enzo BML-EI302,2026-11-05
+W2-PL-01,,,DrugBank DB01221,DailyMed Ketamine IV 1970 tool-comparator,2026-11-05
+W2-PL-02,,,DrugBank DB11823,DailyMed Spravato nasal 2019/2020,2026-11-05
+W2-PL-03,Selleck,S3064,DrugBank DB06742,Selleck S3064 Ambroxol + Tocris 2404 + human-CSF-GCase,2026-11-05
+W3-FL-01,Sigma,P5239,,Sigma P5239 Pinocembrin + Selleck S3941 + MCE HY-N0280,2026-11-05
+W3-FL-02,Sigma,C8221,,Sigma C8221 CAPE + Selleck S7414 + Tocris 2743,2026-11-05
+W3-FL-03,Selleck,S2299,,Selleck S2299 Formononetin + Sigma phytoestrogen-panel + MCE HY-N0183,2026-11-05
+W3-FL-04,Selleck,S5312,,Selleck S5312 Urolithin-A + Sigma SML1791 + MCE HY-100599,2026-11-05
+W3-FL-05,Sigma,SML2147,,Sigma SML2147 S-Equol + Selleck SML-series + MCE HY-101193,2026-11-05
+W3-FL-06,Sigma,D2016,,Sigma D2016 Biochanin-A + Selleck S2399 + MCE HY-N2110,2026-11-05
+W3-FL-07,Sigma,38790,,Sigma 38790 Pinostrobin + Selleck E-series + MCE HY-N8587,2026-11-05
+W3-FL-08,Sigma,R5010,,Sigma R5010 Resveratrol + Selleck S1396 + MCE HY-16561 + Tocris 1418,2026-11-05
+W3-MC-01,Sigma,T1952,,Sigma T1952 TSA + Selleck S1045 + MCE HY-15144 cytotoxic-tool-only,2026-11-05
+W3-MC-02,Sigma,B7651,,Sigma B7651 Brefeldin-A + Selleck S7046 + MCE HY-16592 secretory-toxin-tool-only,2026-11-05
+W3-MC-04,Sigma,SML1649,,Sigma SML1649 Urolithin-B + Selleck S1321,2026-11-05
+W3-MC-06,Sigma,45199,,Sigma 45199 Enterolactone + MCE HY-108692 logP-verify,2026-11-05
+W3-TCM-01,Sigma,H5777,,Sigma H5777 Huperzine-A + Selleck S2251 + MCE HY-17387 logP-FAIL-control-only,2026-11-05
+W3-TCM-02,Sigma,361593,,Sigma 361593 Artemisinin + Selleck S1282 + MCE HY-B0094,2026-11-05
+W3-TCM-03,Selleck,S2290,,Selleck S2290 DHA + MCE HY-N0176,2026-11-05
+W3-TCM-04,Sigma,E3531,,Sigma E3531 Evodiamine + Selleck S2382 + MCE HY-N0114,2026-11-05
+W3-TCM-05,Sigma,R3277,,Sigma R3277 Rutaecarpine + Selleck S2349 + MCE HY-N0147,2026-11-05
+W3-TCM-07,Sigma,SML2345,,Sigma SML2345 Rhynchophylline + Selleck S9400 borderline-verify,2026-11-05
+W3-TCM-08,Sigma,G1660,,Sigma G1660 Galantamine-HBr + Selleck S3866/S1339 + MCE HY-76299 approved-AD-drug,2026-11-05
+W4-CNS-01,Sigma,R1529,,FDA1997 Requip + Sigma R1529 + Tocris 0983 + Selleck S1324 + MCE HY-14603,2026-11-05
+W4-CNS-02,Sigma,V7264,,FDA1993 Effexor + Sigma V7264 + Tocris 0953 + Selleck S3183 venlafaxine-pKa-9.14-note,2026-11-05
+W4-CNS-03,Sigma,A8523,,FDA1980 Asendin + Sigma A8523 + Selleck S1284 + MCE HY-B1253,2026-11-05
+W4-CNS-04,Sigma,B7148,,FDA1986 BuSpar + Sigma B7148 + Tocris 0962 + Selleck S1949,2026-11-05
+W4-CNS-05,Sigma,M3840,,FDA1974 Moban + Sigma M3840 + Cayman 23897 + MCE HY-B0502,2026-11-05
+W4-CNS-06,Sigma,D0899,,FDA1963 Valium + Sigma D0899 + Tocris 0800 Hensch-PNN-trigger,2026-11-05
+W4-CNS-07,Sigma,Z103,,FDA1992 Ambien + Sigma Z103 + Tocris 0655 moderate-spindle-hook,2026-11-05
+W4-CNS-08,Sigma,D9180,,FDA1959 Tenuate + Sigma D9180 + Cayman 11719 cathinone-moderate-hook,2026-11-05
+W4-SC-01,Selleck,S1739,,Selleck S1739 Thiabendazole In-Stock riluzole-hop,2026-11-05
+W4-SC-02,Selleck,S4651,,Selleck S4651 Etoricoxib In-Stock sulfone-hop,2026-11-05
+W5-MMP-01,Vitas-M,STK169690,,Vitas-M STK169690 live 323mg ADD-TO-BASKET + PubChem CID647176,2026-11-06
+W5-MMP-02,Vitas-M,STK519331,,Vitas-M STK519331 live 211mg ADD-TO-BASKET + Enamine_000799 synonym,2026-11-06
+W5-MMP-03,Vitas-M,STK169693,,Vitas-M STK169693 live 255mg + MFCD04589400,2026-11-06
+W5-FLAV-01,Enamine,EN300-17915,,Enamine EN300-17915 In-stock UA/US $19 + EBC-04233 Bioactive,2026-11-06
+W5-INDO-01,MCE,HY-B1104,,MCE HY-B1104 + TargetMol T0321 In-Stock 5g + Bepharm In-Stock,2026-11-06
+W5-TE-02,Selleck,S3891,,Selleck S3891 live + MCE HY-B1021 + Sigma 194719 + EP Y0002124,2026-11-06
+W5-TE-06,Sigma,P0667,,Sigma P0667 + Selleck S2341 + MCE HY-N0141 + Tocris 0610,2026-11-06
+W5-TE-08,Selleck,S2437,,Selleck S2437 live + MCE HY-N0096 + Thermo AAJ6332803,2026-11-06
+W2-PH-02-CORRECTION,MCE,HY-15720,,Wave5D: PubChem TPSA 70.7 FAIL (>70) logP 1.7 — demoted B-to-C control-only,2026-11-06
+W6-ENRICH-F-Donepezil,,,DrugBank DB00843,Wave146 CORRECTION: 100% is RELATIVE (Aricept solution/Namzaric label §Clinical PK); NDA22-568 review states absolute F UNKNOWN — CSV corrected to empty, tier holds B 0.957,2026-11-06
+W6-ENRICH-F-Riluzole,,,DrugBank DB00740,Wave146 CONFIRMED: NDA020599 §12.3 + DailyMed generics — absolute oral F ~60%,2026-11-06
+W6-ENRICH-F-Escitalopram,,,DrugBank SSRI,Wave146 CONFIRMED-with-flag: NDA021323 §12.3 absolute F = citalopram racemate ~80% (escitalopram-specific IV unavailable); EMA-expected same,2026-11-06
+W6-ENRICH-F-Ambroxol,,,DrugBank DB06742,Wave146 CONFIRMED IR-30mg: HPRA SmPC §5.2 F 79% (sevforms 60-67% — formulation-caveat),2026-11-06
+W6-ENRICH-F-Galantamine,,,DrugBank galantamine,Wave146 CONFIRMED: DailyMed/Razadyne PI §12.3 absolute F ~90%,2026-11-06
+W6-ENRICH-F-Ropinirole,,,DrugBank ropinirole,Wave146 CONFIRMED range: DailyMed/Requip PI §12.3 F 45-55% (receipts >88% in urine); CSV keeps 55 top-bound,2026-11-06
+W6-ENRICH-F-Venlafaxine,,,DrugBank DB00285,Wave146 CONFIRMED: NDA020699 §12.3 absolute F ~45% (92% absorbed) + pKa-9.14 concern stands,2026-11-06
+W6-ENRICH-NOTES,,,preserved-notes,Riluzole mouse Kp 2.4/4.6 = P-gp signal caveat; escitalopram QTcF +4.5-10.5ms TdP postmarketing (hERG IC50 2.6uM note kept UNKNOWN); ambroxol Caco-2 45e-6 + human CSF 15.6-21.2%; galantamine mouse Kp 2.10 + CYP3A4-no-inhibit + hERG IC50 760uM clean-note; donepezil CYP Ki 50-130uM clean-note (kept UNKNOWN),2026-11-06
+W6-FLAG-Trazodone-QT,,,DrugBank DB00656,Wave6: QT-PROLONGATION label §5.3 + TdP ≤100mg + hERG IC50 0.69-2.9uM — chronic-use flag, assay-priority down,2026-11-06
+W6-FLAG-Naltrexone-F,,,DrugBank DB00704,Wave6: label F 5-40% range straddles 10% fail-floor — marginal, kept UNKNOWN,2026-11-06
+W6-FLAG-Ketamine-oral,,,DrugBank DB01221,Wave6: oral F 16-29% marginal-pass + human CSF:plasma AUC 0.917 excellent-brain note (IV/nasal only),2026-11-06
+W6-FLAG-Vincamine-Pgp,,,Sigma 194719,Wave6: unbound-brain microdialysis equilibration + cyclosporine P-gp signal noted,2026-11-06
+W7-LM-01,Selleck,S5177,DrugBank DB00788,Selleck S5177 Naproxen In-Stock + Sigma N8280 + Aleve FDA1976,2026-11-06
+W7-LM-02,Sigma,I4883,DrugBank DB01050,Sigma I4883 Ibuprofen + Advil FDA1974 logP-3.5-at-limit,2026-11-06
+W7-LM-03,Sigma,K1751,DrugBank DB01009,Sigma K1751 Ketoprofen + Orudis approved,2026-11-06
+W7-LM-04,Sigma,Fenoprofen,DrugBank DB00712,Commodity Nalfon FDA-approved + MCE/Selleck lines confirm-salt,2026-11-06
+W7-GR-01,Selleck,S2590,,Selleck S2590 Pioglitazone In-Stock — Wave2 kill CORRECTED (bad TPSA/logP numbers) + weight-gain-inverse flag,2026-11-06
+W7-GR-02,Selleck,S3227,,Selleck S3227 5,7-DMF In-Stock + BCRP/CYP3A-modulator DDI flag,2026-11-06
+W7-GR-03,Selleck,S3868,,Selleck S3868 Harmine In-Stock + MAO-A-Ki-0.048uM cheese-crisis flag,2026-11-06
+W7-OR-01,Tocris,1706,,Tocris 1706 CX-614 ampakine-ARC + MCE/Sigma lines,2026-11-06
+W7-OR-02,Tocris,0905,,Tocris 0905 Rolipram + MCE HY-16900 + Sigma R6520 investigational-not-approved,2026-11-06
+W7-OR-03,Tocris,4317,,Tocris 4317 ML324 + MCE HY-12725 KDM4-probe,2026-11-06
+W7-OR-04,Tocris,0922,,Tocris 0922 SKF-38393 + MCE HY-12524 + Sigma D047 D1-pair-to-D2,2026-11-06
+W7-OR-05,Tocris,1760,,Tocris 1760 Blebbistatin + MCE HY-13441 + Sigma B0560 myosin-II-racemate,2026-11-06
+W7-OR-07,Sigma,D6126,,Sigma D6126 Dichlone + covalent/ROS-counterscreen-only flag,2026-11-06
+W7-OR-06-KILL,,,W1-RX-06-duplicate,Quinpirole = W1-RX-06 duplicate (Tocris 1061/Sigma Q102) killed,2026-11-06
+W8-KILL-01-Trazodone,,,DrugBank DB00656,Wave8 MPO/safety triage: CHRONIC-USE KILL — QT prolongation + TdP ≤100mg (Teva §5.3); acute-slice tool only,2026-11-06
+W8-KILL-02-Harmine,,,Selleck S3868,Wave8: CHRONIC-USE KILL — MAO-A Ki 0.048uM cheese-crisis liability; DYRK1A tool only,2026-11-06
+W8-KILL-03-Pioglitazone,,,Selleck S2590,Wave8: PROGRAM-DIRECTION KILL — PPARγ weight-gain/fluid retention vs anti-obesity goal; microglia comparator only,2026-11-06
+W8-KILL-04-TSA,,,Sigma T1952,Wave8: IN-VIVO KILL — HDAC antiproliferative nM range + differentiation/apoptosis; tool dosing only,2026-11-06
+W8-KILL-05-BFA,,,Sigma B7651,Wave8: IN-VIVO KILL — secretory toxin Acute Tox 3 H301 rat LD50 275mg/kg; tool only,2026-11-06
+W8-KILL-06-Dichlone,,,Sigma D6126,Wave8: IN-VIVO KILL — promiscuous covalent/ROS quinone; counterscreen only with NAC control,2026-11-06
+W8-KILL-07-Pergolide,,,DrugBank DB01186,Wave8: CHRONIC-USE KILL CONFIRMED — valvulopathy withdrawal 2007; acute-slice only,2026-11-06
+W8-KILL-08-Risperidone,,,DrugBank risperidone,Wave8: PROGRAM-DIRECTION KILL — weight-gain/IR class signal; network control only,2026-11-06
+W8-KILL-09-Mirtazapine,,,DrugBank mirtazapine,Wave8: PROGRAM-DIRECTION KILL — +1.74/+2.59kg orexigenic; inverse comparator only,2026-11-06
+W8-KILL-10-SHP099,,,Selleck S6388,Wave8: PNN-PROGRAM KILL — SHP2 (PTPN11) not PTPsigma/LAR; chemistry control only,2026-11-06
+W8-MPO-NOTE,,,82-profiled,Wave8: pnn.mpo over 82 combined wave rows → 0 DEVELOPMENT / 82 OPTIMIZATION_LEAD; F-filled 7 score D 0.563 vs 0.473 rest; top CNS-MPO CX-614 6.00 / galantamine 5.83 / riluzole 5.83 — outputs in output/wave8_mpo.* (ignored),2026-11-06
+W4-PTP-05-KILL,MCE,HY-19383,,Ertiprotafib In-stock TODAY but MW559.5/logP9.2/TPSA74.8 3-fails REJECTED,2026-11-06
+W9-TP-01,Sigma,C7897,,Sigma C7897 clonidine-HCl + Tocris 0690 + Catapres-TTS systemic/CNS label,2026-11-06
+W9-TP-02,Sigma,A0132,,Sigma A0132 atropine-sulfate + Tocris 0456 + MCE HY-B1205 + central-anticholinergic BBB proof,2026-11-06
+W9-TP-03,Sigma,F1293,DrugBank finasteride,Sigma F1293 + MCE HY-13612 + Propecia/Proscar FDA oral (topical compounded),2026-11-06
+W9-NT-01,Sigma,D5441,,Sigma D5441 7,8-DHF + MCE HY-N0441 + Tocris 3826 TrkB-agonist,2026-11-06
+W9-NT-02,Tocris,2921,,Tocris 2921 MTEP-HCl + MCE HY-13128 mGluR5-NAM,2026-11-06
+W9-NT-03,MCE,HY-13514,,MCE HY-13514 xanomeline-oxalate + Cobenfy FDA2024 CNS proof,2026-11-06
+W9-NT-04,Tocris,2207,,Tocris 2207 PNU-282987 + MCE HY-12560 + Sigma P6499 alpha7-agonist,2026-11-06
+W9-TP-04-RE-PARK,,,W2-CNS-08-duplicate,Ketotifen re-proposed but NO new PNN datum since Wave-2 UNPROVABLE park — stays parked,2026-11-06
+W9-REAGENT-D12054,Thermo,D12054,,Thermo D12054 DQ-Gelatin 5x1mg VERIFIED live (Target Enzyme: Metalloproteinase) — degradation-assay fluorogenic stand-in,2026-11-06
+W9-REAGENT-PARKED,,,4-parked,ChABC C3667 + WFA B-1355-2 + MMP-9 911-MP-010 + ilomastat 2707 — no live proof (JS/403/timeout) stays parked,2026-11-06
+W10-EF-01,MCE,HY-N0061,,MCE HY-N0061 + Enamine EN300-226629 + live in-stock qtys — W7-parked CONVERTED (esterase-metabolite flag stands),2026-11-06
+W10-FAR-01,MCE,HY-10937,,MCE HY-10937 live + 2g in-stock supplier — W7-parked-pending CONVERTED (Tocris route unconfirmed),2026-11-06
+W10-TPI-01,MCE,HY-100463,,MCE HY-100463 live + 2g in-stock supplier — CONVERTED (Selleck S6570 dead, MCE route carries),2026-11-06
+W10-REAGENT-WFA,Vector,B-1355-2,,Vector B-1355-2 biotinylated WFA $223 Add-to-cart VERIFIED live — WFA assay unblocked,2026-11-06
+W10-KILL-ChABC,,,access-kill,ChABC C3667/C2905/C6737 + MMP-9 911-MP-010 + ilomastat 2707 — all routes exhausted (timeouts/403/404/JS) ACCESS-KILL not chemistry-kill; revival = manual browser stock-button check,2026-11-06
+W10-BENZOFURAN-STAND,,,Vitas-M-originator,STK169690/519331/169693 Wave-5 Vitas-live proof STANDS (211-323mg captured same-day); Wave-10 re-confirm JS-gated = inconclusive not disproof; order-time verification required,2026-11-06
+W11-REAGENT-MARIMASTAT,Selleck,S7156,,Selleck S7156 Marimastat VERIFIED live (title In-Stock + schema.org/InStock + 4 offers $147-4970 + .cn all-SKU in-stock) — MMP-inhibitor CONTROL (hydroxamate, assay-only),2026-11-06
+W11-TPI1-SLUG-FIX,Selleck,S6570,,TPI-1 canonical slug /products/tpi-1.html (S6570 pattern 404 was wrong-URL artifact) — In-Stock both domains + Batch S657001 99.72%,2026-11-06
+W11-FARAMPATOR-2ND,Cayman,21510,,Cayman 21510 second source (Biomol distributor 1/5/10mg + 5-10d delivery) — MCE HY-10937 primary + Cayman secondary; Selleck/Tocris/Sigma no-listing,2026-11-06
+W15-REAGENT-MMP9,BPS,80215,,BPS 80215 active human MMP-9 20ug $425 VERIFIED live (activity ≥2500pmole/min/ug) + kit 79915 $490 — degradation path unblocked; R&D 911-MP-010 itself remains blocked,2026-11-06
+W15-KILL-ChABC,,,dispositive-kill,ChABC ALL routes exhausted (VWR/Avantor blank, Fisher 500, Sigma/MX timeout, Seikagaku timeout, SCBT/AMSBIO 403, Sino shell, MyBioSource 403) — revival = Seikagaku direct/human email only,2026-11-06
+W15-KILL-EUTRO-RES,,,dispositive-kill,Eutropoflavin research powder: BOC name+CAS double-negative dispositive + 8 routes dead — retail capsules only; revival = custom synthesis,2026-11-06
+W15-KILL-67DHF,,,killed,6,7-DHF: only BOC inquiry-only hit (no price/pack/stock) — no live SKU; revival = custom synthesis (Liu 2010 Fig 2),2026-11-06
+W15-KILL-VITAS,,,stock-unproven,Vitas STK trio structures+props confirmed (PUG) but zero stock on Vitas-mirror/MolPort/Mcule/Ambinter — Wave-5 live capture stands as single observation; order-time check required,2026-11-06
+W12-MGL-01,MCE,HY-14866,,MCE HY-14866 raseglurant (clinical oral mGluR5) — hepatic-signal flag, comparator only,2026-11-06
+W12-MGL-02,MCE,HY-15257,,MCE HY-15257 mavoglurant (clinical Fragile-X-failed, scaffold-diverse) — mechanism anchor,2026-11-06
+W12-MGL-03,MCE,HY-14859,,MCE HY-14859 dipraglurant — logP-ceiling flag, motor-circuit precedent,2026-11-06
+W12-MGL-04,Tocris,1215,,Tocris 1215 + Selleck S2645 + MCE HY-102095 SIB-1757 (first-gen NAM, weaker — tool only),2026-11-06
+W12-A7-01,MCE,HY-16748,,MCE HY-16748 ABT-126 (AbbVie alpha7, schizophrenia/AD program),2026-11-06
+W12-A7-02,MCE,HY-19490,,MCE HY-19490 AQW051 (Novartis selective alpha7, logP-ceiling flag),2026-11-06
+W12-AM-01,MCE,HY-101528,,MCE HY-101528 + Selleck s2434 + HelloBio HB0334 IDRA-21 (logP-floor flag, 48h monkey effect),2026-11-06
+W12-D1-01,HelloBio,HB1858,,HelloBio HB1858 SKF-81297-HBr VERIFIED live (Tocris 3346/Sigma S4371 backup) — SKF-38393 upgrade,2026-11-06
+W12-PARKED,,,6-parked,Eutropoflavin (no SKU) + 6,7-DHF (no hook/SKU) + dihydrexidine/dinapsoline/CY208-243/emapunil (pass filters, no live fetch — reconfirm at order),2026-11-06
+W12-DEAD-TRKB,,,dead-end,LM22A-4/LM22B-10/deoxygedunin/HIOC/chrysin — TrkB small-molecule space filter-dead except 7,8-DHF; eutropoflavin only SKU-less hope,2026-11-06
+W12-DEAD-STEROID,,,dead-end,Dutasteride/allopregnanolone/ganaxolone/epristeride/FCE28260/zuranolone/etifoxine/izonsteride — steroidal 5AR/neurosteroid logP 4.5-6.2 systematic fail; TSPO non-steroidal only route,2026-11-06
+W13-D1-02,GlpBio,GC15792,,GlpBio GC15792 CY-208-243 10mg $281 In-Stock — CAS CORRECTED to 100999-26-6 (task 101152-94-7 = milnacipran); ergoline-check clean, logP-at-bound flag,2026-11-06
+W13-TSPO-01,Selleck,S2592,,Selleck S2592 emapunil In-Stock + Biorbyt orb1223178 ladder — non-steroidal TSPO route realized,2026-11-06
+W13-EUTRO-HOOK,,,hook-proven-parked,Eutropoflavin TrkB hook PROVEN (Liu 2010 stronger/longer than 7,8-DHF) but research-grade SKU absent (ND capsules retail-only) — stays parked,2026-11-06
+W13-67DHF-HOOK,,,hook-proven-parked,6,7-DHF TrkB partial activity PROVEN (Liu 2010 + ChEMBL Active) but no allowed-vendor SKU — stays parked,2026-11-06
+W13-KILL-DIHYDREX,,,killed,Dihydrexidine KILL — task CAS pair PUG-404 (true 123039-93-0, no vendor codes); ApexBio lead-time only, no stock,2026-11-06
+W13-KILL-DINAP,,,killed,Dinapsoline KILL — CAS validates, vendor namespace empty, all alternates absent/blocked,2026-11-06
+W14-MPO102,,,102-profiled,Wave14: pnn.mpo over 102 combined rows → 0 DEVELOPMENT / 102 OPTIMIZATION_LEAD; D 0.563 = 7 F-filled only; top CNS-MPO CX-614/farampator/MTEP 6.00; bottom CY-208-243 4.08 + mirtazapine-lipophilicity — outputs in output/wave14_mpo.* (ignored),2026-11-06
+W14-BUYLIST-01,,,buy-list,ORDER-NOW T1 donepezil S5077-class/S5073 + riluzole S1614 + galantamine G1660/S3866 + ambroxol S3064 + carbamazepine S1693 (PAMPA 6.6) + ropinirole R1529 — all live-SKU + labels,2026-11-06
+W14-BUYLIST-02,,,buy-list,ORDER-NOW T2 CX-614 Tocris-1706 + farampator HY-10937/Cayman-21510 + MTEP (W9-NT-02) + parthenolide P0667 + rolipram Tocris-0905 + SKF-81297 HB1858 + emapunil S2592 — MPO 5.7-6.0 band,2026-11-06
+W14-BUYLIST-03,,,buy-list,REAGENTS marimastat S7156 (control) + DQ-gelatin D12054 + WFA B-1355-2 — all live; ChABC/MMP-9/ilomastat still access-blocked = human-browser batch,2026-11-06
+W14-FLAG-LOW,,,deprioritized,CY-208-243 lowest MPO 4.08 + logP-at-bound + single-vendor (GlpBio) — control-only, not killed (passes filters),2026-11-06
+W16-CH-01,Selleck,S1259,DrugBank ramelteon,Selleck S1259 ramelteon In-Stock 99.92% + MCE HY-B0461 + FDA Rozerem 2005 MT1-potent ERK probe,2026-11-06
+W16-CH-02,Selleck,S4281,DrugBank tasimelteon,Selleck S4281 tasimelteon In-Stock 99.74% + MCE HY-14898 + FDA Hetlioz 2014 + EMA EPAR MT2-biased entrainment,2026-11-06
+W16-CH-03,Selleck,S1243,,Selleck S1243 agomelatine In-Stock 99.89% + MCE HY-14278 + EMA Valdoxan 2009 MT+5HT2C BDNF/Arc/neurogenesis + LFT-monitor flag,2026-11-06
+W16-KILL-MELATONIN,,,Selleck S1204-ref-only,Melatonin KILL logP 0.8<1.5 floor (endogenous reference tool only; Circadin/Slenyto same API — not separate),2026-11-06
+W16-KILL-KYN,,,10-kills-mapped,Kynurenine/metabolite systematic dead-end: kynurenic MW+logP, xanthurenic logP+TPSA, quinolinic MW+logP+TPSA, cinnabarinic logP+TPSA+HBA, 3HK logP+TPSA+HBD, tryptamine MW, serotonin MW+logP, 5HTP logP+TPSA+HBD, Trp logP+TPSA, nicotinamide MW+logP — PUG numbers,2026-11-06
+W17-EPI-01,,,DrugBank perampanel,FDA Fycompa NDA 202834 (2012) non-competitive AMPA antagonist — only ARC/LTD-direct antiepileptic; research catalogs stocked,2026-11-06
+W17-SIG-01,Tocris,0589,,Tocris 0589 + Selleck S6950 In-Stock + Cayman 9001329 PRE-084 gold-standard sigma-1 probe (Ki 2.2nM),2026-11-06
+W17-OX-01,Tocris,3371,,Tocris 3371 + MCE HY-100452 + HelloBio HB3225 TCS-OX2-29 OX2-selective (approved DORAs all fail TPSA/MW/logP),2026-11-06
+W17-SIG-02,MCE,HY-105296,,MCE HY-105296/101864 In-Stock blarcamesine (ANAVEX2-73 AD Ph2/3, sigma-1+muscarinic),2026-11-06
+W17-KILL-EPI,,,7-kills-mapped,Lacosamide/eslicarbazepine/brivaracetam/zonisamide/rufinamide/stiripentol/cannabidiol killed on logP/TPSA with PUG numbers (eslicarb-acetate TPSA-rescue fails too),2026-11-06
+W17-KILL-DORA-S1,,,5-kills-mapped,Suvorexant 3-fail + lemborexant TPSA-only + daridorexant 3-fail + SA4503 logP/RB + igmesine logP/RB — approved DORAs out of PNN box,2026-11-06
+W18-AD-01,MCE,HY-W380450,DrugBank viloxazine,MCE HY-W380450/HY-125784 + FDA Qelbree 2021/2022 SNMA PFC-hook (logP at floor flag),2026-11-06
+W18-MIG-01,,,DrugBank lasmiditan,FDA Reyvow 2019 ditan 5-HT1F 6/6 pass — vendor SKU confirm at order,2026-11-06
+W18-AE-01,,,DrugBank ondansetron,FDA Zofran 1991 5-HT3 clean 6/6 pass — vendor SKU confirm at order,2026-11-06
+W18-KILL-ADHD,,,4-kills-mapped,Atomoxetine logP + guanfacine TPSA + pitolisant logP/RB + solriamfetol triple-fail — PUG numbers,2026-11-06
+W18-KILL-MIG,,,5-kills-mapped,Varenicline logP + cytisine MW/logP + aprepitant 4-fail + rimegepant/ubrogepant MW/TPSA/HBA — gepant class MW-dead,2026-11-06
+W19-KILL-AH,,,5-kills-mapped,Loratadine logP5.2 + desloratadine logP4.5 + cetirizine RB8 + fexofenadine MW/TPSA/RB + ebastine MW/logP/RB — 2nd-gen antihistamines systematically out (S1358 live proves sourcing not blocker),2026-11-06
+W19-KILL-CV,,,5-kills-mapped,Losartan 3-fail + valsartan 3-fail + pitavastatin TPSA/RB + ezetimibe logP-only + fenofibrate logP — ARB/statin/cholesterol out of PNN box,2026-11-06
+W20-KILL-SPASM,,,6-kills-mapped,Dantrolene TPSA + tizanidine 2-fail + baclofen logP + tolterodine/oxybutynin/solifenacin logP(+RB) — relaxant/bladder shelf dead,2026-11-06
+W20-KILL-GOUT,,,5-kills-mapped,Febuxostat logP/TPSA + colchicine logP/TPSA + allopurinol 3-fail + pirfenidone MW-only + nintedanib 4-fail — gout/fibrosis shelf dead,2026-11-06
+W21-AP-01,,,DrugBank praziquantel,FDA Biltricide NDA 018714 + Sigma P4668 — neuroinflammation-bridge anthelmintic,2026-11-06
+W21-AP-02,,,DrugBank levamisole,FDA Ergamisol + Sigma L9756/31742 — CNS nicotinic immunomodulator,2026-11-06
+W21-AM-01,,,DrugBank primaquine,FDA 8-aminoquinoline 6/6 pass — expect-fail refuted,2026-11-06
+W21-KILL-PARA,,,4-kills-mapped,Albendazole/mebendazole TPSA + ivermectin 5-fail + DEC MW/logP — PUG numbers,2026-11-06
+W21-KILL-AFAM,,,4-kills-mapped,Fluconazole logP/TPSA + ketoconazole MW/logP + chloroquine logP/RB + HCQ logP/RB — BBB label not enough,2026-11-06
+W22-GI-01,Selleck,S5862,DrugBank metoclopramide,FDA Reglan + Selleck S5862 In-Stock 99.95% — brain-penetrant D2/5-HT4 (EPS proves BBB),2026-11-06
+W22-AE-01,Selleck,S5052,DrugBank granisetron,FDA Kytril NDA020239 + Selleck S5052 In-Stock,2026-11-06
+W22-AE-02,Selleck,S5740,DrugBank palonosetron,FDA Aloxi NDA021372 + Selleck S5740 In-Stock,2026-11-06
+W22-AE-03,Selleck,S5326,DrugBank dolasetron,FDA Anzemet oral ACTIVE + Selleck S5326/Cayman 22234 — IV withdrawn QT, oral remains (flag),2026-11-06
+W22-AE-04,Selleck,S3723,,JP/KR Nasea approval + Selleck S3723 HCl In-Stock — HCl MW 315.80 still passes,2026-11-06
+W22-KILL-GI,,,5-kills-mapped,Domperidone logP + mosapride/prucalopride TPSA + itopride RB + tropisetron logP3.8 — PUG numbers,2026-11-06
+W30-PR-01,,,DrugBank norethindrone,FDA + MCE HY-B0554/Cayman 15597 — PR/MMP-suppression PNN angle,2026-11-06
+W30-PR-02,Sigma,L1799,DrugBank levonorgestrel,Sigma L1799 + MCE HY-B0202/Selleck S1382 (verify live) — potent gonane PR,2026-11-06
+W30-PR-03,Sigma,M1629,DrugBank medroxyprogesterone,Sigma M1629 base (logP-bound) — acetate form killed logP4.1, use base only,2026-11-06
+W30-PR-04,Sigma,SML1684,DrugBank drospirenone,Sigma SML1684 + MCE HY-B0154 (logP-bound) — antimineralocorticoid/antiandrogenic contrast,2026-11-06
+W30-KILL-AA,,,3-kills-mapped,Flutamide TPSA + bicalutamide TPSA/HBA + enzalutamide 4-fail — AR antagonists out,2026-11-06
+W29-ES-01,Selleck,S1196,DrugBank exemestane,Selleck S1196 In-Stock 99.96% + FDA Aromasin — steroidal irreversible AI (triazoles TPSA-dead),2026-11-06
+W29-KILL-SERM,,,3-kills-mapped,Tamoxifen logP/RB + raloxifene triple + clomifene logP/RB — ER-microglia hook real, chemistry out,2026-11-06
+W29-KILL-AI,,,2-kills-mapped,Letrozole/anastrozole identical TPSA 78.3 — triazole nonsteroidals share the fail,2026-11-06
+W26-KILL-JAK,,,4-kills-mapped,Tofacitinib/baricitinib/ruxolitinib/upadacitinib — JAK class systematically TPSA>70 (pyrrolo-pyrimidine pattern + backups),2026-11-06
+W26-KILL-BTK,,,4-kills-mapped,Ibrutinib/evobrutinib/zanubrutinib/tolebrutinib — BTK class logP+TPSA/MW (even CNS-designed tolebrutinib TPSA92),2026-11-06
+W23-KILL-MYCO,,,4-kills-mapped,Dapsone/benznidazole logP+TPSA + ethambutol triple + ethionamide triple — approvals noted, filters kill,2026-11-06
+W23-KILL-PG,,,4-kills-mapped,Latanoprost 3-fail + bimatoprost 3-fail + travoprost 5-fail + tafluprost 4-fail — prostanoid backbone systematically RB12-14/TPSA76-96,2026-11-06
+W24-RAC-01,Sigma,A9950,,Sigma A9950/504913 + Cayman 17752 + Selleck S1281 + Tocris 0867 aniracetam 6/6 — AMPA-PAM + cholinergic ARC hook,2026-11-06
+W202-CM-01,,,FDA Camzyos 2022 + EMA 2023,Myosin inhibitor 6/6 full pass (PUG CID 117761397) — vendor SKU confirm at order,2026-11-06
+W202-KILL-ANGINO,,,6-kills-mapped,Ranolazine TPSA/RB + ivabradine extracorporeal-MW/logP + trimetazidine logP + levosimendan TPSA + omecamtiv logP/TPSA + aficamten TPSA-only (PUG CID 139331495 verified 2026-11-06)
+W24-KILL-RAC,,,7-kills-mapped,Phenylpiracetam logP + pramiracetam logP + oxiracetam triple + fasoracetam MW/logP + coluracetam TPSA + nefiracetam logP-marginal + seletracetam logP — PUG numbers,2026-11-06
+W201-ZERO-CLOBAZAM,,,stays-synonym,Clobazam live-SKU hunt exhausted ALL routes (Selleck 404, MCE/ChemScene 403, Cayman JS-wall, Tocris timeout, GlpBio/AdooQ/TargetMol 404/412, websearch quota out) — 0 new/0 kills = ZERO-WAVE 1,2026-11-06
+W200-BZ-01,,,FDA Onfi Lennox-Gastaut,1,5-benzodiazepine 6/6 full pass + MIDAZOLAM-neighbor note (W57 midazolam converted) — vendor SKU confirm at order,2026-11-06
+W200-KILL-BZ,,,2-kills-mapped,Vigabatrin MW/logP + clonazepam TPSA-only — GABAergic file fully closed (retigabine/tiagabine/clobazam split),2026-11-06
+W199-KILL-ANTIEPI,,,2-kills-mapped,Retigabine TPSA + tiagabine TPSA-only — GABAergic antiepileptics closed,2026-11-06
+W198-KILL-IMSUP,,,2-kills-mapped,Benzbromarone logP-only (+withdrawn FR/ES) + mycophenolate TPSA/HBA/RB triple (CID 5281078),2026-11-06
+W197-CONV-BUP,,,GlpBio GC14714 In-Stock 10mM $39/50mg $49 (HCl CAS 31677-93-7) — W2-CNS-01 Tier B upgraded from synonym,2026-11-06
+W197-CONV-ESCIT,,,GlpBio GC13161 In-Stock $35-231 + Selleck E4898 In-Stock cross-confirm — W2-CNS-02 upgraded,2026-11-06
+W197-STAYS-PHENY,,,phenytoin stays-synonym (Selleck 404/country-chooser, MCE 403, Sigma/Tocris timeouts, search 402) — retry with fresh quota or browser,2026-11-06
+W196-BB-01,GlpBio,GC17734,,GlpBio GC17734 In-Stock 50mg $42 (Visken, ORANGE BOOK, USP) — CONVERTED 6/6, counter reset,2026-11-06
+W196-KILL-BB,,,3-kills-mapped,Nebivolol TPSA-only + bisoprolol RB-only + acebutolol TPSA/RB — beta-blocker shelf fully closed,2026-11-06
+W195-ZERO-TEGO,,,stays-synonym,Tegoprazan live-SKU hunt blocked on all routes (403/quota) — 0 new/0 kills = ZERO-WAVE 1,2026-11-06
+W194-KILL-SNRI,,,3-kills-mapped,Duloxetine lipophilic + milnacipran/levomilnacipran polar-floor fails — SNRI leftover shelf closed,2026-11-06
+W193-KILL-URICOS,,,3-kills-mapped,Probenecid TPSA-only + lesinurad logP/TPSA + cinacalcet logP-only — uricosuric/calcimimetic shelf closed; counter reset,2026-11-06
+W192-KILL-SULFA,,,4-kills-mapped,Sulfamethoxazole/trimethoprim/sulfadiazine logP+TPSA + sulfasalazine logP/TPSA/HBA — sulfonamide file closed,2026-11-06
+W191-KILL-THAL,,,1-killed,Thalidomide logP/TPSA dual-fail (CID 5426; history context only) — IMiD family fully closed with W190,2026-11-06
+W190-KILL-IMID,,,4-kills-mapped,Pomalidomide/iberdomide logP/TPSA + mezigdomide 4-fail + avadomide logP/TPSA — IMiD/CELMoD file closed; counter reset,2026-11-06
+W189-MPO171,,,171-profiled,Wave189: MPO over 53 files/171 unique (0 dupes) → 0 DEVELOPMENT / 171 OPTIMIZATION_LEAD. Count corrected 157->171 (tally drift, files ground truth). Buy-list refreshed unchanged (same F-filled top + same flags). 0 new/0 kills = ZERO-WAVE 1,2026-11-06
+W188-HAL-01,GlpBio,GC17599,,GlpBio GC17599 In-Stock (10mM $15 / 25mg $14; CAS 52-86-8) — CONVERTED from W187 park; SMILES intentionally blank (no fabrication),2026-11-06
+W187-KILL-TYP2,,,4-kills-mapped,Chlorpromazine logP + flupenthixol logP-near-miss + zuclopenthixol/trifluoperazine logP — typical-antipsychotic file fully closed,2026-11-06
+W187-PARK-HALO,,,parked-provisional,Haloperidol 6/6 (PUG CID 3559; MW 375.9/logP 3.2/TPSA 40.5) but NO live SKU checked — convert on live-SKU hunt,2026-11-06
+W186-KILL-ATYP,,,3-kills-mapped,Pimavanserin logP/RB + lumateperone logP (lumateperin = misspelling, no CID) + brexpiprazole logP/TPSA — atypical file closed,2026-11-06
+W185-CONV-RAS,,,Biomol TGM-T200035 In-Stock raseglurant (CAS 757950-09-7, ADX-10059 synonym) 25mg 1440EUR — W12 verified,2026-11-06
+W185-CONV-DIPR,,,Biomol TGM-T15134 + Cayman 42535 In-Stock dipraglurant (CAS 872363-17-2, ADX48621) — W12 verified; Cayman catalog live title,2026-11-06
+W185-CONV-FEX,,,Biomol/Cayman Abeprazan=Fexuprazan CAS 1902954-60-2 In-Stock (Cay45283) + TGM-T10221 — W104 verified as abeprazan synonym,2026-11-06
+W185-CONV-APAU,,,Biomol Cayman-38346 AR-9281/APAU In-Stock (CAS 913548-29-5, UC1153) — W99 converted,2026-11-06
+W185-STAYS-MAV,,,mavoglurant stays-synonym: exact-enantiomer 543906-09-8 only BOCSci inquiry; Biomol racemate-only — distinct-CAS rule,2026-11-06
+W184-KILL-PYRIM,,,4-kills-mapped,Cytarabine/gemcitabine/azacitidine/decitabine logP/TPSA (+HBD) — nucleoside-pattern kills confirmed; approvals moot,2026-11-06
+W183-KILL-PURINE,,,5-kills-mapped,Fludarabine 2/6 + clofarabine 3/6 + pentostatin 3/6 + nelarabine/ara-G 4-6/6 (Selleck live moot) + Arranon neurotoxicity flag — nucleoside shelf closed,2026-11-06
+W182-KILL-CLAD,,,1-killed,Cladribine logP/TPSA dual-fail (nucleoside polarity pattern) — purine-analog MS angle closed,2026-11-06
+W181-KILL-VDR,,,4-kills-mapped,Paricalcitol/doxercalciferol/alfacalcidol logP-only + eldecalcitol 5-fail — secosteroid = lipophilic-outlier class; VDR file closed,2026-11-06
+W180-LAS-CONFIRM,GlpBio,GC15121,,GlpBio GC15121 In-Stock 5mg$193 (COL-144/LY573144) — W18-MIG Tier B upgraded from approval-only,2026-11-06
+W180-OND-CONFIRM,Tocris,2891,,Tocris 2891 live on rndsystems.com (post-migration) + Wako/Fujifilm priced + Labome $144 — W18-AE Tier B upgraded,2026-11-06
+W179-KILL-COMT,,,3-kills-mapped,Tolcapone/entacapone TPSA-only + opicapone TPSA/HBA (peripheral by design) — COMT file closed,2026-11-06
+W178-KILL-AADC,,,2-kills-mapped,Carbidopa triple-fail (logP/TPSA/HBD; peripheral-by-design, live S1891 moot) + benserazide triple-fail (target-miss + BBB hard-fail by design) — counter reset,2026-11-06
+W177-APO-STAYS,,,stays-synonym,Apomorphine live-SKU hunt exhausted BOTH attempts (Selleck 404/MCE 403/Cayman JS/Tocris timeout/GlpBio 404/AdooQ 403/TargetMol 412/ChemScene 403; Cayman-16094 exists but JS-walled) — 0 new/0 kills = ZERO-WAVE 1,2026-11-06
+W176-KILL-DPP4,,,4-kills-mapped,Sitagliptin 3/6 + saxagliptin/linagliptin/alogliptin 4/6 — DPP-4 peripheral-polarity class dead,2026-11-06
+W175-TEGO-CONFIRM,GlpBio,GC31566,,GlpBio GC31566 In-Stock 1mg$56 + AdooQ A20873 In-Stock 1mg$40 — W103 Tier B upgraded to dual live (SMILES match),2026-11-06
+W175-FEX-STAYS,,,fexuprazan stays-synonym,All routes dead/blocked (GlpBio 0-results, AdooQ/MCE/Cayman/Tocris/TargetMol/ChemScene blocked, Selleck 404, Exa quota out) — stays PUG-synonym,2026-11-06
+W174-APO-CONFIRM,AdooQ,A46016,,AdooQ A46016 In-Stock 1mg$300 — W171 Tier B upgraded from synonym-only (Selleck/MCE dead ends documented),2026-11-06
+W173-KILL-BENZ,,,4-kills-mapped,Amisulpride TPSA + tiapride logP/TPSA/RB + sulpiride logP/TPSA + sultopride TPSA — benzamide class polarity-incompatible; counter reset,2026-11-06
+W172-ZERO-MGLU,,,zero-wave,Wave172 mGluR NAM live-SKU hunt: all routes bot-walled (MCE 403, Cayman JS, TargetMol 412, AdooQ 403, Selleck/GlpBio 404, Tocris timeout, Exa quota out) — 0 new/0 kills = ZERO-WAVE 1, all 3 stay synonym-level,2026-11-06
+W171-APO-01,,,DB00714 Apokyn/Kynmobi,Apomorphine 6/6 (PUG CID 6005 + CS-0012299/EN300-synonym) — INJECTABLE/SUBLINGUAL caveat (not oral); Tier B on chemistry,2026-11-06
+W171-KILL-DA,,,2-kills-mapped,Pramipexole TPSA-only + rotigotine logP-only — dopamine-agonist file closed (ropinirole + apomorphine pass),2026-11-06
+W170-KILL-ACH,,,3-kills-mapped,Trihexyphenidyl/Biperiden/procyclidine logP (+BBB-label moot per W21 precedent) — anticholinergic file closed, homatropine sole passer,2026-11-06
+W169-HM-01,Sigma,USP1310008,,Sigma USP 1310008 $417 CRM + SIAL PHR3182 (CRM) + EP H0800000 + MCE HY-B0547AR — CONVERTED 6/6,2026-11-06
+W169-KILL-ANTI,,,4-kills-mapped,Anisotropine logP + MeBr-quat no-logP + emepronium logP/charged + clidinium charged-despite-6/6 (charge-precedent reinforced) — wave MUST-DELIVER satisfied,2026-11-06
+W168-FENFEN-STAYS,,,confirmed-approval-only,Fenfluramine racemate: no live SKU (Selleck/MCE/Cayman/Tocris/GlpBio/AdooQ all dead or dex-only) — CAS corrected to 404-82-0 HCl (not 404-82-4); Cayman-39831 IS dexfenfluramine (do not misattribute); Wako JP standard out-of-scope; DEA-SCH-IV explains gating. 0 new/0 kills = ZERO-WAVE 1,2026-11-06
+W167-PHEN-CONFIRM,Cayman,24037,,Cayman 24037 live (50g $32) + GlpBio GC16086 In-Stock — W2-CNS-04 upgraded synonym to live. Tocris/AdooQ no base SKU,2026-11-06
+W166-ESC-CONFIRM,Selleck,S4064,,Selleck S4064 In-Stock 50mg$147 1g$670 + Cayman 39841 + Tocris 4796 + MCE HY-14258A + GlpBio GC16797 + AdooQ A16533 — 6-vendor live,2026-11-06
+W166-BUP-CONFIRM,GlpBio,GC14714,,GlpBio GC14714 In-Stock HCl 50mg$49 (CAS 31677-93-7) — W2-CNS-01 upgraded synonym to live,2026-11-06
+W165-OND-CONFIRM,GlpBio,GC16142,,GlpBio GC16142 In-Stock 1mg$11 — W18-AE-01 upgraded from approval-only to live,2026-11-06
+W165-LAS-CONFIRM,GlpBio,GC36428,,GlpBio GC36428 HCl In-Stock 5mg$89 — W18-MIG-01 upgraded from approval-only to live,2026-11-06
+W164-LOX-01,,,DB00408 Loxitane/Adasuve,Loxapine 6/6 (logP 3.1 at ceiling, TPSA 28.1) + live LKT/Midas/Molport SKU — CONVERTED with D2/5-HT2 craving-behavior hook,2026-11-06
+W164-KILL-CLASSICAP,,,3-kills-mapped,Perphenazine logP + fluphenazine logP/HBA + thiothixene logP/TPSA — classic-antipsychotic file fully closed (amoxapine/loxapine sole passers),2026-11-06
+W164-DONE-CONFIRM,Selleck,S5073,,Selleck S5073 live re-fetch CONFIRMED: title In-Stock + JSON-LD InStock $147 + .cn 25mg 794.65 + CAS 120014-06-4 match,2026-11-06
+W164-RILZ-REPATH,,,DrugBank riluzole,SELLICK S1614 UNCONFIRMED direct (404/chooser = bot-block, not delisting) — RE-PATHED via live MCE HY-B0211 (NOT HY-0149, correct the record) + Cayman 35833/14577 + Tocris 0761,2026-11-06
+W162-NAL-SINGLE,,,single-source-confirmed,Naltrindole second-SKU hunt exhausted all routes (Cayman/Tocris/MCE/Selleck/AdooQ/TargetMol/ChemScene) — GC13688 stands alone. 0 new/0 kills = ZERO-WAVE 1,2026-11-06
+W161-NALMEFENE,,,DrugBank nalmefene + EMA Selincro,GlpBio GC26177 In-Stock from $54 + AdooQ A13892 In-Stock from $25 — UPGRADED from approval-only to dual live SKU,2026-11-06
+W160-SB408124-2ND,AdooQ,A11567,,AdooQ A11567 In-Stock $35/5mg (CAS 288150-92-5, C19H18F2N4O) — second vendor beside S1545; logP-ceiling flag stands,2026-11-06
+W159-SAR167,,,167-profiled,Wave159: pnn.sar Bemis-Murcko over 49 files → 95 scaffolds across 101 SMILES-bearing (65 no-SMILES excluded) → 0 priority series (no measured EC50/docking in wave files, expected). COUNT CORRECTED to 167 unique (0 dupes). Outputs in output/wave159_sar.* (ignored). 0 new/0 kills = ZERO-WAVE 1,2026-11-06
+W158-NAL-01,GlpBio,GC13688,,GlpBio GC13688 In-Stock 1mg$49 — CONVERTED from W130 research-grade-only park (6/6 + PUG CID 5497186),2026-11-06
+W157-LB-01,AdooQ,A18262,,AdooQ A18262 In-Stock $35/5mg + GlpBio GC30167 In-Stock — CONVERTED from W156 park,2026-11-06
+W157-BAY3RD,MCE,HY-104028,,MCE HY-104028 In-Stock (third vendor for R-form) + A17024/GC30923 re-confirmed live — W143 proof deepened,2026-11-06
+W157-INDE-PARKED,,,confirmed-park,Indecainide 6/6 but zero live research SKU (Cayman/ChemScene/TargetMol/BOC/AdooQ/GlpBio/LGC all dead) — stays parked,2026-11-06
+W156-KILL-CART,,,1-killed,Carteolol logP/TPSA (timolol/betaxolol already dead W112 — no re-swarm),2026-11-06
+W156-PARK-LEVO,,,parked-provisional,Levobunolol 6/6 but search provider exhausted, no live SKU verified — convert on SKU proof,2026-11-06
+W155-KILL-MIOTIC,,,3-kills-mapped,Pilocarpine logP-floor 1.1 (5/6; E7001 live + FDA moot — PARK reserved for unevaluable/no-SKU cases) + carbachol MW/logP-null/quaternary + echothiophate logP/RB/quaternary — miotic file closed,2026-11-06
+W154-KILL-OCUHYP,,,4-kills-mapped,Brimonidine/apraclonidine logP-only near-miss pair + dorzolamide TPSA/logP + brinzolamide triple — ocular hypotensives out,2026-11-06
+W153-KILL-TOPAA,,,2-kills-mapped,Alfatradiol logP (PUG governs over CDK/ChEMBL) + clascoterone logP/TPSA — topical AA file closed,2026-11-06
+W152-KILL-BLADD2,,,2-kills-mapped,Propiverine logP/RB (dual MoA moot) + flavoxate logP-narrow (FDA-approved yet failing) — bladder fully closed incl. leftovers,2026-11-06
+W151-PARK-DEXFEN2,,,confirmed-park,Dexfenfluramine CRM hunt exhausted (Cayman/Cerilliant/TRC/LGC/Chiron/Lipomed/MCE/Selleck/Sigma/GlpBio/AdooQ/ChemScene/HY — zero hits) — stays parked; 0 new/0 kills = ZERO-WAVE 1,2026-11-06
+W150-KILL-LIPASE,,,4-kills-mapped,Orlistat 2/6 + cetilistat 4/6 (over-lipophilic alkyl pharmacophore) + setmelanotide 0/6 peptide-injectable + phentermine MW-floor — lipase/MC4R file closed,2026-11-06
+W149-MPO165,,,165-profiled,Wave149: fourth full-list MPO over 47 files → 0 DEVELOPMENT / 165 OPTIMIZATION; top band: F-filled 7 at D 0.563 + 6.00-CNS cluster (farampator/levamisole/aniracetam/MB/pyrantel/morantel/CX-614/MTEP). COUNT CORRECTED to 165 (tally drift, data clean, 0 dupes). 0 new/0 kills = ZERO-WAVE 1,2026-11-06
+W149-BUYLIST,,,refresh,REFRESHED T1 (approved+live/enriched): donepezil/riluzole/carbamazepine/galantamine/ambroxol/ropinirole/venlafaxine + praziquantel/ondansetron/aniracetam 6.00-band + nevirapine-boxed + SB-408124 + BAY-73-6691 + dextrorphan + clioquinol(logP-bound flag),2026-11-06
+W148-KILL-CANMIN,,,4-kills-mapped,CBG logP/RB + CBN/CBC/THCV logP-only — terpene-phenol scaffold class-fail; cannabinoid file fully closed (7 agents),2026-11-06
+W147-KILL-CB1,,,3-kills-mapped,Surinabant MW/logP + otenabant triple + ibipinabant triple — CB1-antagonist file fully closed (rimonabant already dead),2026-11-06
+W145-AH-CONFIRM,GlpBio,GC10208/GC32176/GC32285,,GlpBio live In-Stock: pyrantel-pamoate GC10208 / oxantel-pamoate GC32176 / morantel-TARTRATE GC32285 — salt-corrected: pamoate-base MW adjust; morantel tartrate not citrate,2026-11-06
+W144-MOXI-UPGRADE,GlpBio,GC32485,,GlpBio GC32485 In-Stock 5mg$18 + AdooQ A17725 In-Stock + Selleck S5666 In-Stock + MCE HY-B1435 — W80 Tier B proof upgraded to live (4 vendors),2026-11-06
+W143-BAY-01,GlpBio,GC30923,DrugBank BAY736691,GlpBio GC30923 (R)-form In-Stock 5mg$138 + AdooQ A17024 In-Stock — CONVERTED from W136 park (6/6 + logP-boundary flag survives),2026-11-06
+W143-FX-CONFIRM,Cayman,45283,,Cayman 45283 Abeprazan(=fexuprazan) GH + TargetMol T10221 In-Stock + MCE HY-109179 — W104 Tier B proof upgraded to live,2026-11-06
+W143-RILO-CONFIRM,MCE,HY-113863,,MCE HY-113863 In-stock ship-TODAY + Tebubio EU T26087 In-stock — W76 Tier B proof upgraded to live,2026-11-06
+W143-APAU-STILLPARKED,,,NOT-FOUND,APAU HY-11114 live-SKU hunt failed on all routes (403/timeout/quota) — stays parked, MCE-synonym only,2026-11-06
+W142-KILL-PDE8,,,2-kills-mapped,PF-04957325 triple (live Selleck/MCE SKUs moot) + PF-04671536 triple — PDE8 closed, PDE file complete,2026-11-06
+W141-KILL-PDECOG,,,2-kills-mapped,Zatolmilast logP-only (allosteric-mechanism moot) + HT-0712 logP-only (discontinued Phase 2) — PDE-cognition closed, rolipram sole passer,2026-11-06
+W140-KILL-ADEN,,,4-kills-mapped,CVT-6883/GS-6201 same-CID + piclidenoson + namodenoson + MRS1523 (antagonist mismatch) — A2B/A3 shelf closed,2026-11-06
+W139-KILL-A2AAG,,,3-kills-mapped,Regadenoson/binodenoson nucleoside-pattern + apadenoson 1/6 labile-ester — A2A flipside closed,2026-11-06
+W138-KILL-A1AG,,,3-kills-mapped,Neladenoson 5/6-fail + capadenoson 5-fail + tecadenoson nucleoside-pattern 4-fail — A1-agonist shelf closed,2026-11-06
+W137-KILL-PDE2,,,2-kills-mapped,BAY 60-7550 4-fail + EHNA TPSA-only — PDE2 closed (PDE1 killed W3, PDE6 n/a),2026-11-06
+W136-KILL-PDE911,,,2-kills-mapped,BI 409306 logP/TPSA + BC11-38 logP/TPSA — PDE9/11 tool shelf dead,2026-11-06
+W136-PARK-BAY732,,,parked-provisional,BAY 73-6691 6/6 but tool-only + no live Selleck SKU (MCE/HY/CS/MS synonym-presence only) — convert on live SKU,2026-11-06
+W135-KILL-PDE710,,,4-kills-mapped,Papaverine logP + BRL-50481 logP/TPSA + edelinontrine logP/TPSA + balipodect logP/TPSA (SMILES on record) — PDE7/10 closed, PDE3/4 passers stand,2026-11-06
+W134-KILL-PDE4C,,,3-kills-mapped,GSK-256066 triple + oglemilast 4-fail + tofimilast TPSA-near-miss (no rounding) — PDE file fully closed, rolipram sole passer,2026-11-06
+W133-KILL-PDE4B,,,2-kills-mapped,Cilomilast TPSA-near-miss (research SKUs moot) + AWD-12-281 triple (GSK-842470 identity) — PDE4 leftovers closed,2026-11-06
+W132-KILL-CENER,,,1-killed,Cenerimod 5/6-fail (MW/logP/TPSA/HBA/RB) — S1P fully closed (ponesimod already dead W27, no re-swarm),2026-11-06
+W131-KILL-S1P2,,,3-kills-mapped,Etrasimod MW/logP + amiselimod triple + phosphate-metabolite 6-fail — S1P file fully closed,2026-11-06
+W130-KILL-KNT127,,,1-killed,KNT-127 logP-only fail (ChEMBL alogp cross-check) — DOR-agonist chemistry dead,2026-11-06
+W130-PARKED-DOR,,,2-parked,Naltrindole 6/6 tool (APExBIO-title SKU, max-phase-null — research-grade only) + TRV250 undisclosed-structure (Phase1/2 oral, no CID/SMILES — re-score at disclosure),2026-11-06
+W129-KILL-KOR,,,2-kills-mapped,Aticaprant logP-only (JNJ discontinued Mar-2025 not Dec-2024 — corrected) + navacaprant 4-fail — KOR file closed,2026-11-06
+W128-KILL-NOP,,,2-kills-mapped,Sunobinop logP/TPSA + cebranopadol logP-only — NOP system closed,2026-11-06
+W127-KILL-OXAG2,,,2-kills-mapped,TAK-861 4-fail (MW/logP/TPSA/HBA) + ledasorexton TPSA-only (E2086 = INN ledasorexton) — OX2-agonist family closed,2026-11-06
+W126-KILL-OXAG,,,2-kills-mapped,Danavorexton TPSA-only (SMILES on record) + firazorexton MW/TPSA/HBA (hydrate checked, logP-null no fabrication) — OX2-agonist flipside closed,2026-11-06
+W125-OX-01,Selleck,S1545,,Selleck S1545 In-Stock batch S154501 (logP at 3.5 ceiling — verify-boundary tier) + OX1 Ki 27-57nM ~50x selective,2026-11-06
+W125-KILL-OX,,,2-kills-mapped,SB-334867 TPSA-only (first-gen) + almorexant triple (Phase-3 discontinued) — orexin file closed with TCS-OX2-29,2026-11-06
+W124-KILL-NKN,,,5-kills-mapped,Saredutant triple + nepadutant peptide 6/6-out + osanetant triple + talnetant logP-only + ezlopitant triple (brief eslopitant = name variant) — neurokinin family closed,2026-11-06
+W123-KILL-NK1B,,,3-kills-mapped,Fosaprepitant 4-fail (charged phosphate/IV) + orvepitant/vestipitant triple-fail — NK1 file FULLY closed (6 antagonists),2026-11-06
+W122-KILL-NK1,,,2-kills-mapped,Rolapitant 3-fail + netupitant MW/logP (verify-then-swarm clean) — NK1 file fully closed (aprepitant/maropitant already dead),2026-11-06
+W121-KILL-BLAD2,,,4-kills-mapped,Fesoterodine/darifenacin/trospium logP + mirabegron TPSA/HBD/RB — bladder file fully closed (6 antimuscarinics + beta-3 all dead),2026-11-06
+W120-KILL-REMY,,,2-kills-mapped,Benztropine/miconazole logP-only (M1/OPC hooks real but insufficient) — remyelination file closed with clemastine-parked,2026-11-06
+W119-AD-01,Selleck,S4687,DrugBank DB00893,Selleck S4687 In-Stock 99.98% + 35 DailyMed labels (Exelon capsules/patch generics) — dual AChE/BChE hook, GI/titration caveat,2026-11-06
+W119-KILL-AD2,,,2-kills-mapped,Memantine MW-floor + tacrine MW-floor/hepatotoxicity — AD file closed (donepezil + galantamine + rivastigmine pass),2026-11-06
+W118-KILL-LIPID2,,,3-kills-mapped,Bempedoic acid triple + icosapent ethyl/EPA double (ethyl-ester pattern; metabolite arc closed) — lipid file closed (statins/fibrates/ezetimibe/ACL/omega-3 all dead),2026-11-06
+W117-KILL-MRA,,,3-kills-mapped,Spironolactone TPSA + eplerenone logP/TPSA + finerenone TPSA-only — steroidal/nonsteroidal MRA class polarity-blocked; audit caught Cycle-115 re-search error first,2026-11-06
+W116-KILL-LIPID,,,3-kills-mapped,Bempedoic acid triple + icosapent ethyl/EPA double (ethyl-ester pattern; metabolite arc closed) — lipid file closed (statins/fibrates/ezetimibe already dead),2026-11-06
+W115-KILL-FIBRATE,,,4-kills-mapped,Gemfibrozil/bezafibrate logP (+TPSA) + fenofibric acid logP + fenofibrate-reference logP — fibrate file closed (metabolite arc documented),2026-11-06
+W114-KILL-KCH,,,2-kills-mapped,Minoxidil logP/TPSA + nicorandil logP/TPSA — K-channel corner closed,2026-11-06
+W113-KILL-CCB,,,6-kills-mapped,Verapamil MW/logP/RB + diltiazem TPSA + amlodipine/nifedipine TPSA (+RB) + nimodipine TPSA/HBA/RB despite real brain exposure + felodipine logP — CCB file closed,2026-11-06
+W112-KILL-BBLOCK,,,3-kills-mapped,Timolol TPSA/HBA + betaxolol RB-only-near-miss + nadolol triple — beta-blocker file closed, propranolol sole passer,2026-11-06
+W111-BB-01,,,DrugBank propranolol Inderal,FDA approval + CNS-active lipophilic beta-blocker — adrenergic ARC comparator,2026-11-06
+W111-KILL-BB,,,3-kills-mapped,Metoprolol RB + atenolol triple + carvedilol triple — beta-blocker file closed with propranolol sole passer,2026-11-06
+W110-PARK-INDEC,,,parked-provisional,Indecainide 6/6 (CID 52195, RB6-ceiling) but discontinued/never-marketed + no live SKU found — metabolite-rule analogue; convert on SKU proof only,2026-11-06
+W110-KILL-IC,,,3-kills-mapped,Encainide/lorcainide logP + moricizine TPSA (CAST/withdrawn noted) — Ic file closed except indecainide-parked,2026-11-06
+W109-KILL-AA,,,4-kills-mapped,Flecainide logP/HBA + propafenone RB + amiodarone triple + dronedarone 4-fail — antiarrhythmic file closed despite real CNS signals,2026-11-06
+W108-PDE-01,Selleck,E4924,DrugBank Agrylin NDC,FDA/DailyMed Agrylin + Selleck E4924 In-Stock 98.90% — PDE3 platelet reference, rigid zero-RB scaffold,2026-11-06
+W108-KILL-PDE3,,,2-kills-mapped,Milrinone logP-floor + enoximone TPSA-only — PDE file closed (anagrelide + rolipram passers),2026-11-06
+W107-KILL-HEMO,,,2-kills-mapped,Pentoxifylline logP/TPSA + cilostazol TPSA-only — PDE-inhibitor polar pattern; rolipram sole passer,2026-11-06
+W106-KILL-NO,,,4-kills-mapped,Nitroglycerin TPSA/HBA + isosorbide dinitrate TPSA/HBA/logP + molsidomine TPSA-only + linsidomine MW/logP — NO-donor side closed with PDE5/sGC,2026-11-06
+W105-KILL-PGE,,,2-kills-mapped,Misoprostol TPSA/HBD/RB (+labor black-box) + enprostil TPSA/RB/logP — prostanoid pattern holds; PGE shelf closed,2026-11-06
+W104-FX-01,,,MFDS Fexuclue 2021-12-30,MFDS 40mg erosive-GERD + SMILES CID-verified — confirm live at order,2026-11-06
+W104-KILL-PCAB,,,2-kills-mapped,Revaprazan logP-only + keverprazan TPSA/RB — P-CAB shelf closed (tegoprazan sole passer),2026-11-06
+W103-KC-01,,,Korea MFDS K-CAB,PUG-synonym HY-17623/CS-0014702/CHEMBL4297583 + SMILES CID-verified + K-CAB Korea approval — confirm live at order,2026-11-06
+W103-KILL-VONO,,,1-killed,Vonoprazan TPSA-only 72.4 (brief CID wrong, true 15981397; ChEMBL PSA 63.99 noted but PUG governs) — acid-blocker file closed except tegoprazan,2026-11-06
+W102-KILL-PPI,,,4-kills-mapped,Omeprazole/esomeprazole TPSA + lansoprazole/pantoprazole TPSA/HBA — sulfinyl-benzimidazole class pattern,2026-11-06
+W101-KILL-H2,,,4-kills-mapped,Cimetidine/ranitidine logP+TPSA (+RB) + famotidine/nizatidine TPSA/HBA (+logP/RB) — H1 already dead, H2 dead too; histamine file closed,2026-11-06
+W100-KILL-ENK,,,2-kills-mapped,Racecadotril TPSA/RB (brief CID 107723 wrong organophosphate; true 107751) + loperamide MW/logP P-gp-control — peripheral restriction story confirmed,2026-11-06
+W99-SE-01,,,DB06345 AR-9281,PUG-synonym HY-111151/CS-0034433/EN300-x3/D87139/T14315 + Phase 2 trials — confirm live at order,2026-11-06
+W99-KILL-SEH,,,2-kills-mapped,TPPU TPSA-near-miss 70.7 (no fabrication) + AUDA triple — first-gen adamantyl-urea out; APAU piperidin-acetyl swap fixes all three,2026-11-06
+W98-KILL-SGC,,,2-kills-mapped,Vericiguat TPSA/HBA + ataciguat 4-fail (investigational) — sGC file closed with riociguat,2026-11-06
+W97-KILL-ERA,,,2-kills-mapped,Bosentan 5-fail + sitaxentan 4-fail/withdrawn — ERA file closed (ambrisentan/macitentan already dead),2026-11-06
+W96-KILL-PAH,,,3-kills-mapped,Riociguat logP/RB + ambrisentan logP/TPSA + macitentan 5-fail — PAH vasodilator file closed (PDE5 already dead),2026-11-06
+W95-KILL-RIFAM,,,3-kills-mapped,Rifampin/rifabutin 5/6 + rifapentine 1/6 (822-877 Da, TPSA 209-220, logP 4.9-6.7) — anti-TB file closed,2026-11-06
+W94-DXOR-01,Cerilliant,D-034,,Cerilliant D-034 $50.70 CRM + Sigma PHR1974 $448/30mg neat CRM + Cayman 18908 via Ibis $44 — tartrate-salt caveat, NMDA Ki 486-906nM,2026-11-06
+W94-PARK-NORFEN,,,confirmed-park,Norfenfluramine 6/6 but best live is Cayman 22604 analytical-standard (not CRM); 6 dead CRM routes; Sigma N3288 powder excluded by grade,2026-11-06
+W93-PARK-DXOR,,,parked-provisional,Dextrorphan 6/6 + NMDA Ki 486-906nM (norfenfluramine-pattern NEGATIVE — desired-activity metabolite) — no live SKU, metabolite rule; analytical-standard at order,2026-11-06
+W93-KILL-LVM,,,1-killed,Levomethorphan 6/6 chemically but DEA Schedule II opiate — scheduling/obtainability kill,2026-11-06
+W92-DX-01,,,OTC monograph M012,OTC Delsym NDCs + Auvelity FDA 2022/expansion 2026 — NMDA-uncompetitive + sigma-1 EPC hook; abuse/serotonin caveats,2026-11-06
+W92-KILL-COUGH,,,2-kills-mapped,Benzonatate 4-fail (ethoxy-mix mappable) + codeine logP + Schedule II — antitussive file closed with DXM,2026-11-06
+W91-MPO155,,,155-profiled,Wave91: pnn.mpo over 155 combined rows (37 files, 0 cross-file dupes) → 0 DEVELOPMENT / 155 OPTIMIZATION — COUNT CORRECTION: running tally said 140, audit proves 155 (tally drift, data clean); outputs in output/wave91_mpo.* (ignored),2026-11-06
+W91-BUYLIST,,,refresh,REFRESHED T1 (F-filled 7) + T2 MPO-band (methylene-blue/pyrantel/morantel/CX-614/MTEP/ondansetron/parthenolide/praziquantel/levamisole/aniracetam 6.00 + fasudil/galantamine/riluzole 5.83) — 0 new/0 kills = ZERO-WAVE 1,2026-11-06
+W90-KILL-PERI,,,2-kills-mapped,Naloxegol 1/6 (PEG lesson) + methylnaltrexone nominal-6/6 overturned by permanent N+ charge + label-proven BBB restriction — charge-precedent recorded,2026-11-06
+W89-OA-01,Cayman,15594,DrugBank naloxone NDA208411,Cayman 15594 live + Sigma N7758/Selleck S3061/MCE HY-17427/Tocris 0597 + FDA Narcan OTC — functional BBB proof, IV/IN/nasal-only (oral F 2%),2026-11-06
+W89-OA-02,,,EMA Selincro EPAR EMEA-H-C-002583,EMA-authorised 18mg oral as-needed + functional BBB — Tier 1 approval proof,2026-11-06
+W88-KILL-NLRP3,,,3-kills-mapped,MCC950 TPSA117 (brief CID wrong; true 9910393; halted hepatotoxic) + dapansutrile MW/logP + DFV890 TPSA — NLRP3 sulfonylurea/sulfone class TPSA-dead,2026-11-06
+W87-TLR-01,Selleck,S1211,DrugBank imiquimod NDA020723,WAVE163 live re-fetch CONFIRMED: title In-Stock + JSON-LD InStock $147-227 + .cn 100mg 647.01 CNY in-stock + CAS 99011-02-6 match; TLR7-microglia hook PMIDs 18490763/34488805/25239168; topical/systemic caveat,2026-11-06
+W87-KILL-TLR78,,,2-kills-mapped,Resiquimod logP/TPSA (S8133/HY-13740 live moot) + gardiquimod logP/TPSA worse — live SKUs do not rescue chemistry,2026-11-06
+W86-KILL-CAN,,,3-kills-mapped,Dronabinol/nabilone/cannabidiol logP-only fails (6.4-7.0) — cannabinoid file closed with rimonabant,2026-11-06
+W85-KILL-AF2,,,2-kills-mapped,Amorolfine logP-bottom (morpholine only; approval moot) + tioxolone MW/TPSA — antifungal file fully closed (efinaconazole/ciclopirox/piroctone/rilopirox sole passers),2026-11-06
+W84-AN-01,Sigma,D2773,,Sigma D2773/PHR1677 + MCE HY-B0738 + USP (Anthranol ointment; McGill FASEB mitochondrial mechanism) — irritant/staining caveat, short-contact only,2026-11-06
+W84-KILL-VDRET,,,2-kills-mapped,Calcipotriene logP-only + tazarotene logP-only — secosteroid/retinoid lipophilicity pattern; vitamin-D/retinoid shelf closed,2026-11-06
+W83-KILL-AHR,,,2-kills-mapped,Tapinarof logP (CID 6439522; brief 67963767 wrong) + difamilast 4-fail (PMDA) — topical AhR/PDE4 out,2026-11-06
+W82-KILL-PDE4,,,3-kills-mapped,Roflumilast logP + apremilast triple + crisaborole null-logP-boron-gap (tasked CID 10376776 wrong; true CID 44591583) — PDE4 shelf out except rolipram,2026-11-06
+W81-KILL-AZOLES2,,,3-kills-mapped,Voriconazole TPSA/HBA-near-miss (real CSF 0.46 data noted) + itraconazole/posaconazole 5-fails — azole file closed for good,2026-11-06
+W80-AB-01,,,DrugBank DB09205,Moxisylyte 6/6 (CID 4260 corrected; brief 4267 was C52 macrolide) + ChEMBL max_phase4 + ATC + Sigma LOPAC M-5154 lineage — RB-boundary + ester flags,2026-11-06
+W80-AB-02,,,DrugBank DB00692,Phentolamine 6/6 + Regitine/Ryzumvi + MCE HY-12717/TargetMol — alpha file closed (quinazolines all dead),2026-11-06
+W80-KILL-PHB,,,1-killed,Phenoxybenzamine logP/RB (Selleck S2499 live moot) — haloalkylamine out,2026-11-06
+W79-KILL-SYMP,,,3-kills-mapped,Moxonidine logP/TPSA (live S2066 moot) + rilmenidine MW/logP + methyldopa triple — central-sympathetic file closed (clonidine sole passer),2026-11-06
+W78-KILL-CU,,,4-kills-mapped,Trientine/penicillamine MW/logP floors + TTM/zinc-acetate metallo-drug boundary — copper shelf out (metallo track separate),2026-11-06
+W77-KILL-ZN,,,2-kills-mapped,Zinc pyrithione null-logP + surrogates<1 (CID 3005835 was wrong compound — true 26041/3005837) + hinokitiol MW-floor — zinc shelf out, ebselen precedent reinforced,2026-11-06
+W76-HP-01,Selleck,S5213,,Selleck S5213 In-Stock 99.88% (base-scored; salt moot) + MCE HY-B1345/USP RS — ciclopirox alkyl-tail congener,2026-11-06
+W76-HP-02,MCE,HY-113863,,MCE HY-113863 catalog-listed (TargetMol/Biorbyt support; Selleck not carried; stock reconfirm at order) — logP-ceiling flag, diaryl-ether tail,2026-11-06
+W76-KILL-DFO,,,2-kills-mapped,Deferoxamine free-base 0/6 + mesylate worse — chelator control dead as expected,2026-11-06
+W75-FE-01,MCE,HY-B0450,DrugBank ciclopirox,MCE HY-B0450 + Sigma C0415/Tocris 6330 + FDA Loprox/Penlac/Olamine/OraMagic — iron-chelation hook, topical-forms caveat,2026-11-06
+W75-KILL-AZAL,,,2-kills-mapped,Sertaconazole logP + naftifine logP-bottom-boundary — lipophilic antifungal class closed,2026-11-06
+W74-AZ-01,Selleck,S5025,DrugBank Jublia NDA203567,Selleck S5025 In-Stock + FDA Jublia 2014 — 6/6 full pass, antifungal file closed except it,2026-11-06
+W74-KILL-AZOL,,,3-kills-mapped,Luliconazole logP/TPSA + tavaborole MW-floor/null-logP (boron gap, no fabrication) + isavuconazole TPSA/HBA — ebselen precedent applied,2026-11-06
+W73-KILL-GEPANT,,,4-kills-mapped,Ubrogepant/atogepant/rimegepant MW+TPSA+HBA + zavegepant MW/TPSA — gepant chemotype systematically oversized; lasmiditan sole migraine passer,2026-11-06
+W72-KILL-LAST,,,2-kills-mapped,Tafenoquine 1/6 + maropitant 3/6 (NK1 file closed with aprepitant) — last singles shelf out,2026-11-06
+W71-KILL-IBS,,,2-kills-mapped,Eluxadoline 5-fail + rifaximin 1/6 — IBS-D file closed (alosetron sole passer),2026-11-06
+W70-IBS-01,,,DrugBank alosetron,FDA Lotronex 2000/2002-restricted + generics — BOXED ischemic-colitis REMS flag; 5-HT3 IBS-D pole vs tegaserod note,2026-11-06
+W70-KILL-LUB,,,1-killed,Lubiprostone logP/TPSA/RB + CID correction (157920 not 157672) — ClC-2 angle closed,2026-11-06
+W69-KILL-5HT4,,,2-kills-mapped,Cisapride MW/TPSA/RB + QT-withdrawal + tegaserod TPSA84/RB8 under PROJECT bars (Ro5-6/6 noted irrelevant; ChEMBL HBD-tautomer 4 would also fail) — 5-HT4 file closed with clebopride sole passer,2026-11-06
+W68-GI-01,Selleck,S6455,DrugBank DB13511,Selleck S6455 In-Stock (AdooQ A58534 base-form backup) — D2/5-HT4 prokinetic, EPS-class flag, base-scored malate caveat,2026-11-06
+W68-KILL-CIN,,,1-killed,Cinitapride logP/TPSA — 5-HT4 shelf closed 1-for-7 (clebopride sole passer),2026-11-06
+W67-PARK-DEXFEN,,,parked-provisional,Dexfenfluramine 6/6 props (d-enantiomer) but withdrawn-1997 + no live SKU confirmed — parked (TRC/LGC/Cerilliant analytical + compliance check at order),2026-11-06
+W67-KILL-AMINOREX,,,1-killed,Aminorex MW/logP dual-floor fail + withdrawn-1968 PAH/scheduled — no path,2026-11-06
+W66-PARK-NORFEN,,,parked-provisional,Norfenfluramine 6/6 props + 2B-agonist hook CONFIRMED but zero catalog SKU — parked (custom-synthesis likely; Cerilliant/TRC analytical standard at order),2026-11-06
+W66-KILL-ANALOG,,,2-kills-mapped,Benfluorex logP/RB (Mediator VHD withdrawn) + chlorphentermine MW-floor (1969/1974 withdrawn),2026-11-06
+W65-FF-01,,,DrugBank fenfluramine,FDA Fintepla 2020 (NDA, UCB, Dravet+LGS) + DEA descheduled 2022 — BOXED VHD/PAH + REMS + echo-q6mo; vendor SKU confirm at order,2026-11-06
+W65-KILL-ANOR,,,3-kills-mapped,Sibutramine logP (SCOUT CV-harm withdrawn) + rimonabant MW/logP (psychiatric withdrawn) + lorcaserin MW-floor (cancer-signal withdrawn),2026-11-06
+W64-SE-01-PARKED,Selleck,S6676,DrugBank DB12610,Selleck S6676 In-Stock + Phase3 — PARKED provisional (PUG+ChEMBL logP null, pipeline requires logP; orthogonal clogP at order decides; selenium-liability counterscreen),2026-11-06
+W64-KILL-THIOL,,,3-kills-mapped,NAC MW/logP + edaravone MW/logP + cysteamine dual-floor — famous hooks fail size,2026-11-06
+W63-KILL-LYS,,,2-kills-mapped,Tranexamic/aminocaproic MW+logP dual-floor fails — lysine analogs too small/hydrophilic,2026-11-06
+W63-KILL-PORPH,,,2-kills-mapped,Hemin + protoporphyrin IX 4-fails — macrocycle itself is the floor-killer; porphyrin shelf out,2026-11-06
+W62-KILL-GP,,,2-kills-mapped,Tirofiban logP/TPSA/RB + eptifibatide heptapeptide 6-fail — GPIIb/IIIa out,2026-11-06
+W62-KILL-TPO,,,3-kills-mapped,Eltrombopag logP/TPSA + avatrombopag 4-fail + lusutrombopag 4-fail — TPO-R class out; platelet file closed,2026-11-06
+W61-KILL-P2Y12,,,5-kills-mapped,Clopidogrel/ticlopidine logP (+0.3/+0.1 narrow) + prasugrel logP/TPSA + ticagrelor 5-fail + aspirin MW/logP — P2Y12 class out,2026-11-06
+W60-AC-01,,,DrugBank warfarin,FDA Coumadin 1954 + Selleck S3129/MCE HY-14648/Sigma W0129/Tocris 5069 — fibrin/BBB-leak mechanistic probe ONLY (bleeding-risk, NTI, INR; not chronic),2026-11-06
+W60-KILL-DOAC,,,4-kills-mapped,Rivaroxaban TPSA + apixaban MW/TPSA + dabigatran 4-fail + etexilate 5-fail — DOAC chemotype size/polarity out,2026-11-06
+W59-KILL-DHODH2,,,2-kills-mapped,Teriflunomide TPSA-only 73.1 (open-enol tautomer; S4169 live moot) + brequinar logP-only — metabolite loses to parent,2026-11-06
+W58-DH-01,Selleck,S1247,DrugBank DB01097,Selleck S1247 In-Stock 20+ citations + MCE HY-B0083 + FDA Arava DMARD — DHODH pyrimidine antimetabolite replacing MTX angle,2026-11-06
+W58-KILL-AM,,,5-kills-mapped,Methotrexate 6-fail + capecitabine logP/TPSA + azathioprine logP/TPSA + mercaptopurine triple + fluorouracil MW/logP — antimetabolite class dead except DHODH,2026-11-06
+W57-AN-01,,,DrugBank etomidate,FDA Amidate IV induction (15-30s LOC = certain BBB); oral not viable — acute IV/probe paradigm,2026-11-06
+W57-AN-02,,,DrugBank dexmedetomidine,FDA Precedex IV + Igalmi sublingual; alpha-2 LC sedative, delirium-sparing differentiator — formulation work needed for chronic oral,2026-11-06
+W57-AN-03,MCE,HY-B0676,DrugBank DB00683,MCE HY-B0676 + Versed/Nayzilam/Buccolam — 6/6 surprise pass,2026-11-06
+W57-KILL-PROP,,,1-killed,Propofol MW+logP dual-fail (small-fragment floor) — MCE live SKU moot,2026-11-06
+W56-AH-01,Selleck,S1816,,Selleck S1816 In-Stock + FDA OTC (base-scored; maleate-salt caveat) — certain BBB, PNN-datum gap noted,2026-11-06
+W56-AH-02,Selleck,S4240,,Selleck S4240 In-Stock + FDA OTC hypnotic (base-scored; succinate-salt caveat) — Unisom functional BBB proof,2026-11-06
+W56-KILL-PIP,,,3-kills-mapped,Hydroxyzine logP/RB + meclizine logP + cyclizine logP-narrow — piperazine lipophilicity ladder closed,2026-11-06
+W55-KILL-MALARONE,,,2-kills-mapped,Atovaquone logP-only + proguanil TPSA-only — orthogonal single-fails, no legal single-agent convert,2026-11-06
+W55-KILL-DIAM,,,2-kills-mapped,Pentamidine triple + miltefosine logP/RB — diamidine/surfactant out; antiprotozoals closed,2026-11-06
+W54-AH-01,,,DrugBank pyrantel,Combantrin/Pin-X + MCE HY-12641A (base-scored; pamoate salt would kill MW/TPSA — moiety convention disclosed),2026-11-06
+W54-AH-02,,,DB13670,MCE HY-124498 oxantel (logP floor pass; N-subtype-selective nAChR probe),2026-11-06
+W54-AH-03,,,Vet Banminth-II,MCE HY-126032 morantel (methyl-vector SAR bridge pyrantel 1.6 to 1.9),2026-11-06
+W54-KILL-AH,,,2-kills-mapped,Tribendimidine MW/logP/RB + emodepside 1/6 — macrocycle/depsipeptide out,2026-11-06
+W53-KILL-NITRO-TB,,,4-kills-mapped,Pretomanid TPSA/HBA + delamanid 4-fail + SQ109 logP/RB + OPC-167832 MW/TPSA/HBA — mycobacterial nitroimidazoles out,2026-11-06
+W52-KILL-VET,,,3-kills-mapped,Oclacitinib TPSA99.4 (CID corrected 44631938; brief 101605333 was dye) + grapiprant triple + robenacoxib logP-only — vet shelf out,2026-11-06
+W51-AZ-01,MCE,HY-D0004,,MCE HY-D0004 + ChemScene CS-0009900 + Sigma A4043/Tocris 0329 lineage — MB active metabolite, MAOI/redox flags,2026-11-06
+W51-AZ-02,MCE,HY-D0944,,MCE HY-D0944/HY-D0947 + EP Impurity-B — narrow-margin Tier B control-only (ChEMBL-proxy logP disclosed),2026-11-06
+W51-KILL-MB-FAM,,,3-kills-mapped,LMTM logP/salt + azure-C TPSA-only + thionine TPSA — demethylation TPSA ladder 43.9→89.3 documented,2026-11-06
+W50-RD-01,Sigma,M9140,DrugBank methylthioninium,FDA ProvayBlue NDA204630 2016 + EMA Proveblue 2011 + USP RS1428008 + Sigma M9140/Selleck S4535/MCE HY-14536 — BOXED serotonin-syndrome + redox-assay-interference flags,2026-11-06
+W50-KILL-MAL,,,3-kills-mapped,Tafenoquine 5-fail + pyronaridine 3-fail + ferroquine XLogP-null investigational — antimalarial file closed,2026-11-06
+W49-MPO129,,,129-profiled,Wave49: pnn.mpo over 129 combined → 0 DEVELOPMENT / 129 OPTIMIZATION_LEAD; D 0.563 = F-filled 7; new top-band: levamisole/praziquantel/ondansetron/aniracetam 5.9-6.0 — outputs in output/wave49_mpo.* (ignored),2026-11-06
+W49-BUYLIST,,,refresh,REFRESHED T1 (approved+live-SKU): donepezil/riluzole/carbamazepine/galantamine/ambroxol/ropinirole/venlafaxine/escitalopram-QTflag + praziquantel/ondansetron/aniracetam; T2 (MPO-band + tools): CX-614/farampator/MTEP/levamisole/parthenolide/fasudil/PBT2/nevirapine-boxed/PRE-084/IDRA-21/SKF-81297/emapunil; 0 new/0 kills this wave,2026-11-06
+W48-KILL-GRIS,,,1-killed-nearmiss,Griseofulvin TPSA-only 71.1 (+1.1, tier-B near-miss, G4753/PHR1534/USP1299007 live) — no rounding applied,2026-11-06
+W48-KILL-ALLYL,,,3-kills-mapped,Flucytosine MW/logP + terbinafine/butenafine logP (lipophilic allylamines) — TPSA-minimal but logP-blind class,2026-11-06
+W47-KILL-MACRO,,,3-kills-mapped,Azithromycin/clarithromycin/erythromycin 733-749 Da + TPSA 180-194 + HBA 14 — macrolide floor,2026-11-06
+W47-KILL-LINCO,,,2-kills-mapped,Clindamycin TPSA/HBD + lincomycin 4-fail — thioglycoside floor; antibiotic file closed,2026-11-06
+W46-KILL-FQ,,,4-kills-mapped,Levofloxacin/ciprofloxacin/moxifloxacin/gatifloxacin — carboxylate/keto/piperazine polarity pattern; CNS entry is transporter-mediated not lipophilic (lesson recorded, filters unchanged),2026-11-06
+W45-KILL-ECHINO,,,3-kills-mapped,Caspofungin/micafungin 0/6 + anidulafungin 5-fail — echinocandin lipopeptide class dead; antifungal file closed,2026-11-06
+W44-KILL-DAA,,,4-kills-mapped,Sofosbuvir 5-fail + daclatasvir 6-fail + ledipasvir 6-fail + dasabuvir 3-fail — DAA large-polar floor,2026-11-06
+W43-KILL-THIAZ,,,2-kills-mapped,Nitazoxanide TPSA-only + niclosamide logP/TPSA — host-directed angle closed,2026-11-06
+W43-KILL-NITRO,,,3-kills-mapped,Metronidazole triple + tinidazole double + ribavirin triple — nitro/nucleoside host chemotypes out,2026-11-06
+W42-KILL-HERPES,,,5-kills-mapped,Acyclovir/valacyclovir/famciclovir/ganciclovir/valganciclovir — MW-pass but logP/TPSA systematically out; nucleoside class dead,2026-11-06
+W41-NVP-01,APExBIO,A8481,DrugBank DB00238,APExBIO A8481 live $55 + S1742/HY-10570 PUG-synonym SKUs + FDA NDA020636 1996 + CSF 45% free-fraction CNS hook — BOXED hepatotoxicity/SJS flag,2026-11-06
+W41-KILL-NNRTI1G,,,2-kills-mapped,Delavirdine MW+TPSA + etravirine logP+TPSA — first-gen NNRTIs out except nevirapine,2026-11-06
+W40-KILL-NNRTI,,,3-kills-mapped,Efavirenz logP-only + doravirine TPSA/HBA + rilpivirine logP/TPSA — CNS-entry tracks with violations; NEVIRAPINE passes 6/6 flagged for next wave,2026-11-06
+W40-KILL-INSTI,,,3-kills-mapped,Dolutegravir TPSA/HBA + raltegravir triple + elvitegravir logP/TPSA/discontinued — INSTI class TPSA-blocked,2026-11-06
+W39-KILL-AMINO,,,3-kills-mapped,Gentamicin/tobramycin 5-fail + amikacin 6-fail — polycationic aminoglycosides out,2026-11-06
+W39-KILL-POLY,,,3-kills-mapped,Colistin 6-fail + amphotericin/nystatin 5-fail — lipopeptide/macrolide out of scope,2026-11-06
+W38-KILL-BVIT,,,4-kills-mapped,Niacin/pyridoxine/nicotinamide MW+logP + riboflavin logP/TPSA/HBD — B-vitamin floor,2026-11-06
+W38-KILL-FOL,,,3-kills-mapped,Thiamine 2-fail + folate 5-fail + cobalamin 6-fail off-scale macromolecule — cofactor floor closed,2026-11-06
+W37-KILL-THY,,,4-kills-mapped,Levothyroxine/liothyronine MW+TPSA + methimazole MW/logP + propylthiouracil triple — endocrine floor,2026-11-06
+W37-KILL-LI,,,1-killed,Lithium elemental (6.94 Da) — outside small-molecule filters by construction,2026-11-06
+W36-KILL-BA,,,4-kills-mapped,OCA logP/TPSA (+withdrawn) + chenodiol logP/TPSA + cholic 3-fail + deoxycholic 2-fail — bile-acid chemotype systematically out; ursodiol sole exception,2026-11-06
+W35-KILL-OXAZ,,,3-kills-mapped,Linezolid logP/TPSA-narrow + tedizolid triple + sutezolid TPSA-only — MAO/CNS hook dies on chemistry,2026-11-06
+W35-KILL-MYCO2,,,3-kills-mapped,Ethambutol triple + clofazimine MW/logP + bedaquiline triple — remaining mycobacterials out,2026-11-06
+W34-MC-01,Sigma,24880,,Sigma 24880 (100g ships TODAY) + MCE HY-14603/Selleck S4601 + PBT1 Phase2 AD — SMON caveat: low-dose short-course only,2026-11-06
+W34-MC-02,MCE,HY-105321,,MCE HY-105321 + ChemScene CS-0025730/TargetMol T9159 — AD/HD Phase2 ionophore successor,2026-11-06
+W34-KILL-CHEL,,,2-kills-mapped,Deferiprone MW/logP + deferasirox logP/TPSA — chelator shelf out,2026-11-06
+W33-KILL-TETRA,,,4-kills-mapped,Minocycline 5-fail + doxycycline 4-fail + tetracycline 4-fail + tigecycline 5-fail — DIRECTION caveat: MMP inhibition hardens PNNs (SB-3CT inversion flag applies to class),2026-11-06
+W32-KILL-XAN,,,4-kills-mapped,Caffeine/theophylline/theobromine MW+logP + pentoxifylline logP/TPSA (live SKU moot) — methylxanthine core out,2026-11-06
+W32-KILL-A2A,,,3-kills-mapped,Istradefylline TPSA-only + preladenant 4-fail + dipyridamole 6-fail — A2A angle dies on TPSA,2026-11-06
+W31-KILL-TB,,,3-kills-mapped,Isoniazid/pyrazinamide/cycloserine MW+logP dual-floor fails (102-137 Da, -1.5 to -0.6) — TB-small chemotype excluded,2026-11-06
+W31-KILL-BIS,,,2-kills-mapped,Alendronate 4-fail + etidronate 3-fail — charged P-C-P class boundary proof,2026-11-06
+W28-KILL-GLP1,,,6-kills-mapped,Danuglipron 5-fail + orforglipron/OWL833 4-fail + lotiglipron 3-fail + TTP273/ZYOG1 no-record — oral GLP-1RAs too big/polar for PNN box,2026-11-06
+W27-KILL-S1P,,,3-kills-mapped,Ozanimod TPSA-only + siponimod 4-fail + ponesimod 4-fail — S1P class lymphocyte rationale intact, chemistry out,2026-11-06
+W27-KILL-CFTR,,,3-kills-mapped,Ivacaftor logP/TPSA + lumacaftor 4-fail + tezacaftor 5-fail (+elexacaftor worse) — CFTR class out,2026-11-06
+W25-KILL-PDE5,,,4-kills-mapped,Sildenafil MW/TPSA/HBA + tadalafil TPSA-only + avanafil 4-fail + vardenafil 4-fail — PDE5 blockbusters too large/polar for PNN box,2026-11-06
+W25-KILL-AB,,,4-kills-mapped,Tamsulosin/alfuzosin/silodosin/doxazosin — universal TPSA 97-112 class killer + RB/HBA,2026-11-06
+W203-KILL-ROCK2,,,3-kills-mapped,Nintedanib MW/TPSA/RB + netarsudil MW/logP/TPSA/RB + belumosudil MW/logP/TPSA (belumosartan = no-such-compound, corrected) — ROCK remainder closed,2026-11-06
+W203-CAT-01,Selleck,E0054,,Selleck E0054 Tegoprazan In-Stock title + CAS 942195-55-3 + MW 387.38 batch E005401 99.67% root-verified 2026-11-06,2026-11-06
+W203-CAT-04,Selleck,E7890,,Selleck E7890 Ketotifen In-Stock + CAS 34580-13-7 batch E789001 99.85% root-verified — H1 hook missing stays parked,2026-11-06
+W203-CAT-08,Selleck,S8319,,Selleck S8319 7-8-DHF In-Stock 3 batches 99.97% + TrkB Kd 320nM BBB/oral vendor note root-verified — duplicate of W9-NT-01 deepens to 4-source,2026-11-06
+W203-CAT-02-NOTE,Cayman,45283,,Abeprazan=fexuprazan CAS 1902954-60-2 live-title root-fetched 2026-11-06 but JS-walled no In-Stock capture — prior W143 live claim stands single-vendor flag,2026-11-06
+W203-CAT-03-NOTE,Cayman,38346,,AR-9281=APAU CAS 913548-29-5 live-title root-fetched 2026-11-06 but JS-walled no In-Stock capture — prior W143/W185 claim stands single-vendor flag,2026-11-06
+W204-NAT-01,MCE,HY-N0144,,MCE HY-N0144 Piperine 98.99% In-stock + Sigma P49007 Available TODAY — CAS CORRECTED 94-62-2 (scout 94-62-3 404); P-gp/CYP3A4 DDI flag,2026-11-06
+W204-NAT-02,MCE,HY-N0096,,MCE HY-N0096 Rotundine 99.96% In-stock + Cayman 20535 + GlpBio GC14657 (Selleck S2437 scout, root slug 404 not disproof) — China-approved analgesic; 4-source,2026-11-06
+W204-NAT-03-HOLD,MCE,HY-N0700,,MCE HY-N0700 alpha-Asarone 99.89% In-stock + Selleck S4772 + Cayman 11681 + Sigma 11107 LIVE but ALKENYLBENZENE HOLD (Wiseman/Cartus/Uebel hepatocarcinogen) — not shortlist without waiver,2026-11-06
+W204-NAT-04,MCE,HY-N0121,,MCE HY-N0121 Sesamin 99.85% In-stock + TargetMol T2919 + GlpBio GN10092 + Sigma SMB00705 — food lignan multi-live,2026-11-06
+W204-NAT-05,MCE,HY-N0377,,MCE HY-N0377 Liquiritigenin 99.85% In-stock + Sigma 78825 Available TODAY — ERbeta EC50 36.5nM screen flag,2026-11-06
+W204-NAT-06,Selleck,E2194,,MCE HY-N2081 Skimmianine 99.93% In-stock + Selleck E2194 Highly Cited In Stock (scout) — costly $370/mg + genotox flag Tier-2,2026-11-06
+W204-NAT-07,MCE,HY-N0049,,MCE HY-N0049 Nuciferine 99.90% In-stock + Sigma SML2230 + Cayman 33839 + AdooQ A14505 + TargetMol T3369 — 5-source scarce-signal,2026-11-06
+W204-NAT-08-PARK,,,legacy-Rx,Yohimbine live shelf (MCE HY-12715/HY-N0127 + Sigma Y3125 + Tocris 1127) but PARKED — legacy Rx never-FDA-for-ED + recall/severe-HTN + MAOI/narrow-TI,2026-11-06
+W204-SRC-02,GlpBio,GC35378,,GlpBio GC35378 AR-9281=APAU CAS 913548-29-5 ROOT-VERIFIED In Stock 1mg $33/5mg $67 + SMILES — APAU now dual-live (Cayman 38346 + GlpBio),2026-11-06
+W204-SRC-03,GlpBio,GC15792,,GlpBio GC15792 CY-208-243 ROOT-VERIFIED In Stock 10mg $281 — CAS CORRECTED to 100999-26-6 (113112-98-4 invalid penicillin hit) + MCE HY-106094 + Tocris 1249 + Aladdin C286833,2026-11-06
+W204-SRC-01-CORR,MCE,HY-109079,,Fexuprazan=Abeprazan 2nd source CORRECTED to MCE HY-109079 (HY-109179 invalid no-SKU) + TargetMol T10221/T10221L 3rd; GlpBio/Selleck no page — dual-live stands,2026-11-06
+W204-SRC-05,Selleck,S8143,,Selleck S8143 Mavoglurant ROOT live-title CAS 543906-09-8 batch S814301 99.44% single-enantiomer (UNII/IUPHAR) — GlpBio GC30778 + MCE HY-15257 cross-2nd; racemate HY-15257A distinct,2026-11-06
+W204-SRC-04-STAYS,,,base-CAS-invalid,Levobunolol base STAYS — A18262+GC30167 both HCl 27912-14-7; 24243-97-8 no-supplier-hit (true base 47141-42-4 synthesis-on-demand only),2026-11-06
+W204-SRC-06-STAYS,,,hook-missing,Ketotifen STAYS PARKED — no ARC/PNN/WFA citation found (EAE mast-cell only; ketamine microglia-PNN papers are not ketotifen),2026-11-06
+W204-REP-04,,,DrugBank DB00315,Zolmitriptan NEW approval-verified (DB00315 + NDA 020768 Zomig 1997 + EMA; non-sulfonamide triptan) — vendor SKU confirm at order; coronary-vasospasm contraindication noted,2026-11-06
+W204-KILL-DUP,,,6-duplicates-mapped,Buspirone→W4-CNS-04 + viloxazine→W18-AD-01 + naproxen→W7-LM-01 + leflunomide→W58 + PRE-084→W17-SIG-01 + trazodone re-proposal→W8-KILL-01 stays-killed (QT),2026-11-06
+W204-PARK-SCF,,,3-parked-provisional,Ketanserin (Cayman/Sigma/MCE patterns no live fetch) + DCU sEH dialkylurea (Cayman 10004971/GlpBio GC10828 patterns) + GTS-21 (Sigma SML0326/Cayman 21570/MCE HY-14564A patterns) — all box-pass, convert on live-SKU hunt,2026-11-06
+W205-VND-01,GlpBio,GC17808,DrugBank DB00315,GlpBio GC17808 Zolmitriptan ROOT-VERIFIED In Stock 100mg $36/500mg $110 + SMILES + NDA 020768 — dual-proof BUT hook GAP (NTS binding only, no ARC bridge) stays parked,2026-11-06
+W205-VND-02,GlpBio,GC14563,,GlpBio GC14563 Ketanserin base ROOT-pattern In Stock 50mg $29/100mg $35 + tartrate GC43999 In-Stock — scout-verified live, 5-HT2A PV-gating hook plausible,2026-11-06
+W205-VND-03,GlpBio,GC10828,,GlpBio GC10828 DCU N,N-Dicyclohexylurea In Stock 10g $17/25g $30 — scout-verified live; molecule brain datum GAP (AUDA class datum cannot substitute) stays parked,2026-11-06
+W205-VND-04,GlpBio,GC10913,,GlpBio GC10913 GTS-21 dihydrochloride In Stock 1mg $19/5mg $42 (sold as diHCl under free-base CAS) — scout-verified live; PNN/PV datum GAP stays parked,2026-11-06
+W205-HOOK-GAPS,,,6-gaps-confirmed,Ketotifen/zolmitriptan/DCU/GTS-21/iodoquinol/TCU hook-gap fill: microglia-only or NTS-only or class-only data, ZERO ARC-PNN-WFA citations — all stay parked/killed as recorded (PMIDs 36868401/9859690/29311641/35457238/4270059 logged in wave notes),2026-11-06
+W205-NAT-RANK,,,rank-demotions,Wave205 NAT chronic-DIO rank: sesamin #1 clean lead / liquiritigenin #2 ERbeta-balance / piperine #3 low-dose-DDI-isolation / nuciferine #4 low-dose-no-escalation / L-THP DEMOTED acute-tool (sedation+CYP2D6-mb Ki0.26) / skimmianine DEMOTED tool-only (genotox+S9+cytotox+$370mg),2026-11-06
+W206-KILL-TCA1,,,4-kills-mapped,Amitriptyline logP4.9 + imipramine logP4.8 + clomipramine logP5.2 + desipramine logP4.1 (all DB-approved generics DB00321/DB00458/DB01242/DB01151; approval moot) - TCA lipophilicity floor + QT/QRS + lethal-overdose class flags; pipeline tier-C logp-only,2026-11-06
+W206-KILL-TCA2,,,4-kills-mapped,Nortriptyline logP4.5 + trimipramine logP5.8 + doxepin logP4.3 + protriptyline logP4.4 (DB00540/DB00738/DB01142/DB00344) - same TCA floor; PubMed PNN-count 0 for all four; tier-C logp-only,2026-11-06
+W206-KILL-TCA3,,,2-kills-mapped,Maprotiline logP4.35 (DB00934; seizure-boxed) + vortioxetine ALOGP3.86 ChEMBL-live (DB09068 FDA2013) - single-criterion logP fails; tier-C; tetracyclic/NRI remainder closed except 3 parks,2026-11-06
+W206-P01,,,EU-marketed,Mianserin tier-B ChEMBL-live MW264.4/ALOGP3.08/PSA6.48/HBD0/HBA2/RTB0 (DB06148; EU-not-US Tolvon generic) PARKED - hook GAP (no ARC-PNN/WFA datum) + agranulocytosis flag; live SKU confirm at order,2026-11-06
+W206-P02,,,UK/EU-marketed,Reboxetine tier-B ChEMBL-live MW313.4/ALOGP3.19/PSA39.7/HBD1/HBA4/RTB6 (DB00234; Edronax UK/EU-not-US) PARKED - hook GAP (no ARC-PNN/WFA datum); live SKU confirm at order,2026-11-06
+W206-P03,,,DE-only-marketed,Opipramol tier-B ChEMBL-live MW363.5/ALOGP3.31/PSA30.0/HBD1/HBA4/RTB6 (Insidon DE; DrugBank ID unverified) PARKED - hook GAP + single-market obtainability; SKU confirm at order,2026-11-06
+W206-SRC-NOTE,,,vendor-access-log,GlpBio search URL 404 + MCE product page 403 this wave - vendor root-verify path walled without search budget; W206 parks rest on approval status per W204-REP-04 precedent,2026-11-06
+W207-KILL-REL1,,,5-kills-mapped,Orphenadrine logP3.8 (DB01173 FDA) + eperisone logP3.8 (DB08992 Asia-only) + pridinol logP3.8 (EU-only) + cyclobenzaprine logP5.2 (DB00924 FDA TCA-like QT/5HT) + tolfenamic logP4.09 (DB09216) - piperidine/TCA lipophilicity floor; tier-C logp-only; PNN-count 0 all,2026-11-06
+W207-KILL-REL2,,,4-kills-mapped,Carisoprodol TPSA90.7/RB9 (DB00395 Sched-IV EU-withdrawn) + meprobamate logP0.7/TPSA105/RB8 (DB00371 Sched-IV; pipeline Reject) + methocarbamol logP0.6/TPSA91 (FDA1957 non-scheduled) + chlorzoxazone MW169.6-only-fail (DB00356; hepatotox-fatal rare) - carbamate polarity floor + MW floor,2026-11-06
+W207-KILL-REL3,,,4-kills-mapped,Amantadine MW151-floor (DB00915 FDA; rest pass) + flupirtine TPSA89.3 (EU-withdrawn-2018 hepatotox; no DB) + tetrazepam ALOGP3.61-fail ChEMBL-live (EU-suspended-2013 SJS/TEN; no DB) + thiocolchicoside 5-fail glycoside (EU-restricted aneugen; pipeline Reject) - size/withdrawal closures,2026-11-06
+W207-P01,,,EU/Asia-approved,Tolperisone tier-B ChEMBL-live MW245.4/ALOGP3.30/PSA20.3/HBD0/HBA2/RTB4 (DB06264; Mydocalm EU-not-US oral restricted post-stroke spasticity) PARKED - hook GAP (PNN-count 0) + anaphylaxis flag; live SKU confirm at order,2026-11-06
+W207-P02,,,FDA-approved,Metaxalone tier-B ChEMBL-live MW221.3/ALOGP1.79/PSA47.6/HBD1/HBA3/RTB3 (DB00660; Skelaxin 1962 non-scheduled) PARKED - hook GAP (PNN-count 0); cleanest relaxant box-pass this wave; live SKU confirm at order,2026-11-06
+W208-KILL-DHP,,,7-kills-mapped,Clevidipine 4-fail IV-only + nicardipine 5-fail + nilvadipine TPSA/HBA (NILVAD PMID30248105 negative) + lacidipine 4-fail + lercanidipine 5-fail worst-fit + isradipine logP/TPSA/HBA (STEADY-PD PMID32227247 negative) + fenoldopam TPSA/HBD IV-only - DHP polarity/size floor + IV-route kills,2026-11-06
+W208-KILL-SYMP,,,5-kills-mapped,Guanethidine MW/logP legacy-disc + reserpine 5-fail legacy-disc + mecamylamine MW-only-fail (legacy-disc; PV-tool PMIDs only) + hydralazine MW/logP + lenalidomide logP/TPSA (REMS teratogen) - sympatholytic floor + legacy/withdrawal closures,2026-11-06
+W208-KILL-PROST,,,5-kills-mapped,Selexipag 4-fail + iloprost TPSA/RB + treprostinil logP/TPSA/RB + beraprost TPSA/RB + epoprostenol TPSA/RB IV-only - prostacyclin TPSA78-110/RB8-12 class floor; PNN-count 0 all,2026-11-06
+W208-P01,,,FDA-approved,Diazoxide tier-B ChEMBL-live MW230.7/ALOGP1.68/PSA58.5/HBD1/HBA3/RTB0 (DB01119; Proglycem oral) PARKED - hook GAP (peripheral muscle-PV PMID24117265 only, no ARC-PNN) + INDICATION MISMATCH hyperglycemia/diabetes vs obesity-insulin goal; live SKU confirm at order,2026-11-06
+W209-KILL-SGLT2,,,4-kills-mapped,Dapagliflozin TPSA99.4/HBD4 + empagliflozin MW450.9/TPSA109/HBD4 + canagliflozin TPSA118/HBD4 + ertugliflozin TPSA109/HBD4 (all FDA DB06292/DB09038/DB08907/DB11827) - glycoside TPSA/HBD class floor; filed note: empagliflozin best CNS-repurpose citations (PMIDs 41986822/42614235/34885795) but box-fail,2026-11-06
+W209-KILL-SU,,,8-kills-mapped,Repaglinide 4-fail + glipizide TPSA139 + glyburide 4-fail + glimepiride 3-fail + tolbutamide TPSA-only + chlorpropamide TPSA-only legacy-disc + rosiglitazone TPSA-only restricted + vildagliptin logP/TPSA (EMA-not-FDA) - SU/TZD TPSA class floor (TPSA-only trio closest); PNN-count 0 all,2026-11-06
+W209-KILL-AGI,,,4-kills-mapped,Acarbose 6/6-fail + miglitol logP/TPSA/HBD + vorapaxar MW/logP/TPSA (bleed-boxed) + lobeglitazone 5-fail Korea-only - oligosaccharide polarity + PAR1/TZD size floors,2026-11-06
+W210-KILL-MAOB,,,2-kills-mapped,Selegiline MW187-floor (DB01037; amphetamine metabolites) + rasagiline MW171-floor (DB01367) - MAO-B fragment floor; PNN-count 0 both,2026-11-06
+W210-KILL-NEURO,,,4-kills-mapped,Chlorpheniramine ALOGP3.82-flip ChEMBL-live (scout 3.4 optimistic; DB01114 OTC) + sumatriptan logP0.9/TPSA73.6 (DB00646) + eletriptan ALOGP3.82-confirmed (DB00216; exp-2.9 claim unsupported) + buprenorphine MW/logP (DB00921 Sched-III) - antihist/triptan/opioid closures; tier-C,2026-11-06
+W210-P01,,,FDA-approved,Safinamide tier-B ChEMBL-live MW302.4/ALOGP2.37/PSA64.4/HBD2/HBA3/RTB7-boundary (DB06654; Xadago 2017) PARKED - hook GAP (PNN-count 0; glutamate/Na-channel mechanism only); live SKU confirm at order,2026-11-06
+W210-P02,,,FDA-OTC,Diphenhydramine tier-B ChEMBL-live MW255.4/ALOGP3.35/PSA12.5 (DB01075) PARKED - hook GAP (PNN-count 0) + Beers-anticholinergic flag; live SKU confirm at order,2026-11-06
+W210-P03,,,FDA-OTC,Doxylamine tier-B ChEMBL-live MW270.4/ALOGP2.92/PSA25.4 (DB00366) PARKED - hook GAP (PNN-count 0) + next-day-impairment flag; live SKU confirm at order,2026-11-06
+W210-P04,,,FDA-Sched-IV,Tramadol tier-B scout MW263.4/logP2.6/PSA32.7 (DB00193; Ultram) PARKED - hook GAP (PNN-count 0; 4 EuropePMC hits false-positive) + Sched-IV/seizure/serotonin flags; chronic-opioid confound noted,2026-11-06
+W210-P05,,,FDA-Sched-II,Tapentadol tier-B ChEMBL-live MW221.3/ALOGP3.08/PSA23.5 (DB06204; Nucynta) PARKED - hook GAP + Sched-II/abuse/resp-depression flags; highest-friction park this wave,2026-11-06
+W211-KILL-WAKE,,,3-kills-mapped,Noopept TPSA-only + no ChEMBL/DrugBank record + Russia-only (obtainability unverteifiable) + vinpocetine ALOGP4.15-confirmed ChEMBL-live + lisdexamfetamine 3-fail logP/TPSA/RB Sched-II (pipeline Reject) - nootropic fringe + eugeroic closures; PNN-count 0 all,2026-11-06
+W211-P01,,,FDA-Sched-IV,Modafinil tier-B ChEMBL-live MW273.4/ALOGP2.01/PSA66.15 (DB00745; Provigil 1998) PARKED - STRONGEST HOOK-ADJACENT this run: hypothalamic arousal PMID11069971 + orexin-glucose-sensing PMID36525384, but no ARC-PNN/WFA datum; SJS/rash flag; live SKU confirm at order,2026-11-06
+W211-P02,,,FDA-Sched-IV,Armodafinil tier-B ChEMBL-live same-props enantiomer (DB06413; Nuvigil 2007) PARKED - hook inherits modafinil class datum only, no direct ARC-PNN; longer-t-half insomnia flag; live SKU confirm at order,2026-11-06
+W211-P03,,,FDA-Sched-II,Methylphenidate tier-B ChEMBL-live MW233.3/ALOGP2.09/PSA38.3 (DB00422; 1955) PARKED - hook GAP (PV c-Fos/maturation PMIDs only, no WFA) + Sched-II/abuse/CV/psychosis flags; highest-friction park; live SKU confirm at order,2026-11-06
+W212-KILL-STATIN,,,7-kills-mapped,Atorvastatin 5-fail efflux-limited (DB01076; TLR4 PMID29417448 filed) + simvastatin logP/TPSA ChEMBL-confirmed (DB00641; BBB-crosses; MS-STAT2 PMID42440661 filed) + lovastatin logP/TPSA (DB00227; Fragile-X PMID39651602 filed) + fluvastatin TPSA/RB + rosuvastatin 4-fail + pravastatin 3-fail + vibegron TPSA-only (DB14895) - statin lipophilic-TPSA split + hydrophilic-TPSA floor; PNN-count 0 all,2026-11-06
+W213-KILL-KBLOCK,,,4-kills-mapped,Sotalol logP/TPSA (DB00489) + dofetilide TPSA/HBA/RB (DB00204; 3-day inpatient load) + ibutilide logP/TPSA/RB IV-only (DB00308) + vernakalant ROUTE-KILL IV-only + FDA-denied (DB06217; pipeline tier-B box-pass noted MW349/logP2.9/TPSA51/RB7-boundary so no re-search) - K-blocker TPSA + IV-route floor; PNN-count 0 all,2026-11-06
+W213-KILL-NABLOCK,,,5-kills-mapped,Mexiletine MW179-floor BBB-penetrant (DB00379) + tocainide MW/logP + withdrawn-aplasia (DB01056; muscle-PV PMID3123225 non-qualifying) + adenosine 4-fail IV-seconds (DB00640) + digoxin 5-fail narrow-TI (DB00390) + digitoxin 4-fail (DB01396) - fragment floor + glycoside wall + seconds-half-life route kill,2026-11-06
+W214-KILL-MAL,,,4-kills-mapped,Mefloquine logP/HBA boxed-neuropsych (DB00358; Cx36-tool PMIDs filed non-qualifying) + hydroxychloroquine logP/RB (DB01611; TLR4 PMID35346242 filed) + artesunate TPSA/HBA IV-only (DB09274) + clotrimazole logP5.0 no-systemic-oral (DB00257) - quinoline lipophilicity + endoperoxide-acid polarity + imidazole lipophilicity; tier-C,2026-11-06
+W214-P01,,,FDA-approved,Quinine tier-B ChEMBL-live MW324.4/logP2.9/TPSA45.6 (DB00173; Qualaquin oral) PARKED - hook GAP (PNN-count 0) + QT/cinchonism/TTP flags; live SKU confirm at order,2026-11-06
+W214-P02,,,FDA-combo,Artemether tier-B ChEMBL-live MW298.4/ALOGP2.84/PSA46.2 (DB06697; Coartem oral combo, no monotherapy) PARKED - hook GAP (PNN-count 0) + animal brainstem/auditory neurotox + lumefantrine-QT-partner flags; live SKU confirm at order,2026-11-06
+W215-KILL-BONE,,,4-kills-mapped,Risedronate 4-fail (DB00884 oral) + zoledronate 4-fail IV-only (DB00399) + ibandronate 5-fail (DB00710) + bazedoxifene MW/logP (DB06401; SERM-PV inference only) - bisphosphonate P-C-P charge floor (W31 precedent extended) + SERM lipophilicity; pipeline C=1 Reject=3; PNN-count 0 all,2026-11-06
+W215-KILL-GUT,,,6-route-kills,Calcitonin nasal/SC peptide (DB00017) + teriparatide SC peptide (DB06285; osteosarcoma box) + sevelamer non-absorbed polymer (DB00658; no discrete props, screening N/A) + tenapanor gut-restricted MW1145 (DB11761) + linaclotide luminal 14aa (DB08817) + plecanatide luminal 16aa (DB13170) - non-systemic by design; fit check moot per cycle order,2026-11-06
+W216-KILL-GLYCO,,,7-kills-mapped,Vancomycin MW1449/TPSA433 oral-nonabsorbed + teicoplanin MW~1880 + dalbavancin/oritavancin/telavancin MW1756-1817 IV-only + daptomycin MW1621 IV-only + polymyxin-B MW1301 oral-nil (all DB-approved; peptide logPs order-of-magnitude placeholders, verdicts rest on MW/TPSA/counts) - glyco/lipopeptide wall; pipeline Reject 7/7; PNN-count 0 all,2026-11-06
+W216-KILL-ABX,,,6-kills-mapped,Fidaxomicin gut-restricted MW1058 + telithromycin MW/TPSA/HBA + US-withdrawn (DB00976; hepatotox-box) + retapamulin/mupirocin/bacitracin topical-only + fusidic-acid MW/logP/TPSA ex-US-systemic - macrocycle/ketolide/topical closures; pipeline Reject 6/6,2026-11-06
+W217-KILL-STEROID,,,10-kills-mapped,Prednisone/prednisolone/dexamethasone/hydrocortisone/methylprednisolone/fludrocortisone/budesonide/betamethasone TPSA92-95-only + triamcinolone logP/TPSA/HBD + deflazacort TPSA102 (all FDA oral DB-verified) - steroid polyol TPSA class floor; filed note: GCs modulate PNN-component genes + PV mouse cortical PMID41317238 but direction/stress-hardening PMID39052390 argues against softening; pipeline C=9 Reject=1,2026-11-06
+W218-KILL-AED,,,4-kills-mapped,Topiramate logP/TPSA/HBA (DB00273; weight-loss relevance moot) + pregabalin MW/logP LAT1-transported (DB00230) + gabapentin MW/logP LAT1 (DB00996; survival PMIDs non-qualifying) + felbamate logP/TPSA + restricted-aplasia (DB00949) - AED sulfamate/amino-acid polarity floor; pipeline C=4,2026-11-06
+W218-KILL-CAI,,,3-kills-mapped,Acetazolamide logP/TPSA (DB00819; tau PMID39482469 filed) + methazolamide logP/TPSA + everolimus 5-fail macrolide (DB01590; mTOR-PNN hypothesis PMIDs 39953287/35580549 filed, immunosuppressant risk unacceptable) - CAI sulfonamide + macrolide walls; pipeline C=1 Reject=2,2026-11-06
+W219-KILL-MACRO,,,2-kills-mapped,Tacrolimus 5-fail (DB00864) + sirolimus 5-fail (DB00877) - macrolide immunosuppressant wall; everolimus class precedent W218; pipeline Reject; PNN-count 0 both,2026-11-06
+W219-KILL-5ASA,,,3-kills-mapped,Mesalamine MW/logP/TPSA gut-acting (DB00244) + balsalazide TPSA/HBD/HBA prodrug unabsorbed (DB01094 salt-flag) + olsalazine TPSA/HBD/HBA dimer (DB01250) - 5-ASA colonic-topical route + polar fails; scout props VERIFY-flagged but route-kill primary,2026-11-06
+W220-KILL-HBV,,,5-kills-mapped,Tenofovir/entecavir/adefovir/telbivudine/lamivudine (all FDA DB-verified; prodrug ambiguity flagged) - nucleoside phosphonate/polyol logP-neg/TPSA88-110 floor; CSF penetration poor (PMIDs 19926779/9121550 filed); pipeline C=5,2026-11-06
+W220-KILL-RESP,,,8-kills-mapped,Montelukast 4-fail boxed-neuropsych (AD chatter PMIDs filed non-qualifying) + zafirlukast 4-fail hepatotox + zileuton TPSA-only-closest + aminophylline/oxtriphylline moiety MW/logP + dyphylline logP/TPSA + cromolyn/nedocromil route-kill inhaled/negligible-oral (cromolyn AD-trial PMID filed) - LTRA lipophilicity + xanthine polarity + mast-cell route; pipeline C=2 Reject=6,2026-11-06
+W220-KILL-MAB,,,2-route-kills,Omalizumab + mepolizumab SC monoclonal antibodies (~150kDa) - zero oral systemic exposure; no research needed, recorded for exhaustion proof,2026-11-06
+W221-KILL-HIFPHI,,,5-kills-mapped,Roxadustat TPSA-only (DB04847 EU/JP/CN-not-US; HIF-neuro PMID42510665 filed) + vadadustat TPSA-only (DB12255 US-dialysis) + daprodustat TPSA-only boxed-thrombotic (DB11682 US) + molidustat logP/TPSA/HBA investigational + desidustat TPSA-only (DB16135 India; stroke PMID39914641 filed) - HIF-PHI carboxylic-acid TPSA99-124 floor; PNN-count 0 all,2026-11-06
+W221-KILL-KIN,,,3-kills-mapped,Fostamatinib 5-fail phosphate prodrug (DB12010) + rilzabrutinib 4-fail (DB17709 FDA-2025) + danazol logP-only ALOGP4.22-confirmed ChEMBL-live (DB01406; Pregnancy-X/virilizing) - kinase size + androgen lipophilicity; tier-C,2026-11-06
+W221-KILL-BIO,,,3-route-kills,Pegloticase + rasburicase IV uricases + romiplostim SC TPO-mimetic - injectable biologics/peptides, zero oral systemic; no research needed, recorded for exhaustion proof,2026-11-06
+W222-KILL-TROP,,,3-kills-mapped,Scopolamine logP-only ALOGP0.92-confirmed (DB00747; rapid-antidepressant PMID17015814 filed non-qualifying) + dicyclomine logP/RB + propantheline logP/quaternary discontinued - tropane polarity + quaternary charge; tier-C,2026-11-06
+W222-KILL-OPIOID,,,4-kills-mapped,Diphenoxylate MW/logP/RB Sched-II-bulk (pipeline Reject) + difenoxin ALOGP5.00-FLIP ChEMBL-live (scout 2.7 wrong) + glycopyrrolate/methscopolamine quaternary non-absorbers - opioid lipophilicity flip + quaternary wall; tier-C,2026-11-06
+W222-P01,,,FDA-approved,Hyoscyamine tier-B ChEMBL-live MW289.4/ALOGP1.93/PSA49.8 (DB00424; Levsin oral) PARKED - hook GAP (PNN-count 0) + Beers-anticholinergic flag; live SKU confirm at order,2026-11-06
+W223-KILL-AVERM,,,7-kills-mapped,Moxidectin 4-fail (DB11431) + milbemycin/selamectin vet-only macrocycles + flubendazole/oxamniquine/hycanthone TPSA-only (seizure/mutagenic flags) + lucanthone logP-only ALOGP4.48-confirmed ChEMBL-live withdrawn (DB04967) - avermectin size + thioxanthone lipophilicity; tier-C,2026-11-06
+W223-KILL-HAT,,,7-kills-mapped,Eflornithine MW/logP IV (DB06243) + nifurtimox logP/TPSA + fexinidazole TPSA-only-closest oral-BBB (DB12265; QT flag) + suramin MW/route + melarsoprol TPSA/IV-arsenic + paromomycin gut/IM + meglumine-antimonial oligomer/route (nominal-monomer props flagged) - HAT polarity + route + chemistry walls; tier C=7 Reject=7 combined wave,2026-11-06
+W224-KILL-OPIOID,,,3-kills-mapped,Oxycodone logP-only (DB00497 prototype-abuse) + oxymorphone logP/TPSA-borderline discontinued-ER (DB01192; TMA signal) + methadone logP-only QT-boxed (DB00333; NMDA PMIDs 7624018/10215686 filed non-qualifying) - oral-agonist lipophilicity split; tier-C,2026-11-06
+W224-KILL-FENT,,,4-route-kills,Fentanyl logP/route (OFC PNN/PV PMID42487688 filed, non-ARC) + alfentanil/sufentanil/remifentanil TPSA/RB/logP + IV-only definitionally-incompatible - fentanyl-family parenteral wall; Sched-II throughout,2026-11-06
+W224-P01,,,FDA-Sched-II,Hydrocodone tier-B ChEMBL-live MW299.4/ALOGP1.93/PSA38.8 (DB00956) PARKED - hook GAP (PNN-count 0) + Sched-II/abuse/CYP flags; live SKU confirm at order,2026-11-06
+W224-P02,,,FDA-Sched-II,Hydromorphone tier-B ChEMBL-live MW285.3/ALOGP1.63/PSA49.8 (DB00327) PARKED - hook GAP + potent-M3G-renal flag; highest-floor-margin pass (0.13); live SKU confirm at order,2026-11-06
+W224-P03,,,FDA-Sched-II,Levorphanol tier-B ChEMBL-live MW257.4/ALOGP3.08/PSA23.5 (DB00854; only oral of potent set) PARKED - hook GAP + Sched-II boxed flag; live SKU confirm at order,2026-11-06
+W225-KILL-PPI,,,3-kills-mapped,Rabeprazole TPSA/RB (DB01129; W102 sulfinyl pattern extends) + dexlansoprazole TPSA/HBA + linaprazan TPSA-only discontinued P-CAB (no DB) - sulfinyl-benzimidazole + imidazopyridine TPSA floor; tier-C,2026-11-06
+W225-KILL-MUC,,,4-kills-mapped,Rebamipide TPSA-only Asia-only + ecabet logP/TPSA + teprenone logP/RB systemic-isoprenoid + troxipide logP-only ALOGP1.19-flip ChEMBL-live Asia-only gut-acting - mucosal lipophilicity/polarity split; tier-C,2026-11-06
+W225-KILL-COMPLEX,,,4-route-kills,Sucralfate Al-complex (DB00364) + bismuth subsalicylate hydrolysable (DB01294) + polaprezinc Zn-chelate JP-only (DB11673) + aldioxa Al-salt obsolete (no DB) - box-inapplicable complexes, screening N/A per W215 precedent,2026-11-06
+W226-KILL-ERGOT,,,5-kills-mapped,Cabergoline MW/TPSA/RB valvulopathy (DB00248) + methysergide WITHDRAWN-fibrosis box-pass-noted pipeline-tier-B (DB00848) + ergoloid mixture obsolete (pipeline Reject) + DHE MW/TPSA no-oral + ergotamine MW/TPSA - ergot size/fibrosis/withdrawal closures,2026-11-06
+W226-KILL-FE,,,1-route-kill,Ferric-carboxymaltose/iron-sucrose/ferumoxytol IV-only iron - injectable route kill, no research needed,2026-11-06
+W226-P01,,,EU-only,Lisuride tier-B ChEMBL-live MW338.5/ALOGP2.84/PSA51.4 (DB00589; Dopergin EU-not-US) PARKED - hook GAP (PNN-count 0) + ergot-fibrosis class flag (5-HT2B-antagonist lower risk); live SKU confirm at order,2026-11-06
+W226-P02,,,EU-only,Piribedil tier-B ChEMBL-live MW298.4/ALOGP1.53/PSA50.7 (DB12478; Trivastal EU-not-US) PARKED - hook GAP; NON-ERGOT no fibrosis signal; narrowest live pass (0.03); live SKU confirm at order,2026-11-06
+W226-P03,,,FDA-acute,Methylergonovine tier-B ChEMBL-live MW339.4/ALOGP1.92/PSA68.4 at-limit (DB00353; Methergine oral+IM) PARKED - hook GAP + acute-obstetric-only indication + HTN/vasospasm flags; live SKU confirm at order,2026-11-06
+W227-KILL-ANDRO,,,6-kills-mapped,Testosterone ROUTE non-oral box-pass-noted tier-B (DB00624; songbird-PNN PMIDs filed) + methyltestosterone ALOGP4.27-flip + oxandrolone/stanozolol/oxymetholone logP CIII-hepatotox + nandrolone ROUTE-IM box-pass tier-B (hippocampal-PV PMID29232412 filed) - androgen lipophilicity + non-oral routes,2026-11-06
+W227-KILL-ESTRO,,,6-kills-mapped,Estradiol/EE logP (insular-PNN PMID40825495 filed, direction unclear) + dienogest ALOGP3.84-flip + ulipristal MW + mifepristone logP abortifacient + clomiphene logP/RB - estrogen/SPRM lipophilicity + size; tier-C,2026-11-06
+W227-P01,,,FDA-oral,Norethisterone tier-B ChEMBL-live MW298.4/ALOGP3.49/PSA37.3 (DB00717; oral contraceptive/HRT) PARKED - hook GAP (PNN-count 0; motoneuron PMID31150830 filed non-qualifying) + VTE/androgenic flags; narrowest live pass (0.01); live SKU confirm at order,2026-11-06
+W228-KILL-AP,,,11-kills-mapped,Thioridazine logP5.9 QT-restricted + quetiapine TPSA-only + aripiprazole/ziprasidone/cariprazine logP + lurasidone 3-fail (Reject) + asenapine logP/SL-route + iloperidone logP/RB + paliperidone TPSA + droperidol ROUTE+QT-boxed box-pass-noted tier-B + pimozide MW/logP restricted - AP lipophilicity + QT/route walls; tier C=9 Reject=1,2026-11-06
+W228-S01,,,FDA-REMS-SHORTLIST,Clozapine tier-B ChEMBL-live MW326.8/ALOGP2.03/PSA30.9 (DB00363; REMS) SHORTLIST #1: DIRECT in vivo PNN-softening PMID40999235 (restores mPFC PNN porosity/density, ketamine model) + PMID42785079 (sex-dependent PV-PNN, Hapln2/Reelin/Acan) | docking N/A (no data, never synthesized) | assay: no DQ-CS EC50; in vivo PNN datum above stands in | PK/PD UNMEASURED mouse NCA (human oral/BBB known) | SAR dibenzodiazepine; CAVEATS: mPFC not ARC, REMS agranulocytosis/myocarditis/seizure; live SKU confirm at order,2026-11-06
+W228-P01,,,FDA-approved,Olanzapine tier-B ChEMBL-live MW312.4/ALOGP3.44/PSA30.9 (DB00334) PARKED - PV datum PMID38139008 but no WFA/PNN + metabolic flag; clozapine-adjacent backup; live SKU confirm at order,2026-11-06
+W229-KILL-ADJ,,,4-kills-mapped,Remoxipride WITHDRAWN-aplasia box-pass-tier-B-noted (DB00409) + melperone ALOGP3.52-flip (+0.02; EU) + nefazodone MW/logP/RB withdrawn-hepatotox (pipeline Reject) + minaxolone logP withdrawn-tox - butyrophenone/SARI closures; PNN-count 0 all,2026-11-06
+W229-KILL-ANES,,,3-route-kills,Esketamine nasal-REMS box-pass-tier-B-noted (DB11823; TRANSFORM/ASPIRE filed) + brexanolone IV-60h + discontinued (logP fail) + alfaxalone vet-IV human-dead (box borderline moot) - route walls; neurosteroid/NMDA datum filed non-qualifying,2026-11-06
+W229-P01,,,EU-only,Pipamperone tier-B ChEMBL-live MW375.5/ALOGP2.59/PSA66.6/RB7-boundary (DB09286; Dipiperon EU-not-US) PARKED - hook GAP (PNN-count 0) + hypotension/sedation flags; live SKU confirm at order,2026-11-06
+W230-KILL-ANOR,,,3-kills-mapped,Benzphetamine logP-only ALOGP3.75-confirmed CIII (DB00865; amphetamine metabolites) + phendimetrazine MW191-floor CIII + anamorelin MW/TPSA/RB JP-only (DB06645; ARC-GHSR PMIDs 15817841/26577678/PMC7005150 filed, box-fail) - stimulant lipophilicity + ghrelin size; tier-C,2026-11-06
+W230-KILL-LAX,,,4-kills-mapped,Bisacodyl logP-only colonic-prodrug + senna/docusate/lactulose non-absorbed route kills + pramlintide SC-peptide + metreleptin SC-protein REMS route kills (DB01278/DB09046) - gut-restricted + injectable walls,2026-11-06
+W230-P01,,,FDA-CIV,Diethylpropion tier-B ChEMBL-live MW205.3/ALOGP2.60/PSA20.3 (DB00937; Tenuate generics) PARKED - FIRST park with hypothalamic mechanism (perifornical-HT feeding PMID2867451; lateral-HT class PMID1182535) but hook GAP for PNN specifically + CIV/short-term-only flags; live SKU confirm at order,2026-11-06
+W231-KILL-VITD,,,4-kills-mapped,Calcitriol/cholecalciferol/ergocalciferol/calcifediol logP-only 5.1-8.9 (all FDA oral DB-verified) - secosteroid lipophilicity floor; filed: vit-D neuroprotection/remyelination reviews + PV-CaBP induction PMC7563709, no PNN datum; hypercalcemia narrow-TI flag,2026-11-06
+W231-KILL-BIND,,,3-route-kills,Patiromer + sodium-zirconium-cyclosilicate + lanthanum-carbonate non-absorbed K/phosphate binders - zero systemic exposure; no research needed,2026-11-06
+W232-KILL-BB,,,5-kills-mapped,Labetalol TPSA/HBD/RB hepatotox (DB00598) + esmolol RB/IV-ultra-short route kill (DB00187) + penbutolol logP discontinued-not-safety + practolol logP/TPSA WITHDRAWN-oculomucocutaneous (never-FDA) + celiprolol TPSA/RB ex-US - BB remainder closed (pindolol W196 untouched); pipeline C=4 Reject=2,2026-11-06
+W232-KILL-ACAM,,,1-kill-mapped,Acamprosate MW/logP/TPSA (DB00659 oral) - NMDA/GABA datum PMIDs 15963001/15165832/9660304 filed but multi-floor fail + 11%-F; no oral-systemic CNS path at box,2026-11-06
+W233-KILL-RESP,,,9-kills-mapped,Pseudoephedrine/phenylephrine MW+logP stimulant floors + oxymetazoline/xylometazoline ROUTE-KILLS nasal-only box-pass-tier-B-noted + pholcodine logP/withdrawn-anaphylaxis + guaifenesin MW/logP-narrow + bromhexine logP-only + carbocisteine/erdosteine polarity - decongestant fragment + imidazoline-route + mucolytic floors; NAC duplicate-closed W64 not re-screened; pipeline B=2(route) C=6 Reject=1,2026-11-06
+W234-KILL-ENDO,,,3-kills-mapped,Carbimazole MW/logP UK-only methimazole-prodrug (DB00389) + KI/perchlorate ion size floors - antithyroid fragment/ion floor; pipeline C=2 Reject=1,2026-11-06
+W234-KILL-PEPT,,,15-route-kills,Desmopressin/oxytocin/vasopressin/terlipressin/atosiban/carbetocin + tetracosactide/cosyntropin + goserelin/leuprolide/triptorelin/histrelin/nafarelin/degarelix/abarelix (MW 988-2933, injectable/nasal) - peptide/implant walls, screening N/A; oxytocin-PV social lit filed non-WFA,2026-11-06
+W235-KILL-VIT,,,8-kills-mapped,Lipoic-acid TPSA-only (DB00166; neuropathy PMID42928304 filed) + ferrous inorganic floor + B12s box-inapplicable + folate 5-fail + ascorbic 3-fail + tocopherol logP/RB + retinol logP-only - nutrient polarity/lipophilicity split; neuro-cohort PMIDs filed, PNN-count 0 all; pipeline C=3 Reject=5,2026-11-06
+W236-KILL-LIPID,,,2-kills-mapped,Obeticholic-acid logP/TPSA boxed-hepatic (DB05990; FXR EC50-99nM, NASH-rejected) + lomitapide MW/logP/RB boxed-hepatic REMS (DB08827; stroke-autophagy PMID36052650 filed vendor-BBB-claim-unverified) - bile-acid/MTP walls; pipeline C=1 Reject=1,2026-11-06
+W236-KILL-LIPID2,,,8-route-kills,Cholestyramine/colestipol/colesevelam non-absorbed sequestrant polymers + mipomersen ASO-SC + evinacumab/alirocumab/evolocumab mAbs-IV/SC + inclisiran siRNA-SC - zero oral systemic; no research needed,2026-11-06
+W237-KILL-ZDRUG,,,3-kills-mapped,Eszopiclone logP/TPSA Sched-IV-boxed + zaleplon logP/TPSA + sodium-oxybate MW/logP Sched-III-REMS (GHB diversion) - Z-drug polarity + oxybate fragment; insomnia reviews filed, PNN-count 0 all,2026-11-06
+W237-P01,,,FDA-Sched-IV,Zolpidem tier-B ChEMBL-live MW307.4/ALOGP3.25/PSA37.6 (DB00425; Ambien; completes W4-CNS-07 scaffold with approval proof) PARKED - hook GAP (PNN-count 0) + boxed complex-behaviors/sex-dosing flags; live SKU confirm at order,2026-11-06
+W238-KILL-FLAV,,,14-kills-mapped,Curcumin TPSA/RB + quercetin/fisetin/luteolin/kaempferol TPSA/HBD + myricetin 4-fail + apigenin/baicalein/naringenin/hesperetin/genistein TPSA-only + wogonin TPSA-only + EGCG 5-fail + silibinin MW/TPSA/HBD/HBA + bilobalide logP/TPSA/HBA + daidzein TPSA-only PSA70.67-flip ChEMBL-live (sole pass lost by 0.67) - flavonoid polyphenol TPSA floor; PAINS flags throughout; senolytic PMIDs filed; pipeline C=11 Reject=5,2026-11-06
+W238-KILL-BERB,,,1-kill-charge,Berberine tier-B-neutral-form-noted (ChEMBL-live 336.4/3.10/40.8) KILLED on permanent isoquinolinium cation + P-gp efflux + ~5% F defeating passive-BBB premise (quaternary precedent W222) - charge wall; PNN-count 0,2026-11-06
+W238-KILL-MIX,,,2-route-kills,Silymarin + ginkgo-extract box-inapplicable mixtures (silibinin/bilobalide scored singly), screening N/A; EGb761 dementia RCT PMID9343463 filed,2026-11-06
+W239-KILL-VOL,,,12-kills-mapped,Nicotine MW/logP addictive (DB00184) + capsaicin logP/RB + menthol/camphor/eucalyptol/thymol/eugenol MW-only floors (camphor seizure flag) + gingerol RB-only + shogaol logP/RB + cinnamaldehyde MW + allicin MW/logP-unstable + sulforaphane 3-floor - volatile fragment floor + pungent RB wall; neuro PMIDs filed, PNN-count 0 all,2026-11-06
+W239-KILL-CAROT,,,4-kills-mapped,Lycopene/astaxanthin/zeaxanthin/betacarotene MW536-597 logP10-16 RB10-16 (ATBC/CARET smoker flag filed) - C40 lipophilicity wall; pipeline C=11 Reject=5 combined wave,2026-11-06
+W240-KILL-CHOL,,,6-kills-mapped,Neostigmine/pyridostigmine/edrophonium quaternary route kills (neostigmine box-pass-tier-B-noted DB01400) + emetine/cephaeline MW/logP hERG-cardiotox restricted + apovincamine logP-only vinca - cholinesterase-quat + ipecac walls; tier mixed, PNN-count 0 all,2026-11-06
+W240-KILL-RAUW,,,3-kills-mapped,Deserpidine 5-fail discontinued-suicidality + tubocurarine/atracurium IV-NM-blocker route kills (box-inapplicable dication noted) - legacy + paralysis walls,2026-11-06
+W240-P01,,,FDA-approved,Physostigmine tier-B ChEMBL-live MW275.4/ALOGP1.77/PSA44.8 (DB00981; IV/ophthalmic) PARKED - hook GAP (PNN-count 0; BBB-crosser antidote context) + cholinergic-crisis/narrow-TI flags; oral route N/A (IV/eye); live SKU confirm at order,2026-11-06
+W240-P02,,,supplement/research,Rauwolscine tier-B ChEMBL-live MW354.5/ALOGP2.65 (alpha-yohimbine fat-burners; no FDA) PARKED - hook GAP + HTN/anxiety flags; research-chemical obtainability, SKU confirm at order,2026-11-06
+W240-P03,,,research-only,Corynanthine tier-B ChEMBL-live MW354.5/ALOGP2.65 (experimental alpha1 standard; no FDA) PARKED - hook GAP; research-only obtainability, SKU confirm at order,2026-11-06
+W240-P04,,,EU-Rx/supplement,Ajmalicine tier-B ChEMBL-live MW352.4/ALOGP3.18 (EU cerebral vasodilator; no US FDA) PARKED - hook GAP + hypotension flags; SKU confirm at order,2026-11-06
+W241-KILL-AD,,,4-kills-mapped,Vilazodone logP/TPSA (DB06684) + moclobemide ALOGP1.40-flip EU-only + brofaromine ALOGP3.67-flip never-approved + toloxatone logP withdrawn-hepatitis - late-AD lipophilicity + RIMA flips; PNN-count 0 all,2026-11-06
+W241-KILL-ALV,,,1-route-kill,Alvimopan peripheral mu-antagonist gut-restricted - zero CNS; no research needed,2026-11-06
+W241-P01,,,FDA-2023,Gepirone tier-B ChEMBL-live MW359.5/ALOGP1.55/PSA69.64 (DB12184; Exxua) PARKED - hook GAP (PNN-count 0) + QT/suicidality flags; newest park (2023 approval); live SKU confirm at order,2026-11-06
+W241-P02,,,research-only,Befloxatone tier-B ChEMBL-live MW349.3/ALOGP2.35/PSA68.2 HBA5 (HBA-split resolved N/O; MAO-A PET-ligand PMID12606609) PARKED - hook GAP + never-approved/discontinued; research-only obtainability, SKU confirm at order,2026-11-06
+W242-KILL-FLU,,,6-kills-mapped,Oseltamivir logP/TPSA/RB prodrug-ambiguity + zanamivir/peramivir/laninamivir inhaled/IV route kills + rimantadine MW-floor discontinued-resistance + arbidol MW/logP/TPSA ex-US - neuraminidase polarity + M2 obsolescence; pipeline C=1 Reject=11 combined wave,2026-11-06
+W242-KILL-COVID,,,6-kills-mapped,Baloxavir 4-fail + favipiravir 3-fail teratogen + molnupiravir logP/TPSA/HBD host-mutagen + remdesivir IV route + nirmatrelvir MW/TPSA/HBA booster-obligate + ensitrelvir MW/TPSA/HBA JP-only - polymerase/protease size-polarity walls; PNN-count 0 all,2026-11-06
+W243-KILL-CEPH,,,5-kills-mapped,Ceftriaxone 6/6-fail IV (DB01212; GLT-1 PMID15635412 filed non-PNN) + cefdinir 4-fail oral + cefotaxime multi-fail IV + posizolid multi-fail discontinued + propentofylline logP/TPSA discontinued (microglia PMID10027689 filed) - cephalosporin polarity + oxazolidinone/xanthine closures; pipeline C=1 Reject=4,2026-11-06
+W243-P01,,,JP-approved,Ibudilast tier-B ChEMBL-live MW230.3/ALOGP3.30/PSA34.4 (Ketas JP; MN-166 US-expanded-access) PARKED - hook GAP (PNN-count 0; TLR4/microglia PMID40237256 filed) + GI flags; live SKU confirm at order,2026-11-06
+W243-P02,,,research-only,CX-516 tier-B ChEMBL-live MW241.3/ALOGP2.26/PSA46.1 (ampakine; never approved) PARKED - hook GAP (cognition PMIDs 38823543/17504104 filed) + low-potency/short-t-half history; research-only obtainability, SKU confirm at order,2026-11-06
+W244-KILL-AZOSIN,,,2-kills-mapped,Terazosin TPSA/HBA/logP-low (DB01162; CLOGP-split noted, TPSA decisive) + prazosin TPSA/HBA (DB00457; prostate-apoptosis PMIDs filed) - quinazoline TPSA floor; doxazosin/tamsulosin/alfuzosin untouched; pipeline C=1 Reject=1,2026-11-06
+W244-DEAD-SRC,,,2-source-notes,Trimethaphan IV ganglion-blocker route kill - no oral systemic; Opium/paregoric tinctures DEAD SOURCE (non-standard mixtures, unquantifiable actives) - excluded from searchable space with proof,2026-11-06
+W245-P01,,,JP-approved,Ibudilast tier-B ChEMBL-live MW230.3/ALOGP3.30/PSA34.4 (DB05266; Ketas JP oral; MN-166 US-expanded-access ALS) PARKED - hook GAP (PNN-count 0; glial/TLR4 MS/ALS PMIDs 14975696/15471363/34816762 filed) + PDE4-GI/platelet flags; live SKU confirm at order,2026-11-06
+W245-KILL-CRIS,,,1-route-kill,Crisaborile topical PDE4 (Eucrisa) - dermal-only route kill; no research needed,2026-11-06
+W247-KILL-AED2,,,4-kills-mapped,Valproic-acid MW-floor HDAC-boxed-teratogen (DB00313; HDAC PMIDs 11779435/11463631 filed; logBB-neg example) + lamotrigine logP/TPSA SJS-boxed + levetiracetam MW/logP (racetam wave24 untouched) + cenobamate TPSA-only Sched-V - AED fragment/polarity floor; pipeline C=4,2026-11-06
+W247-DEAD-SRC,,,1-source-note,Opium/paregoric tinctures reconfirmed DEAD SOURCE W244 (non-standard mixtures) - exclusion stands,2026-11-06
+W248-KILL-CHEL,,,5-kills-mapped,Tiopronin MW/logP (DB06823; meprin-beta PMID21646356 filed) + succimer 4-fail (DB00566; nanoparticle PMID37759500 filed non-chelation) + deferitrin logP/TPSA discontinued-nephrotox (no DB) + dimercaprol IM-oil route kill + edetate IV 5-fail route kill - thiol fragment + polyacid walls; pipeline C=3 Reject=2,2026-11-06 (screen retry after transient pnn-module glitch, clean)
+W249-KILL-ATYP,,,7-kills-mapped,Tianeptine 3-fail abuse + amineptine RB-only withdrawn-hepatitis + diclofensine logP never-marketed + phenibut MW/logP RU-only + picamilon logP/TPSA RU-only + fabomotizole TPSA-only RU-only + mebicar MW/logP RU-only - atypical-AD polarity + RU-regulatory wall; tier C=6 Reject=1,2026-11-06
+W249-KILL-SAFETY,,,3-box-pass-kills,Nomifensine box-pass-tier-B WITHDRAWN-hemolysis + kavain box-pass-tier-B kava-hepatotoxicity supplement-only + mitragynine box-pass-tier-B kratom-abuse quasi-legal - chemistry passes, safety/obtainability fails (W226-methysergide/W228-droperidol precedent); PNN-count 0 all,2026-11-06
+W250-KILL-FIB,,,5-kills-mapped,Ciprofibrate ALOGP3.59-flip ex-US (W2-MET-05 completed) + clofibrate box-pass-tier-B WITHDRAWN-mortality + acipimox MW/logP/TPSA + probucol 4-fail withdrawn-QT + resmetirom TPSA-only FDA-2024 (MAESTRO PMID38324483 filed) - fibrate flip + thyromimetic floor; pipeline B=1(clofibrate-withdrawn) C=6 Reject=4,2026-11-06
+W250-KILL-PPAR,,,6-kills-mapped,Dextrothyroxine/tiratricol MW/logP withdrawn-legacy + elafibranor/seladelpar/saroglitazar/pemafibrate logP5.0-5.6 PPAR lipophilicity wall (2024 PBC approvals noted) - thyroid/PPAR size-lipophilicity closures,2026-11-06
+W251-KILL-AMET,,,6-kills-mapped,Thioguanine MW/logP/TPSA myelosuppressive + tegafur logP-only DPD-risk + floxuridine logP/TPSA IV-arterial route kill + sulfinpyrazone TPSA-only marrow-withdrawn + oxypurinol/tisopurine triple-floor experimental - purine/pyrimidine polarity + marrow walls; tegafur 7-count verified false-positive; pipeline C=3 Reject=3,2026-11-06
+W252-KILL-IL1,,,3-route-kills,Anakinra SC-daily (Kineret FDA 2001; 17.3kDa IL-1Ra) + canakinumab SC-q8w (Ilaris FDA 2009; 150kDa mAb) + rilonacept SC-weekly (Arcalyst FDA 2008; IL-1 trap) - injectable biologics, zero oral systemic; no research needed; gout/IL-1 file closed,2026-11-06
+W252-NOTE,,,exhaustion-watch,Approved-drug systematic space now ~exhaustively mapped across 250+ waves (all major classes + naturals + peptides/biologics route-killed); remaining frontier: expired-patent scaffolds + vendor catalogs (access-walled) + obscure naturals; waves continue while each adds verified kills,2026-11-06
+W253-KILL-ETHNO,,,5-kills-mapped,Ibogaine Sched-I/logP QT-fatalities + noribogaine ALOGP3.63-confirmed investigational-cardiac + salvinorin TPSA/HBA kappa-dissociative + arecoline MW/logP betel-carcinogen + lobeline logP legacy-withdrawn - scheduled/dissociative/carcinogen walls; PNN-count 0 all,2026-11-06
+W253-KILL-LUPIN,,,3-box-pass-kills,Anagyrine teratogen-crooked-calf (danazol precedent) + sparteine cardiotoxic-Na-block abortifacient + lupanine narrow-TI poisoning-risk - chemistry passes, safety fails; research-only obtainability; tier-B noted,2026-11-06
+W253-P01,,,research-chemical,Harmaline tier-B ChEMBL-live MW214.3/ALOGP2.54/PSA37.4 (unscheduled RC) PARKED - BEST hook-adjacent natural this run: adult-hippocampal-neurogenesis PMID28353639 + tremor/MAOI flags; SKU confirm at order,2026-11-06
+W253-P02,,,research-chemical,Tetrahydroharmine tier-B ChEMBL-live MW216.3/ALOGP2.38/PSA37.1 (unscheduled RC) PARKED - hook-adjacent same PMID28353639 + SSRI/MAOI flags; SKU confirm at order,2026-11-06
+W254-KILL-BENZO,,,4-kills-mapped,Clorazepate TPSA prodrug-salt + quazepam ALOGP5.03-confirmed + brotizolam ALOGP4.40-confirmed (TPSA-dispute moot) + loprazolam MW/TPSA - fluorinated/long-acting closures; tier-C,2026-11-06
+W254-P01,,,FDA-Sched-IV,Diazepam tier-B ChEMBL-live MW284.8/ALOGP3.15/PSA32.7 (DB00829) PARKED - BEST benzo hook-adjacent: GABA-A probe in PNN/critical-period papers PMIDs 28974755/29031852/25220148 + 40 PV hits, no direct softening datum; dependence/box flags,2026-11-06
+W254-P02,,,FDA-Sched-IV,9-benzo-park-batch Lorazepam/alprazolam/temazepam/oxazepam/chlordiazepoxide/flurazepam/estazolam/triazolam/lormetazepam tier-B scout-verified (DB00186/DB00404/DB00231/DB00842/DB00475/DB00690/DB01215/DB00897/DB13872; FDA+EUs) PARKED - hook GAP all (PNN-count 0; alprazolam 1 incidental PMID) + dependence/box flags; flurazepam long-t-half hangover noted; live SKU confirm at order,2026-11-06
+W255-KILL-BARB,,,10-kills-mapped,Phenobarbital/pentobarbital/secobarbital/butalbital TPSA-only Sched-II/IV (euthanasia/lethal-injection flags) + primidone logP-only + thiopental TPSA+IV-anesthesia + amobarbital TPSA Sched-II + aprobarbital/butabarbital/talbutal TPSA+logP legacy-withdrawn - barbiturate TPSA75.3 floor + narrow-TI walls; tier C=10,2026-11-06
+W255-KILL-BOX2,,,2-box-pass-kills,Methohexital box-pass-tier-B IV-anesthesia route kill + mephobarbital box-pass-tier-B withdrawn-teratogen (phenobarbital prodrug) - chemistry passes, route/withdrawal fails; PNN-count 0 all,2026-11-06
+W256-KILL-PSY,,,7-sched-kills,Psilocybin/DMT/mescaline box-fail + psilocin/LSD/5-MeO-DMT/DOI box-pass-tier-B-noted - ALL US Schedule I (DEA 7437/7438/7315/7435/7381/tryptamine/phenethylamine) = unobtainable without DEA license; filed: Nardou-2023 PMID37316643 critical-period reopening, Ly-2018 PMID29698297, Vargas-2023 PMID37561896 intracellular-5HT2A, Dakic-2017 PMID28993683; NO direct ARC-PNN/WFA datum for any,2026-11-06
+W257-KILL-DISS,,,2-sched-kills,PCP logP+Sched-II psychotomimetic-model (DB03575) + methoxetamine box-pass-tier-B Sched-I-2022 cerebellar/bladder-tox (no DB; PMID28867363 filed) - dissociative scheduling walls; PNN-count 0 both,2026-11-06
+W257-KILL-GAS,,,8-route-kills,Nitrous/xenon inhaled-only rapid-antidepressant PMIDs 25577164/34108247/32106142 filed + isoflurane/sevoflurane/desflurane/halothane/enflurane/methoxyflurane volatile-only (MH/hepatotoxicity flags) - inhaled-route wall, screening N/A gases,2026-11-06
+W258-KILL-CAN2,,,2-kills-mapped,Cannabidivarin logP-only (GW epilepsy PMID22970845 filed) + taranabant 4-fail discontinued-psychiatric (rimonabant-class; PMIDs 20157323/20518807 filed) - varinoid lipophilicity + CB1-inverse-agonist wall,2026-11-06
+W258-DEAD-SRC,,,1-source-note,CBN/CBG/CBC/THCV excluded as W148 re-search (W148-KILL-CANMIN closed 7 agents) - dead wave for those four, no ceremony,2026-11-06
+W259-KILL-CFTR,,,1-kill-mapped,Ivacaftor logP/TPSA (DB08820; combos closed) + hepatic/neuropsych flags - CFTR lipophilicity wall; pipeline C=1,2026-11-06
+W259-KILL-BIO,,,12-route-kills,Palivizumab/nirsevimab mAbs + somatropin/mecasermin/pegvisomant/tesamorelin GH-axis + hCG/follitropin/menotropin/urofollitropin gonadotropins + cetrorelix/ganirelix GnRH-antagonists - all injectable peptides/proteins/mAbs, zero oral; no research needed,2026-11-06
+W260-KILL-LEVODOPA,,,1-kill-mapped,Levodopa 4-fail MW/logP/TPSA/HBD (DB01235; Sinemet 1975; LAT1-transported but box is passive-design, transporter does not rescue) - catechol amino-acid floor; PNN-count 0,2026-11-06
+W260-NOTE,,,1-coverage-note,Istradefylline reconfirmed closed W32-KILL-A2A; carbidopa/benserazide untouched per cycle rule,2026-11-06
+W261-KILL-ADRENAL,,,2-kills-mapped,Levoketoconazole MW/logP boxed-hepatotoxic (DB15044 uncertain-ID flagged) + metyrosine MW/logP/TPSA (depression/suicidality flag) - Cushing size + pheo polarity floors,2026-11-06
+W261-KILL-SST,,,3-route-kills,Octreotide/lanreotide/pasireotide injectable somatostatin analogs - depot/SC route kill; no research needed,2026-11-06
+W261-P01,,,FDA-1961,Metyrapone tier-B ChEMBL-live MW226.3/ALOGP2.64/PSA42.9 (DB01011; Metopirone) PARKED - hook GAP (PNN-count 0) + hypocortisolism/QT flags; live SKU confirm at order,2026-11-06
+W261-P02,,,FDA-2020,Osilodrostat tier-B ChEMBL-live MW227.2/ALOGP2.43/PSA41.6 (DB11837; Isturisa) PARKED - hook GAP + hypocortisolism-dose-limiting/QTc flags; live SKU confirm at order,2026-11-06
+W262-KILL-ARI,,,10-kills-mapped,Sorbinil logP-only hypersensitivity-withdrawn + tolrestat logP/TPSA hepatic-deaths + zopolrestat TPSA/HBA discontinued + epalrestat logP/TPSA JP-only + fidarestat logP/TPSA JP-only + ranirestat logP/TPSA + ponalrestat TPSA-only PSA72.19-confirmed no-DB + lidorestat logP/TPSA + zenarestat/minalrestat TPSA-only - ARI carboximide TPSA floor + withdrawal wall; neuropathy PMIDs filed, PNN-count 0 all; pipeline C=10,2026-11-06
+W263-KILL-MAOI,,,3-kills-mapped,Phenelzine MW/logP cheese-effect (DB00780) + tranylcypromine MW-floor logP-at-bound (DB00752) + isocarboxazid ALOGP1.42-flip (DB01247, 0.08 under) - hydrazine/cyclopropylamine fragment floor + tyramine/serotonin walls; PNN-count 0 all; pipeline C=3,2026-11-06
+W264-KILL-FGA,,,4-kills-mapped,Prochlorperazine logP-only boxed-elderly (DB00433; Wnt-cancer PMIDs filed non-PNN) + mesoridazine logP withdrawn-QT (DB00933) + acetophenazine/carphenazine TPSA+RB discontinued - phenothiazine lipophilicity + indolone closures; PNN-count 0 all,2026-11-06
+W264-P01,,,FDA-discontinued-commercial,Molindone tier-B ChEMBL-live MW276.4/ALOGP1.96/PSA45.3 (DB01618; Moban 1974, NOT safety-withdrawn) PARKED - hook GAP (PNN-count 0; Wnt-cancer hits only) + EPS/tardive flags; live SKU confirm at order,2026-11-06
+W265-KILL-GLIT,,,10-kills-mapped,Troglitazone logP/TPSA withdrawn-hepatic-deaths + muraglitazar/tesaglitazar/aleglitazar/ragaglitazar multi-fail discontinued-CV + farglitazar/naveglitazar/netoglitazone multi-fail + balaglitazone/rivoglitazone TPSA-only-closest investigational - glitazar lipophilicity/polarity graveyard; no PPAR work without override; pipeline C=6 Reject=4,2026-11-06
+W266-KILL-DPP4,,,6-kills-mapped,Gemigliptin 4-fail + evogliptin/omarigliptin/trelagliptin logP+TPSA + teneligliptin TPSA-only-closest + oral-semaglutide peptide-n/a (BBB-crosses note filed) - Asia-DPP4 TPSA floor; neuro PMIDs filed (teneligliptin PMID40441584; omarigliptin x4; trelagliptin cog x2), PNN-count 0 all,2026-11-06
+W266-KILL-GLP1,,,6-route-kills,Exenatide/liraglutide/dulaglutide/tirzepatide/albiglutide/lixisenatide SC peptides - injectable route kill; no research needed,2026-11-06
+W267-KILL-ACEI,,,10-kills-mapped,Enalapril/lisinopril/ramipril/perindopril/quinapril/benazepril/trandolapril TPSA/RB/logP floors + fosinopril/moexipril 4-5-fail + captopril logP-only-closest active-thiol - ACE-inhibitor peptidomimetic polarity floor; AD-cognition PMIDs filed, PNN-count 0 all,2026-11-06
+W267-KILL-ARB,,,7-kills-mapped,Irbesartan/candesartan/eprosartan/azilsartan logP+TPSA + olmesartan TPSA+RB + telmisartan MW/logP/TPSA + aliskiren MW/TPSA/HBD/RB - ARB tetrazole/biphenyl lipophilicity wall; neuro PMIDs filed (telmisartan n=21, candesartan BBB-panel), PNN-count 0 all,2026-11-06
+W268-KILL-NASAL,,,4-kills-mapped,Fluticasone/mometasone/ciclesonide/beclomethasone inhaled/nasal route kills + MW/logP/TPSA fails (class GC-PNN note W217 applies) - topical-steroid route + size walls,2026-11-06
+W268-KILL-RETIN,,,5-kills-mapped,Tretinoin/adapalene logP topicals + isotretinoin/acitretin logP oral-systemics iPLEDGE/3yr-teratogen + pimecrolimus MW/TPSA/HBA topical-boxed - retinoid lipophilicity + teratogenicity walls; pipeline C=4 Reject=5,2026-11-06
+W269-KILL-ANDRO,,,2-kills-mapped,Nilutamide TPSA-only discontinued-pneumonitis/hepatotoxicity (DB00665) + abiraterone logP-only mineralocorticoid/hepatotoxic (DB05812; +prednisone obligate) - antiandrogen nitroaromatic/steroid floor; PNN-count 0 both,2026-11-06
+W270-KILL-COX,,,9-kills-mapped,Celecoxib ALOGP3.51/PSA78-flip (ADAPT PMIDs filed) + rofecoxib/valdecoxib box-pass WITHDRAWN-CV/SJS + parecoxib TPSA + diclofenac/indomethacin logP + meloxicam/piroxicam TPSA + lumiracoxib logP withdrawn-hepatic - coxib/NSAID closures,2026-11-06
+W270-P01,,,FDA-OTC,Ibuprofen tier-B ChEMBL-live MW206.3/ALOGP3.07/PSA37.3 (DB01050) PARKED - hook GAP but best AD-epi in class (Rotterdam PMID11739367, meta PMID18448874; ADAPT-RCT negative filed) + GI/CV/renal flags,2026-11-06
+W270-P02,,,FDA-short-course,Ketorolac tier-B ChEMBL-live MW255.3/ALOGP2.29/PSA59.3 (DB00465) PARKED - hook GAP + short-course-only + hemorrhage/renal flags,2026-11-06
+W270-P03,,,FDA-approved,Nabumetone tier-B ChEMBL-live MW228.3/ALOGP3.37/PSA26.3 (DB00461; prodrug to 6-MNA) PARKED - hook GAP (PNN-count 0),2026-11-06
+W271-KILL-AR2,,,2-kills-mapped,Apalutamide MW/logP/TPSA seizure/fall flags (DB11901) + darolutamide TPSA-only low-BBB (DB12941; P-gp/BCRP substrate) - AR-antagonist polarity/size wall; PNN-count 0 both,2026-11-06
+W272-KILL-MUSC,,,2-kills-mapped,Bethanechol MW/logP permanent-cation (DB01019; ICV-AD PMIDs filed, no oral benefit) + cevimeline MW-floor free-base (DB00185; AF102B M1-AD PMIDs filed, AlzForum discontinued) - muscarinic fragment/charge floor,2026-11-06
+W272-DEAD-SRC,,,1-source-note,Organophosphate pesticides + ophthalmic AChEIs + endogenous acetylcholine DEAD SOURCES (non-drugs/route-kills),2026-11-06
+W273-KILL-MR,,,3-kills-mapped,Canrenone ALOGP4.37-flip (scout 2.7 wrong; EU-approved metabolite) + mexrenone/prorenone no-ChEMBL/no-DrugBank discontinued-investigational unobtainable-unverifiable (noopept precedent; pipeline tier-B-noted) - MR lipophilicity + record-gap walls,2026-11-06
+W274-KILL-LOCA,,,8-route-kills,Lidocaine/bupivacaine/ropivacaine/mepivacaine/prilocaine/articaine/chloroprocaine/procaine box-pass-tier-B-noted but injectable/topical-only + LAST/CNS-seizure blocks chronic oral (bupivacaine highest cardiotox) - local-anesthetic route wall; PNN-count 0 all,2026-11-06
+W274-KILL-LOCA2,,,3-kills-mapped,Tetracine logP/RB + benzocaine MW-floor methemoglobinemia-box + dibucaine logP/RB topical-only - ester/topical closures,2026-11-06
+W275-KILL-PROM,,,1-kill-mapped,Promethazine logP-only dual-calculator (DB01069; axonal-injury PMIDs filed non-qualifying) + Beers/boxed-vesicant flags - phenothiazine lipophilicity floor; pipeline C=1,2026-11-06
+W276-KILL-XAN,,,6-kills-mapped,Fenspiride box-pass-tier-B WITHDRAWN-2019-QT (DB08979) + enprofylline MW/logP/TPSA + bamiphylline multi + acebrophylline salt-wall + doxofylline/proxophylline logP/TPSA - xanthine polarity + QT-withdrawal walls; PNN-count 0 all,2026-11-06
+W277-KILL-BIND2,,,3-route-kills,Sucroferric polynuclear-Fe non-absorbed (DB09146) + ferric-citrate coordination-family gut-binder (DB08881; systemic fraction is iron not drug) + colestilan cross-linked polymer no-DB - binder file fully closed; screening N/A box-inapplicable per W215 precedent,2026-11-06
+W278-KILL-TOP,,,3-route-kills,Clobetasol/fluocinonide/betamethasone-dipropionate topical-only multi-fail + HPA-suppression boxed - topical-steroid route + size walls; W217 class note applies,2026-11-06
+W278-KILL-DOAC,,,3-kills-mapped,Edoxaban MW/logP/TPSA/HBA triple-boxed + betrixaban MW/logP/TPSA discontinued + fondaparinux SC-pentasaccharide route kill - DOAC polarity/size + injectable walls; pipeline Reject=6/6,2026-11-06
+W279-KILL-COUGH,,,5-kills-mapped,Levodropropizine logP-only peripheral + butamirate RB-only + pentoxyverine logP/RB + pipazethate TPSA withdrawn-inefficacy + clobutinol box-pass WITHDRAWN-2007-QT (DB09004) - cough closures,2026-11-06
+W279-P01,,,EU/Taiwan-approved,Oxolamine tier-B ChEMBL-live MW245.3/ALOGP2.62/PSA42.2 (DB13216) PARKED - hook GAP (PNN-count 0) + sensitization flag; live SKU confirm at order,2026-11-06
+W279-P02,,,research-limited,Moguisteine tier-B ChEMBL-live MW339.4/ALOGP1.93/PSA65.1/RB7-boundary (no DB; ChEMBL146980) PARKED - hook GAP + thin-safety-dataset flag; ChEMBL-resolved split; live SKU confirm at order,2026-11-06
+W280-P01,,,JP-approved,Imidafenacin tier-B ChEMBL-live MW319.4/ALOGP3.05/PSA60.9 (DB09262; Uritos/Staybla Japan oral, not US/EU) PARKED - hook GAP (PNN-count 0) + anticholinergic/retention/glaucoma flags; live SKU confirm at order,2026-11-06
+W281-KILL-BIO,,,4-route-kills,Denosumab SC-mAb + abaloparatide SC-peptide + romosozumab SC-mAb + burosumab SC-mAb - injectable bone biologics, zero oral; no research needed,2026-11-06
+W283-KILL-ADS,,,4-route-kills,Kaolin/pectin unabsorbed clay-polymer antidiarrheals + attapulgite withdrawn-clay + activated-charcoal luminal adsorbent - zero systemic exposure; screening N/A box-inapplicable,2026-11-06
+W283-KILL-ENZ,,,6-route-kills,Pancrelipase/pancreatin/zenpep/creon pig-derived enzyme mixtures + lactase/sacrosidase oral proteins - GI-lumen-only macromolecules, no discrete BBB-relevant props; screening N/A,2026-11-06
+W284-KILL-MYD,,,2-route-kills,Tropicamide box-pass-tier-B logP-at-boundary ophthalmic-only (DB00809; IV-abuse signals filed) + cyclopentolate box-pass-tier-B ChEMBL-confirmed ophthalmic-only + delirium-in-MCI flag (DB00979) - mydriatic route wall; pipeline B=2 both,2026-11-06
+W285-KILL-OPH,,,3-route-kills,Metipranolol/dipivefrin/unoprostone ophthalmic-only + box fails (RB/TPSA/logP) + systemic beta-blockade/adrenergic load - ophthalmic route wall; demecarium/ambenonium dead-source reconfirmed,2026-11-06
+W286-KILL-TET,,,6-kills-mapped,Demeclocycline/omadacycline/sarecycline/lymecycline/chlortetracycline multi-fail + eravacycline IV route - tetracycline naphthacene polyol floor (TPSA 174-243); calpain/glutamate PMIDs filed, PNN-count 0 all; pipeline Reject=6/6,2026-11-06
+W287-KILL-STAT2,,,2-kills-mapped,Cerivastatin MW/TPSA/RB withdrawn-rhabdo-deaths (DB00439) + mevastatin logP/TPSA never-marketed-dog-lymphomas (DB06693 prototype) - statin file fully closed; pipeline C=1 Reject=1,2026-11-06
+W288-KILL-LSF,,,1-kill-mapped,Lisofylline logP/TPSA investigational-discontinued (DB12406; IL-12/STAT4 mechanism filed, no PNN datum) - xanthine file fully closed; pipeline C=1,2026-11-06
+W289-KILL-TOP2,,,8-kills-mapped,Olopatadine/epinastine/emedastine/levocabastine/antazoline/naphazoline/tetrahydrozoline box-pass-tier-B-noted but nasal/ophthalmic-only + rebound-vasoconstriction/anticholinergic flags + azelastine logP-only - topical antihist/decongestant route wall,2026-11-06
+W290-KILL-PDE5,,,3-kills-mapped,Lodenafil/udenafil/mirodenafil MW500+ TPSA120+ HBA/RB regional-only (DB11927/DB06267/DB11792) - PDE5 file closed; pipeline Reject=3/3,2026-11-06
+W291-KILL-LAI,,,6-route-kills,Haloperidol-decanoate + fluphenazine-decanoate + aripiprazole-lauroxi/Maintena + paliperidone-palmitate-1mo/3mo + risperidone-Consta/Perseris + olanzapine-pamoate - all IM depot formulations of box-mapped molecules, zero oral; chemistry already on record, route kills only,2026-11-06
+W292-KILL-ECTO,,,5-kills-mapped,Permethrin logP-only cat/aquatic-toxic + lindane logP restricted-neurotoxic + crotamiton box-pass-tier-B topical-only route kill + benzyl-benzoate logP-only + spinosad multi-fail mixture - ectoparasiticide file closed; pipeline B=1 C=3 Reject=1,2026-11-06
+W293-KILL-ADR,,,5-kills-mapped,Testolactone ALOGP3.59-flip withdrawn + formestane box-pass-tier-B IM-only route kill + aminoglutethimide logP/TPSA adrenal-insufficiency + trilostane TPSA-only vet + mitotane logP chemo obligate-insufficiency - steroidogenesis file closed,2026-11-06
+W293-KILL-B2,,,13-kills-mapped,Salbutamol/terbutaline/fenoterol/procaterol/formoterol/salmeterol/vilanterol/olodaterol/indacaterol/bambuterol/salmefamol/arformoterol/levalbuterol polarity/TPSA/RB floors + inhaled-route limits - beta2-agonist wall; PNN-count 0 all,2026-11-06
+W293-P01,,,EU-oral,Clenbuterol tier-B ChEMBL-live MW277.2/ALOGP3.00/PSA58.3 (DB01407; EU oral/vet) PARKED - hook GAP + tremor/CV/doping flags; live SKU confirm at order,2026-11-06
+W293-P02,,,JP/CN-approved,Tulobuterol tier-B ChEMBL-live MW227.7/ALOGP2.76/PSA32.3 (DB12248; patch+oral JP) PARKED - hook GAP + tremor/CV flags; live SKU confirm at order,2026-11-06
+W294-KILL-VITK,,,5-kills-mapped,Phytonadione MW/logP/RB + menadione MW-floor redox-cycling/withdrawn + menatetrenone logP/RB + ethamsylate TPSA/HBD/logP + carbazochrome logP/TPSA - quinone lipophilicity + polar floor,2026-11-06
+W294-KILL-HEMO,,,4-route-kills,Aprotinin withdrawn-anaphylaxis + hemocoagulase venom + thrombin/fibrinogen topical-only proteins - injectable/topical route walls,2026-11-06
+W295-KILL-ATTR,,,4-kills-mapped,Tafamidis logP-only oral ATTR (CHEMBL2103837; first approval 2011) + acoramidis TPSA-only oral ATTR (CHEMBL3940890; first approval 2024) + voxelotor logP/TPSA WITHDRAWN (CHEMBL4101807; withdrawn_flag True) + L-glutamine MW/logP/TPSA polar floor (CHEMBL930; Endari oral) - ATTR/sickle small-molecule remainder; pipeline B=1 C=3 Reject=1,2026-11-06
+W295-P01,,,generic-oral,Diflunisal tier-B ChEMBL-live MW250.2/ALOGP3.04/PSA57.5 (CHEMBL898; first approval 1982; NSAID black-box) PARKED - hook GAP + GI/renal/CV flags; live SKU confirm at order,2026-11-06
+W295-KILL-BIO,,,2-route-kills,Etelcalcetide IV peptide calcimimetic (CHEMBL3545184; parenteral True; first approval 2016) + crizanlizumab IV mAb (CHEMBL4297734; parenteral True; withdrawn_flag True) - injectable route walls; no small-molecule CSV,2026-11-06
+W296-KILL-SMA,,,1-kill-mapped,Risdiplam TPSA/HBA oral SMA (CHEMBL4297528; FDA 2020 oral; EMA 2021) - CNS oral but box fail; pipeline C=1,2026-11-06
+W296-KILL-SMABIO,,,2-route-kills,Nusinersen intrathecal ASO (CHEMBL3301572/CHEMBL3833342; FDA 2016) + onasemnogene IV AAV gene therapy (CHEMBL4297240; FDA 2019) - non-oral route walls; no small-molecule CSV,2026-11-06
+W297-KILL-DMD,,,3-kills-mapped,Vamorolone TPSA-only oral DMD (CHEMBL2348780; FDA 2023) + givinostat logP/TPSA/RB oral HDAC (CHEMBL1213492 active; FDA 2024) + ataluren TPSA-only EXPIRED EMA-conditional/no-FDA (CHEMBL256997; auth 2014/expired 2025) - DMD remainder; pipeline C=2 Reject=1,2026-11-06
+W297-KILL-PMO,,,4-route-kills,Eteplirsen + golodirsen + viltolarsen + casimersen IV PMO antisense oligomers (CHEMBL2108278/CHEMBL4297762/CHEMBL4298062/CHEMBL4297566; FDA 2016/2019/2020/2021) - weekly IV infusion route walls; no small-molecule CSV,2026-11-06
+W298-KILL-GNRH,,,5-kills-mapped,Relugolix MW/logP/TPSA/HBA/RB oral FDA-2020 (CHEMBL1800159) + elagolix MW/logP/TPSA/RB oral FDA-2018 (CHEMBL1208155) + linzagolix MW/TPSA/HBA oral EU-2022 (CHEMBL3668014) + quinagolide TPSA-only oral UK/non-US (CHEMBL2218861) + gestrinone logP-only oral regional/non-US (CHEMBL1868702) - GnRH/endometriosis remainder; pipeline C=2 Reject=3,2026-11-06
+W299-KILL-VMAT2,,,1-kill-mapped,Valbenazine logP/TPSA oral VMAT2 (CHEMBL2364639; FDA 2017; sprinkle form 2024 filed) - box fail; pipeline B=2 C=1,2026-11-06
+W299-P01,,,US-oral,Tetrabenazine tier-B ChEMBL-live MW317.4/ALOGP3.24/PSA38.8 (CHEMBL117785; FDA 2008 oral) PARKED - hook GAP + depression/suicidality + parkinsonism flags; live SKU confirm at order,2026-11-06
+W299-P02,,,US-oral,Deutetrabenazine tier-B ChEMBL-live MW323.5/ALOGP3.24/PSA38.8 (CHEMBL3137326; FDA 2017 oral; deuterated tetrabenazine) PARKED - hook GAP + depression/suicidality + parkinsonism flags; live SKU confirm at order,2026-11-06
+W300-KILL-ALS,,,2-kills-mapped,Sodium-phenylbutyrate MW-floor free-acid remainder (CHEMBL1746 salt/active phenylbutyrate; Buphenyl FDA 1996; Relyvrio combo withdrawn 2025) + taurursodiol MW/TPSA/HBD bile-acid remainder (CHEMBL272427; Relyvrio combo FDA 2022) - ALS combo file closed; pipeline C=1 Reject=1,2026-11-06
+W300-KILL-ASO,,,1-route-kill,Tofersen intrathecal ASO SOD1 (CHEMBL3833346; FDA 2023 accelerated) - CSF-delivery route wall; no small-molecule CSV,2026-11-06
+W301-KILL-WOM,,,3-kills-mapped,Ospemifene logP/RB oral SERM (CHEMBL2105395; FDA 2013) + tibolone logP-only oral regional non-US (CHEMBL2103774; NL 1988) + prasterone logP-only vaginal-only drug product (CHEMBL90593; Intrarosa FDA 2016 vaginal) - womens-health remainder; pipeline B=1 C=3,2026-11-06
+W301-P01,,,US-oral,Flibanserin tier-B ChEMBL-live MW390.4/ALOGP3.17/PSA44.3 (CHEMBL231068; FDA 2015 oral; HSDD) PARKED - hook GAP + hypotension/syncope/alcohol-interaction + somnolence flags; live SKU confirm at order,2026-11-06
+W301-KILL-ROUTE,,,4-route-kills,Bremelanotide SC peptide (CHEMBL2070241; FDA 2019) + etonogestrel implant/vaginal-ring only (CHEMBL1531) + segesterone vaginal-ring only (CHEMBL3707377; FDA 2018) + conjugated estrogens ill-defined mixture (no discrete ChEMBL) - non-oral/mixture walls; no small-molecule CSV,2026-11-06
+W302-P01,,,US-oral,Bupropion tier-B ChEMBL-live MW239.8/ALOGP3.30/PSA29.1 (CHEMBL894; FDA 1985 oral; Wellbutrin/Zyban) PARKED - hook GAP + seizure/hypertension/activation flags; live SKU confirm at order,2026-11-06
+W302-P02,,,US-oral,Lofexidine tier-B ChEMBL-live MW259.1/ALOGP2.76/PSA33.6 (CHEMBL17860; FDA 2018 oral; Lucemyra) PARKED - hook GAP + hypotension/bradycardia/syncope flags; live SKU confirm at order,2026-11-06
+W303-KILL-OTIC,,,2-route-kills,Ciprofloxacin/dexamethasone otic auricular-only (NDA 021537; FDA 2003) + ofloxacin otic auricular-only (ANDA 076527; do-not-take-by-mouth) - otic-only route walls; systemic ofloxacin tablet is a separate record; no small-molecule CSV,2026-11-06
+W303-KILL-ANTISEP,,,3-route-kills,Chlorhexidine topical/oral-rinse expectorate-only + povidone-iodine external-use-only + octenidine EU topical-only non-US - no systemic oral products; route walls; no small-molecule CSV,2026-11-06
+W303-KILL-KERAT,,,3-route-kills,Salicylic-acid topical-only OTC + urea/carbamide topical-only OTC + lactic-acid/ammonium-lactate topical-only OTC - local skin exposure only; route walls; no small-molecule CSV,2026-11-06
+W304-KILL-MGAB,,,5-route-kills,Efgartigimod IV/SC Fc-fragment biologic (CHEMBL4297551; BLA 2021; SC follow-on 2023) + ravulizumab IV/SC mAb (CHEMBL3989986; BLA 2018) + zilucoplan SC peptide (CHEMBL5315048; FDA 2023) + rozanolixizumab SC mAb (CHEMBL4297820; BLA 2023) + nipocalimab IV mAb (CHEMBL4594310; BLA 2025) - injectable biologics; myasthenia file closed; no small-molecule CSV,2026-11-06
+W305-KILL-BPH1,,,3-kills-mapped,Tamsulosin TPSA108/RB11 (CID 129211; FDA Flomax NDA020579 oral 1997; Selleck S1435 live) + silodosin MW495.5/logP3.6/TPSA97.1/HBA9/RB13 (CID 5312125; FDA Rapaflo NDA022206 oral 2008; Selleck S1613 live) + alfuzosin TPSA112/HBA8/RB8 (CID 2092; FDA Uroxatral NDA021287 oral 2003; Selleck S5766 live) - BPH alpha-1 shelf; pipeline C=1 Reject=2,2026-11-07
+W305-KILL-BPH2,,,3-kills-mapped,Terazosin logP1.4/TPSA103/HBA8 (CID 5401; FDA Hytrin NDA020347 oral; Selleck S4679 live) + doxazosin MW451.5/TPSA112/HBA9 (CID 3157; FDA Cardura NDA019668 oral 1990; MCE HY-B0098 catalog) + naftopidil logP4.1-only (CID 4418; Japan PMDA Flivas 1999 non-US; Cayman 21122 live) - BPH alpha-blocker file closed (wave80 moxisylyte/phentolamine sole prior); pipeline C=1 Reject=2,2026-11-07
+W306-KILL-GUT1,,,3-kills-mapped,Lubiprostone logP4.0/TPSA83.8/RB11 (CID 157920; FDA Amitiza oral 2006; GlpBio GC16890 live) + linaclotide peptide MW1526.8/TPSA726 gut-restricted (CID 16158208; FDA Linzess oral 2012; GlpBio GC30016 live) + plecanatide peptide MW1681.9/TPSA819 gut-restricted (CID 70693500; FDA Trulance oral 2017; GlpBio GC61194 live) - constipation/GC-C shelf; pipeline Reject=3,2026-11-07
+W306-KILL-GUT2,,,3-kills-mapped,Tenapanor MW1145/TPSA235 non-absorbed (CID 71587953; FDA Ibsrela NDA211801 oral 2019; Selleck E1186 live) + eluxadoline MW569.6/logP0.9/TPSA165/HBD4/RB11 (CID 11250029; FDA Viberzi NDA206940 oral 2015; no live SKU verified) + rifaximin MW785.9/logP6.9/TPSA198 non-absorbed (CID 6436173; FDA Xifaxan NDA021361 oral 2004; MCE HY-13234 live) - IBS/antibiotic gut-restricted file closed; pipeline Reject=3,2026-11-07
+W307-KILL-LAMA1,,,3-kills-mapped,Tiotropium TPSA116 + permanent-N + inhaled-only (CID 5487427; Spiriva inhaled; AbMole M6016 live) + aclidinium MW484.7/logP4.7/TPSA112/RB10 + permanent-N + inhaled-only (CID 11434515; Tudorza inhaled; Selleck S4031 live) + umeclidinium logP4.7/RB8 + permanent-N + inhaled-only (CID 11519070; Incruse inhaled; Selleck S3735 live) - LAMA shelf; pipeline C=2 Reject=1,2026-11-07
+W307-KILL-LAMA2,,,3-kills-mapped,Ipratropium Tier-B-on-properties KILLED on charge-precedent (permanent-N + inhaled/nasal-only no oral; CID 657309; Atrovent; Selleck S1683 live; W169-clidinium-rule) + revefenacin MW597.7/logP4.1/TPSA108/RB11 inhaled-only (CID 11753673; Yupelri; Selleck S5258 live) + glycopyrrolate permanent-N + logP-null-unevaluable + BBB-wall (CID 11693; oral Cuvposa exists but charged; Selleck S4660 live) - LAMA file closed; no small-molecule survivors,2026-11-07
+W308-KILL-LEUK1,,,3-kills-mapped,Montelukast MW586.2/logP7.7/TPSA95.7/RB12 (CID 5281040; FDA Singulair NDA020829 oral; Selleck S4211 live) + zafirlukast MW575.7/logP5.5/TPSA124/RB9 (CID 5717; FDA Accolate NDA020547 oral; APExBIO B2068 live) + zileuton TPSA94.8-only (CID 60490; FDA Zyflo NDA020471 oral; Selleck S1443 live) - CysLT1/5-LOX shelf; pipeline C=1 Reject=2,2026-11-07
+W308-KILL-LEUK2,,,3-kills-mapped,Pranlukast MW481.5/logP4.2/TPSA119/RB9 (CID 4887; PMDA Onon 1995 non-US; Selleck S1829 live) + fevipiprant TPSA97.6/HBA8 investigational-discontinued (CID 23582412; Cayman 20263 live) + setipiprant logP4.1-only investigational (CID 49843471; Cayman 28291 live) - CRTH2/CysLT1 remainder file closed; pipeline C=2 Reject=1,2026-11-07
+W309-KILL-COMP1,,,3-kills-mapped,Avacopan MW581.6/logP7.2 (CID 49841217; FDA Tavneos NDA214487 oral 2021; Selleck S0474 live) + danicopan MW580.4/TPSA123/HBA8 (CID 118323590; FDA Voydeya NDA218037 oral 2024; Cayman 32737 live) + iptacopan TPSA74.8-only (CID 90467622; FDA Fabhalta NDA218276 oral 2023; MCE HY-127105 live) - oral complement-inhibitor shelf; pipeline C=2 Reject=1,2026-11-07
+W309-KILL-COMP2,,,3-route-kills,Pegcetacoplan 43.5kDa PEG-peptide SC (Empaveli 2021 SC pump) + sutimlimab 147kDa IV mAb (Enjaymo BLA 2022) + eculizumab IV mAb (Soliris BLA125166 2007) - injectable complement biologics; complement file closed; no small-molecule CSV,2026-11-07
+W310-KILL-HAE1,,,2-kills-mapped,Berotralstat MW562.6/logP4.5/TPSA109/HBA9/RB9 (CID 137528262; FDA Orladeyo oral 2020; no live SKU verified) + sebetralstat MW491.5/logP1.3/TPSA98.6/RB10 (CID 121365142; FDA Ekterly oral 2025; Cayman 45043 listing) - oral kallikrein-inhibitor shelf; pipeline Reject=2,2026-11-07
+W310-KILL-HAE2,,,3-route-kills,Icatibant decapeptide TPSA552 SC (CID 6918173; Firazyr 2011; Selleck S5695 live) + ecallantide 7kDa protein SC boxed-anaphylaxis (CID 44152182; Kalbitor 2009) + lanadelumab 146kDa IV mAb (Takhzyro BLA 2018) - injectable HAE biologics; HAE file closed; no small-molecule survivors beyond Reject=2 pair,2026-11-07
+W311-KILL-IRON1,,,2-kills-mapped,Deferiprone MW139.2-floor/logP0.5-floor (CID 2972; FDA Ferriprox NDA021825 oral 2011; Selleck S4067 live) + deferasirox logP3.8/TPSA108 (CID 214348; FDA Exjade NDA021882 oral 2005; no live SKU verified) - oral chelator shelf; pipeline C=2,2026-11-07
+W311-KILL-IRON2,,,3-route-kills,Deferoxamine MW560.7/logP-2.1/TPSA206 parenteral-only (CID 2973; Desferal NDA016267 1968; Sigma D9533 live) + ferumoxytol 750kDa nanoparticle IV-only (Feraheme NDA022180 2009) + ferric carboxymaltose colloidal IV-only (Injectafer NDA203565 2013) - injectable iron file closed with W248; no oral BBB-penetrant survivors,2026-11-07
+W312-KILL-BILE,,,4-kills-mapped,Obeticholic-acid logP5.7/TPSA77.8 WITHDRAWN-2025 (CID 447715; Ocaliva NDA207999 withdrawn FR2025-20767; Sigma SML3096 live) + chenodiol logP4.9/TPSA77.8 (CID 10133; Ctexli NDA219488 oral 2025 CTX; Cayman 10011286 live) + cholic-acid logP3.6/TPSA98/HBD4 (CID 221493; Cholbam NDA205750 oral 2015; Sigma C1129 live) + deoxycholic-acid logP4.9/TPSA77.8 injectable-only (CID 222528; Kybella NDA206333 SC 2015; Sigma D2510 live) - bile-acid/FXR file closed (UDCA W1 + taurursodiol W300 stand); pipeline C=3 Reject=1,2026-11-07
+W313-KILL-ANT1,,,2-kills-mapped,Naloxone Tier-B-on-properties KILLED on single-agent-route (no oral product; nasal/injectable only, oral combos only; CID 5284596; 119 SPLs; Cayman 15594 live) + flumazenil logP1.0-only + injectable-only (CID 3373; 23 injection SPLs; Cayman 14252 live) - opioid/GABA antidote probes; pipeline B=1 C=1,2026-11-07
+W313-KILL-ANT2,,,2-kills-mapped,Acetylcysteine MW163.2-floor/logP0.4 (CID 12035; 28 SPLs mucolytic/antidote; no live SKU verified) + fomepizole MW82.1-floor/logP1.4 IV-only (CID 3406; Antizol 11 injection SPLs; no live SKU verified) - antidote file closed; pipeline C=2,2026-11-07
+W314-KILL-THY1,,,2-kills-mapped,Levothyroxine MW776.9/TPSA92.8 (CID 5819; Synthroid NDA021402 oral 2002; Sigma T2501 listing) + liothyronine MW651.0/TPSA92.8 (CID 5920; Cytomel NDA010379 oral 1956; Selleck S4217 live) - thyroid-hormone shelf transporter-only CNS; pipeline C=2,2026-11-07
+W314-KILL-THY2,,,3-kills-mapped,Methimazole MW114.2-floor/logP-0.3 (CID 1349907; Tapazole ANDA oral; Sigma PHR3037 live) + propylthiouracil MW170.2-floor/logP0.8/TPSA73.2 (CID 657298; PTU ANDA oral + liver-box; Sigma USP1578000 live) + carbimazole MW186.2-floor/logP0.7 non-US (CID 31072; UK MHRA oral; Sigma SML0931 live) - antithyroid file closed; pipeline C=2 Reject=1,2026-11-07
+W315-KILL-BIS1,,,3-kills-mapped,Alendronate logP-6.5/TPSA161/HBD6/HBA8 (CID 2088; Fosamax oral 1995; Sigma Y0001727 live) + risedronate logP-3.1/TPSA148/HBD5/HBA8 (CID 5245; Actonel NDA020835 oral 1998; Sigma USP1604610 live) + ibandronate logP-4.1/TPSA139/HBD5/HBA8/RB9 (CID 60852; Boniva NDA021455 oral 2003; Supelco PHR2715 live) - oral bisphosphonate shelf; pipeline Reject=3,2026-11-07
+W315-KILL-BIS2,,,3-kills-mapped,Zoledronic-acid logP-4.3/TPSA153/HBD5/HBA8 IV-only (CID 68740; Selleck S1314 live) + pamidronate logP-6.9/TPSA161/HBD6/HBA8 IV-only (CID 4674; Selleck S1311 live) + etidronate logP-3.7/TPSA135/HBD5 no-active-label (CID 3305; Didronel 0 SPLs; no live SKU verified) - bisphosphonate class polarity-wall file closed (bone-biologics W281 stand); pipeline Reject=3,2026-11-07
+W316-KILL-UCD1,,,2-kills-mapped,Glycerol-phenylbutyrate MW530.6/logP6.7/TPSA78.9/RB20 (CID 10482134; Ravicti oral generics; no live SKU verified) + carglumic-acid MW190.2-floor/logP-2.4/TPSA130/HBD4 (CID 121396; Carbaglu oral; no live SKU verified) - nitrogen-scavenger shelf; pipeline Reject=2,2026-11-07
+W316-KILL-UCD2,,,2-route-kills,Sodium-phenylacetate MW158.1-floor/logP-null IV-only (CID 23690424; Ammonul IV 1987; no live SKU) + sodium-benzoate MW144.1-floor/logP-null IV-only (CID 517055; Ammonul component; no live SKU) - urea-cycle file closed (phenylbutyrate W300 stands); no oral BBB-penetrant survivors,2026-11-07
+W317-KILL-SICK1,,,3-kills-mapped,Hydroxyurea MW76.1-floor/logP-1.8/TPSA75.4 (CID 3657; Droxia/Hydrea/Siklos marketed; no live SKU verified) + voxelotor TPSA77.2-only WITHDRAWN-2024 (CID 71602803; Oxbryta 2019 accelerated; no live SKU verified) + L-glutamine MW146.1-floor/logP-3.1/TPSA106 (CID 5961; Endari NDA208587 oral 2017; Sigma 1002891000 live) - sickle-cell shelf; pipeline C=1 Reject=2,2026-11-07
+W317-KILL-SICK2,,,1-route-kill,Luspatercept 76kDa SC fusion-protein (Reblozyl BLA761136 2019) - anemia-biologic route kill; sickle/anemia small-molecule file closed (crizanlizumab W295 stands),2026-11-07
+W318-KILL-HEMO1,,,2-route-kills,Emicizumab 146kDa bispecific SC (Hemlibra BLA761083 2017) + concizumab 149kDa SC daily (Alhemo BLA761315 2024) - hemophilia mAb route walls; no small-molecule CSV,2026-11-07
+W318-KILL-HEMO2,,,2-route-kills,Marstacimab 146kDa SC (Hympavzi BLA761369 2024) + fitusiran SC siRNA (Qfitlia NDA219019 2025) - hemophilia file closed; no oral BBB-penetrant survivors; no small-molecule CSV,2026-11-07
+W319-KILL-VWF,,,3-kills-mapped,Caplacizumab nanobody IV/SC (Cablivi BLA761112 2019) + vonicog-alfa recombinant-vWF IV (Vonvendi BLA125577 2015) + desmopressin peptide MW1069.2/logP-4/TPSA489 Reject (CID 5311065; DDAVP NDA019955 oral moot; no live SKU verified) - vWF/bleeding file closed with W318; pipeline Reject=1,2026-11-07
+W320-KILL-P2Y12,,,4-kills-mapped,Clopidogrel logP3.8-only (CID 60606; Plavix NDA020839 oral 1997; Sigma 5057620001 live) + prasugrel logP3.6/TPSA74.9 (CID 6918456; Effient oral 2009; Sigma SML0331 live) + ticagrelor MW522.6/TPSA164/HBD4/HBA12/RB10 (CID 9871419; Brilinta NDA022433 oral 2011; Cayman 15425 live) + cangrelor MW776.4/logP-1/TPSA307 IV-only (CID 9854012; Kengreal NDA204958 IV 2015) - P2Y12 file closed; pipeline C=2 Reject=2,2026-11-07
+W321-KILL-GP1,,,2-kills-mapped,Vorapaxar MW492.6/logP5.3/TPSA77.5 discontinued-RLD (CID 10077130; Zontivity NDA204886 oral 2014; Cayman 23119 live) + tirofiban logP1.4/TPSA113/RB14 IV-only (CID 60947; Aggrastat IV 1998) - PAR-1/small-molecule antiplatelet shelf; pipeline Reject=2,2026-11-07
+W321-KILL-GP2,,,2-route-kills,Abciximab Fab-47.6kDa IV no-active-label (Reopro archived) + eptifibatide peptide MW832/TPSA377 IV-infusion-only (CID 448812; 1998) - GPIIb/IIIa file closed; no oral BBB-penetrant survivors,2026-11-07
+W322-P01,,,FR-oral,Fluindione Tier-B ChEMBL-live MW240.2/ALOGP3.00/PSA34.1 (CID 68942; Previscan France oral; ATC B01AA12) PARKED - hook GAP + bleeding/teratogenic flags; live SKU confirm at order,2026-11-07
+W322-KILL-COU,,,3-kills-mapped,Acenocoumarol TPSA109-only (CID 54676537; non-US oral; no live SKU) + phenprocoumon logP3.6-only non-US (CID 54680692; Marcoumar/Marcumar oral; no live SKU) + argatroban MW508.6/logP1.3/TPSA189/HBD5/HBA8/RB9 IV-only (CID 92722; IV 2000; Cayman 19639 research-only) + bivalirudin peptide MW2180 IV-only (CID 16129704; Angiomax 2000; Cayman 23035 research-only) - DTI/coumarin file closed (warfarin W60 stands); pipeline B=1(parked) C=2 Reject=1,2026-11-07
+W323-KILL-FIBR1,,,2-kills-mapped,Tranexamic-acid MW157.2-floor/logP-2.0 (CID 5526; Lysteda NDA022430 oral 1986; Sigma 857653 live) + aminocaproic-acid MW131.2-floor/logP-3.0 (CID 564; Amicar NDA015197 oral; Sigma A2504 live) - antifibrinolytic shelf; pipeline C=2,2026-11-07
+W323-KILL-FIBR2,,,2-route-kills,Alteplase 527aa IV (Activase BLA103172 1987) + tenecteplase 58.7kDa IV-bolus (TNKase BLA103909 2000) - thrombolytic file closed; no oral BBB-penetrant survivors,2026-11-07
+W324-KILL-LYT1,,,2-route-kills,Reteplase tPA-mutein IV no-current-NDCs (Retavase BLA103786 1996; EU withdrawn 2024) + anistreplase complex IV withdrawn (Eminase; 0 NDCs) - legacy thrombolytic route walls; no small-molecule CSV,2026-11-07
+W324-KILL-LYT2,,,2-route-kills,Urokinase 49kDa IV discontinued (Kinlytic BLA021846 1978) + streptokinase bacterial-protein IV discontinued (Streptase/Kabikinase) - thrombolytic file fully closed with W323; no small-molecule CSV,2026-11-07
+W325-KILL-FAC1,,,2-route-kills,Eptacog-alfa rFVIIa IV (NovoSeven BLA 1999) + 4F-PCC plasma-derived IV (Kcentra BLA 2013) - factor-replacement route walls; no small-molecule CSV,2026-11-07
+W325-KILL-FAC2,,,2-route-kills,Fibrinogen-concentrate 340kDa IV (RiaSTAP BLA125317 2009) + protein-C-concentrate IV (Ceprotin BLA 2007) - coagulation-protein file closed; no oral BBB-penetrant survivors; no small-molecule CSV,2026-11-07
+W326-KILL-ESA1,,,2-route-kills,Epoetin-alfa 30.4kDa IV/SC (Epogen 1989) + darbepoetin-alfa 37kDa IV/SC (Aranesp 2001) - ESA route walls; no small-molecule CSV,2026-11-07
+W326-KILL-ESA2,,,2-route-kills,Mircera PEG-EPO IV/SC (BLA 2007) + peginesatide PEG-peptide withdrawn (Omontys NDA202799 2012; 0 labels) - anemia-biologic file closed with W317; no small-molecule CSV,2026-11-07
+W327-KILL-CSF1,,,3-kills-mapped,Filgrastim protein SC/IV (Neupogen 1991) + pegfilgrastim PEG-protein SC (Neulasta 2002) + sargramostim GM-CSF SC/IV (Leukine 1991) - G-CSF/GM-CSF route walls; no small-molecule CSV,2026-11-07
+W327-KILL-CSF2,,,1-killed,Plerixafor MW502.8/logP0.0/TPSA78.7/HBD6/HBA8 SC-only (CID 65015; Mozobil 2008; no live SKU verified) - mobilizer file closed; pipeline Reject=1,2026-11-07
+W328-KILL-IFN1,,,2-route-kills,Interferon-alfa-2b protein no-live-label (Intron A BLA103132 1986; deposition-artifact CID ignored) + peginterferon-alfa-2a PEG-protein SC (Pegasys BLA103964 2002) - interferon-alfa route walls; no small-molecule CSV,2026-11-07
+W328-KILL-IFN2,,,2-route-kills,Interferon-beta-1a 22.5kDa IM/SC (Avonex 1996/Rebif) + interferon-beta-1b 18.5kDa SC (Betaseron 1993) - interferon file closed; no oral BBB-penetrant survivors; no small-molecule CSV,2026-11-07
+W329-KILL-IL1,,,3-route-kills,Anakinra 17.3kDa SC (Kineret BLA103950 2001) + canakinumab 145kDa SC (Ilaris BLA125319 2009) + rilonacept 251kDa SC (Arcalyst 2008) - IL-1 axis route walls; no small-molecule CSV,2026-11-07
+W330-KILL-IL6,,,3-route-kills,Tocilizumab IV/SC (Actemra BLA125276 2010) + sarilumab SC (Kevzara BLA761037 2017) + siltuximab IV (Sylvant BLA125496 2014) - IL-6 axis file closed; no small-molecule CSV,2026-11-07
+W331-KILL-IL17,,,3-route-kills,Secukinumab 151kDa SC/IV (Cosentyx 2015) + ixekizumab 146kDa SC (Taltz 2016) + brodalumab 144kDa SC REMS (Siliq 2017) - IL-17 axis route walls; no small-molecule CSV,2026-11-07
+W331-KILL-IL23,,,3-route-kills,Guselkumab SC/IV (Tremfya 2017) + risankizumab SC/IV (Skyrizi 2019) + tildrakizumab SC (Ilumya 2018) - IL-23 axis file closed; no small-molecule CSV,2026-11-07
+W332-KILL-TNF1,,,3-route-kills,Adalimumab 148kDa SC (Humira 2002) + infliximab 149kDa IV (Remicade 1998) + etanercept 150kDa TNFR-Fc SC (Enbrel 1998) - TNF route walls; no small-molecule CSV,2026-11-07
+W332-KILL-TNF2,,,2-route-kills,Certolizumab Fab-PEG 91kDa SC (Cimzia BLA125160 2008) + golimumab 150kDa SC/IV (Simponi 2009) - TNF file closed; no small-molecule CSV,2026-11-07
+W333-KILL-CGRP1,,,2-route-kills,Eptinezumab 143kDa IV (Vyepti BLA761119 2020) + fremanezumab 148kDa SC (Ajovy BLA761089 2018) - CGRP-mAb route walls; no small-molecule CSV,2026-11-07
+W333-KILL-CGRP2,,,2-route-kills,Galcanezumab 147kDa SC (Emgality 2018) + erenumab 150kDa SC (Aimovig 2018) - CGRP file closed with W18 (gepants dead); no small-molecule CSV,2026-11-07
+W334-KILL-MSOR,,,3-kills-mapped,Dimethyl-fumarate MW144.1-floor/logP0.7 (CID 637568; Tecfidera oral 2013; Selleck S2586 live) + diroximel-fumarate logP-0.9/TPSA90 (CID 73330464; Vumerity oral; no live SKU verified) + teriflunomide TPSA73.1-only (CID 54684141; Aubagio oral; Selleck S4169 live) - oral-MS remainder file closed; pipeline C=3,2026-11-07
+W335-KILL-MSAB1,,,3-route-kills,Ocrelizumab IV/SC (Ocrevus 2017) + ofatumumab SC (Kesimpta) + ublituximab IV (Briumvi 2022) - anti-CD20 route walls; no small-molecule CSV,2026-11-07
+W335-KILL-MSAB2,,,2-route-kills,Alemtuzumab IV REMS (Lemtrada/Campath) + natalizumab IV PML-REMS (Tysabri BLA125104 2004) - MS-mAb file closed; no small-molecule CSV,2026-11-07
+W336-KILL-ANTH,,,2-kills-mapped,Mitoxantrone logP1.0/TPSA163/HBD8/HBA10/RB12 IV-only boxed-cardio/leukemia (CID 4212; IV generics; no live SKU verified) + pixantrone logP1.0/TPSA123/HBD4 IV-only EU-expired-2024 (CID 134019; Pixuvri; Selleck S5059 live) - anthracenedione file closed; pipeline Reject=2,2026-11-07
+W337-KILL-RET,,,3-kills-mapped,Isotretinoin logP6.3-only iPLEDGE-teratogenic (CID 5282379; Absorica oral 1982; Selleck S1379 live) + acitretin logP6.1-only 3yr-teratogenic (CID 5284513; ANDA oral; Selleck S1368 live) + bexarotene logP7.6-only (CID 82146; Targretin NDA021055 oral 1999; Selleck S2098 live) - oral-retinoid file closed; pipeline C=3,2026-11-07
+W338-KILL-TRET,,,4-kills-mapped,Tazarotene logP4.9 topical-only (CID 5381; 1997) + adapalene logP7.7 topical-only (CID 60164; Differin) + trifarotene MW459.6/logP6.3 topical-only (CID 11518241; Aklief) + alitretinoin logP6.3 US-topical/oral-non-US (CID 449171; Panretin gel/Toctino UK; no live SKU verified) - retinoid file fully closed with W337; pipeline C=3 Reject=1,2026-11-07
+W339-KILL-KBIND,,,3-route-kills,Patiromer non-absorbed polymer oral (Veltassa NDA205739 2015) + sodium-zirconium-cyclosilicate non-absorbed lattice oral (Lokelma NDA207078 2018) + sodium-polystyrene-sulfonate non-absorbed resin oral/rectal 1958 - K-binder file closed with W277; no small-molecule CSV,2026-11-07
+W340-KILL-LIPO,,,4-kills-mapped,Lomitapide MW693.7/logP8.6/HBA9/RB10 REMS (CID 9853053; Juxtapid NDA203858 oral 2012 HoFH; Selleck S7635 live) + volanesorsen ASO SC-only EU-only (Waylivra 2019) + olezarsen ASO SC (Tryngolza 2024) + pelacarsen ASO SC investigational - lipid-orphan file closed with W236; pipeline Reject=1,2026-11-07
+W341-KILL-TTR1,,,2-route-kills,Patisiran siRNA IV (Onpattro 2018) + inotersen ASO SC boxed-thrombo/renal REMS (Tegsedi 2018) - TTR-silencer route walls; no small-molecule CSV,2026-11-07
+W341-KILL-TTR2,,,2-route-kills,Vutrisiran GalNAc-siRNA SC (Amvuttra NDA215515 2022) + eplontersen GalNAc-ASO SC (Wainua NDA217388 2023) - ATTR file fully closed with W295; no small-molecule CSV,2026-11-07
+W342-KILL-PPAR,,,2-kills-mapped,Lanifibranor logP4.5/TPSA126 investigational (CID 68677842; max-phase-3; no live SKU verified) + clinofibrate MW468.6/logP7.5/TPSA93.1/RB10 Japan-only (CID 2787; Lipoclin; AdooQ A11184 live) - PPAR/fibrate file fully closed with W250; pipeline C=1 Reject=1,2026-11-07
+W343-KILL-CETP1,,,2-kills-mapped,Torcetrapib MW600.5/logP7.0/HBA13 terminated-2006 (CID 159325; no live SKU) + dalcetrapib logP7.1/TPSA71.5/RB9 terminated-2012 (CID 6918540; no live SKU) - CETP mortality/futility wall; pipeline Reject=2,2026-11-07
+W343-KILL-CETP2,,,3-kills-mapped,Anacetrapib MW637.5/logP8.8/HBA13 unfiled-2017 (CID 11556427; Selleck S2748 live) + evacetrapib MW638.6/logP7.7/TPSA87.4/HBA13 terminated-2015 (CID 49836058; Selleck S2925 live) + obicetrapib MW722.6/logP7.4/TPSA105/HBA17/RB12 EU-only-2026 (CID 11498596; Ubeslo; Selleck E1561 live) - CETP file fully closed; pipeline Reject=3,2026-11-07
+W344-KILL-BENZ,,,3-kills-mapped,Brexpiprazole logP4.7/TPSA73.1 (CID 11978813; Rexulti oral; no live SKU verified) + levosulpiride logP0.6/TPSA110 non-US (CID 688272; no live SKU verified) + veralipride logP0.8/TPSA119/RB8 withdrawn-2007 (CID 47979; no live SKU verified) - atypical/benzamide leftovers closed with W228/W173; pipeline C=2 Reject=1,2026-11-07
+W345-KILL-PDPRO1,,,3-kills-mapped,Droxidopa logP-3.2/TPSA124/HBD5 BBB-verified-but-chemistry FAIL (CID 92974; Northera oral 2014; no live SKU verified) + melevodopa logP-0.2/TPSA92.8 investigational (CID 23497; no live SKU) + etilevodopa logP0.3/TPSA92.8 investigational (CID 170345; no live SKU) - PD-prodrug shelf; pipeline C=2 Reject=1,2026-11-07
+W345-KILL-PDPRO2,,,3-kills-mapped,Foslevodopa logP-4/TPSA150/HBD5/HBA8 SC-infusion-only (CID 127766; Vyalev component) + foscarbidopa logP-5.8/TPSA162/HBD6/HBA9 SC-only (CID 121288738; Vyalev component) + inhaled-levodopa MW197.2-floor/logP-2.7/TPSA104/HBD4 inhaled-only (CID 6047; Inbrija; W260-precedent) - non-oral PD file closed; pipeline Reject=3,2026-11-07
+W346-KILL-AUTON,,,3-kills-mapped,Midodrine logP-0.6/TPSA93.8 (CID 4195; generic oral; Selleck S5734 live) + prazosin TPSA107/HBA8 (CID 4893; Minipress generic capsule; Selleck S1424 live) + distigmine dication-charge/RB11 non-US (CID 3116; Ubretid JP; no live SKU) - autonomic leftovers closed; pipeline C=3,2026-11-07
+W347-KILL-AF1,,,3-kills-mapped,Isavuconazole TPSA116/HBA8 (CID 6918485; Cresemba NDA207500 oral 2015; Selleck S3722 live) + oteseconazole MW527.4/logP4.2/TPSA86/HBA13/RB8 (CID 77050711; Vivjoa NDA215888 oral 2022; no live SKU verified) + ibrexafungerp MW730/logP5.8/TPSA125/HBA8/RB9 (CID 46871657; Brexafemme NDA214900 oral 2021; no live SKU verified) - novel oral-antifungal shelf; pipeline C=1 Reject=2,2026-11-07
+W347-KILL-AF2,,,3-kills-mapped,Rezafungin lipopeptide MW1226/TPSA366 IV-only no-discrete-record (CID 78318119-polymer; Rezzayo 2023) + fosravuconazole TPSA172 prodrug Japan-oral SMILES-unverified CSV-excluded (CID 9807507; Nailin) + eberconazole topical-only SMILES-unverified CSV-excluded (CID 72051; Ebernet non-US) - antifungal file fully closed with W21/W81; no small-molecule survivors,2026-11-07

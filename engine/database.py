@@ -10,7 +10,7 @@ from typing import Iterator
 from engine.artifacts import utc_now
 from engine.errors import EngineError
 
-SCHEMA_VERSION = 13
+SCHEMA_VERSION = 14
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS schema_meta (
@@ -42,7 +42,12 @@ CREATE TABLE IF NOT EXISTS source (
     status_at TEXT NOT NULL DEFAULT '',
     screening TEXT NOT NULL DEFAULT 'identified',
     screening_reason TEXT NOT NULL DEFAULT '',
-    screening_at TEXT NOT NULL DEFAULT ''
+    screening_at TEXT NOT NULL DEFAULT '',
+    arxiv TEXT NOT NULL DEFAULT '',
+    venue TEXT NOT NULL DEFAULT '',
+    abstract TEXT NOT NULL DEFAULT '',
+    tags TEXT NOT NULL DEFAULT '',
+    study_type TEXT NOT NULL DEFAULT ''
 );
 CREATE TABLE IF NOT EXISTS question (
     id TEXT PRIMARY KEY,
@@ -238,6 +243,66 @@ CREATE TABLE IF NOT EXISTS amendment (
     actor TEXT NOT NULL,
     at TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS experiment_intervention (
+    id TEXT PRIMARY KEY,
+    research_id TEXT NOT NULL REFERENCES research(id),
+    name TEXT NOT NULL,
+    start_date TEXT NOT NULL,
+    projected_end_date TEXT,
+    end_date TEXT,
+    dosage TEXT NOT NULL DEFAULT '',
+    notes TEXT NOT NULL DEFAULT '',
+    created_at TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS experiment_metric_definition (
+    id TEXT PRIMARY KEY,
+    research_id TEXT NOT NULL REFERENCES research(id),
+    name TEXT NOT NULL,
+    description TEXT NOT NULL DEFAULT '',
+    unit TEXT NOT NULL DEFAULT '',
+    created_at TEXT NOT NULL,
+    UNIQUE(research_id, name)
+);
+CREATE TABLE IF NOT EXISTS experiment_metric (
+    id TEXT PRIMARY KEY,
+    research_id TEXT NOT NULL REFERENCES research(id),
+    intervention_id TEXT REFERENCES experiment_intervention(id),
+    metric_name TEXT NOT NULL,
+    date TEXT NOT NULL,
+    value REAL NOT NULL,
+    note TEXT NOT NULL DEFAULT '',
+    created_at TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS experiment_event (
+    id TEXT PRIMARY KEY,
+    research_id TEXT NOT NULL REFERENCES research(id),
+    intervention_id TEXT REFERENCES experiment_intervention(id),
+    timestamp TEXT NOT NULL,
+    event_name TEXT NOT NULL,
+    severity INTEGER,
+    notes TEXT NOT NULL DEFAULT '',
+    created_at TEXT NOT NULL,
+    CHECK (severity IS NULL OR (severity >= 1 AND severity <= 5))
+);
+CREATE TABLE IF NOT EXISTS domain_pack (
+    name TEXT PRIMARY KEY,
+    version TEXT NOT NULL,
+    api_version TEXT NOT NULL,
+    data_root TEXT NOT NULL DEFAULT '',
+    manifest_sha256 TEXT NOT NULL DEFAULT '',
+    status TEXT NOT NULL DEFAULT 'registered',
+    registered_at TEXT NOT NULL,
+    CHECK (status IN ('registered', 'disabled'))
+);
+CREATE TABLE IF NOT EXISTS migration_run (
+    id TEXT PRIMARY KEY,
+    source TEXT NOT NULL,
+    source_digest TEXT NOT NULL,
+    target_research TEXT NOT NULL REFERENCES research(id),
+    applied_at TEXT NOT NULL,
+    report_json TEXT NOT NULL,
+    UNIQUE(source, source_digest)
+);
 CREATE INDEX IF NOT EXISTS idx_claim_research ON claim(research_id);
 CREATE INDEX IF NOT EXISTS idx_claim_status ON claim(status);
 CREATE INDEX IF NOT EXISTS idx_edge_dst ON edge(dst_kind, dst_id);
@@ -329,6 +394,16 @@ _MIGRATIONS = {
     # created by the CREATE TABLE IF NOT EXISTS script above, so this step is
     # intentionally empty: it only advances the version marker for existing databases.
     12: (),
+    # Version 13 -> 14 adds lattice paper metadata, N1 experiment tables, the pack
+    # registry and the migration ledger. The tables are created above; only the
+    # source columns need an ALTER TABLE on an existing database.
+    13: (
+        ("source", "arxiv", "TEXT NOT NULL DEFAULT ''"),
+        ("source", "venue", "TEXT NOT NULL DEFAULT ''"),
+        ("source", "abstract", "TEXT NOT NULL DEFAULT ''"),
+        ("source", "tags", "TEXT NOT NULL DEFAULT ''"),
+        ("source", "study_type", "TEXT NOT NULL DEFAULT ''"),
+    ),
 }
 
 
@@ -346,6 +421,21 @@ def _ensure_indexes(conn: sqlite3.Connection) -> None:
     )
     conn.execute(
         "CREATE INDEX IF NOT EXISTS idx_ai_research ON ai_artifact(research_id)"
+    )
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_experiment_intervention_research"
+        " ON experiment_intervention(research_id)"
+    )
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_experiment_metric_research"
+        " ON experiment_metric(research_id, metric_name, date)"
+    )
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_experiment_event_research"
+        " ON experiment_event(research_id, timestamp)"
+    )
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_migration_source ON migration_run(source)"
     )
 
 

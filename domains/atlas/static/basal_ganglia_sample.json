@@ -1,0 +1,200 @@
+{
+  "analysis_version": "atlas.visual-knowledge/v1",
+  "document_ref": "demo: basal-ganglia schematic (fixture, not a model result)",
+  "source_page": 1,
+  "figure_id": "basal-ganglia-demo",
+  "entities": [
+    {
+      "id": "cortex",
+      "name": "Cortex",
+      "category": "anatomical-structure",
+      "description": "Glutamatergic input to the striatum.",
+      "bbox": {
+        "x_min": 0.3,
+        "y_min": 0.04,
+        "x_max": 0.7,
+        "y_max": 0.16
+      },
+      "source_evidence": "fixture schematic top region",
+      "confidence": 1.0,
+      "uncertainty": "",
+      "mask_ref": "",
+      "model_inferred": false
+    },
+    {
+      "id": "striatum",
+      "name": "Striatum",
+      "category": "anatomical-structure",
+      "description": "Input nucleus; D1 (direct) and D2 (indirect) populations.",
+      "bbox": {
+        "x_min": 0.32,
+        "y_min": 0.22,
+        "x_max": 0.68,
+        "y_max": 0.36
+      },
+      "source_evidence": "fixture schematic upper-middle region",
+      "confidence": 1.0,
+      "uncertainty": "",
+      "mask_ref": "",
+      "model_inferred": false
+    },
+    {
+      "id": "gpe",
+      "name": "GPe",
+      "category": "anatomical-structure",
+      "description": "Globus pallidus externa; indirect pathway relay.",
+      "bbox": {
+        "x_min": 0.1,
+        "y_min": 0.44,
+        "x_max": 0.34,
+        "y_max": 0.58
+      },
+      "source_evidence": "fixture schematic left-middle region",
+      "confidence": 1.0,
+      "uncertainty": "",
+      "mask_ref": "",
+      "model_inferred": false
+    },
+    {
+      "id": "stn",
+      "name": "STN",
+      "category": "anatomical-structure",
+      "description": "Subthalamic nucleus; excites GPi/SNr.",
+      "bbox": {
+        "x_min": 0.38,
+        "y_min": 0.6,
+        "x_max": 0.62,
+        "y_max": 0.72
+      },
+      "source_evidence": "fixture schematic center-lower region",
+      "confidence": 1.0,
+      "uncertainty": "",
+      "mask_ref": "",
+      "model_inferred": false
+    },
+    {
+      "id": "gpi",
+      "name": "GPi",
+      "category": "anatomical-structure",
+      "description": "Globus pallidus interna; direct-pathway output.",
+      "bbox": {
+        "x_min": 0.66,
+        "y_min": 0.44,
+        "x_max": 0.9,
+        "y_max": 0.58
+      },
+      "source_evidence": "fixture schematic right-middle region",
+      "confidence": 1.0,
+      "uncertainty": "",
+      "mask_ref": "",
+      "model_inferred": false
+    },
+    {
+      "id": "snr",
+      "name": "SNr",
+      "category": "anatomical-structure",
+      "description": "Substantia nigra pars reticulata; output nucleus.",
+      "bbox": {
+        "x_min": 0.66,
+        "y_min": 0.62,
+        "x_max": 0.9,
+        "y_max": 0.74
+      },
+      "source_evidence": "fixture schematic right-lower region",
+      "confidence": 1.0,
+      "uncertainty": "",
+      "mask_ref": "",
+      "model_inferred": false
+    },
+    {
+      "id": "thalamus",
+      "name": "Thalamus",
+      "category": "anatomical-structure",
+      "description": "Relay back to cortex; inhibited by GPi/SNr.",
+      "bbox": {
+        "x_min": 0.36,
+        "y_min": 0.8,
+        "x_max": 0.64,
+        "y_max": 0.92
+      },
+      "source_evidence": "fixture schematic bottom region",
+      "confidence": 1.0,
+      "uncertainty": "",
+      "mask_ref": "",
+      "model_inferred": false
+    }
+  ],
+  "relationships": [
+    {
+      "source_id": "cortex",
+      "target_id": "striatum",
+      "rel_type": "activates",
+      "explanation": "Cortical glutamate drives striatal neurons.",
+      "supporting_evidence": "fixture",
+      "confidence": 1.0,
+      "provenance": "source",
+      "model_inferred": false
+    },
+    {
+      "source_id": "striatum",
+      "target_id": "gpi",
+      "rel_type": "inhibits",
+      "explanation": "Direct pathway: D1 striatum inhibits GPi.",
+      "supporting_evidence": "fixture",
+      "confidence": 1.0,
+      "provenance": "source",
+      "model_inferred": false
+    },
+    {
+      "source_id": "striatum",
+      "target_id": "gpe",
+      "rel_type": "inhibits",
+      "explanation": "Indirect pathway: D2 striatum inhibits GPe.",
+      "supporting_evidence": "fixture",
+      "confidence": 1.0,
+      "provenance": "source",
+      "model_inferred": false
+    },
+    {
+      "source_id": "gpe",
+      "target_id": "stn",
+      "rel_type": "inhibits",
+      "explanation": "GPe disinhibits STN in the indirect pathway.",
+      "supporting_evidence": "fixture",
+      "confidence": 1.0,
+      "provenance": "source",
+      "model_inferred": false
+    },
+    {
+      "source_id": "stn",
+      "target_id": "gpi",
+      "rel_type": "activates",
+      "explanation": "STN excites GPi.",
+      "supporting_evidence": "fixture",
+      "confidence": 1.0,
+      "provenance": "source",
+      "model_inferred": false
+    },
+    {
+      "source_id": "gpi",
+      "target_id": "thalamus",
+      "rel_type": "inhibits",
+      "explanation": "GPi output inhibits thalamus.",
+      "supporting_evidence": "fixture",
+      "confidence": 1.0,
+      "provenance": "source",
+      "model_inferred": false
+    },
+    {
+      "source_id": "thalamus",
+      "target_id": "cortex",
+      "rel_type": "activates",
+      "explanation": "Thalamus returns excitation to cortex.",
+      "supporting_evidence": "fixture",
+      "confidence": 1.0,
+      "provenance": "source",
+      "model_inferred": false
+    }
+  ],
+  "_demo_image": "/static/basal_ganglia_demo.svg"
+}
