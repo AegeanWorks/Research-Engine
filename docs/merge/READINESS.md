@@ -23,7 +23,8 @@ deliberate exclusions listed in section 6.**
 The source repositories were never stopped, finished, archived, deleted, moved, tagged or
 modified. Their pins are in `SOURCE-INVENTORY.md`; copied files and modifications are listed in
 `PROVENANCE.md` and each destination's `NOTICE.md`. The second-pass function inventory and the
-N1 gaps it found are in `GAP-ANALYSIS.md`.
+N1 gaps it found are in `GAP-ANALYSIS.md`; the N1 archive decision matrix is
+`N1-COMPLETENESS.md`.
 
 ## 2. Baseline and post-merge test evidence
 
@@ -43,7 +44,7 @@ Post-merge host gate:
 
 ```text
 python -m unittest discover -s tests -t .
-Ran 1096 tests in 233.905s
+Ran 1101 tests in 343.636s
 OK
 ```
 
@@ -152,9 +153,9 @@ because archive extraction changes the inventory mtimes used by one freshness te
 
 ## 6. Deliberate exclusions and residual gaps
 
-1. **N1 PyQt GUI is not ported.** Models, metrics, events, analysis, correlation, CSV
-   import/export, HTML reporting and database migration are ported. The source keeps the GUI
-   runnable.
+1. **N1 PyQt GUI is not ported.** Models, metrics, events, analysis, correlation, settings,
+   CSV import/export, HTML reporting, compatibility class names and database migration are
+   ported. The source keeps the GUI runnable.
 2. **Atlas real-analysis corpus and uploaded media stay external.** The 4 demo-integrity tests
    and the real-video frame test read the sibling Atlas checkout in place; when that checkout is
    absent they skip. No Atlas media was copied into the host.

@@ -6,11 +6,11 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `405`
-- **Total Classes**: `296`
-- **Total Top-Level Functions**: `1913`
-- **Total Class Methods**: `1449`
-- **Total Source Lines**: `87116`
+- **Total Python Modules**: `407`
+- **Total Classes**: `300`
+- **Total Top-Level Functions**: `1916`
+- **Total Class Methods**: `1463`
+- **Total Source Lines**: `87462`
 
 ---
 
@@ -4141,7 +4141,7 @@
 ### [`engine/migrations.py`](engine/migrations.py)
 > *Migration harness for lattice and N1 source databases.*
 
-**Size**: `625` lines (`21509` bytes)
+**Size**: `652` lines (`22343` bytes)
 
 **Classes:**
 - `class MigrationReport` - *What one inspection or application observed and inserted.*
@@ -4165,6 +4165,7 @@
 - `def _as_date(value)`
 - `def _as_timestamp(value)`
 - `def _lattice_rows(path)`
+- `def _table_rows(conn, table, columns)`
 - `def _n1_rows(path)`
 - `def _lattice_screening(screening_rows)`
 - `def _record_migration(conn, report, mapping)`
@@ -4404,31 +4405,48 @@
 ### [`experiments/__init__.py`](experiments/__init__.py)
 > *N1 experiment records and baseline-vs-intervention analysis.*
 
-**Size**: `39` lines (`851` bytes)
+**Size**: `45` lines (`1005` bytes)
 
 ---
 
 ### [`experiments/analysis.py`](experiments/analysis.py)
 > *Baseline-vs-intervention analysis for N1 experiment records.*
 
-**Size**: `291` lines (`10849` bytes)
+**Size**: `356` lines (`12945` bytes)
 
 **Functions:**
 - `def _start_date(value)`
 - `def _days(value, field)`
 - `def _summary(rows)`
 - `def _trend(rows)`
-- `def _window_warnings(baseline, intervention, baseline_days, intervention_days)`
-- `def analyze_baseline_vs_intervention(conn, research_ref, metric_name, start_date, baseline_days, intervention_days)` - *Compare one metric before and after the declared intervention start.*
+- `def calculate_trend(values, dates)` - *Linear trend for a value series, matching the source ``calculate_trend`` result.*
+- `def bootstrap_ci(baseline, treatment, seed, resamples)` - *Percentile bootstrap interval with both host and source key names.*
+- `def _window_warnings(baseline, intervention, baseline_days, intervention_days, min_baseline_days, min_intervention_days)`
+- `def analyze_baseline_vs_intervention(conn, research_ref, metric_name, start_date, baseline_days, intervention_days, settings)` - *Compare one metric before and after the declared intervention start.*
 - `def correlation_matrix(conn, research_ref, metric_names)` - *Pairwise Pearson correlation for metrics observed on the same dates.*
-- `def analyze_multiple_metrics(conn, research_ref, metric_names, start_date, baseline_days, intervention_days)` - *Analyze several metrics and report the multiple-comparison risk as a global warning.*
+- `def analyze_multiple_metrics(conn, research_ref, metric_names, start_date, baseline_days, intervention_days, settings)` - *Analyze several metrics and report the multiple-comparison risk as a global warning.*
+
+---
+
+### [`experiments/compat.py`](experiments/compat.py)
+> *Compatibility names for code that imported the N1-Engine classes directly.*
+
+**Size**: `39` lines (`1379` bytes)
+
+**Classes:**
+- `class AnalysisEngine` - *Static subset of the source AnalysisEngine that does not need a DataFrame.*
+- `class DataManager` - *Bind the source CSV import/export methods to one host connection and program.*
+  - Method `.__init__(conn, research_ref)`
+  - Method `.import_from_csv(filepath, data_type)`
+  - Method `.export_to_csv(filepath, data_type)`
+- `class ReportGenerator` - *Source-compatible static report entry point.*
 
 ---
 
 ### [`experiments/exporter.py`](experiments/exporter.py)
 > *CSV export for N1 experiment rows, mirroring the import headers.*
 
-**Size**: `102` lines (`3057` bytes)
+**Size**: `103` lines (`3136` bytes)
 
 **Functions:**
 - `def _write(path, fields, rows)`
@@ -4442,7 +4460,7 @@
 ### [`experiments/importer.py`](experiments/importer.py)
 > *CSV import for N1 experiment rows, using the host experiment model.*
 
-**Size**: `148` lines (`5252` bytes)
+**Size**: `160` lines (`5574` bytes)
 
 **Functions:**
 - `def _rows(path, required)`
@@ -4490,6 +4508,21 @@
 **Functions:**
 - `def _number(value, digits)`
 - `def generate_html_report(results, filepath, intervention_name, metric_name)` - *Write the source-style HTML report and return whether it was written.*
+
+---
+
+### [`experiments/settings.py`](experiments/settings.py)
+> *Analysis settings for N1 experiments, mirroring the source SettingsManager.*
+
+**Size**: `66` lines (`2202` bytes)
+
+**Classes:**
+- `class SettingsManager` - *Load, save and expose the four analysis thresholds.*
+  - Method `.__init__(settings_file)`
+  - Method `.load_settings()`
+  - Method `.save_settings()`
+  - Method `.get(key, default)`
+  - Method `.set(key, value)`
 
 ---
 
@@ -6944,17 +6977,19 @@
 ### [`tests/test_migration_harness.py`](tests/test_migration_harness.py)
 > *Migration harness: inspect first, then apply a source fixture without losing provenance.*
 
-**Size**: `229` lines (`10289` bytes)
+**Size**: `268` lines (`12083` bytes)
 
 **Classes:**
 - `class MigrationHarnessTests`
   - Method `._lattice()`
   - Method `._n1()`
+  - Method `._legacy_n1()`
   - Method `.test_lattice_inspect_is_read_only_and_counts_rows()`
   - Method `.test_lattice_dry_run_writes_nothing()`
   - Method `.test_lattice_apply_preserves_paper_fields_provenance_and_screening()`
   - Method `.test_lattice_apply_is_recorded_once()`
   - Method `.test_n1_manifest_and_apply_link_metrics_to_interventions()`
+  - Method `.test_legacy_n1_schema_without_link_columns_migrates()`
   - Method `.test_golden_both_sources_share_one_program()`
   - Method `.test_inspect_tree_counts_and_fingerprints_files()`
   - Method `.test_inspect_obezite_counts_verified_and_backfill()`
@@ -7024,7 +7059,7 @@
 ### [`tests/test_n1_surfaces.py`](tests/test_n1_surfaces.py)
 > *N1 surfaces that were missing after the first merge: correlation, CSV, report.*
 
-**Size**: `101` lines (`4775` bytes)
+**Size**: `192` lines (`8790` bytes)
 
 **Classes:**
 - `class ExperimentSurfaceTests`
@@ -7033,6 +7068,10 @@
   - Method `.test_correlation_refuses_unknown_metric()`
   - Method `.test_csv_import_and_export_round_trip_all_three_types()`
   - Method `.test_unknown_csv_type_is_refused()`
+  - Method `.test_out_of_range_severity_is_coerced_not_fatal()`
+  - Method `.test_all_bad_rows_report_failure()`
+  - Method `.test_settings_round_trip_and_custom_minimum()`
+  - Method `.test_compatibility_names_cover_trend_bootstrap_and_data_manager()`
   - Method `.test_html_report_writes_escape_safe_summary()`
 
 ---

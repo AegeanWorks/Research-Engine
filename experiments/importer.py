@@ -32,7 +32,12 @@ def _rows(path: Path | str, required: set[str]) -> list[dict]:
 
 
 def _result(imported: int, skipped: int, reasons: list[str]) -> dict:
-    return {"imported": imported, "skipped": skipped, "reasons": reasons}
+    return {
+        "success": imported > 0,
+        "imported": imported,
+        "skipped": skipped,
+        "reasons": reasons,
+    }
 
 
 def import_metrics_csv(
@@ -53,7 +58,7 @@ def import_metrics_csv(
                 str(row.get("metric_name") or ""),
                 str(row.get("date") or ""),
                 float(str(row.get("value") or "").strip()),
-                intervention_ref=intervention_ref,
+                intervention_ref=str(row.get("intervention_ref") or "").strip() or intervention_ref,
                 note=str(row.get("note") or ""),
             )
         except (EngineError, TypeError, ValueError) as exc:
@@ -107,8 +112,15 @@ def import_events_csv(
     for line_no, row in enumerate(_rows(path, {"timestamp", "event_name"}), start=2):
         raw_severity = str(row.get("severity") or "").strip()
         intervention = str(row.get("intervention_ref") or "").strip() or None
+        severity = None
+        if raw_severity:
+            try:
+                candidate = int(raw_severity)
+            except ValueError:
+                candidate = None
+            if candidate is not None and 1 <= candidate <= 5:
+                severity = candidate
         try:
-            severity = int(raw_severity) if raw_severity else None
             add_event(
                 conn,
                 research_ref,

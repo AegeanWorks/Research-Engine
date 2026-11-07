@@ -43,11 +43,13 @@ Status on 2026-11-07: all rows below are `ported` unless the status column says 
 | N-08 | Cohen's d, Welch t, Mann-Whitney U | `experiments/analysis.py` | reimplement | ported | `tests/test_experiments.py` |
 | N-09 | Multiple-comparison warning | `experiments/analysis.py` | reimplement | ported | `tests/test_experiments.py` |
 | N-10 | CSV import and export for metrics, interventions, events | `experiments/importer.py`, `experiments/exporter.py` | reimplement | ported | `tests/test_n1_surfaces.py` |
-| N-11 | Database schema migration and golden import | `engine/migrations.py` | reimplement | ported | `tests/test_migration_harness.py` |
+| N-11 | Database schema migration and golden import, including legacy N1 schemas | `engine/migrations.py` | reimplement | ported | `tests/test_migration_harness.py` |
 | N-12 | Correlation matrix aligned by date | `experiments/analysis.py:correlation_matrix` | reimplement on `engine/stats.py` | ported | `tests/test_n1_surfaces.py` |
 | N-13 | HTML analysis report | `experiments/reporting.py:generate_html_report` | reimplement | ported | `tests/test_n1_surfaces.py` |
-| N-14 | PyQt desktop GUI | not ported | surface not ported | deliberate | source suite stays green; host is CLI/API/MCP |
-| N-15 | SQLAlchemy/PyQt dependency footprint | not copied | dependency boundary | deliberate | host import scan has neither |
+| N-14 | Analysis settings manager | `experiments/settings.py:SettingsManager` | reimplement | ported | `tests/test_n1_surfaces.py` |
+| N-15 | Source-compatible class names (`AnalysisEngine`, `DataManager`, `ReportGenerator`) | `experiments/compat.py` | reimplement | ported | `tests/test_n1_surfaces.py` |
+| N-16 | PyQt desktop GUI | not ported | surface not ported | deliberate | source suite stays green; host is CLI/API/MCP |
+| N-17 | SQLAlchemy/PyQt dependency footprint | not copied | dependency boundary | deliberate | host import scan has neither |
 
 ## fluid-universe (M2 rigor, M4 pack)
 

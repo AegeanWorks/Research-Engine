@@ -10,7 +10,7 @@ from pathlib import Path
 from engine.errors import EngineError
 from experiments.models import list_events, list_interventions, list_metrics
 
-METRIC_FIELDS = ["date", "metric_name", "value", "note"]
+METRIC_FIELDS = ["date", "metric_name", "value", "note", "intervention_ref"]
 INTERVENTION_FIELDS = [
     "name",
     "start_date",
@@ -42,6 +42,7 @@ def export_metrics_csv(
             "metric_name": row.metric_name,
             "value": row.value,
             "note": row.note,
+            "intervention_ref": row.intervention_id or "",
         }
         for row in list_metrics(conn, research_ref)
     ]

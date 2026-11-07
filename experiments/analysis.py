@@ -21,6 +21,7 @@ from experiments.models import (
     MIN_INTERVENTION_DAYS,
     list_metrics,
 )
+from experiments.settings import SettingsManager
 
 def _start_date(value: str) -> date:
     try:
@@ -62,24 +63,55 @@ def _trend(rows: Sequence) -> dict:
     return {"slope": result["slope"], "r": result["r"], "p_value": result["p"]}
 
 
+def calculate_trend(values: Sequence[float], dates: Optional[Sequence[str]] = None) -> dict:
+    """Linear trend for a value series, matching the source ``calculate_trend`` result."""
+    clean = [float(value) for value in values]
+    if dates is not None:
+        xs = [date.fromisoformat(str(day)).toordinal() for day in dates]
+    else:
+        xs = list(range(len(clean)))
+    result = stats.linregress(xs, clean)
+    return {
+        "slope": result["slope"],
+        "p_value": result["p"],
+        "r": result["r"],
+        "n": result["n"],
+    }
+
+
+def bootstrap_ci(
+    baseline: Sequence[float],
+    treatment: Sequence[float],
+    seed: int = stats.DEFAULT_SEED,
+    resamples: int = stats.DEFAULT_RESAMPLES,
+) -> dict:
+    """Percentile bootstrap interval with both host and source key names."""
+    interval = stats.bootstrap_ci(baseline, treatment, seed=seed, resamples=resamples)
+    interval["lower"] = interval["low"]
+    interval["upper"] = interval["high"]
+    return interval
+
+
 def _window_warnings(
     baseline: Sequence,
     intervention: Sequence,
     baseline_days: int,
     intervention_days: int,
+    min_baseline_days: int = MIN_BASELINE_DAYS,
+    min_intervention_days: int = MIN_INTERVENTION_DAYS,
 ) -> List[str]:
     warnings: List[str] = []
     baseline_span = len({row.date for row in baseline})
     intervention_span = len({row.date for row in intervention})
-    if baseline_span < MIN_BASELINE_DAYS:
+    if baseline_span < min_baseline_days:
         warnings.append(
             f"Insufficient baseline duration: {baseline_span} days"
-            f" (recommended >= {MIN_BASELINE_DAYS})"
+            f" (recommended >= {min_baseline_days})"
         )
-    if intervention_span < MIN_INTERVENTION_DAYS:
+    if intervention_span < min_intervention_days:
         warnings.append(
             f"Insufficient intervention duration: {intervention_span} days"
-            f" (recommended >= {MIN_INTERVENTION_DAYS})"
+            f" (recommended >= {min_intervention_days})"
         )
     if intervention_days < baseline_days:
         warnings.append(
@@ -105,12 +137,13 @@ def analyze_baseline_vs_intervention(
     start_date: str,
     baseline_days: int = 14,
     intervention_days: int = 14,
+    settings: Optional[SettingsManager] = None,
 ) -> dict:
     """Compare one metric before and after the declared intervention start.
 
     The baseline window is ``[start - baseline_days, start)``; the intervention window is
-    ``[start, start + intervention_days)``. Fewer than ``MIN_DATA_POINTS`` observations in either
-    window is reported as counts, not raised: a sparse record is a finding, not a crash.
+    ``[start, start + intervention_days)``. Fewer than the configured minimum observations in
+    either window is reported as counts, not raised: a sparse record is a finding, not a crash.
     """
     metric_name = str(metric_name).strip()
     if not metric_name:
@@ -119,6 +152,19 @@ def analyze_baseline_vs_intervention(
             "an analysis needs the metric it compares.",
             "pass the metric name.",
         )
+    minimum_points = (
+        int(settings.get("min_data_points", MIN_DATA_POINTS)) if settings else MIN_DATA_POINTS
+    )
+    min_baseline = (
+        int(settings.get("min_baseline_days", MIN_BASELINE_DAYS))
+        if settings
+        else MIN_BASELINE_DAYS
+    )
+    min_intervention = (
+        int(settings.get("min_intervention_days", MIN_INTERVENTION_DAYS))
+        if settings
+        else MIN_INTERVENTION_DAYS
+    )
     start = _start_date(start_date)
     baseline_days = _days(baseline_days, "baseline_days")
     intervention_days = _days(intervention_days, "intervention_days")
@@ -134,9 +180,9 @@ def analyze_baseline_vs_intervention(
         row for row in rows
         if start <= date.fromisoformat(row.date) < intervention_end
     ]
-    if len(baseline) < MIN_DATA_POINTS or len(intervention) < MIN_DATA_POINTS:
+    if len(baseline) < minimum_points or len(intervention) < minimum_points:
         return {
-            "error": f"Insufficient data points (minimum {MIN_DATA_POINTS} required)",
+            "error": f"Insufficient data points (minimum {minimum_points} required)",
             "metric": metric_name,
             "baseline_count": len(baseline),
             "intervention_count": len(intervention),
@@ -154,9 +200,19 @@ def analyze_baseline_vs_intervention(
     intervention_values = [float(row.value) for row in intervention]
     compared = stats.compare_groups(baseline_values, intervention_values)
     warnings = _window_warnings(
-        baseline, intervention, baseline_days, intervention_days
+        baseline,
+        intervention,
+        baseline_days,
+        intervention_days,
+        min_baseline_days=min_baseline,
+        min_intervention_days=min_intervention,
     )
     warnings.extend(compared["warnings"])
+    welch = compared["welch"]
+    mann = compared["mann_whitney"]
+    interval = dict(compared["bootstrap"])
+    interval["lower"] = interval.get("low")
+    interval["upper"] = interval.get("high")
     return {
         "metric": metric_name,
         "baseline_window": {
@@ -173,17 +229,19 @@ def analyze_baseline_vs_intervention(
             "mean_difference": compared["difference"],
             "cohens_d": compared["cohens_d"],
             "t_test": {
-                "t": compared["welch"]["t"],
-                "df": compared["welch"]["df"],
-                "p_value": compared["welch"]["p"],
+                "t": welch["t"],
+                "statistic": welch["t"],
+                "df": welch["df"],
+                "p_value": welch["p"],
             },
             "mann_whitney_u": {
-                "u": compared["mann_whitney"]["u"],
-                "z": compared["mann_whitney"]["z"],
-                "p_value": compared["mann_whitney"]["p"],
-                "method": compared["mann_whitney"]["method"],
+                "u": mann["u"],
+                "statistic": mann["u"],
+                "z": mann["z"],
+                "p_value": mann["p"],
+                "method": mann["method"],
             },
-            "bootstrap_ci": compared["bootstrap"],
+            "bootstrap_ci": interval,
             "baseline_trend": _trend(baseline),
             "intervention_trend": _trend(intervention),
             "alpha": compared["alpha"],
@@ -244,6 +302,7 @@ def analyze_multiple_metrics(
     start_date: str,
     baseline_days: int = 14,
     intervention_days: int = 14,
+    settings: Optional[SettingsManager] = None,
 ) -> dict:
     """Analyze several metrics and report the multiple-comparison risk as a global warning."""
     names = [str(name).strip() for name in metric_names if str(name).strip()]
@@ -268,12 +327,18 @@ def analyze_multiple_metrics(
             start_date,
             baseline_days=baseline_days,
             intervention_days=intervention_days,
+            settings=settings,
         )
     global_warnings: List[str] = []
-    if len(names) > MAX_SAFE_METRICS:
+    safe_limit = (
+        int(settings.get("max_safe_metrics", MAX_SAFE_METRICS))
+        if settings
+        else MAX_SAFE_METRICS
+    )
+    if len(names) > safe_limit:
         global_warnings.append(
             f"Multiple Comparison Risk: {len(names)} metrics exceed the safe limit of"
-            f" {MAX_SAFE_METRICS}; treat isolated significant results as exploratory."
+            f" {safe_limit}; treat isolated significant results as exploratory."
         )
     p_values: List[float] = []
     for name in names:

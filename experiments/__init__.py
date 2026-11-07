@@ -3,6 +3,8 @@
 from experiments.analysis import (
     analyze_baseline_vs_intervention,
     analyze_multiple_metrics,
+    bootstrap_ci,
+    calculate_trend,
     correlation_matrix,
 )
 from experiments.models import (
@@ -19,12 +21,14 @@ from experiments.models import (
     list_metric_definitions,
     list_metrics,
 )
+from experiments.settings import SettingsManager
 
 __all__ = [
     "EventEntry",
     "Intervention",
     "MetricDefinition",
     "MetricEntry",
+    "SettingsManager",
     "add_event",
     "add_intervention",
     "add_metric",
@@ -35,5 +39,7 @@ __all__ = [
     "list_metrics",
     "analyze_baseline_vs_intervention",
     "analyze_multiple_metrics",
+    "bootstrap_ci",
+    "calculate_trend",
     "correlation_matrix",
 ]

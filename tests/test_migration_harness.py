@@ -90,6 +90,26 @@ INSERT INTO events(id, timestamp, event_name, severity, intervention_id)
     VALUES (1, '2026-01-02T10:00:00+00:00', 'headache', 2, 1);
 """
 
+_LEGACY_N1 = """
+CREATE TABLE interventions (
+    id INTEGER PRIMARY KEY, name TEXT NOT NULL, start_date TEXT NOT NULL,
+    end_date TEXT, dosage TEXT, notes TEXT
+);
+CREATE TABLE metric_definitions (
+    id INTEGER PRIMARY KEY, name TEXT NOT NULL, description TEXT, unit TEXT
+);
+CREATE TABLE metrics (
+    id INTEGER PRIMARY KEY, date TEXT NOT NULL, metric_name TEXT NOT NULL, value REAL NOT NULL
+);
+CREATE TABLE events (
+    id INTEGER PRIMARY KEY, timestamp TEXT NOT NULL, event_name TEXT NOT NULL,
+    severity INTEGER, notes TEXT
+);
+INSERT INTO interventions(id, name, start_date) VALUES (1, 'Legacy intervention', '2026-01-01');
+INSERT INTO metrics(id, date, metric_name, value) VALUES (1, '2026-01-02', 'weight', 81.5);
+INSERT INTO events(id, timestamp, event_name, severity) VALUES (1, '2026-01-02T10:00:00+00:00', 'headache', 2);
+"""
+
 
 def _fixture(sql: str, name: str) -> Path:
     directory = Path(tempfile.mkdtemp())
@@ -109,6 +129,11 @@ class MigrationHarnessTests(DatabaseCase):
 
     def _n1(self) -> Path:
         path = _fixture(_N1, "main.db")
+        self.addCleanup(lambda: __import__("shutil").rmtree(path.parent, ignore_errors=True))
+        return path
+
+    def _legacy_n1(self) -> Path:
+        path = _fixture(_LEGACY_N1, "main.db")
         self.addCleanup(lambda: __import__("shutil").rmtree(path.parent, ignore_errors=True))
         return path
 
@@ -175,6 +200,20 @@ class MigrationHarnessTests(DatabaseCase):
         self.assertEqual([row["value"] for row in metrics], [81.5, 81.2])
         self.assertEqual({row["intervention_id"] for row in metrics}, {intervention["id"]})
         event = self.conn.execute("SELECT * FROM experiment_event").fetchone()
+        self.assertEqual(event["severity"], 2)
+
+    def test_legacy_n1_schema_without_link_columns_migrates(self) -> None:
+        research = self.add_research()
+        path = self._legacy_n1()
+        report = inspect_n1(path)
+        self.assertEqual(report.tables["interventions"], 1)
+        migrate_n1(self.conn, research, path)
+        intervention = self.conn.execute("SELECT * FROM experiment_intervention").fetchone()
+        self.assertIsNone(intervention["projected_end_date"])
+        metric = self.conn.execute("SELECT * FROM experiment_metric").fetchone()
+        self.assertIsNone(metric["intervention_id"])
+        event = self.conn.execute("SELECT * FROM experiment_event").fetchone()
+        self.assertIsNone(event["intervention_id"])
         self.assertEqual(event["severity"], 2)
 
     def test_golden_both_sources_share_one_program(self) -> None:

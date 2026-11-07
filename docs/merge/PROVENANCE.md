@@ -8,7 +8,7 @@ SHA, license and modifications.
 |---|---|---|---:|---:|---|
 | `adapters/lattice/` | `lattice/lattice/*.py`, `tools/ui_inventory.py`, `start.py` | `d3f0502b…e868` | 21 | 6,639 | package path, imports, launcher root |
 | `studio/` | `lattice/lattice/{web,mcp,api,client}.py` | `d3f0502b…e868` | 5 | 3,472 | package path, imports |
-| `experiments/` | N1 `main/core/{models,analysis,data_manager,reporting}.py` behaviour | `f2c48869…960a` | 6 | 984 | reimplemented on stdlib + SQLite |
+| `experiments/` | N1 `main/core/{models,analysis,data_manager,reporting,settings_manager}.py` behaviour | `f2c48869…960a` | 8 | 1,145 | reimplemented on stdlib + SQLite, including compatibility classes |
 | `domains/pnn/` | `PNN/pnn/*.py` + small `data/` fixtures | `3b6e6c27…8c4d` | 27 | 8,580 | package path, pack-local data root |
 | `domains/fluid_universe/` | `fluid-universe/{verification,theory,phenomenology,sims}/*.py` | `7b4efe14…6c06` | 139 | 24,142 | package paths, external verification root |
 | `domains/obezite/` | `obezite-mekanizma-projesi/08_ARACLAR/*.py` | `18b5d4d8…315a` | 9 | 1,093 | package path, explicit external roots and host output paths, import-safe operator tools |

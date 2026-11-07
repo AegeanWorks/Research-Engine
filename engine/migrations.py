@@ -333,16 +333,43 @@ def _lattice_rows(path: Path | str) -> dict:
         conn.close()
 
 
+def _table_rows(
+    conn: sqlite3.Connection, table: str, columns: tuple
+) -> list[dict]:
+    exists = conn.execute(
+        "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?", (table,)
+    ).fetchone()
+    if exists is None:
+        return []
+    present = {row["name"] for row in conn.execute(f"PRAGMA table_info({table})")}
+    return [
+        {column: (row[column] if column in present else None) for column in columns}
+        for row in conn.execute(f"SELECT * FROM {table} ORDER BY id")
+    ]
+
+
 def _n1_rows(path: Path | str) -> dict:
     conn = _read_only(path)
     try:
         return {
-            "interventions": conn.execute("SELECT * FROM interventions ORDER BY id").fetchall(),
-            "metric_definitions": conn.execute(
-                "SELECT * FROM metric_definitions ORDER BY id"
-            ).fetchall(),
-            "metrics": conn.execute("SELECT * FROM metrics ORDER BY id").fetchall(),
-            "events": conn.execute("SELECT * FROM events ORDER BY id").fetchall(),
+            "interventions": _table_rows(
+                conn,
+                "interventions",
+                ("id", "name", "start_date", "projected_end_date", "end_date", "dosage", "notes"),
+            ),
+            "metric_definitions": _table_rows(
+                conn, "metric_definitions", ("id", "name", "description", "unit")
+            ),
+            "metrics": _table_rows(
+                conn,
+                "metrics",
+                ("id", "date", "metric_name", "value", "intervention_id"),
+            ),
+            "events": _table_rows(
+                conn,
+                "events",
+                ("id", "timestamp", "event_name", "severity", "notes", "intervention_id"),
+            ),
         }
     finally:
         conn.close()
