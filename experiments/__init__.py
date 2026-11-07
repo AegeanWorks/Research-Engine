@@ -3,6 +3,7 @@
 from experiments.analysis import (
     analyze_baseline_vs_intervention,
     analyze_multiple_metrics,
+    correlation_matrix,
 )
 from experiments.models import (
     EventEntry,
@@ -34,4 +35,5 @@ __all__ = [
     "list_metrics",
     "analyze_baseline_vs_intervention",
     "analyze_multiple_metrics",
+    "correlation_matrix",
 ]

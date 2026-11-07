@@ -10,7 +10,7 @@ from __future__ import annotations
 import sqlite3
 from datetime import date, timedelta
 from statistics import mean
-from typing import Dict, List, Optional, Sequence
+from typing import Dict, List, Optional, Sequence, Tuple
 
 from engine import stats
 from engine.errors import EngineError
@@ -21,7 +21,6 @@ from experiments.models import (
     MIN_INTERVENTION_DAYS,
     list_metrics,
 )
-
 
 def _start_date(value: str) -> date:
     try:
@@ -193,6 +192,49 @@ def analyze_baseline_vs_intervention(
             "warnings": warnings,
         },
     }
+
+
+def correlation_matrix(
+    conn: sqlite3.Connection,
+    research_ref: str,
+    metric_names: Optional[Sequence[str]] = None,
+) -> dict:
+    """Pairwise Pearson correlation for metrics observed on the same dates.
+
+    A date with repeated values is averaged, mirroring the source pivot table. A pair with fewer
+    than three shared dates reports ``r=0.0`` and its actual ``n``, never a fabricated value.
+    """
+    rows = list_metrics(conn, research_ref)
+    available = sorted({row.metric_name for row in rows})
+    if metric_names:
+        selected = [str(name).strip() for name in metric_names if str(name).strip()]
+        unknown = sorted(set(selected) - set(available))
+        if unknown:
+            raise EngineError(
+                f"unknown metrics: {', '.join(unknown)}",
+                "a correlation needs recorded metrics.",
+                "use a metric name from this program, or record it first.",
+            )
+        metrics = list(dict.fromkeys(selected))
+    else:
+        metrics = available
+    by_metric: Dict[str, Dict[str, float]] = {name: {} for name in metrics}
+    totals: Dict[Tuple[str, str], list] = {}
+    for row in rows:
+        if row.metric_name not in by_metric:
+            continue
+        totals.setdefault((row.metric_name, row.date), []).append(float(row.value))
+    for (name, day), values in totals.items():
+        by_metric[name][day] = mean(values)
+    matrix: Dict[str, Dict[str, dict]] = {}
+    for left in metrics:
+        matrix[left] = {}
+        for right in metrics:
+            shared = sorted(set(by_metric[left]) & set(by_metric[right]))
+            pairs = [(by_metric[left][day], by_metric[right][day]) for day in shared]
+            result = stats.pearson([pair[0] for pair in pairs], [pair[1] for pair in pairs])
+            matrix[left][right] = {"r": result["r"], "n": result["n"]}
+    return {"metrics": metrics, "matrix": matrix}
 
 
 def analyze_multiple_metrics(

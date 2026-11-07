@@ -6,11 +6,11 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `402`
-- **Total Classes**: `295`
-- **Total Top-Level Functions**: `1900`
-- **Total Class Methods**: `1443`
-- **Total Source Lines**: `86689`
+- **Total Python Modules**: `405`
+- **Total Classes**: `296`
+- **Total Top-Level Functions**: `1913`
+- **Total Class Methods**: `1449`
+- **Total Source Lines**: `87116`
 
 ---
 
@@ -4404,14 +4404,14 @@
 ### [`experiments/__init__.py`](experiments/__init__.py)
 > *N1 experiment records and baseline-vs-intervention analysis.*
 
-**Size**: `37` lines (`801` bytes)
+**Size**: `39` lines (`851` bytes)
 
 ---
 
 ### [`experiments/analysis.py`](experiments/analysis.py)
 > *Baseline-vs-intervention analysis for N1 experiment records.*
 
-**Size**: `249` lines (`8938` bytes)
+**Size**: `291` lines (`10849` bytes)
 
 **Functions:**
 - `def _start_date(value)`
@@ -4420,17 +4420,37 @@
 - `def _trend(rows)`
 - `def _window_warnings(baseline, intervention, baseline_days, intervention_days)`
 - `def analyze_baseline_vs_intervention(conn, research_ref, metric_name, start_date, baseline_days, intervention_days)` - *Compare one metric before and after the declared intervention start.*
+- `def correlation_matrix(conn, research_ref, metric_names)` - *Pairwise Pearson correlation for metrics observed on the same dates.*
 - `def analyze_multiple_metrics(conn, research_ref, metric_names, start_date, baseline_days, intervention_days)` - *Analyze several metrics and report the multiple-comparison risk as a global warning.*
 
 ---
 
-### [`experiments/importer.py`](experiments/importer.py)
-> *CSV import for N1 metric entries, using the host experiment model.*
+### [`experiments/exporter.py`](experiments/exporter.py)
+> *CSV export for N1 experiment rows, mirroring the import headers.*
 
-**Size**: `58` lines (`2146` bytes)
+**Size**: `102` lines (`3057` bytes)
 
 **Functions:**
+- `def _write(path, fields, rows)`
+- `def export_metrics_csv(conn, research_ref, path)`
+- `def export_interventions_csv(conn, research_ref, path)`
+- `def export_events_csv(conn, research_ref, path)`
+- `def export_csv(conn, research_ref, path, data_type)` - *Dispatch the source ``DataManager.export_to_csv`` data types.*
+
+---
+
+### [`experiments/importer.py`](experiments/importer.py)
+> *CSV import for N1 experiment rows, using the host experiment model.*
+
+**Size**: `148` lines (`5252` bytes)
+
+**Functions:**
+- `def _rows(path, required)`
+- `def _result(imported, skipped, reasons)`
 - `def import_metrics_csv(conn, research_ref, path, intervention_ref)` - *Import ``date,metric_name,value[,note]`` rows; bad rows are counted, not fatal.*
+- `def import_interventions_csv(conn, research_ref, path)` - *Import ``name,start_date[,projected_end_date,end_date,dosage,notes]`` rows.*
+- `def import_events_csv(conn, research_ref, path)` - *Import ``timestamp,event_name[,severity,notes,intervention_ref]`` rows.*
+- `def import_csv(conn, research_ref, path, data_type)` - *Dispatch the source ``DataManager.import_from_csv`` data types.*
 
 ---
 
@@ -4459,6 +4479,17 @@
 - `def list_metric_definitions(conn, research_ref)`
 - `def list_metrics(conn, research_ref, metric_name, intervention_ref)`
 - `def list_events(conn, research_ref)`
+
+---
+
+### [`experiments/reporting.py`](experiments/reporting.py)
+> *HTML report generation for N1 baseline-vs-intervention results.*
+
+**Size**: `90` lines (`3907` bytes)
+
+**Functions:**
+- `def _number(value, digits)`
+- `def generate_html_report(results, filepath, intervention_name, metric_name)` - *Write the source-style HTML report and return whether it was written.*
 
 ---
 
@@ -6987,6 +7018,22 @@
   - Method `.test_dry_run_writes_nothing()`
 - `class HolmTests`
   - Method `.test_holm_table_opt_in()`
+
+---
+
+### [`tests/test_n1_surfaces.py`](tests/test_n1_surfaces.py)
+> *N1 surfaces that were missing after the first merge: correlation, CSV, report.*
+
+**Size**: `101` lines (`4775` bytes)
+
+**Classes:**
+- `class ExperimentSurfaceTests`
+  - Method `.setUp()`
+  - Method `.test_correlation_matrix_aligns_pairs_by_date()`
+  - Method `.test_correlation_refuses_unknown_metric()`
+  - Method `.test_csv_import_and_export_round_trip_all_three_types()`
+  - Method `.test_unknown_csv_type_is_refused()`
+  - Method `.test_html_report_writes_escape_safe_summary()`
 
 ---
 

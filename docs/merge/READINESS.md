@@ -13,7 +13,7 @@ deliberate exclusions listed in section 6.**
 | Lifecycle core | host | `engine/` | 577 host tests before merge; schema v14 |
 | Literature adapters | lattice `d3f0502b` | `adapters/lattice/` | 252 ported tests pass |
 | Studio surfaces | lattice `d3f0502b` | `studio/` | web, MCP, API, client tests pass |
-| Experiments | N1 `f2c48869` | `experiments/` | models, analysis, CSV import tests pass |
+| Experiments | N1 `f2c48869` | `experiments/` | models, analysis, correlation, CSV import/export, HTML report tests pass |
 | Rigor | fluid-universe `7b4efe14` | `domains/fluid_universe/verification/` | fingerprint/compare/claims tests pass |
 | Physics pack | fluid-universe `7b4efe14` | `domains/fluid_universe/{theory,phenomenology,sims}/` | import smoke test passes |
 | Drug-discovery pack | PNN `3b6e6c27` | `domains/pnn/` | 219 ported tests pass |
@@ -22,7 +22,8 @@ deliberate exclusions listed in section 6.**
 
 The source repositories were never stopped, finished, archived, deleted, moved, tagged or
 modified. Their pins are in `SOURCE-INVENTORY.md`; copied files and modifications are listed in
-`PROVENANCE.md` and each destination's `NOTICE.md`.
+`PROVENANCE.md` and each destination's `NOTICE.md`. The second-pass function inventory and the
+N1 gaps it found are in `GAP-ANALYSIS.md`.
 
 ## 2. Baseline and post-merge test evidence
 
@@ -42,7 +43,7 @@ Post-merge host gate:
 
 ```text
 python -m unittest discover -s tests -t .
-Ran 1091 tests in 505.844s
+Ran 1096 tests in 233.905s
 OK
 ```
 
@@ -151,20 +152,21 @@ because archive extraction changes the inventory mtimes used by one freshness te
 
 ## 6. Deliberate exclusions and residual gaps
 
-1. **N1 PyQt GUI is not ported.** Models, metrics, events, analysis, CSV import and database
-   migration are ported. The source keeps the GUI runnable.
+1. **N1 PyQt GUI is not ported.** Models, metrics, events, analysis, correlation, CSV
+   import/export, HTML reporting and database migration are ported. The source keeps the GUI
+   runnable.
 2. **Atlas real-analysis corpus and uploaded media stay external.** The 4 demo-integrity tests
    and the real-video frame test read the sibling Atlas checkout in place; when that checkout is
    absent they skip. No Atlas media was copied into the host.
 3. **obezite's canonical corpus and generated tables stay external.** The host contracts use a
-   small synthetic ledger fixture. The source advanced during the merge and its current HEAD
-   (`6776125…`) passes 10/10; the host pin remains `18b5d4d8…`.
+   small synthetic ledger fixture. The source advanced through its own work; its latest observed
+   HEAD (`3ca2e0d…`) is clean, while the host pin remains `18b5d4d8…`.
 4. **fluid physics outputs stay external.** The host carries the code and verification rules; the
    generated `results/` are referenced by SHA-256, not copied. The full source suite passed 403
    tests at M0 (1807.74s) and again at M5 (1728.43s) with the same clean SHA.
-5. **obezite tool CLIs still use cwd-relative ledger paths.** The library functions and
-   `sentez`/`uret` are host-wired with injected roots; the remaining operator scripts are copied
-   but not re-rooted.
+5. **obezite operator tools now use explicit roots.** All six tools take a `--root`/`--output`
+   path, are import-safe, and are exercised against the pinned archive; no tool writes the source
+   checkout.
 6. **No live model calls.** Atlas Muse/SAM providers still require keys and refuse keyless calls;
    the offline fallback is the tested path.
 
