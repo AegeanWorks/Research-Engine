@@ -14,6 +14,7 @@ from domains.obezite.sentez import (
     summarize,
 )
 from domains.obezite.uret import bol, chunk_adi, govde_dogrula, uret
+from domains.obezite.split import split_lines
 
 _LEDGER = """\
 | **1** | First claim | L1 | D1 | up | none | **kan\u0131tl\u0131** | PMID:123 |
@@ -76,3 +77,15 @@ class LedgerChunkingTests(unittest.TestCase):
         self.assertTrue(set(order) <= set(outputs))
         self.assertIn("iddia-defteri-index.md", outputs)
         self.assertIn("claim-index.md", outputs)
+
+    def test_quarantine_split_is_import_safe_and_keeps_headers(self) -> None:
+        lines = [
+            "header\n",
+            "| **1** | active | L1 | D1 | up | none | kanitli | PMID:1 |\n",
+            "| **2** | dead | L2 | D3 | down | none | falsified | PMID:2 |\n",
+        ]
+        active, quarantine = split_lines(lines)
+        self.assertIn("header\n", active)
+        self.assertIn("| **1** | active", "".join(active))
+        self.assertIn("| **2** | dead", "".join(quarantine))
+        self.assertNotIn("| **2** | dead", "".join(active))

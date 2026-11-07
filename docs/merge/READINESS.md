@@ -42,7 +42,7 @@ Post-merge host gate:
 
 ```text
 python -m unittest discover -s tests -t .
-Ran 1075 tests in 72.171s
+Ran 1076 tests in 104.871s
 OK
 ```
 
@@ -106,6 +106,10 @@ python aikit.py check research-engine
 - no pack imports another pack;
 - no pack imports `studio`, `adapters` or `experiments`;
 - `engine/` imports no pack or surface.
+
+An import sweep over all 228 copied modules under `adapters/`, `studio/`, `experiments/` and
+`domains/` reports **0 failures**. The obezite split tool is import-safe and writes only to paths
+passed by the caller.
 
 ## 5. Source integrity
 

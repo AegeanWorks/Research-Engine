@@ -8,9 +8,9 @@
 ## 📊 Codebase Metrics
 - **Total Python Modules**: `399`
 - **Total Classes**: `290`
-- **Total Top-Level Functions**: `1887`
-- **Total Class Methods**: `1422`
-- **Total Source Lines**: `86971`
+- **Total Top-Level Functions**: `1890`
+- **Total Class Methods**: `1423`
+- **Total Source Lines**: `87003`
 
 ---
 
@@ -3074,7 +3074,14 @@
 ---
 
 ### [`domains/obezite/split.py`](domains/obezite/split.py)
-**Size**: `62` lines (`2271` bytes)
+> *Split the obezite claim ledger into active and quarantined projections.*
+
+**Size**: `81` lines (`2697` bytes)
+
+**Functions:**
+- `def split_lines(lines)` - *Return active and quarantined lines using the source's verdict-column rule.*
+- `def split_ledger(source_file, active_file, quarantine_file)` - *Write the two projections and return their line counts.*
+- `def main(argv)`
 
 ---
 
@@ -6951,7 +6958,7 @@
 ### [`tests/test_obezite_ledger.py`](tests/test_obezite_ledger.py)
 > *Obezite claim-ledger tooling: parsing, buckets and projections on a fixture.*
 
-**Size**: `78` lines (`3496` bytes)
+**Size**: `91` lines (`4099` bytes)
 
 **Classes:**
 - `class LedgerParsingTests`
@@ -6963,6 +6970,7 @@
   - Method `.test_chunk_names_follow_the_500_claim_window()`
   - Method `.test_split_is_lossless_and_routes_by_claim_number()`
   - Method `.test_generated_chunks_keep_every_line()`
+  - Method `.test_quarantine_split_is_import_safe_and_keeps_headers()`
 
 ---
 

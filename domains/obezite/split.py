@@ -1,61 +1,81 @@
+"""Split the obezite claim ledger into active and quarantined projections.
+
+The source script ran at import time against a fixed working-directory path. This port keeps the
+same keyword rule but exposes it as a function with explicit paths; importing the module touches
+no file.
+"""
+
+from __future__ import annotations
+
+import argparse
 import re
-import os
+from pathlib import Path
+from typing import Iterable
 
-source_file = r'02_LITERATUR\iddia-defteri.md'
-active_file = r'02_LITERATUR\iddia-defteri-AKTIF.md'
-quarantine_file = r'02_LITERATUR\iddia-defteri-CURUTULMUS.md'
+from domains.obezite.sentez import split_fields
 
-with open(source_file, 'r', encoding='utf-8') as f:
-    lines = f.readlines()
+QUARANTINE_KEYWORDS = (
+    "falsified",
+    "GERİ ÇEKİLDİ",
+    "geçersiz",
+    "çürütüldü",
+    "yanlışlandı",
+    "replike edilemedi",
+)
 
-active_lines = []
-quarantine_lines = []
+CLAIM_PATTERN = re.compile(r"^\|\s*\*\*\d+\*\*\s*\|")
 
-# Keywords that indicate a claim is falsified or retracted
-# Looking specifically in the "Derece" or "Hüküm" columns, but a global row match is usually safe enough if it's explicitly marked.
-quarantine_keywords = [
-    'falsified', 
-    'GERİ ÇEKİLDİ', 
-    'geçersiz', 
-    'çürütüldü', 
-    'yanlışlandı',
-    'replike edilemedi'
-]
 
-claim_pattern = re.compile(r'^\|\s*\*\*\d+\*\*\s*\|')
-
-for line in lines:
-    if claim_pattern.match(line):
-        # It's a claim row
-        is_quarantined = any(kw.lower() in line.lower() for kw in quarantine_keywords)
-        
-        # Exception: if it says "falsifikasyon" in the claim title but the claim itself is "kanıtlı", it shouldn't be quarantined.
-        # Let's be more precise: check if the 'Derece' or 'Hüküm' contains the keywords.
-        # A claim row has columns separated by '|'. 
-        # Format: | ID | İddia | Sınıf | Kanıt Derecesi | Sentez Yönü | Hüküm | Kaynaklar |
-        # Columns: 1:ID, 2:İddia, 3:Sınıf, 4:Kanıt, 5:Yön, 6:Hüküm, 7:Kaynaklar
-        cols = line.split('|')
-        if len(cols) >= 7:
-            hukum_col = cols[6].lower()
-            yon_col = cols[5].lower()
-            if any(kw.lower() in hukum_col for kw in quarantine_keywords) or any(kw.lower() in yon_col for kw in quarantine_keywords):
-                quarantine_lines.append(line)
+def split_lines(lines: Iterable[str]) -> tuple[list[str], list[str]]:
+    """Return active and quarantined lines using the source's verdict-column rule."""
+    active: list[str] = []
+    quarantine: list[str] = []
+    for line in lines:
+        if CLAIM_PATTERN.match(line):
+            columns = split_fields(line)
+            if len(columns) >= 7:
+                verdict = columns[6].lower()
+                direction = columns[4].lower()
+                hit = any(keyword.lower() in verdict for keyword in QUARANTINE_KEYWORDS)
+                hit = hit or any(keyword.lower() in direction for keyword in QUARANTINE_KEYWORDS)
+                (quarantine if hit else active).append(line)
             else:
-                active_lines.append(line)
+                active.append(line)
         else:
-            # Fallback
-            active_lines.append(line)
-    else:
-        # Non-claim row (headers, empty lines, section titles)
-        active_lines.append(line)
-        quarantine_lines.append(line)
+            active.append(line)
+            quarantine.append(line)
+    return active, quarantine
 
-with open(active_file, 'w', encoding='utf-8') as f:
-    f.writelines(active_lines)
 
-with open(quarantine_file, 'w', encoding='utf-8') as f:
-    f.writelines(quarantine_lines)
+def split_ledger(
+    source_file: Path | str,
+    active_file: Path | str,
+    quarantine_file: Path | str,
+) -> dict:
+    """Write the two projections and return their line counts."""
+    lines = Path(source_file).read_text(encoding="utf-8").splitlines(keepends=True)
+    active, quarantine = split_lines(lines)
+    Path(active_file).write_text("".join(active), encoding="utf-8")
+    Path(quarantine_file).write_text("".join(quarantine), encoding="utf-8")
+    return {
+        "total": len(lines),
+        "active": len(active),
+        "quarantined": len(quarantine),
+    }
 
-print(f"Total lines: {len(lines)}")
-print(f"Active claims/lines: {len(active_lines)}")
-print(f"Quarantined claims/lines: {len(quarantine_lines)}")
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--source", required=True)
+    parser.add_argument("--active", required=True)
+    parser.add_argument("--quarantine", required=True)
+    args = parser.parse_args(argv)
+    counts = split_ledger(args.source, args.active, args.quarantine)
+    print(f"Total lines: {counts['total']}")
+    print(f"Active claims/lines: {counts['active']}")
+    print(f"Quarantined claims/lines: {counts['quarantined']}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

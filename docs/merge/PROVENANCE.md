@@ -11,7 +11,7 @@ SHA, license and modifications.
 | `experiments/` | N1 `main/core/{models,analysis,data_manager}.py` behaviour | `f2c48869…960a` | 5 | 1,180 | reimplemented on stdlib + SQLite |
 | `domains/pnn/` | `PNN/pnn/*.py` + small `data/` fixtures | `3b6e6c27…8c4d` | 27 | 8,580 | package path, pack-local data root |
 | `domains/fluid_universe/` | `fluid-universe/{verification,theory,phenomenology,sims}/*.py` | `7b4efe14…6c06` | 139 | 24,142 | package paths, external verification root |
-| `domains/obezite/` | `obezite-mekanizma-projesi/08_ARACLAR/*.py` | `18b5d4d8…315a` | 9 | 1,192 | package path, safe output root, external ledger |
+| `domains/obezite/` | `obezite-mekanizma-projesi/08_ARACLAR/*.py` | `18b5d4d8…315a` | 9 | 1,206 | package path, safe output root, external ledger, import-safe split |
 | `domains/atlas/` | `Atlas/atlas/*.py`, `static/`, `assets/`, two demo modules | `f3cd7470…2663` | 23 | 4,546 | package path, pack-local static root |
 
 ## What stayed external
