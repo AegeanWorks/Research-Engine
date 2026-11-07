@@ -46,5 +46,5 @@ cd projects/Atlas && python -m pytest tests -q
 | PNN | `Ran 222 tests in 1.979s` — `OK` | unchanged |
 | Atlas | `152 passed, 1 skipped in 20.80s` | unchanged |
 | obezite (pinned archive) | 9/10; only `test_generated_files_are_fresh` fails because archive extraction changes inventory mtimes | pinned `18b5d4d8…` |
-| obezite (current worktree) | `Ran 10 tests in 2.422s` — `OK`; later gained its own uncommitted work | current `6776125…`; not imported |
+| obezite (current worktree) | `Ran 10 tests in 2.422s` — `OK`; later advanced further | latest observed `3ca2e0d…`, clean; not imported |
 | fluid-universe | `403 passed in 1728.43s (28:48)` | unchanged |
