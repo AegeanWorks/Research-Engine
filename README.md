@@ -347,6 +347,7 @@ research-engine/
 │   ├── stats.py
 │   ├── series.py
 │   ├── charts.py
+│   ├── NOTICE-gauge.md    <- gauge source notice
 │   ├── migrations.py         <- source snapshot inspection and dry-run
 │   ├── packs.py              <- domain-pack registry
 │   └── synthesis.py
