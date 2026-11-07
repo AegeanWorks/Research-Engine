@@ -6,11 +6,11 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `413`
-- **Total Classes**: `316`
+- **Total Python Modules**: `414`
+- **Total Classes**: `317`
 - **Total Top-Level Functions**: `1959`
-- **Total Class Methods**: `1543`
-- **Total Source Lines**: `89267`
+- **Total Class Methods**: `1544`
+- **Total Source Lines**: `89299`
 
 ---
 
@@ -7332,6 +7332,17 @@
   - Method `.test_uncited_comparison_with_plans_is_exploratory()`
   - Method `.test_plan_must_match_the_compared_pair()`
   - Method `.test_plan_belongs_to_one_claim()`
+
+---
+
+### [`tests/test_projects_scan.py`](tests/test_projects_scan.py)
+> *Every directory under projects/ is named in the project scan.*
+
+**Size**: `32` lines (`1019` bytes)
+
+**Classes:**
+- `class ProjectsScanCoverageTests`
+  - Method `.test_every_top_level_and_archived_project_is_listed()`
 
 ---
 

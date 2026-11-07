@@ -47,7 +47,7 @@ Post-merge host gate:
 
 ```text
 python -m unittest discover -s tests -t .
-Ran 1178 tests in 237.558s
+Ran 1179 tests in 124.387s
 OK
 ```
 
