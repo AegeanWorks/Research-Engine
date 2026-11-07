@@ -5225,7 +5225,7 @@
 ### [`tests/lattice/test_api.py`](tests/lattice/test_api.py)
 > *Unit tests for the public `lattice.api` integration surface.*
 
-**Size**: `369` lines (`14244` bytes)
+**Size**: `369` lines (`14255` bytes)
 
 **Classes:**
 - `class PublicApiTests` - *Verify the facade stays complete, inert at import time and faithful.*
