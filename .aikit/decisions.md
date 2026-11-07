@@ -879,3 +879,19 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   contracts run against the copied code. The only unported surface remains
   N1's PyQt GUI; N1 models, analysis, CSV import and database migration are
   ported. Packs remain independently removable.
+
+
+### ADR-059: Port gauge series and terminal chart primitives
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: The 50-project scan found one reusable primitive missing from the
+  lifecycle host: gauge's numeric series parsing, summaries, percentiles,
+  histograms, box plots and terminal charts. The host has statistical tests but
+  no compact display primitives for reports and experiment summaries.
+- **Decision**: Copy gauge's series.py and 
+ender.py into engine/series.py
+  and engine/charts.py, preserving the source contracts and tests. Keep gauge
+  active; store its SHA and notice in engine/NOTICE-gauge.md.
+- **Consequences**: Reports and experiment summaries can use one stdlib-only
+  series vocabulary. No third-party dependency is added. Other scanned projects
+  (games, compilers, chains, model harnesses) are not lifted into the core.

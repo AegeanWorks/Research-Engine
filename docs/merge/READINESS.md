@@ -19,13 +19,15 @@ deliberate exclusions listed in section 6.**
 | Drug-discovery pack | PNN `3b6e6c27` | `domains/pnn/` | 219 ported tests pass |
 | Claim-ledger pack | obezite `18b5d4d8` | `domains/obezite/` | 7 host contract tests pass |
 | Learning pack | Atlas `f3cd7470` | `domains/atlas/` | 153 ported pytest tests pass, 0 skipped |
+| Series charts | gauge `e275cfbd` | `engine/series.py`, `engine/charts.py` | 71 ported tests pass |
 
 The source repositories were never stopped, finished, archived, deleted, moved, tagged or
 modified. Their pins are in `SOURCE-INVENTORY.md`; copied files and modifications are listed in
 `PROVENANCE.md` and each destination's `NOTICE.md`. The second-pass function inventory and the
 N1 gaps it found are in `GAP-ANALYSIS.md`; the N1 archive decision matrix is
 `N1-COMPLETENESS.md`; the lattice archive decision matrix is `LATTICE-COMPLETENESS.md`; the
-four active projects' worth-implementing review is `OTHER-PROJECTS-ANALYSIS.md`.
+four active projects' worth-implementing review is `OTHER-PROJECTS-ANALYSIS.md`; the full
+50-project scan is `PROJECTS-SCAN.md`.
 
 ## 2. Baseline and post-merge test evidence
 
@@ -45,7 +47,7 @@ Post-merge host gate:
 
 ```text
 python -m unittest discover -s tests -t .
-Ran 1107 tests in 201.956s
+Ran 1178 tests in 237.558s
 OK
 ```
 
@@ -140,6 +142,9 @@ HTTP, including chaos requests, and reports **25/25 steps passed** with the trac
 The four active packs were registered against their real external roots:
 fluid results `1b8afb04…c1f4`, PNN output `bce1add0…cf90`, Atlas demo `0b5ebd6c…1ddc`, and
 obezite `02_LITERATUR` `097b722c…19db`.
+
+`tests/test_series.py` and `tests/test_charts.py` exercise the gauge port: percentile/histogram/
+box-plot contracts, overflow-safe summaries, sparklines, bars and terminal charts.
 
 ## 5. Source integrity
 

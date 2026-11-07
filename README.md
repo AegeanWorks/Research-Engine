@@ -328,14 +328,14 @@ research-engine/
 │   ├── evidence.py
 │   ├── hypotheses.py
 │   ├── information.py
-│   ├── integrity.py          <- the check gate
+│   ├── integrity.py
 │   ├── killtests.py
 │   ├── maintenance.py
 │   ├── manifest.py
 │   ├── markdown.py
 │   ├── merging.py
 │   ├── models.py
-│   ├── plans.py             <- preregistered analysis plans
+│   ├── plans.py
 │   ├── provenance.py
 │   ├── protocols.py
 │   ├── observations.py
@@ -345,6 +345,8 @@ research-engine/
 │   ├── search.py             <- lexical graph search
 │   ├── sources.py
 │   ├── stats.py
+│   ├── series.py
+│   ├── charts.py
 │   ├── migrations.py         <- source snapshot inspection and dry-run
 │   ├── packs.py              <- domain-pack registry
 │   └── synthesis.py

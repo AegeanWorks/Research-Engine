@@ -13,6 +13,7 @@ SHA, license and modifications.
 | `domains/fluid_universe/` | `fluid-universe/{verification,theory,phenomenology,sims}/*.py` | `7b4efe14…6c06` | 139 | 24,142 | package paths, external verification root |
 | `domains/obezite/` | `obezite-mekanizma-projesi/08_ARACLAR/*.py` | `18b5d4d8…315a` | 9 | 1,093 | package path, explicit external roots and host output paths, import-safe operator tools |
 | `domains/atlas/` | `Atlas/atlas/*.py`, `static/`, `assets/`, two demo modules | `f3cd7470…2663` | 23 | 4,546 | package path, pack-local static root |
+| `engine/series.py`, `engine/charts.py` | `gauge/gauge/series.py`, `gauge/gauge/render.py` | `e275cfbd…a7b3` | 2 | 451 | module path and test imports |
 
 ## What stayed external
 

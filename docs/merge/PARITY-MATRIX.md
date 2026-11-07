@@ -124,6 +124,7 @@ Status on 2026-11-07: all rows below are `ported` unless the status column says 
 | X-06 | Source notices preserved | `adapters/lattice/NOTICE.md`, `studio/NOTICE.md`, `domains/*/NOTICE.md` | `docs/merge/PROVENANCE.md` |
 | X-07 | Every source remains runnable and untouched | external repos | post-merge re-run in `docs/merge/READINESS.md` |
 | X-08 | External pack data root fingerprinted and registered in place | `engine/artifacts.digest_tree`, `engine/packs.register_pack_from_tree` | `tests/test_packs.py` |
+| X-09 | Numeric series summaries, histograms, box plots and terminal charts | `engine/series.py`, `engine/charts.py` | `tests/test_series.py`, `tests/test_charts.py` |
 
 ## Summary
 

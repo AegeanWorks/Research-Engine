@@ -6,11 +6,11 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `409`
-- **Total Classes**: `301`
-- **Total Top-Level Functions**: `1942`
-- **Total Class Methods**: `1471`
-- **Total Source Lines**: `88303`
+- **Total Python Modules**: `413`
+- **Total Classes**: `316`
+- **Total Top-Level Functions**: `1959`
+- **Total Class Methods**: `1543`
+- **Total Source Lines**: `89267`
 
 ---
 
@@ -3860,6 +3860,27 @@
 
 ---
 
+### [`engine/charts.py`](engine/charts.py)
+> *Text renderers: sparklines, signed bar charts and a statistics table.*
+
+**Size**: `250` lines (`9551` bytes)
+
+**Functions:**
+- `def format_number(value)` - *A compact human label for one value, with negative zero folded to zero.*
+- `def _edge_texts(low, high)` - *Labels for one bin's edges, adding digits only when six would collapse them.*
+- `def resample(values, width)` - *`values` unchanged when it already fits, else `width` bucket averages.*
+- `def _ratio(value, low, high)` - *Where `value` sits in [low, high], scaled when the raw span would overflow.*
+- `def _level(value, low, high, levels)` - *The half-up level of `value` between `low` and `high`; a flat series sits in the middle.*
+- `def sparkline(values, width, ascii_only)` - *One character per value, resampled to `width`; eight levels from lowest to highest.*
+- `def _position(value, low, high, width)` - *The half-up column of `value` in a chart of `width` cells.*
+- `def _bar_row(value, low, high, width, zero, block, axis)` - *One bar row with the zero axis kept visible; a tiny non-zero value keeps one block.*
+- `def bar_chart(values, width, ascii_only)` - *One labelled row per value, bars growing from a shared zero axis.*
+- `def stats_table(summary)` - *The human statistics block, one aligned `name  value` line per measurement.*
+- `def render_histogram(histogram, width, ascii_only)` - *One row per bin: a right-open range label, a scaled bar and the count.*
+- `def render_box(boxplot, width, ascii_only)` - *Render a horizontal 5-number box plot and its summary row (ADR-007).*
+
+---
+
 ### [`engine/claims.py`](engine/claims.py)
 > *Claims: the unit of knowledge, with provenance and an append-only verdict history.*
 
@@ -4370,6 +4391,26 @@
 - `def _fields(kind, row)` - *Primary and supporting text for one record, in match-priority order.*
 - `def _rows(conn, kind, research_id, include_superseded)` - *Program-scoped rows for one kind, in stable identifier order.*
 - `def search(conn, query, research_ref, kinds, limit, include_superseded, budget)` - *Rank one query across the graph and return matches with a matched-field snippet.*
+
+---
+
+### [`engine/series.py`](engine/series.py)
+> *Numeric input parsing, summary statistics and histogram binning for gauge.*
+
+**Size**: `266` lines (`9531` bytes)
+
+**Classes:**
+- `class Summary` - *A series' count, extrema, centre and spread, with a stable JSON shape.*
+  - Method `.as_dict()` - *The `stats --json` object: stable keys and raw floating-point values.*
+- `class Histogram` - *Equal-width bins: `edges` holds one more boundary than `counts` holds counts.*
+- `class BoxPlot` - *The 5-number summary: minimum, lower quartile, median, upper quartile, maximum.*
+
+**Functions:**
+- `def parse_numbers(chunks, field, delimiter)` - *Every finite number in text chunks, in order.*
+- `def percentile(values, fraction)` - *The nearest-rank percentile: the ceil(fraction * n)-th smallest value.*
+- `def summarize(values, percentiles)` - *The summary of a non-empty finite series.*
+- `def build_histogram(values, bins)` - *Equal-width bins over [min, max], right-open except the last, which is closed.*
+- `def build_boxplot(values)` - *Compute the 5-number summary for a box plot (ADR-007).*
 
 ---
 
@@ -6413,6 +6454,52 @@
 
 ---
 
+### [`tests/test_charts.py`](tests/test_charts.py)
+> *Unit tests for gauge's deterministic text renderers.*
+
+**Size**: `208` lines (`8151` bytes)
+
+**Classes:**
+- `class SparklineTests` - *Eight fixed levels, a flat middle and proportional resampling.*
+  - Method `.test_a_rising_series_uses_every_level()`
+  - Method `.test_a_flat_series_sits_in_the_middle_level()`
+  - Method `.test_the_ascii_twin_uses_its_own_middle_level()`
+  - Method `.test_a_short_series_is_not_padded_or_upsampled()`
+  - Method `.test_a_long_series_resamples_to_exactly_the_width()`
+  - Method `.test_extreme_opposite_signs_render_without_overflow()`
+  - Method `.test_an_empty_series_is_refused()`
+- `class ResampleTests` - *Proportional buckets keep the shape of the original series.*
+  - Method `.test_five_values_become_two_bucket_averages()`
+  - Method `.test_a_series_within_the_width_is_unchanged()`
+  - Method `.test_bucket_averages_of_extreme_values_do_not_overflow()`
+  - Method `.test_a_zero_width_is_refused()`
+- `class BarChartTests` - *Rows share a zero axis and keep a visible block for tiny values.*
+  - Method `.test_positive_bars_grow_from_the_left_axis()`
+  - Method `.test_signed_bars_grow_outward_from_the_center()`
+  - Method `.test_all_zero_values_show_a_centered_axis()`
+  - Method `.test_an_empty_series_or_narrow_width_is_refused()`
+- `class StatsTableTests` - *The five-line table is a stable, aligned surface.*
+  - Method `.test_the_table_matches_the_documented_example()`
+  - Method `.test_numbers_stay_compact_and_negative_zero_folds()`
+  - Method `.test_table_shows_custom_percentiles_aligned()`
+  - Method `.test_empty_percentiles_table_keeps_p90()`
+- `class HistogramRenderTests` - *Bars scale to the largest count and every bin keeps a row.*
+  - Method `.test_bars_scale_to_the_largest_count()`
+  - Method `.test_a_flat_series_uses_one_compact_label()`
+  - Method `.test_empty_bins_stay_visible()`
+  - Method `.test_the_unicode_block_is_the_default()`
+  - Method `.test_a_narrow_width_is_refused()`
+  - Method `.test_edges_that_share_six_digits_stay_distinguishable()`
+- `class BoxPlotRenderTests` - *The box plot renders whiskers, quartiles, median and extrema (ADR-007).*
+  - Method `.test_render_box_ascii()`
+  - Method `.test_render_box_unicode()`
+  - Method `.test_render_box_flat_series()`
+  - Method `.test_a_collapsed_box_still_shows_both_brackets()`
+  - Method `.test_a_box_whose_median_is_the_maximum_keeps_its_right_bracket()`
+  - Method `.test_narrow_width_refused()`
+
+---
+
 ### [`tests/test_claims.py`](tests/test_claims.py)
 > *Provenance requirements and the append-only verdict lifecycle.*
 
@@ -7378,6 +7465,61 @@
   - Method `.test_result_limit_is_per_kind()`
   - Method `.test_repeat_is_deterministic()`
   - Method `.test_invalid_inputs_are_refused()`
+
+---
+
+### [`tests/test_series.py`](tests/test_series.py)
+> *Unit tests for gauge's input parsing and summary statistics.*
+
+**Size**: `240` lines (`10224` bytes)
+
+**Classes:**
+- `class ParseNumbersTests` - *One strict reader for positional arguments, files and pipes.*
+  - Method `.test_whitespace_commas_and_lines_split_the_same_way()`
+  - Method `.test_decimal_exponent_and_signed_forms_are_accepted()`
+  - Method `.test_a_generator_is_consumed_once()`
+  - Method `.test_a_non_numeric_token_is_named()`
+  - Method `.test_non_finite_values_are_refused()`
+  - Method `.test_empty_input_is_refused()`
+- `class PercentileTests` - *The nearest-rank definition recorded in ADR-002.*
+  - Method `.test_p90_is_the_ninth_of_ten_values()`
+  - Method `.test_a_single_value_is_its_own_percentile()`
+  - Method `.test_an_out_of_range_fraction_is_refused()`
+  - Method `.test_an_empty_series_is_refused()`
+- `class SummaryTests` - *Central values, spread and the stable JSON object.*
+  - Method `.test_odd_series_has_its_middle_value_as_median()`
+  - Method `.test_even_series_averages_the_middle_pair()`
+  - Method `.test_stdev_is_the_population_form()`
+  - Method `.test_a_flat_series_has_zero_stdev()`
+  - Method `.test_extreme_opposite_signs_stay_finite()`
+  - Method `.test_even_median_of_extreme_values_does_not_overflow()`
+  - Method `.test_an_unrepresentable_sum_is_refused()`
+  - Method `.test_json_object_has_the_documented_keys()`
+  - Method `.test_custom_percentiles_computed_and_included_in_dict()`
+  - Method `.test_invalid_custom_percentiles_refused()`
+  - Method `.test_empty_percentiles_list_behaves_like_none()`
+  - Method `.test_an_empty_or_non_finite_series_is_refused()`
+- `class HistogramTests` - *The equal-width bin contract recorded in ADR-004.*
+  - Method `.test_ten_values_split_evenly_across_five_bins()`
+  - Method `.test_the_maximum_belongs_to_the_closed_last_bin()`
+  - Method `.test_an_inner_edge_belongs_to_the_upper_bin()`
+  - Method `.test_a_flat_series_is_one_bin()`
+  - Method `.test_negative_ranges_bin_without_special_cases()`
+  - Method `.test_extreme_opposite_signs_do_not_overflow()`
+  - Method `.test_bin_counts_outside_the_bounds_are_refused()`
+  - Method `.test_an_empty_or_non_finite_series_is_refused()`
+- `class FieldAndDelimiterTests` - *Field and delimiter extraction rules (ADR-005).*
+  - Method `.test_field_extracts_column_from_lines()`
+  - Method `.test_delimiter_splits_custom_separator()`
+  - Method `.test_field_with_custom_delimiter_csv()`
+  - Method `.test_field_out_of_bounds_raises()`
+  - Method `.test_invalid_field_raises()`
+  - Method `.test_empty_delimiter_raises()`
+  - Method `.test_field_with_empty_delimiter_is_refused()`
+- `class BoxPlotTests` - *The 5-number summary computation (ADR-007).*
+  - Method `.test_boxplot_computes_five_number_summary()`
+  - Method `.test_boxplot_flat_series()`
+  - Method `.test_boxplot_empty_or_non_finite_raises()`
 
 ---
 
