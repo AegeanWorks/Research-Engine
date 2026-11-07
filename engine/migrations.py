@@ -130,6 +130,7 @@ def _inspect(path: Path | str, source: str, tables: tuple) -> MigrationReport:
         source_digest=_file_digest(source_path),
         target_research="",
         tables=counts,
+        dry_run=True,
     )
 
 
@@ -145,7 +146,25 @@ def inspect_n1(path: Path | str) -> MigrationReport:
 
 def inspect_research(path: Path | str) -> MigrationReport:
     """Describe a host research database without writing to it."""
-    return _inspect(path, "research", _RESEARCH_TABLES)
+    report = _inspect(path, "research", _RESEARCH_TABLES)
+    conn = _read_only(path)
+    try:
+        row = conn.execute("SELECT version FROM schema_meta").fetchone()
+        version = int(row["version"]) if row is not None else None
+    except sqlite3.Error:
+        version = None
+    finally:
+        conn.close()
+    tables = dict(report.tables)
+    if version is not None:
+        tables["schema_version"] = version
+    return MigrationReport(
+        source=report.source,
+        source_digest=report.source_digest,
+        target_research="",
+        tables=tables,
+        dry_run=True,
+    )
 
 
 def inspect_tree(
@@ -191,6 +210,7 @@ def inspect_tree(
         source_digest=digest.hexdigest(),
         target_research="",
         tables={"files": total, **{key: value for key, value in counts.items() if value}},
+        dry_run=True,
     )
 
 
@@ -228,6 +248,7 @@ def inspect_obezite(path: Path | str) -> MigrationReport:
         source_digest=_file_digest(ledger),
         target_research="",
         tables={"claim": claims, "verified": verified, "backfill": backfill},
+        dry_run=True,
     )
 
 

@@ -216,7 +216,7 @@ class MigrationHarnessTests(DatabaseCase):
         self.assertEqual(report.tables, {"claim": 2, "verified": 1, "backfill": 1})
 
     def test_inspect_research_reads_a_host_database(self) -> None:
-        from engine.database import connect, initialize
+        from engine.database import SCHEMA_VERSION, connect, initialize
 
         path = self._lattice().parent / "research.db"
         conn = connect(path)
@@ -225,4 +225,5 @@ class MigrationHarnessTests(DatabaseCase):
         report = inspect_research(path)
         self.assertEqual(report.tables["research"], 0)
         self.assertEqual(report.tables["source"], 0)
+        self.assertEqual(report.tables["schema_version"], SCHEMA_VERSION)
         self.assertEqual(len(report.source_digest), 64)

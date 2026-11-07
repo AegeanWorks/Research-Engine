@@ -83,7 +83,7 @@ Status on 2026-11-07: all rows below are `ported` unless the status column says 
 | O-01 | Canonical claim-ledger parsing | `domains/obezite/sentez.py` | copy with injected root | ported | `tests/test_obezite_ledger.py` |
 | O-02 | Lossless chunking and claim index | `domains/obezite/uret.py` | copy with host-generated output | ported | `tests/test_obezite_ledger.py` |
 | O-03 | Citation extraction | `domains/obezite/atif.py` | copy | ported | imported by `uret.py`; `tests/test_obezite_ledger.py` |
-| O-04 | Dedupe, claim-index and split tools | `domains/obezite/dedup.py`, `claim_index.py`, `split*.py`, `cokus.py`, `backfill.py` | copy | ported (CLI paths still cwd-relative) | import check in `tests/test_obezite_ledger.py` |
+| O-04 | Dedupe, claim-index and split tools | `domains/obezite/dedup.py`, `claim_index.py`, `split*.py`, `cokus.py`, `backfill.py` | copy + explicit root/output | ported | `tests/test_obezite_ledger.py` (all write only caller paths) |
 | O-05 | Register, evidence summary, inventory | `domains/obezite/sentez.py` | copy | ported | `tests/test_obezite_ledger.py` |
 | O-06 | Hypothesis/observation/synthesis vocabulary | host `engine/hypotheses.py`, `engine/observations.py` | wrap host lifecycle | ported at lifecycle level | `tests/test_hypotheses.py`, `tests/test_observations.py` |
 | O-07 | 6.1 GB corpus and generated tables | external `02_LITERATUR/`, `09_SENTEZ/` | reference + SHA-256 | external | `docs/merge/MIGRATION-DRYRUN.md` |
@@ -110,7 +110,7 @@ Status on 2026-11-07: all rows below are `ported` unless the status column says 
 | X-01 | Pack registry: name, version, API version, data root, digest | `engine/packs.py`, `domain_pack` table | `tests/test_packs.py` |
 | X-02 | Additive schema migration and dry-run harness | `engine/migrations.py` | `tests/test_migration_harness.py` |
 | X-03 | External data referenced by path plus digest | `inspect_tree`, migration reports | `tests/test_migration_harness.py`, `docs/merge/MIGRATION-DRYRUN.md` |
-| X-04 | NeuroCore consumes the host through API/MCP only | `studio/api.py`, `studio/mcp.py` | `tests/lattice/test_api.py`, `test_mcp.py` |
+| X-04 | NeuroCore consumes the host through API/MCP only | `studio/api.py`, `studio/mcp.py` | `tests/test_neurocore_contract.py` |
 | X-05 | No cross-domain imports | repository-wide | `tests/test_domain_isolation.py` |
 | X-06 | Source notices preserved | `adapters/lattice/NOTICE.md`, `studio/NOTICE.md`, `domains/*/NOTICE.md` | `docs/merge/PROVENANCE.md` |
 | X-07 | Every source remains runnable and untouched | external repos | post-merge re-run in `docs/merge/READINESS.md` |

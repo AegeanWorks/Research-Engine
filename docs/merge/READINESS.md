@@ -42,7 +42,7 @@ Post-merge host gate:
 
 ```text
 python -m unittest discover -s tests -t .
-Ran 1076 tests in 104.871s
+Ran 1086 tests in 162.360s
 OK
 ```
 
@@ -84,11 +84,16 @@ evidence is in `MIGRATION-DRYRUN.md`:
 |---|---|---|
 | lattice.db | 3 papers, 5 claims, 2 questions, 11 edges | 0 |
 | N1 main.db | 1 intervention | 0 |
-| host schema | 17 tables | 0 |
+| existing `research.db` | schema v11: 5 programs, 5 sources, 5 questions, 25 claims, 5 hypotheses, 5 kill tests, 18 runs, 15 verdicts, 2 events | 0 (read-only inspection) |
 | obezite ledger | 1,908 claims (1,794 verified, 114 backfill) | 0 (manifest only) |
-| PNN data | 200 CSV files | 0 (manifest only) |
+| PNN output | 236 files: 114 CSV, 105 JSON, 14 MD, 1 HTML, 2 SVG | 0 (manifest only) |
 | Atlas demo corpus | 50 files | 0 (manifest only) |
 | fluid results | 171 files | 0 (manifest only) |
+
+All six obezite operator tools were also run against the pinned archive into a temporary output
+root: dedup found 0 duplicates, the claim index covered 995 claims, backfill wrote 116 skeleton
+rows, the collapse audit reported `TEMIZ`, the range split produced 500/97 claim chunks, and the
+quarantine split produced 2,396 active / 584 quarantined lines. No source file was written.
 
 ## 4. Exact host verification
 
@@ -110,6 +115,12 @@ python aikit.py check research-engine
 An import sweep over all 228 copied modules under `adapters/`, `studio/`, `experiments/` and
 `domains/` reports **0 failures**. The obezite split tool is import-safe and writes only to paths
 passed by the caller.
+
+`tests/test_neurocore_contract.py` exercises the documented NeuroCore consumption surface:
+the `studio.api` facade (`synthesize_question`, `extract_claims_for_paper`, context pack,
+evidence matrix), MCP `initialize`, `tools/list`, `resources/list`, `prompts/list`,
+`resources/read`, graph writes/reads and synthesis calls. It is a contract test, not a claim
+that the NeuroCore application itself was run.
 
 ## 5. Source integrity
 

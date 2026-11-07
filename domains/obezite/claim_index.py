@@ -1,192 +1,148 @@
-#!/usr/bin/env python3
-"""
-Create claim cross-reference index mapping claim → VA report, hipotez kartı, tur.
-Reads from chunk files and CURUTULMUS, extracts the "Bağlı" column.
-"""
-
-import re
-from pathlib import Path
-from collections import defaultdict
-
-CHUNK_FILES = [
-    Path("02_LITERATUR/iddia-defteri-0001-0500.md"),
-    Path("02_LITERATUR/iddia-defteri-0501-1000.md"),
-]
-CURUTULMUS_FILE = Path("02_LITERATUR/iddia-defteri-CURUTULMUS.md")
-OUTPUT_FILE = Path("02_LITERATUR/claim-index.md")
-
-def parse_claims_from_file(filepath):
-    """Parse claims from a file, returning list of (claim_id, bağlı_col)."""
-    if not filepath.exists():
-        return []
-    lines = filepath.read_text(encoding='utf-8').splitlines()
-    claims = []
-    for line in lines:
-        # Match claim table rows: | **123** | ... | ... | ... | ... | ... | ... | S00.1 |
-        match = re.match(r'^\|\s*\*\*(\d+)\*\*\s*\|(.+)\|$', line)
-        if match:
-            claim_id = int(match.group(1))
-            # Split by | to get columns
-            cols = match.group(2).split('|')
-            if len(cols) >= 7:
-                # Columns: İddia, Katman, Kanıt, Nedensellik, Aleyhte, Durum, Bağlı
-                bagli = cols[6].strip()
-                claims.append((claim_id, bagli))
-    return claims
-
-def categorize_reference(ref):
-    """Categorize a reference string into type."""
-    ref = ref.strip()
-    if not ref or ref == '—':
-        return []
-    refs = []
-    # Split by common separators
-    parts = re.split(r'[,\s]+', ref)
-    for p in parts:
-        p = p.strip()
-        if not p:
-            continue
-        if p.startswith('VA-') or p.startswith('va-'):
-            refs.append(('VA', p.upper()))
-        elif p.startswith('S') and p[1:].replace('.', '').isdigit():
-            refs.append(('SORU', p))
-        elif p.startswith('Ç-') or p.startswith('C-'):
-            refs.append(('ÇELİŞKİ', p))
-        elif p.startswith('H') and p[1:].isdigit():
-            refs.append(('HIPOTEZ', p))
-        elif p.startswith('T') and p[1:].isdigit():
-            refs.append(('TUR', p))
-        elif p.startswith('G') and p[1:].isdigit():
-            refs.append(('GÖZLEM', p))
-        elif p.startswith('K') and p[1:].isdigit():
-            refs.append(('KURAL', p))
-        elif p.startswith('R') and p[1:].isdigit():
-            refs.append(('KURAL', p))
-        elif p.startswith('Z') and p[1:].isdigit():
-            refs.append(('Z-SKOR', p))
-        elif p.startswith('M-') or (p.startswith('M') and len(p) > 1 and p[1:].isdigit()):
-            refs.append(('MODEL', p))
-        elif p.startswith('D') and p[1:].isdigit():
-            refs.append(('DERECE', p))
-        elif p.startswith('E') and p[1:].isdigit():
-            refs.append(('DERECE', p))
-    return refs
-
-def main():
-    all_claims = {}
-    
-    # Parse all files
-    for cf in CHUNK_FILES:
-        for claim_id, bagli in parse_claims_from_file(cf):
-            all_claims[claim_id] = bagli
-    
-    if CURUTULMUS_FILE.exists():
-        for claim_id, bagli in parse_claims_from_file(CURUTULMUS_FILE):
-            if claim_id not in all_claims:
-                all_claims[claim_id] = bagli
-    
-    print(f"Total unique claims: {len(all_claims)}")
-    
-    # Build cross-reference index
-    va_refs = defaultdict(list)
-    hipotez_refs = defaultdict(list)
-    tur_refs = defaultdict(list)
-    soru_refs = defaultdict(list)
-    celiski_refs = defaultdict(list)
-    gozlem_refs = defaultdict(list)
-    kural_refs = defaultdict(list)
-    model_refs = defaultdict(list)
-    derece_refs = defaultdict(list)
-    zskor_refs = defaultdict(list)
-    
-    for claim_id, bagli in sorted(all_claims.items()):
-        refs = categorize_reference(bagli)
-        for ref_type, ref_val in refs:
-            if ref_type == 'VA':
-                va_refs[ref_val].append(claim_id)
-            elif ref_type == 'HIPOTEZ':
-                hipotez_refs[ref_val].append(claim_id)
-            elif ref_type == 'TUR':
-                tur_refs[ref_val].append(claim_id)
-            elif ref_type == 'SORU':
-                soru_refs[ref_val].append(claim_id)
-            elif ref_type == 'ÇELİŞKİ':
-                celiski_refs[ref_val].append(claim_id)
-            elif ref_type == 'GÖZLEM':
-                gozlem_refs[ref_val].append(claim_id)
-            elif ref_type == 'KURAL':
-                kural_refs[ref_val].append(claim_id)
-            elif ref_type == 'MODEL':
-                model_refs[ref_val].append(claim_id)
-            elif ref_type == 'DERECE':
-                derece_refs[ref_val].append(claim_id)
-            elif ref_type == 'Z-SKOR':
-                zskor_refs[ref_val].append(claim_id)
-    
-    # Write index file
-    lines = [
-        '# İDDİA ÇAPRAZ-ATIF İNDEKSİ\n\n',
-        f'> Otomatik oluşturuldu: {len(all_claims)} benzersiz iddia\n',
-        '> Kaynak: chunk dosyaları + CURUTULMUS\n\n',
-        '## İstatistikler\n\n',
-        f'- Toplam iddia: {len(all_claims)}\n',
-        f'- VA raporu atıflı: {len(va_refs)}\n',
-        f'- Hipotez kartı atıflı: {len(hipotez_refs)}\n',
-        f'- Tur atıflı: {len(tur_refs)}\n',
-        f'- Soru haritası atıflı: {len(soru_refs)}\n',
-        f'- Çelişki atıflı: {len(celiski_refs)}\n',
-        f'- Gözlem atıflı: {len(gozlem_refs)}\n',
-        f'- Kural atıflı: {len(kural_refs)}\n',
-        f'- Model atıflı: {len(model_refs)}\n',
-        f'- Derece (D/E) atıflı: {len(derece_refs)}\n',
-        f'- Z-skor atıflı: {len(zskor_refs)}\n\n',
-    ]
-    
-    # VA Reports
-    lines.append('## VA Raporlarına Göre İddialar\n\n')
-    for va in sorted(va_refs.keys()):
-        claims = sorted(va_refs[va])
-        lines.append(f'### {va}\n\n')
-        lines.append(f'İddialar: {", ".join(f"[{c}](#iddia-{c})" for c in claims)}\n\n')
-    
-    # Hipotez Kartları
-    lines.append('## Hipotez Kartlarına Göre İddialar\n\n')
-    for h in sorted(hipotez_refs.keys()):
-        claims = sorted(hipotez_refs[h])
-        lines.append(f'### {h}\n\n')
-        lines.append(f'İddialar: {", ".join(f"[{c}](#iddia-{c})" for c in claims)}\n\n')
-    
-    # Turlar
-    lines.append('## Turlara Göre İddialar\n\n')
-    for t in sorted(tur_refs.keys(), key=lambda x: int(x[1:])):
-        claims = sorted(tur_refs[t])
-        lines.append(f'### {t}\n\n')
-        lines.append(f'İddialar: {", ".join(f"[{c}](#iddia-{c})" for c in claims)}\n\n')
-    
-    # Soru Haritası
-    lines.append('## Soru Haritasına Göre İddialar\n\n')
-    for s in sorted(soru_refs.keys()):
-        claims = sorted(soru_refs[s])
-        lines.append(f'### {s}\n\n')
-        lines.append(f'İddialar: {", ".join(f"[{c}](#iddia-{c})" for c in claims)}\n\n')
-    
-    # Çelişkiler
-    lines.append('## Çelişkilerle Göre İddialar\n\n')
-    for c in sorted(celiski_refs.keys()):
-        claims = sorted(celiski_refs[c])
-        lines.append(f'### {c}\n\n')
-        lines.append(f'İddialar: {", ".join(f"[{c}](#iddia-{c})" for c in claims)}\n\n')
-    
-    # Full claim table
-    lines.append('## Tam İddia Listesi (Bağlı Sütunu)\n\n')
-    lines.append('| İddia | Bağlı |\n')
-    lines.append('|-------|-------|\n')
-    for claim_id in sorted(all_claims.keys()):
-        bagli = all_claims[claim_id]
-        lines.append(f'| {claim_id} | {bagli} |\n')
-    
-    OUTPUT_FILE.write_text(''.join(lines), encoding='utf-8')
-    print(f"Created {OUTPUT_FILE} ({OUTPUT_FILE.stat().st_size/1024:.1f} KB)")
-
-if __name__ == '__main__':
-    main()
+#!/usr/bin/env python3
+"""Create the claim cross-reference index from the obezite chunk files.
+
+The source script wrote into a fixed ``02_LITERATUR`` path. This port returns the Markdown and
+writes only to a caller-provided output file.
+"""
+
+from __future__ import annotations
+
+import argparse
+import re
+from collections import defaultdict
+from pathlib import Path
+from typing import Iterable
+
+CLAIM = re.compile(r"^\|\s*\*\*(\d+)\*\*\s*\|(.+)\|$")
+
+
+def parse_claims_from_file(filepath: Path) -> list[tuple[int, str]]:
+    """Return ``(claim_id, linked_column)`` for each claim row."""
+    if not filepath.is_file():
+        return []
+    claims: list[tuple[int, str]] = []
+    for line in filepath.read_text(encoding="utf-8").splitlines():
+        match = CLAIM.match(line)
+        if not match:
+            continue
+        columns = match.group(2).split("|")
+        if len(columns) >= 7:
+            claims.append((int(match.group(1)), columns[6].strip()))
+    return claims
+
+
+def categorize_reference(ref: str) -> list[tuple[str, str]]:
+    """Categorize the free-text linked column into stable reference kinds."""
+    text = ref.strip()
+    if not text or text == "—":
+        return []
+    refs: list[tuple[str, str]] = []
+    for part in re.split(r"[,\s]+", text):
+        token = part.strip()
+        if not token:
+            continue
+        if token.startswith(("VA-", "va-")):
+            refs.append(("VA", token.upper()))
+        elif token.startswith("S") and token[1:].replace(".", "").isdigit():
+            refs.append(("SORU", token))
+        elif token.startswith(("Ç-", "C-")):
+            refs.append(("ÇELİŞKİ", token))
+        elif token.startswith("H") and token[1:].isdigit():
+            refs.append(("HIPOTEZ", token))
+        elif token.startswith("T") and token[1:].isdigit():
+            refs.append(("TUR", token))
+        elif token.startswith("G") and token[1:].isdigit():
+            refs.append(("GÖZLEM", token))
+        elif token.startswith(("K", "R")) and token[1:].isdigit():
+            refs.append(("KURAL", token))
+        elif token.startswith("Z") and token[1:].isdigit():
+            refs.append(("Z-SKOR", token))
+        elif token.startswith("M-") or (token.startswith("M") and token[1:].isdigit()):
+            refs.append(("MODEL", token))
+        elif token.startswith(("D", "E")) and token[1:].isdigit():
+            refs.append(("DERECE", token))
+    return refs
+
+
+def build_index(
+    chunk_files: Iterable[Path],
+    retracted_file: Path,
+    output_file: Path,
+) -> dict:
+    """Build and write the cross-reference index; return the counts."""
+    all_claims: dict[int, str] = {}
+    for chunk in chunk_files:
+        for claim_id, linked in parse_claims_from_file(chunk):
+            all_claims[claim_id] = linked
+    if retracted_file.is_file():
+        for claim_id, linked in parse_claims_from_file(retracted_file):
+            all_claims.setdefault(claim_id, linked)
+
+    buckets: dict[str, dict[str, list[int]]] = {
+        key: defaultdict(list)
+        for key in (
+            "VA", "HIPOTEZ", "TUR", "SORU", "ÇELİŞKİ", "GÖZLEM", "KURAL", "MODEL",
+            "DERECE", "Z-SKOR",
+        )
+    }
+    for claim_id, linked in sorted(all_claims.items()):
+        for kind, value in categorize_reference(linked):
+            buckets[kind][value].append(claim_id)
+
+    lines = [
+        "# İDDİA ÇAPRAZ-ATIF İNDEKSİ\n\n",
+        f"> Otomatik oluşturuldu: {len(all_claims)} benzersiz iddia\n",
+        "> Kaynak: chunk dosyaları + CURUTULMUS\n\n",
+        "## İstatistikler\n\n",
+        f"- Toplam iddia: {len(all_claims)}\n",
+        f"- VA raporu atıflı: {len(buckets['VA'])}\n",
+        f"- Hipotez kartı atıflı: {len(buckets['HIPOTEZ'])}\n",
+        f"- Tur atıflı: {len(buckets['TUR'])}\n",
+        f"- Soru haritası atıflı: {len(buckets['SORU'])}\n",
+        f"- Çelişki atıflı: {len(buckets['ÇELİŞKİ'])}\n",
+        f"- Gözlem atıflı: {len(buckets['GÖZLEM'])}\n",
+        f"- Kural atıflı: {len(buckets['KURAL'])}\n",
+        f"- Model atıflı: {len(buckets['MODEL'])}\n",
+        f"- Derece (D/E) atıflı: {len(buckets['DERECE'])}\n",
+        f"- Z-skor atıflı: {len(buckets['Z-SKOR'])}\n\n",
+    ]
+    sections = (
+        ("VA", "VA Raporlarına Göre İddialar"),
+        ("HIPOTEZ", "Hipotez Kartlarına Göre İddialar"),
+        ("TUR", "Turlara Göre İddialar"),
+        ("SORU", "Soru Haritasına Göre İddialar"),
+        ("ÇELİŞKİ", "Çelişkilerle Göre İddialar"),
+    )
+    for kind, heading in sections:
+        lines.append(f"## {heading}\n\n")
+        for value in sorted(buckets[kind], key=lambda item: (len(item), item)):
+            claims = sorted(buckets[kind][value])
+            links = ", ".join(f"[{claim}](#iddia-{claim})" for claim in claims)
+            lines.append(f"### {value}\n\nİddialar: {links}\n\n")
+    lines.append("## Tam İddia Listesi (Bağlı Sütunu)\n\n")
+    lines.append("| İddia | Bağlı |\n|-------|-------|\n")
+    for claim_id in sorted(all_claims):
+        lines.append(f"| {claim_id} | {all_claims[claim_id]} |\n")
+    output_file.parent.mkdir(parents=True, exist_ok=True)
+    output_file.write_text("".join(lines), encoding="utf-8")
+    return {"claims": len(all_claims), "output": str(output_file)}
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--root", required=True, help="external obezite checkout")
+    parser.add_argument("--output", required=True, help="host output file")
+    args = parser.parse_args(argv)
+    literature = Path(args.root) / "02_LITERATUR"
+    chunks = [
+        literature / "iddia-defteri-0001-0500.md",
+        literature / "iddia-defteri-0501-1000.md",
+    ]
+    result = build_index(chunks, literature / "iddia-defteri-CURUTULMUS.md", Path(args.output))
+    print(f"Total unique claims: {result['claims']}")
+    print(f"Created {result['output']}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

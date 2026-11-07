@@ -6,11 +6,11 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `399`
-- **Total Classes**: `290`
-- **Total Top-Level Functions**: `1890`
-- **Total Class Methods**: `1423`
-- **Total Source Lines**: `87003`
+- **Total Python Modules**: `400`
+- **Total Classes**: `293`
+- **Total Top-Level Functions**: `1900`
+- **Total Class Methods**: `1438`
+- **Total Source Lines**: `86615`
 
 ---
 
@@ -3000,52 +3000,61 @@
 ---
 
 ### [`domains/obezite/backfill.py`](domains/obezite/backfill.py)
-> *Backfill script for claims 482-597.*
+> *Build skeleton backfill rows for missing obezite claims.*
 
-**Size**: `291` lines (`5469` bytes)
+**Size**: `136` lines (`4804` bytes)
 
 **Functions:**
-- `def mevcut_iddialar()`
-- `def turdan_iddialar(tur_no)`
-- `def main()`
+- `def existing_ids(ledger_file)`
+- `def _tour_file(questions_dir, tour_no)`
+- `def claims_from_tour(questions_dir, tour_no)`
+- `def collect_references(questions_dir, tours)`
+- `def skeleton_row(claim_id, tour_no)`
+- `def insert_rows(ledger_text, rows)` - *Insert rows at the end of the active table, before any retracted section.*
+- `def backfill(ledger_file, questions_dir, output_file, start, end, tours, stamp)` - *Write a backfilled ledger copy and return the missing/reference counts.*
+- `def main(argv)`
 
 ---
 
 ### [`domains/obezite/claim_index.py`](domains/obezite/claim_index.py)
-> *Create claim cross-reference index mapping claim → VA report, hipotez kartı, tur.*
+> *Create the claim cross-reference index from the obezite chunk files.*
 
-**Size**: `383` lines (`7669` bytes)
+**Size**: `148` lines (`6022` bytes)
 
 **Functions:**
-- `def parse_claims_from_file(filepath)` - *Parse claims from a file, returning list of (claim_id, bağlı_col).*
-- `def categorize_reference(ref)` - *Categorize a reference string into type.*
-- `def main()`
+- `def parse_claims_from_file(filepath)` - *Return ``(claim_id, linked_column)`` for each claim row.*
+- `def categorize_reference(ref)` - *Categorize the free-text linked column into stable reference kinds.*
+- `def build_index(chunk_files, retracted_file, output_file)` - *Build and write the cross-reference index; return the counts.*
+- `def main(argv)`
 
 ---
 
 ### [`domains/obezite/cokus.py`](domains/obezite/cokus.py)
-> *cokus.py — ÇÖKÜŞ ÇAĞLAYANI DENETİMİ (T209, iddia 806) · kontrol.ps1 §13*
+> *Audit collapse annotations: every row citing an invalidated claim needs a marker.*
 
-**Size**: `129` lines (`5207` bytes)
+**Size**: `108` lines (`3698` bytes)
 
 **Functions:**
-- `def satirlar()`
-- `def serh_var(satir)` - *Şerh YALNIZ Durum veya Aleyhte veri sütununda sayılır (bkz. başlık: daraltma).*
-- `def analiz()`
-- `def main()`
+- `def ledger_lines(ledger_file)`
+- `def marker_present(line)` - *A marker counts only in the status or opposing-data column.*
+- `def analyze(ledger_file)`
+- `def main(argv)`
 
 ---
 
 ### [`domains/obezite/dedup.py`](domains/obezite/dedup.py)
-> *Deduplicate defter claims across chunk files and CURUTULMUS.*
+> *Deduplicate obezite ledger claims across chunk files and the retracted ledger.*
 
-**Size**: `247` lines (`5255` bytes)
+**Size**: `133` lines (`5271` bytes)
 
 **Functions:**
-- `def parse_claims_from_file(filepath)` - *Parse all claim lines from a file, returning list of (claim_id, line, line_num).*
-- `def get_all_lines(filepath)` - *Get all lines from a file.*
-- `def write_lines(filepath, lines)` - *Write lines to a file.*
-- `def main()`
+- `def parse_claims_from_file(filepath)` - *Return ``(claim_id, line, line_index)`` for every claim row in one file.*
+- `def get_all_lines(filepath)`
+- `def write_lines(filepath, lines)`
+- `def find_duplicates(chunk_files, retracted_file)` - *Return duplicate claims as ``(id, chunk_row, retracted_row)``.*
+- `def deduplicate(chunk_files, retracted_file, archive_file, updated_retracted_file, stamp)` - *Write the duplicate archive and a retracted-ledger copy; return counts.*
+- `def _paths(root, output_dir)`
+- `def main(argv)`
 
 ---
 
@@ -3086,13 +3095,14 @@
 ---
 
 ### [`domains/obezite/split_range.py`](domains/obezite/split_range.py)
-> *Split iddia-defteri.md by claim range (500 claims per file).*
+> *Split the obezite ledger into two range chunks plus a master index.*
 
-**Size**: `255` lines (`5910` bytes)
+**Size**: `117` lines (`4700` bytes)
 
 **Functions:**
-- `def parse_claims(lines)` - *Parse claims from the markdown table lines.*
-- `def main()`
+- `def parse_claims(lines)`
+- `def split_ledger(source_file, output_dir)`
+- `def main(argv)`
 
 ---
 
@@ -4131,7 +4141,7 @@
 ### [`engine/migrations.py`](engine/migrations.py)
 > *Migration harness for lattice and N1 source databases.*
 
-**Size**: `604` lines (`20896` bytes)
+**Size**: `625` lines (`21509` bytes)
 
 **Classes:**
 - `class MigrationReport` - *What one inspection or application observed and inserted.*
@@ -6878,7 +6888,7 @@
 ### [`tests/test_migration_harness.py`](tests/test_migration_harness.py)
 > *Migration harness: inspect first, then apply a source fixture without losing provenance.*
 
-**Size**: `228` lines (`10199` bytes)
+**Size**: `229` lines (`10289` bytes)
 
 **Classes:**
 - `class MigrationHarnessTests`
@@ -6955,10 +6965,30 @@
 
 ---
 
+### [`tests/test_neurocore_contract.py`](tests/test_neurocore_contract.py)
+> *NeuroCore consumption contract: the documented Python API and MCP surface stay callable.*
+
+**Size**: `164` lines (`6627` bytes)
+
+**Classes:**
+- `class NeuroCoreApiTests`
+  - Method `.setUp()`
+  - Method `.test_documented_facade_symbols_exist_and_are_originals()`
+  - Method `.test_evidence_bundle_and_matrix_are_json_ready()`
+  - Method `.test_context_pack_and_synthesis_are_callable()`
+- `class NeuroCoreMcpTests`
+  - Method `.setUp()`
+  - Method `.call(method, params, request_id)`
+  - Method `.tool(name, arguments)`
+  - Method `.test_initialize_tools_resources_and_prompts()`
+  - Method `.test_graph_write_read_and_synthesis_tools()`
+
+---
+
 ### [`tests/test_obezite_ledger.py`](tests/test_obezite_ledger.py)
 > *Obezite claim-ledger tooling: parsing, buckets and projections on a fixture.*
 
-**Size**: `91` lines (`4099` bytes)
+**Size**: `180` lines (`8262` bytes)
 
 **Classes:**
 - `class LedgerParsingTests`
@@ -6971,6 +7001,13 @@
   - Method `.test_split_is_lossless_and_routes_by_claim_number()`
   - Method `.test_generated_chunks_keep_every_line()`
   - Method `.test_quarantine_split_is_import_safe_and_keeps_headers()`
+- `class LedgerOperatorTests`
+  - Method `.setUp()`
+  - Method `.test_dedup_writes_only_a_copy_and_archives_duplicates()`
+  - Method `.test_claim_index_classifies_references()`
+  - Method `.test_backfill_builds_missing_rows_without_touching_the_source()`
+  - Method `.test_collapse_audit_flags_unmarked_dependents()`
+  - Method `.test_range_split_writes_chunks_and_index()`
 
 ---
 
