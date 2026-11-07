@@ -348,7 +348,7 @@ research-engine/
 │   ├── migrations.py         <- source snapshot inspection and dry-run
 │   ├── packs.py              <- domain-pack registry
 │   └── synthesis.py
-├── adapters/lattice/         <- lattice discovery, ingest, extraction, snapshots
+├── adapters/                 <- lattice discovery, ingest, extraction, snapshots
 ├── studio/                   <- lattice web studio, MCP and API
 ├── experiments/              <- N1 models, metrics, events and analysis
 ├── domains/                  <- pnn, fluid_universe, obezite and atlas packs
