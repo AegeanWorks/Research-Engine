@@ -38,6 +38,14 @@ class BundleTests(DatabaseCase):
         self.assertIn("claim", types)
         self.assertEqual(counts["claim"], 1)
 
+    def test_export_declares_the_supported_bridge(self) -> None:
+        # The writer refuses an export whose meta line lacks this declaration;
+        # without it the two projects cannot talk without a hand-edited file.
+        self.add_research()
+        export_jsonl(self.conn, self.path)
+        meta = json.loads(self.path.read_text(encoding="utf-8").splitlines()[0])
+        self.assertEqual(meta["bridge"], "articles/1")
+
     def test_scoped_export_excludes_other_programs(self) -> None:
         first = create_research(self.conn, "First")
         second = create_research(self.conn, "Second")

@@ -14,6 +14,11 @@ from engine.database import SCHEMA_VERSION
 from engine.errors import EngineError
 from engine.researches import get_research
 
+# The writer's `research_export.BRIDGE` must match this. Declaring it on the meta
+# line lets a genuine export sync without hand-editing the snapshot. It is not
+# part of `export_digest`, which covers records only.
+BRIDGE = "articles/1"
+
 _ORDER = (
     "research",
     "protocol",
@@ -204,6 +209,7 @@ def export_jsonl(
         json.dumps(
             {
                 "type": "meta",
+                "bridge": BRIDGE,
                 "schema": SCHEMA_VERSION,
                 "engine": "research-engine",
                 "exported_at": utc_now(),
