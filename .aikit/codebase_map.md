@@ -6,15 +6,15 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `418`
+- **Total Python Modules**: `419`
 - **Total Classes**: `317`
-- **Total Top-Level Functions**: `1963`
+- **Total Top-Level Functions**: `1965`
 - **Total Class Methods**: `1545`
-- **Total Source Lines**: `89438`
+- **Total Source Lines**: `89474`
 
 ## 🧭 Map Coverage
-- **Indexed**: python (`418` module(s))
-- **Not indexed by this map**: javascript (`1` file(s)), rust (`24` file(s))
+- **Indexed**: python (`419` module(s))
+- **Not indexed by this map**: javascript (`1` file(s)), rust (`25` file(s))
 
 > Only Python symbols are catalogued. A language above is reported as not indexed, never as verified by this map.
 
@@ -4619,6 +4619,15 @@
 - `def _date(value, field)`
 - `def summarize_period(conn, research_ref, start_date, end_date, intervention_ref)` - *Collect interventions, metrics and events for a date range or one intervention.*
 - `def render_summary_html(summary)` - *Format a summary the way the source widget displayed it, with escaping.*
+
+---
+
+### [`rust/analysis_extra_parity.py`](rust/analysis_extra_parity.py)
+**Size**: `36` lines
+
+**Functions:**
+- `def run(cmd, cwd)`
+- `def compare(label, args)`
 
 ---
 

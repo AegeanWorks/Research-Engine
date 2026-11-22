@@ -232,6 +232,23 @@ pub enum AnalysisAction {
         #[arg(long, default_value = "")] until: String,
         #[arg(long, default_value = "agent")] actor: String,
     },
+    Calibration { reference: String, #[arg(long, default_value_t = 10)] min_n: i64 },
+    Contradictions {
+        reference: String,
+        #[arg(long, default_value_t = 0.0)] min_score: f64,
+        #[arg(long)] unlinked: bool,
+    },
+    Matrix { reference: String },
+    Keystone { reference: String, #[arg(long, default_value_t = 10)] limit: i64 },
+    Expose { reference: String },
+    Correlation {
+        claim: String,
+        #[arg(long, default_value = "")] groups: String,
+        #[arg(long)] allow_incomparable: bool,
+        #[arg(long)] allow_self_reported: bool,
+        #[arg(long, default_value = "")] since: String,
+        #[arg(long, default_value = "")] until: String,
+    },
 }
 
 #[derive(Debug, Subcommand)]
@@ -376,6 +393,37 @@ pub fn run(cli: &Cli) -> Result<Output> {
             AnalysisAction::Trend { claim, group, since, until, actor } => {
                 let result = crate::analysis::claim_trend(&conn, claim, group, actor, since, until)?;
                 emit(result.clone(), to_stable_json(&result))
+            }
+            AnalysisAction::Calibration { reference, min_n } => {
+                let result = crate::calibration::score(&conn, reference, *min_n, "agent")?;
+                emit(result.clone(), to_stable_json(&result))
+            }
+            AnalysisAction::Contradictions { reference, min_score, unlinked } => {
+                let result = if *unlinked {
+                    crate::discovery::unlinked_contradictions(&conn, reference, 0.35)?
+                } else {
+                    crate::discovery::contradictions(&conn, reference, *min_score)?
+                };
+                emit(Value::Array(result.clone()), list_text(&result))
+            }
+            AnalysisAction::Matrix { reference } => {
+                let result = crate::discovery::evidence_matrix(&conn, reference)?;
+                emit(result.clone(), to_stable_json(&result))
+            }
+            AnalysisAction::Keystone { reference, limit } => {
+                let result = crate::discovery::keystone_claims(&conn, reference, *limit)?;
+                emit(Value::Array(result.clone()), list_text(&result))
+            }
+            AnalysisAction::Expose { reference } => {
+                let result = crate::discovery::expose(&conn, reference)?;
+                emit(result.clone(), to_stable_json(&result))
+            }
+            AnalysisAction::Correlation { claim, groups, allow_incomparable, allow_self_reported, since, until } => {
+                let wanted: Vec<String> = groups.split(',').map(|g| g.trim().to_string()).filter(|g| !g.is_empty()).collect();
+                let result = crate::discovery::group_correlations(&conn, claim,
+                    if wanted.is_empty() { None } else { Some(wanted.as_slice()) },
+                    *allow_incomparable, *allow_self_reported, since, until)?;
+                emit(Value::Array(result.clone()), list_text(&result))
             }
         },
         Commands::Protocol { action } => run_protocol(&conn, action),

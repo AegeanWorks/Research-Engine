@@ -45,7 +45,7 @@ argparse requires in `python -m engine`.
 | Cascade | `cascade preview`, `claim invalidate`, `source retract`, preview digests and the 10-record bulk tripwire (G-004/G-005) |
 | Synthesis | `report`, `scorecard`, graph-derived consensus and coverage (G-006) |
 | Measurements | `protocol add/list/amend`, `observation add/list/void/import-csv`, provenance and group gates, `OBS-001`..`OBS-004` |
-| Analysis | `analysis stats` and `analysis trend` with CPython-compatible MT19937 bootstrap, Welch t, Mann-Whitney U, comparability gates and event recording |
+| Analysis | `analysis stats`, `trend`, `calibration`, `contradictions`, `matrix`, `keystone`, `expose`, `correlation` with CPython-compatible MT19937 bootstrap, Welch t, Mann-Whitney U, keyword/polarity discovery and comparability gates |
 | Views | `outline`, `brief`, `claim context` with exact token-budget packing and pruning |
 | Manifests | `report --out/--check/--strict` with schema-3 manifests, license pin, content/graph digests and drift detection |
 | Export | `export` JSONL with byte-identical records, `export --check` self-verification |
@@ -70,11 +70,11 @@ argparse requires in `python -m engine`.
   both compare equal.
 - `views_parity.py <db>` compares `outline`, `brief`, `claim context`, report
   manifests and export verification; digests and checks compare equal.
+- `analysis_extra_parity.py <db>` compares the remaining `analysis` commands;
+  all seven compare equal.
 
 ## Still to port
 
-`analysis calibration`/`contradictions`/`matrix`/correlation (the report and
-`analysis stats` paths already use the same calibration arithmetic), AI
-artifacts, `diff`, studio/adapters/experiments/domains, and the Python CLI text
-renderer. These remain served by `python -m engine` until their Rust
+AI artifacts, `diff`, studio/adapters/experiments/domains, and the Python CLI
+text renderer. These remain served by `python -m engine` until their Rust
 equivalents land; the SQLite graph is shared throughout.

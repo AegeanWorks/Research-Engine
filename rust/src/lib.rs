@@ -11,6 +11,7 @@ pub mod cascade;
 pub mod cli;
 pub mod context;
 pub mod core;
+pub mod discovery;
 pub mod db;
 pub mod error;
 pub mod integrity;

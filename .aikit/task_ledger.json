@@ -5,34 +5,13 @@
     "last_phase": "in_progress",
     "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1795347927.0146828,
+    "updated_at": 1795348737.2935462,
     "owner": "opencode:rust-rewrite",
-    "lease_until": 1795355127.0146828,
+    "lease_until": 1795355937.2935462,
     "started_by": "opencode:rust-rewrite",
     "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "T-024-audit-fixes",
-      "phase": "in_progress",
-      "phase_num": 4,
-      "description": "[3/3] Docs plus ADR shipped: ARCHITECTURE offset line plus ADR-055, full suite and 4/4 gates pass, checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793913825.8317425,
-      "timestamp_str": "2026-11-06 00:23:45",
-      "agent": "kilo:goal"
-    },
-    {
-      "task_id": "T-024-audit-fixes",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'T-024-audit-fixes' completed successfully.",
-      "status": "completed",
-      "timestamp": 1793913882.9623256,
-      "timestamp_str": "2026-11-06 00:24:42",
-      "agent": "kilo:goal"
-    },
     {
       "task_id": "T-025-research-functions-merge",
       "phase": "phase 2",
@@ -260,6 +239,29 @@
       "status": "in_progress",
       "timestamp": 1795347927.0146828,
       "timestamp_str": "2026-11-22 14:45:27",
+      "agent": "opencode:rust-rewrite",
+      "checklists": "passed"
+    },
+    {
+      "task_id": "T-027-rust-layers",
+      "phase": "in_progress",
+      "phase_num": 3,
+      "description": "[3/6] Ported analysis calibration, contradictions, unlinked proposals, evidence matrix, keystone, expose and correlation into rust/src/discovery.rs",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795348737.0726159,
+      "timestamp_str": "2026-11-22 14:58:57",
+      "agent": "opencode:rust-rewrite"
+    },
+    {
+      "task_id": "T-027-rust-layers",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[3/6] Verification: cargo test 20/20; Python parity equal for all seven analysis commands; project gates passing",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795348737.2935462,
+      "timestamp_str": "2026-11-22 14:58:57",
       "agent": "opencode:rust-rewrite",
       "checklists": "passed"
     }

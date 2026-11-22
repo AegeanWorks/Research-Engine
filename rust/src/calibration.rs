@@ -3,7 +3,7 @@
 use rusqlite::{params, Connection};
 use serde_json::{json, Value};
 
-use crate::core::get_research;
+use crate::core::{get_research, record_event};
 use crate::error::Result;
 use crate::util::query_json;
 
@@ -16,6 +16,23 @@ fn field(value: &Value, name: &str) -> String {
 fn round(value: f64, places: i32) -> f64 {
     let factor = 10f64.powi(places);
     (value * factor).round() / factor
+}
+
+pub fn score(conn: &Connection, reference: &str, min_resolved: i64, actor: &str) -> Result<Value> {
+    let result = summary(conn, reference, min_resolved)?;
+    let rid = field(&result, "research");
+    let counts = result.get("counts").unwrap();
+    let detail = if result.get("brier").and_then(Value::as_f64).is_none() {
+        format!("n=0 coverage={:.4} no resolved outcome", result.get("coverage").and_then(Value::as_f64).unwrap_or(0.0))
+    } else {
+        format!("n={} brier={:.4} log_loss={:.4} coverage={:.4}",
+            counts.get("resolved").and_then(Value::as_i64).unwrap_or(0),
+            result.get("brier").and_then(Value::as_f64).unwrap_or(0.0),
+            result.get("log_loss").and_then(Value::as_f64).unwrap_or(0.0),
+            result.get("coverage").and_then(Value::as_f64).unwrap_or(0.0))
+    };
+    record_event(conn, &rid, "hypothesis.calibration", &rid, &detail, actor)?;
+    Ok(result)
 }
 
 pub fn summary(conn: &Connection, reference: &str, min_resolved: i64) -> Result<Value> {

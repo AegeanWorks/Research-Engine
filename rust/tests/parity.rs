@@ -221,6 +221,46 @@ fn search_is_phrase_first_and_program_scoped() {
 }
 
 #[test]
+fn discovery_ranks_from_the_graph() {
+    let path = temp_db("discovery");
+    let conn = open(path.to_str().unwrap()).unwrap();
+    initialize(&conn).unwrap();
+    let research = core::add_research(&conn, "Discovery", "", None).unwrap();
+    let rid = field(&research, "id");
+    let source = core::add_source(&conn, &rid, "Paper", Some(2024), "", "", "", "paper").unwrap();
+    let question = core::add_question(&conn, &rid, "Does X work?").unwrap();
+    let qid = field(&question, "id");
+    let a = core::add_claim(&conn, &rid, "X works", "empirical", Some(&field(&source, "id")),
+        "quote", "p1", 0.8, "echo ok", "", &[]).unwrap();
+    let b = core::add_claim(&conn, &rid, "X does not work", "empirical", Some(&field(&source, "id")),
+        "quote", "p2", 0.7, "echo ok", "", &[]).unwrap();
+    core::record_edge(&conn, "claim", &field(&a, "id"), "question", &qid, "supports").unwrap();
+    core::record_edge(&conn, "claim", &field(&b, "id"), "question", &qid, "contradicts").unwrap();
+
+    let pairs = research_engine::discovery::contradictions(&conn, &rid, 0.0).unwrap();
+    assert_eq!(pairs.len(), 1);
+    assert_eq!(field(&pairs[0], "support"), field(&a, "id"));
+    assert_eq!(field(&pairs[0], "contradicts"), field(&b, "id"));
+    assert!(pairs[0].get("polarity_mismatch").and_then(Value::as_bool).unwrap());
+
+    let matrix = research_engine::discovery::evidence_matrix(&conn, &rid).unwrap();
+    assert_eq!(matrix.get("rows").and_then(Value::as_array).map(|v| v.len()), Some(1));
+    assert_eq!(matrix.get("rows").unwrap()[0].get("total").and_then(Value::as_i64), Some(2));
+
+    let keystone = research_engine::discovery::keystone_claims(&conn, &rid, 10).unwrap();
+    assert_eq!(keystone.len(), 2);
+    let exposed = research_engine::discovery::expose(&conn, &field(&a, "id")).unwrap();
+    assert_eq!(field(&exposed, "claim"), field(&a, "id"));
+
+    let hypothesis = core::add_hypothesis(&conn, &rid, "X replicates", "no effect", 0.6, None).unwrap();
+    core::record_outcome(&conn, &field(&hypothesis, "id"), "SUPPORTED", "study", "", "agent").unwrap();
+    let calibration = research_engine::calibration::score(&conn, &rid, 10, "agent").unwrap();
+    assert_eq!(calibration.get("counts").and_then(|c| c.get("resolved")).and_then(Value::as_i64), Some(1));
+    let events: i64 = conn.query_row("SELECT COUNT(*) FROM event WHERE kind='hypothesis.calibration'", [], |r| r.get(0)).unwrap();
+    assert_eq!(events, 1);
+}
+
+#[test]
 fn bounded_views_and_manifest_digests() {
     let path = temp_db("views");
     let conn = open(path.to_str().unwrap()).unwrap();

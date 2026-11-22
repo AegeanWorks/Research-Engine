@@ -35,7 +35,7 @@ fn parse_bound(value: &str, name: &str) -> Result<String> {
     Ok(parsed.with_timezone(&Utc).format("%Y-%m-%dT%H:%M:%S+00:00").to_string())
 }
 
-fn bounds(since: &str, until: &str) -> Result<(String, String)> {
+pub(crate) fn bounds(since: &str, until: &str) -> Result<(String, String)> {
     let since = parse_bound(since, "since")?;
     let until = parse_bound(until, "until")?;
     if !since.is_empty() && !until.is_empty() && since > until {
@@ -46,7 +46,7 @@ fn bounds(since: &str, until: &str) -> Result<(String, String)> {
     Ok((since, until))
 }
 
-fn group_provenance(
+pub(crate) fn group_provenance(
     conn: &Connection, claim_id: &str, group: &str, since: &str, until: &str,
 ) -> Result<Value> {
     let mut sql = String::from("SELECT protocol_id, instrument_id, instrument_digest, rater_id, rater_version, unit, provenance_class FROM observation WHERE claim_id=?1 AND group_label=?2 AND voided=0");
@@ -78,7 +78,7 @@ fn group_provenance(
         "classes": classes, "missing": missing}))
 }
 
-fn comparability(
+pub(crate) fn comparability(
     baseline: &Value, treatment: &Value, allow_incomparable: bool, allow_self_reported: bool,
 ) -> Result<(bool, String, Value)> {
     let b_protocols = baseline.get("protocols").and_then(Value::as_array).cloned().unwrap_or_default();
