@@ -221,6 +221,29 @@ fn search_is_phrase_first_and_program_scoped() {
 }
 
 #[test]
+fn studio_evidence_matrix_and_question_evidence() {
+    let path = temp_db("studio");
+    let conn = research_engine::lattice_repo::open(path.to_str().unwrap()).unwrap();
+    let mut metadata = std::collections::BTreeMap::new();
+    metadata.insert("title".to_string(), "Quantum Effects".to_string());
+    metadata.insert("doi".to_string(), "10.1/studio".to_string());
+    let (paper, _) = research_engine::lattice_repo::add_paper(&conn, &metadata).unwrap();
+    research_engine::lattice_repo::add_claim(&conn, &field(&paper, "id"), "It works",
+        "quote", "abstract:s1", "supports", 0.8).unwrap();
+    let question = research_engine::lattice_repo::add_question(&conn, "Does it work?").unwrap();
+    research_engine::lattice_repo::add_edge(&conn, "c_000001", &field(&question, "id"), "supports", "").unwrap();
+
+    let matrix = research_engine::studio_api::build_evidence_matrix(&conn).unwrap();
+    assert_eq!(matrix.get("cells").and_then(Value::as_array).map(|v| v.len()), Some(1));
+    let wanted = vec![field(&question, "id")];
+    let filtered = research_engine::studio_api::get_evidence_matrix(&conn, Some(wanted.as_slice())).unwrap();
+    assert_eq!(filtered.get("questions").and_then(Value::as_array).map(|v| v.len()), Some(1));
+    let evidence = research_engine::studio_api::question_evidence(&conn, "q_000001").unwrap();
+    assert_eq!(evidence.get("evidence_count").and_then(Value::as_u64), Some(1));
+    assert!(research_engine::studio_api::question_evidence(&conn, "p_000001").is_err());
+}
+
+#[test]
 fn lattice_discovery_offline_provider_and_ingest() {
     use research_engine::lattice_discovery as d;
     let found = d::offline_search("sleep memory", 5).unwrap();

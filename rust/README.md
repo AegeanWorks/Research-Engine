@@ -58,6 +58,7 @@ argparse requires in `python -m engine`.
 | Meta-analysis | Fixed/DerSimonian-Laird random-effects pooling, Q/I²/τ², Hedges' g study construction and ASCII forest plots (`meta` CLI) |
 | Lattice queries | Contradiction detection, bounded outline/search views and GraphRAG context packs (`lattice-query` CLI) |
 | Lattice discovery | Offline seed-corpus provider, candidate de-duplication, provider registry and Crossref/OpenAlex helper parsers (`discovery` CLI) |
+| Studio API | Paper×Question evidence matrix, filtered matrices and per-question evidence grouping (`studio` CLI) |
 | Search | deterministic phrase-first lexical `search` with exact snippet/token-budget output |
 | Markdown | `sanitize`/`cell`/`estimate_tokens`/`pack` shared with reports and search |
 | Integrity | 24 finding codes including `PROV-*`, `EVID-*`, `GRAPH-*`, `GAP-*`, `LEDGER-001` |
@@ -97,10 +98,12 @@ argparse requires in `python -m engine`.
   search and both context-pack formats; all five checks match.
 - `discovery_parity.py` compares provider names, offline ranking, ingest,
   de-duplication and the bibliographic helper parsers; all six checks match.
+- `studio_api_parity.py` compares the evidence matrix, filtered matrix and
+  question evidence against the Python studio facade; all three checks match.
 
 ## Still to port
 
 the network-backed lattice providers (arXiv, Crossref, OpenAlex, EuropePMC),
-studio, domains and the Python CLI text renderer. These remain served by their
-Python entry points until their Rust equivalents land; the SQLite graph is
-shared throughout.
+studio's web/MCP/client surfaces, domains and the Python CLI text renderer.
+These remain served by their Python entry points until their Rust equivalents
+land; the SQLite graph is shared throughout.

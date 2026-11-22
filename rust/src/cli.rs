@@ -45,6 +45,7 @@ pub enum Commands {
     Meta { #[command(subcommand)] action: MetaAction },
     LatticeQuery { #[command(subcommand)] action: LatticeQueryAction },
     Discovery { #[command(subcommand)] action: DiscoveryAction },
+    Studio { #[command(subcommand)] action: StudioAction },
     Search {
         query: String,
         #[arg(long)] research: Option<String>,
@@ -258,6 +259,12 @@ pub enum AnalysisAction {
         #[arg(long, default_value = "")] since: String,
         #[arg(long, default_value = "")] until: String,
     },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum StudioAction {
+    Matrix { #[arg(long, default_value = "")] questions: String },
+    Evidence { reference: String },
 }
 
 #[derive(Debug, Subcommand)]
@@ -539,7 +546,7 @@ pub fn run(cli: &Cli) -> Result<Output> {
     let conn = open(&cli.db)?;
     if !matches!(cli.command, Commands::Init | Commands::Lattice { .. }
         | Commands::LatticeRepo { .. } | Commands::LatticeSnap { .. } | Commands::Meta { .. }
-        | Commands::LatticeQuery { .. } | Commands::Discovery { .. }) {
+        | Commands::LatticeQuery { .. } | Commands::Discovery { .. } | Commands::Studio { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -652,6 +659,21 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::Studio { action } => {
+            use crate::studio_api;
+            let lattice = crate::lattice_repo::open(&cli.db)?;
+            match action {
+                StudioAction::Matrix { questions } => {
+                    let list: Vec<String> = questions.split(',').map(|q| q.trim().to_string()).filter(|q| !q.is_empty()).collect();
+                    let result = studio_api::get_evidence_matrix(&lattice, if list.is_empty() { None } else { Some(list.as_slice()) })?;
+                    emit(result.clone(), to_stable_json(&result))
+                }
+                StudioAction::Evidence { reference } => {
+                    let result = studio_api::question_evidence(&lattice, reference)?;
+                    emit(result.clone(), to_stable_json(&result))
+                }
+            }
+        }
         Commands::Discovery { action } => {
             use crate::lattice_discovery as discovery;
             match action {

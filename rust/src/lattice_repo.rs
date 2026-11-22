@@ -81,6 +81,14 @@ fn normalize_arxiv(value: &str) -> String {
     if text.to_lowercase().starts_with("arxiv:") { text[6..].trim().to_string() } else { text.to_string() }
 }
 
+pub fn resolve_ref(value: &str) -> Result<String> {
+    resolve(value)
+}
+
+pub fn summary_public(conn: &Connection, reference: &str) -> Value {
+    summary(conn, reference)
+}
+
 fn resolve(value: &str) -> Result<String> {
     let text = value.trim();
     if text.contains(':') { return lattice::validate_ref(text); }

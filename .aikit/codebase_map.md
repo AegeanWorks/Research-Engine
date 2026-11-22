@@ -6,15 +6,15 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `434`
+- **Total Python Modules**: `436`
 - **Total Classes**: `317`
-- **Total Top-Level Functions**: `1981`
+- **Total Top-Level Functions**: `1982`
 - **Total Class Methods**: `1545`
-- **Total Source Lines**: `90270`
+- **Total Source Lines**: `90344`
 
 ## 🧭 Map Coverage
-- **Indexed**: python (`434` module(s))
-- **Not indexed by this map**: javascript (`1` file(s)), rust (`34` file(s))
+- **Indexed**: python (`436` module(s))
+- **Not indexed by this map**: javascript (`1` file(s)), rust (`35` file(s))
 
 > Only Python symbols are catalogued. A language above is reported as not indexed, never as verified by this map.
 
@@ -4767,6 +4767,21 @@
 
 ### [`rust/parity_check.py`](rust/parity_check.py)
 **Size**: `36` lines
+
+**Functions:**
+- `def run(cmd, cwd)`
+
+---
+
+### [`rust/studio_api_expected.py`](rust/studio_api_expected.py)
+> *Python reference for the Rust `studio` CLI commands.*
+
+**Size**: `30` lines
+
+---
+
+### [`rust/studio_api_parity.py`](rust/studio_api_parity.py)
+**Size**: `44` lines
 
 **Functions:**
 - `def run(cmd, cwd)`

@@ -5,36 +5,13 @@
     "last_phase": "in_progress",
     "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1795355171.9581423,
+    "updated_at": 1795355795.526915,
     "owner": "opencode:rust-rewrite",
-    "lease_until": 1795362371.9581423,
+    "lease_until": 1795362995.526915,
     "started_by": "opencode:rust-rewrite",
     "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "T-027-rust-layers",
-      "phase": "in_progress",
-      "phase_num": 3,
-      "description": "[3/6] Ported analysis calibration, contradictions, unlinked proposals, evidence matrix, keystone, expose and correlation into rust/src/discovery.rs",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795348737.0726159,
-      "timestamp_str": "2026-11-22 14:58:57",
-      "agent": "opencode:rust-rewrite"
-    },
-    {
-      "task_id": "T-027-rust-layers",
-      "phase": "in_progress",
-      "phase_num": 4,
-      "description": "[3/6] Verification: cargo test 20/20; Python parity equal for all seven analysis commands; project gates passing",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795348737.2935462,
-      "timestamp_str": "2026-11-22 14:58:57",
-      "agent": "opencode:rust-rewrite",
-      "checklists": "passed"
-    },
     {
       "task_id": "T-027-rust-layers",
       "phase": "in_progress",
@@ -251,6 +228,29 @@
       "status": "in_progress",
       "timestamp": 1795355171.9581423,
       "timestamp_str": "2026-11-22 16:46:11",
+      "agent": "opencode:rust-rewrite",
+      "checklists": "passed"
+    },
+    {
+      "task_id": "T-028-outer-layers",
+      "phase": "in_progress",
+      "phase_num": 3,
+      "description": "[6/6 partial] Ported the studio public API facade functions (evidence matrix, filtered matrix, per-question evidence) into rust/src/studio_api.rs",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795355795.12396,
+      "timestamp_str": "2026-11-22 16:56:35",
+      "agent": "opencode:rust-rewrite"
+    },
+    {
+      "task_id": "T-028-outer-layers",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[6/6 partial] Verification: cargo test 30/30; studio_api_parity.py 3/3 exact matches; project gates passing",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795355795.526915,
+      "timestamp_str": "2026-11-22 16:56:35",
       "agent": "opencode:rust-rewrite",
       "checklists": "passed"
     }

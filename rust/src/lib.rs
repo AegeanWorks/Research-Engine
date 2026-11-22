@@ -32,6 +32,7 @@ pub mod protocols;
 pub mod provenance;
 pub mod search;
 pub mod stats;
+pub mod studio_api;
 pub mod synthesis;
 pub mod util;
 pub mod vocab;
