@@ -330,6 +330,20 @@ pub fn search_literature(
     }))
 }
 
+pub fn set_question_status(conn: &Connection, reference: &str, status: &str) -> Result<Value> {
+    let question = get_question(conn, reference)?;
+    let cleaned = status.trim().to_lowercase();
+    if !["open", "answered", "abandoned"].contains(&cleaned.as_str()) {
+        return Err(EngineError::new(format!("unknown question status '{status}'"),
+            "questions are open, answered or abandoned", "pass --status open, answered or abandoned"));
+    }
+    let tx = conn.unchecked_transaction()?;
+    tx.execute("UPDATE questions SET status=?1 WHERE id=?2", params![cleaned, field(&question, "id")])?;
+    tx.commit()?;
+    log(conn, "question.status", &json!({"id": field(&question, "id"), "status": cleaned}))?;
+    get_question(conn, &field(&question, "id"))
+}
+
 pub fn get_paper(conn: &Connection, reference: &str) -> Result<Value> {
     let bare = lattice::bare_id(&resolve(reference)?)?;
     one(conn, "papers", &bare).ok_or_else(|| EngineError::new(

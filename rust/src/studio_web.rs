@@ -79,16 +79,81 @@ fn overview(conn: &Connection) -> Result<Value, EngineError> {
     }))
 }
 
+fn post_dispatch(conn: &Connection, route: &str, payload: &Value) -> Result<Value, EngineError> {
+    let value = |key: &str| field(payload, key);
+    match route {
+        "/api/discover" => {
+            let source = if value("source").is_empty() { "offline".to_string() } else { value("source") };
+            let limit = payload.get("limit").and_then(Value::as_i64).unwrap_or(10);
+            let ingest = payload.get("ingest").and_then(Value::as_bool).unwrap_or(true);
+            Ok(json_response(200, &crate::lattice_discovery::discover(conn, &value("query"), &source, limit, ingest)?))
+        }
+        "/api/detect-contradictions" => {
+            let auto_link = payload.get("auto_link").and_then(Value::as_bool).unwrap_or(true);
+            let pairs = lattice_query::detect_contradictions(conn, auto_link)?;
+            Ok(json_response(200, &json!({"count": pairs.len(), "contradictions": pairs})))
+        }
+        "/api/questions" => {
+            let question = repo::add_question(conn, &value("text"))?;
+            Ok(json_response(200, &json!({"question": question})))
+        }
+        "/api/question-status" => {
+            let question = repo::set_question_status(conn, &value("question"), &value("status"))?;
+            Ok(json_response(200, &json!({"question": question})))
+        }
+        "/api/papers" => {
+            let mut metadata = std::collections::BTreeMap::new();
+            if let Value::Object(map) = payload {
+                for (key, item) in map {
+                    if let Some(text) = item.as_str() { metadata.insert(key.clone(), text.to_string()); }
+                }
+            }
+            let (paper, created) = repo::add_paper(conn, &metadata)?;
+            Ok(json_response(200, &json!({"paper": paper, "created": created})))
+        }
+        "/api/claims" => {
+            let claim = repo::add_claim(conn, &value("paper"), &value("text"), &value("quote"),
+                &value("locator"), &if value("stance").is_empty() { "mentions".to_string() } else { value("stance") },
+                payload.get("confidence").and_then(Value::as_f64).unwrap_or(0.5))?;
+            let question_ref = value("question");
+            let edge = if question_ref.is_empty() { Value::Null } else {
+                let question = repo::get_question(conn, &question_ref)?;
+                let stance = field(&claim, "stance");
+                let kind = if stance == "supports" || stance == "contradicts" { stance } else { "answers".to_string() };
+                repo::add_edge(conn, &format!("claim:{}", field(&claim, "id")),
+                    &format!("question:{}", field(&question, "id")), &kind, "linked via web studio")?
+            };
+            Ok(json_response(200, &json!({"claim": claim, "edge": edge})))
+        }
+        "/api/edges" => {
+            let edge = repo::add_edge(conn, &value("src"), &value("dst"), &value("kind"), &value("note"))?;
+            Ok(json_response(200, &json!({"edge": edge})))
+        }
+        other => Ok(json_response(404, &json!({"error": format!("route not found: POST {other}")}))),
+    }
+}
+
 pub fn dispatch_web_request(conn: &Connection, method: &str, path: &str,
-                            _body: Option<&str>) -> Result<Value, EngineError> {
+                            body: Option<&str>) -> Result<Value, EngineError> {
     let (raw_path, query_string) = path.split_once('?').unwrap_or((path, ""));
     let route = raw_path.trim_end_matches('/');
     let route = if route.is_empty() { "/" } else { route };
     let query = parse_query(query_string);
     let verb = (if method.is_empty() { "GET" } else { method }).to_uppercase();
+    if verb == "POST" {
+        let payload: Value = match body {
+            Some(text) if !text.trim().is_empty() => serde_json::from_str(text).map_err(|e| EngineError::new(
+                format!("request body is not valid JSON: {e}"), "POST routes expect JSON objects",
+                "send a JSON object payload"))?,
+            _ => json!({}),
+        };
+        if !payload.is_object() {
+            return Ok(json_response(400, &json!({"error": "request body must be a JSON object"})));
+        }
+        return post_dispatch(conn, route, &payload);
+    }
     if verb != "GET" {
-        return Ok(json!({"status": 404, "content_type": JSON_TYPE,
-            "body": "{\"detail\":\"Not Found\"}", "headers": {}}));
+        return Ok(json_response(404, &json!({"error": format!("route not found: {verb} {route}")})));
     }
     match route {
         "/" => Ok(json!({"status": 200, "content_type": "text/html; charset=utf-8",

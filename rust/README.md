@@ -60,7 +60,8 @@ argparse requires in `python -m engine`.
 | Lattice discovery | Offline seed-corpus provider, candidate de-duplication, provider registry and Crossref/OpenAlex helper parsers (`discovery` CLI) |
 | Studio API | Paper×Question evidence matrix, filtered matrices and per-question evidence grouping (`studio` CLI) |
 | Studio MCP | JSON-RPC dispatcher with all 28 tool declarations, resources, prompts and ported tool handlers (`mcp` CLI) |
-| Studio web | GET request dispatcher for the UI, overview, matrix bundle, search, literature, exports and integrity checks (`web` CLI) |
+| Studio web | GET and POST request dispatchers for the UI, overview, matrix bundle, search, literature, exports, mutations and integrity checks (`web` CLI) |
+| Studio client | `LatticeClient` facade: tool/resource/prompt schemas, read-only policy and MCP tool calls (`client` CLI) |
 | Domains: Atlas | Visual-knowledge schema validation, Muse payload coercion, analysis merging and JSON Schema (`atlas` CLI) |
 | Domains: PNN safety | NOAEL→HED conversion, most-sensitive study selection, IND safety thresholds and Markdown report (`pnn-safety` CLI) |
 | Search | deterministic phrase-first lexical `search` with exact snippet/token-budget output |
@@ -106,8 +107,10 @@ argparse requires in `python -m engine`.
   question evidence against the Python studio facade; all three checks match.
 - `mcp_parity.py` compares initialize/ping/list/read/tool-call messages; all
   11 checks match (timestamps normalized).
-- `web_parity.py` compares all implemented GET routes including the UI page,
-  overview, matrix bundle and exports; all 11 checks match.
+- `web_parity.py` compares all implemented GET and POST routes including the UI
+  page, overview, matrix bundle, exports and mutations; all 16 checks match.
+- `client_parity.py` compares schemas, read-only filtering, tool calls and
+  resources; all 8 checks match.
 - `atlas_parity.py` compares Muse coercion, schema and chunk merging; all three
   checks match.
 - `pnn_safety_parity.py` compares safety assessments and the Markdown package;
@@ -116,7 +119,6 @@ argparse requires in `python -m engine`.
 ## Still to port
 
 the network-backed lattice providers (arXiv, Crossref, OpenAlex, EuropePMC),
-studio's client and POST routes, the remaining fluid-universe/obezite domain
-packs and PNN modules, and the Python CLI text renderer. These remain served by
-their Python entry points until their Rust equivalents land; the SQLite graph
-is shared throughout.
+the remaining fluid-universe/obezite domain packs and other PNN modules, and
+the Python CLI text renderer. These remain served by their Python entry points
+until their Rust equivalents land; the SQLite graph is shared throughout.

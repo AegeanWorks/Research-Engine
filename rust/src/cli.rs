@@ -50,6 +50,7 @@ pub enum Commands {
     Web { method: String, path: String, #[arg(long, default_value = "")] body: String },
     Atlas { #[command(subcommand)] action: AtlasAction },
     PnnSafety { #[arg(long, required = true)] tox: String, #[arg(long, default_value = "{}")] pharm: String },
+    Client { #[command(subcommand)] action: ClientAction },
     Search {
         query: String,
         #[arg(long)] research: Option<String>,
@@ -263,6 +264,20 @@ pub enum AnalysisAction {
         #[arg(long, default_value = "")] since: String,
         #[arg(long, default_value = "")] until: String,
     },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum ClientAction {
+    ToolSchemas { #[arg(long)] read_only: bool },
+    ResourceSchemas,
+    PromptSchemas,
+    Call {
+        name: String,
+        #[arg(long, default_value = "{}")] arguments: String,
+        #[arg(long, default_value = "{}")] kwargs: String,
+        #[arg(long)] read_only: bool,
+    },
+    ReadResource { uri: String },
 }
 
 #[derive(Debug, Subcommand)]
@@ -564,7 +579,7 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::LatticeRepo { .. } | Commands::LatticeSnap { .. } | Commands::Meta { .. }
         | Commands::LatticeQuery { .. } | Commands::Discovery { .. } | Commands::Studio { .. }
         | Commands::Mcp { .. } | Commands::Web { .. } | Commands::Atlas { .. }
-        | Commands::PnnSafety { .. }) {
+        | Commands::PnnSafety { .. } | Commands::Client { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -677,6 +692,38 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::Client { action } => {
+            use crate::studio_client as client;
+            let conn = crate::lattice_repo::open(&cli.db)?;
+            match action {
+                ClientAction::ToolSchemas { read_only } => {
+                    let result = client::tool_schemas(*read_only);
+                    emit(result.clone(), to_stable_json(&result))
+                }
+                ClientAction::ResourceSchemas => {
+                    let result = client::resource_schemas();
+                    emit(result.clone(), to_stable_json(&result))
+                }
+                ClientAction::PromptSchemas => {
+                    let result = client::prompt_schemas();
+                    emit(result.clone(), to_stable_json(&result))
+                }
+                ClientAction::Call { name, arguments, kwargs, read_only } => {
+                    let args: Value = serde_json::from_str(arguments).map_err(|e| EngineError::new(
+                        format!("invalid arguments JSON: {e}"), "arguments must be a JSON object.",
+                        "pass a JSON object."))?;
+                    let extra: Value = serde_json::from_str(kwargs).map_err(|e| EngineError::new(
+                        format!("invalid kwargs JSON: {e}"), "kwargs must be a JSON object.",
+                        "pass a JSON object."))?;
+                    let result = client::call_tool(&conn, *read_only, name, &args, &extra)?;
+                    emit(result.clone(), to_stable_json(&result))
+                }
+                ClientAction::ReadResource { uri } => {
+                    let result = client::read_resource(&conn, uri)?;
+                    emit(result.clone(), to_stable_json(&result))
+                }
+            }
+        }
         Commands::PnnSafety { tox, pharm } => {
             use crate::domains_pnn_safety as safety;
             let studies: Vec<Value> = serde_json::from_str(tox).map_err(|e| EngineError::new(

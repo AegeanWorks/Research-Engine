@@ -221,6 +221,32 @@ fn search_is_phrase_first_and_program_scoped() {
 }
 
 #[test]
+fn studio_client_read_only_policy() {
+    let path = temp_db("client");
+    let conn = research_engine::lattice_repo::open(path.to_str().unwrap()).unwrap();
+    let writable = research_engine::studio_client::tool_schemas(false);
+    let read_only = research_engine::studio_client::tool_schemas(true);
+    assert!(writable.as_array().unwrap().len() > read_only.as_array().unwrap().len());
+    assert_eq!(research_engine::studio_client::resource_schemas().as_array().map(|v| v.len()), Some(3));
+    assert_eq!(research_engine::studio_client::prompt_schemas().as_array().map(|v| v.len()), Some(1));
+    assert!(research_engine::studio_client::call_tool(&conn, true, "search",
+        &serde_json::json!({"query": "x"}), &serde_json::json!({})).is_ok());
+    assert!(research_engine::studio_client::call_tool(&conn, true, "add_question",
+        &serde_json::json!({"text": "x"}), &serde_json::json!({})).is_err());
+}
+
+#[test]
+fn studio_web_post_routes() {
+    let path = temp_db("web_post");
+    let conn = research_engine::lattice_repo::open(path.to_str().unwrap()).unwrap();
+    let question = research_engine::studio_web::dispatch_web_request(&conn, "POST", "/api/questions",
+        Some(r#"{"text":"Does it work?"}"#)).unwrap();
+    assert_eq!(question.get("status").and_then(Value::as_i64), Some(200));
+    let missing = research_engine::studio_web::dispatch_web_request(&conn, "POST", "/api/nope", None).unwrap();
+    assert_eq!(missing.get("status").and_then(Value::as_i64), Some(404));
+}
+
+#[test]
 fn pnn_safety_assessment_and_report() {
     use research_engine::domains_pnn_safety as safety;
     let heds = safety::noael_hed(50.0, "rat", 37.0).unwrap();

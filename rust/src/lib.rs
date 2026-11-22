@@ -37,6 +37,7 @@ pub mod provenance;
 pub mod search;
 pub mod stats;
 pub mod studio_api;
+pub mod studio_client;
 pub mod studio_web;
 pub mod studio_web_html;
 pub mod studio_mcp;

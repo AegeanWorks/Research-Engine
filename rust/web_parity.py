@@ -1,4 +1,4 @@
-import json, re, subprocess, sys, tempfile
+import json, re, shutil, subprocess, sys, tempfile
 from pathlib import Path
 
 binary = str(Path('target/x86_64-pc-windows-gnu/debug/research-engine.exe').resolve())
@@ -14,9 +14,14 @@ def run(cmd, cwd):
         raise RuntimeError(f'{cmd}: {p.stderr[:700]}')
     return p.stdout
 
-def compare(label, method, path):
-    rust = json.loads(run([binary, '--db', db, '--json', 'web', method, path], Path('.')))
-    py = json.loads(run([sys.executable, ref, '--db', db, method, path], root))
+def compare(label, method, path, body=None):
+    rust_cmd = [binary, '--db', db, '--json', 'web', method, path]
+    py_cmd = [sys.executable, ref, '--db', db, method, path]
+    if body is not None:
+        rust_cmd += ['--body', body]
+        py_cmd += ['--body', body]
+    rust = json.loads(run(rust_cmd, Path('.')))
+    py = json.loads(run(py_cmd, root))
     a, b = TS.sub('<TS>', json.dumps(rust, sort_keys=True)), TS.sub('<TS>', json.dumps(py, sort_keys=True))
     print(f'{label} equal:', a == b)
     if a != b:
@@ -43,3 +48,22 @@ with tempfile.TemporaryDirectory() as tmp:
         ('cytoscape', '/api/export-cytoscape'), ('unknown', '/api/nope'),
     ]:
         compare(label, 'GET', path)
+
+    rdb, pdb = str(Path(tmp) / 'post-rust.db'), str(Path(tmp) / 'post-py.db')
+    shutil.copyfile(db, rdb)
+    shutil.copyfile(db, pdb)
+    for label, path, payload in [
+        ('post-questions', '/api/questions', {'text': 'Is it reproducible?'}),
+        ('post-question-status', '/api/question-status', {'question': 'q_000002', 'status': 'answered'}),
+        ('post-edges', '/api/edges', {'src': 'claim:c_000001', 'dst': 'question:q_000001', 'kind': 'answers'}),
+        ('post-papers', '/api/papers', {'title': 'New Paper', 'doi': '10.1/new', 'year': '2025'}),
+        ('post-detect', '/api/detect-contradictions', {'auto_link': False}),
+    ]:
+        body = json.dumps(payload)
+        rust = json.loads(run([binary, '--db', rdb, '--json', 'web', 'POST', path, '--body', body], Path('.')))
+        py = json.loads(run([sys.executable, ref, '--db', pdb, 'POST', path, '--body', body], root))
+        a, b = TS.sub('<TS>', json.dumps(rust, sort_keys=True)), TS.sub('<TS>', json.dumps(py, sort_keys=True))
+        print(f'{label} equal:', a == b)
+        if a != b:
+            i = next((i for i, (x, y) in enumerate(zip(a, b)) if x != y), min(len(a), len(b)))
+            print('  diff at', i, a[max(0, i-120):i+260], '|', b[max(0, i-120):i+260])

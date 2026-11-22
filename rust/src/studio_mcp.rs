@@ -39,7 +39,7 @@ fn optional_int(args: &Value, name: &str, default: i64) -> i64 {
     args.get(name).and_then(Value::as_i64).unwrap_or(default)
 }
 
-fn dispatch(conn: &Connection, name: &str, args: &Value) -> Result<Value, EngineError> {
+pub fn dispatch(conn: &Connection, name: &str, args: &Value) -> Result<Value, EngineError> {
     match name {
         "search" => {
             let query_text = required_text(args, "query").map_err(|m| EngineError::new(m.clone(), m.clone(), m))?;
