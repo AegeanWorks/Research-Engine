@@ -82,9 +82,8 @@ external; see [docs/merge/READINESS.md](docs/merge/READINESS.md).
 16. **Every non-verdict action is logged.** Status changes, screening, merges, reports and
     migrations append to a hash-chained log; `events --verify` checks continuity,
     `events --tree`/`--path` render causality.
-17. **Discovery is lexical and bounded.** `search` ranks claims, sources, questions and hypotheses
-    by an exact phrase then matched terms, reports the matched field, and packs text to
-    `--budget`; `source duplicates` groups normalized DOI and title matches, and
+17. **Discovery is lexical and bounded.** `search` ranks records by exact phrase then matched
+    terms and packs text to `--budget`; `source duplicates` groups DOI/title matches and
     `DUP-002` warns on a hard duplicate.
 18. **Confidence is scored, not just stored.** `analysis calibration` computes Brier, log loss,
     reliability bins, coverage and a baseline skill score from preregistered confidence and
