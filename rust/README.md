@@ -81,6 +81,7 @@ argparse requires in `python -m engine`.
 | Domains: dispersive water | Full capillary-gravity dispersion, group velocity, horizon wavenumber, dispersive horizon radius and capillary frequency (`water-dispersive` CLI) |
 | Domains: two-state Marcus | Classical Marcus FWHM, shared-λ two-state width prediction, observed component ratio and frozen kill thresholds (`two-state-marcus` CLI) |
 | Domains: excited fluid | First-excited HO density/wavefunction/quantum pressure, π phase slip at the node, phase-gradient divergence and log-log scaling (`excited-fluid` CLI) |
+| Domains: acoustic rays | Outgoing/ingoing radial speeds, horizon separatrix, peeling rate, analytic ray time and RK4 integration (`water-rays` CLI) |
 | Domains: obezite | Citation-number extraction with bibliography-noise stripping and claim-row de-duplication (`obezite` CLI) |
 | Domains: PNN rules | CNS/property design-rule evaluation and criterion weighting (`pnn-rules` CLI) |
 | Domains: PNN docking | Docking-score alias parsing, RMSD/Vina filtering, weighted consensus normalization and per-compound best-target aggregation (`pnn-docking` CLI) |
@@ -193,6 +194,8 @@ argparse requires in `python -m engine`.
   the observed ratio, thresholds and scales; all nine checks match.
 - `excited_fluid_parity.py` compares density, wavefunction, regular pressure,
   phase slip/gradient and scaling slope; all seven checks match.
+- `water_rays_parity.py` compares ray speeds, peeling rate, analytic time and
+  RK4 integration; all nine checks match.
 
 ## Still to port
 

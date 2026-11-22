@@ -76,6 +76,7 @@ pub enum Commands {
     WaterDispersive { #[command(subcommand)] action: WaterDispersiveAction },
     TwoStateMarcus { #[command(subcommand)] action: TwoStateMarcusAction },
     ExcitedFluid { #[command(subcommand)] action: ExcitedFluidAction },
+    WaterRays { #[command(subcommand)] action: WaterRaysAction },
     Providers { #[command(subcommand)] action: ProvidersAction },
     Search {
         query: String,
@@ -302,6 +303,15 @@ pub enum ProvidersAction {
 pub enum PnnRulesAction {
     Evaluate { #[arg(long, required = true)] compound: String },
     Weight { criterion: String },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum WaterRaysAction {
+    Outgoing { r: f64, #[arg(long)] flow_rate: f64, #[arg(long, default_value_t = 0.1)] depth: f64, #[arg(long, default_value_t = crate::domains_fluid_water_analogue::GRAVITY)] gravity: f64 },
+    Ingoing { r: f64, #[arg(long)] flow_rate: f64, #[arg(long, default_value_t = 0.1)] depth: f64, #[arg(long, default_value_t = crate::domains_fluid_water_analogue::GRAVITY)] gravity: f64 },
+    Peeling { #[arg(long)] flow_rate: f64, #[arg(long, default_value_t = 0.1)] depth: f64, #[arg(long, default_value_t = crate::domains_fluid_water_analogue::GRAVITY)] gravity: f64 },
+    Time { r: f64, r0: f64, horizon: f64, speed: f64 },
+    Integrate { r0: f64, r_end: f64, #[arg(long)] flow_rate: f64, #[arg(long, default_value_t = 0.1)] depth: f64, #[arg(long, default_value_t = crate::domains_fluid_water_analogue::GRAVITY)] gravity: f64, #[arg(long, default_value_t = 1e-5)] dt: f64 },
 }
 
 #[derive(Debug, Subcommand)]
@@ -890,7 +900,7 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::WaterWell { .. } | Commands::WaterElectron { .. }
         | Commands::WaterVde { .. } | Commands::WaterDispersive { .. }
         | Commands::TwoStateMarcus { .. } | Commands::ExcitedFluid { .. }
-        | Commands::Providers { .. }) {
+        | Commands::WaterRays { .. } | Commands::Providers { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -1003,6 +1013,30 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::WaterRays { action } => {
+            use crate::domains_fluid_water_rays as wr;
+            macro_rules! scalar {
+                ($expr:expr) => {{
+                    let value = $expr?;
+                    emit(json!({"value": value}), format!("{value}\n"))
+                }};
+            }
+            match action {
+                WaterRaysAction::Outgoing { r, flow_rate, depth, gravity } =>
+                    scalar!(wr::outgoing_speed(*r, *flow_rate, *depth, *gravity)),
+                WaterRaysAction::Ingoing { r, flow_rate, depth, gravity } =>
+                    scalar!(wr::ingoing_speed(*r, *flow_rate, *depth, *gravity)),
+                WaterRaysAction::Peeling { flow_rate, depth, gravity } =>
+                    scalar!(wr::peeling_rate(*flow_rate, *depth, *gravity)),
+                WaterRaysAction::Time { r, r0, horizon, speed } =>
+                    scalar!(wr::analytic_outgoing_time(*r, *r0, *horizon, *speed)),
+                WaterRaysAction::Integrate { r0, r_end, flow_rate, depth, gravity, dt } => {
+                    let value = wr::integrate_outgoing(*r0, *r_end, *flow_rate, *depth, *gravity, *dt)?;
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+            }
+        }
         Commands::ExcitedFluid { action } => {
             use crate::domains_fluid_excited_fluid as ef;
             macro_rules! curve {

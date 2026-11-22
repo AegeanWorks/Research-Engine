@@ -433,6 +433,27 @@ fn fluid_frank_oseen_dispersion() {
 }
 
 #[test]
+fn acoustic_horizon_rays() {
+    use research_engine::domains_fluid_water_rays as wr;
+    let flow = 1e-3;
+    let depth = 0.1;
+    let speed = research_engine::domains_fluid_water_analogue::sound_speed(depth, 9.81).unwrap();
+    let horizon = research_engine::domains_fluid_water_analogue::horizon_radius(flow, depth, 9.81).unwrap();
+    assert!(wr::outgoing_speed(0.005, flow, depth, 9.81).unwrap() > 0.0);
+    assert!(wr::outgoing_speed(horizon, flow, depth, 9.81).unwrap().abs() < 1e-12);
+    assert!(wr::ingoing_speed(0.005, flow, depth, 9.81).unwrap() < 0.0);
+    assert!((wr::peeling_rate(flow, depth, 9.81).unwrap() - speed * speed / horizon).abs() < 1e-9);
+    assert!(wr::analytic_outgoing_time(0.01, 0.004, horizon, speed).unwrap() > 0.0);
+    assert!(wr::analytic_outgoing_time(horizon, 0.004, horizon, speed).is_err());
+    let integrated = wr::integrate_outgoing(0.003, 0.004, flow, depth, 9.81, 1e-5).unwrap();
+    assert!(integrated["time"].as_f64().unwrap() > 0.0);
+    assert!(integrated["radius"].as_f64().unwrap() >= 0.004);
+    assert!(integrated["steps"].as_u64().unwrap() > 0);
+    assert!(wr::integrate_outgoing(0.004, 0.003, flow, depth, 9.81, 1e-5).is_err());
+    assert!(wr::outgoing_speed(0.0, flow, depth, 9.81).is_err());
+}
+
+#[test]
 fn excited_madelung_fluid_node() {
     use research_engine::domains_fluid_excited_fluid as ef;
     assert!((ef::oscillator_width(1.0, 1.0, 1.0).unwrap() - 1.0).abs() < 1e-12);
