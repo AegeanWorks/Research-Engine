@@ -72,6 +72,7 @@ argparse requires in `python -m engine`.
 | Domains: circulant | Hermitian 3×3 circulant algebra: eigenvalues, DFT vectors, Koide Q variants, inverse DFT, mass fit and tau prediction (`fluid-circulant` CLI) |
 | Domains: reduction | Wall tension, 2D lower bound, power-tail moment integrability, numeric moment and claim-6b Markdown report (`fluid-reduction` CLI) |
 | Domains: variational width | Gaussian Ritz width selection: G-M vs Yasui actions, derivatives, analytic/grid/Newton extrema, Ermakov cross-check and claim-49 scales (`fluid-variational-width` CLI) |
+| Domains: osmotic closure | Fokker-Planck residual with conservative flux, Gaussian/bimodal probes, residual scaling, frozen-drift sigma map and claim-48 scales (`fluid-nelson-closure` CLI) |
 | Domains: obezite | Citation-number extraction with bibliography-noise stripping and claim-row de-duplication (`obezite` CLI) |
 | Domains: PNN rules | CNS/property design-rule evaluation and criterion weighting (`pnn-rules` CLI) |
 | Domains: PNN docking | Docking-score alias parsing, RMSD/Vina filtering, weighted consensus normalization and per-compound best-target aggregation (`pnn-docking` CLI) |
@@ -150,6 +151,9 @@ argparse requires in `python -m engine`.
   moments, verdicts and the Markdown report; all 23 checks match.
 - `fluid_variational_width_parity.py` compares actions, derivatives, extrema,
   Ermakov cross-check and the full scales bundle; all 13 checks match.
+- `fluid_nelson_closure_parity.py` compares osmotic velocity, FP residual,
+  scaling, sigma map, OU/free probes and the scales bundle; all six checks match
+  (the log-fit over ~1e-16 error floors uses a documented wider tolerance).
 
 ## Still to port
 

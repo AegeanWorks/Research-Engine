@@ -221,6 +221,32 @@ fn search_is_phrase_first_and_program_scoped() {
 }
 
 #[test]
+fn fluid_osmotic_closure_no_go() {
+    use research_engine::domains_fluid_nelson_closure as nc;
+    let values = vec![1.0, 2.0, 4.0, 8.0];
+    let g = nc::gradient(&values, 2.0).unwrap();
+    assert_eq!(g.len(), values.len());
+    assert!((g[0] - 0.5).abs() < 1e-12);
+    assert!((g[1] - 0.75).abs() < 1e-12);
+    assert!((nc::trapezoid(&values, &[0.0, 2.0, 4.0, 6.0]) - 21.0).abs() < 1e-12);
+    let xs = vec![-2.0, -1.0, 0.0, 1.0, 2.0];
+    let rho = vec![0.1, 0.2, 0.4, 0.2, 0.1];
+    assert_eq!(nc::osmotic_velocity(&rho, 1.0).unwrap().len(), xs.len());
+    assert_eq!(nc::fp_residual(&rho, 1.0, 0.5).unwrap().len(), xs.len());
+    assert!(nc::fp_residual(&rho, 0.0, 0.5).is_err());
+    assert!(nc::gradient(&[], 1.0).unwrap().is_empty());
+    assert!(nc::polyfit_slope(&[1.0], &[2.0]).is_err());
+    let scaling = nc::residual_scaling().unwrap();
+    let rows = scaling.get("rows").unwrap().as_object().unwrap();
+    assert_eq!(rows.len(), 6);
+    assert!(rows.contains_key("gauss_1.0"));
+    assert!(rows.contains_key("gauss_2.0"));
+    assert!(!nc::frozen_drift_sigma_map().unwrap().get("entries").unwrap().as_array().unwrap().is_empty());
+    assert!(nc::ou_free_packet_instances().unwrap().get("free_drift_at_zero").is_some());
+    assert!(nc::closure_scales().unwrap().get("stationary_map").is_some());
+}
+
+#[test]
 fn fluid_variational_width_selection() {
     use research_engine::domains_fluid_variational_width as vw;
     assert!((vw::diffusivity(1.0, 1.0).unwrap() - 0.5).abs() < 1e-12);

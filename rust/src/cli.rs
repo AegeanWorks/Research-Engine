@@ -59,6 +59,7 @@ pub enum Commands {
     FluidCirculant { #[command(subcommand)] action: FluidCirculantAction },
     FluidReduction { #[command(subcommand)] action: FluidReductionAction },
     FluidVariationalWidth { #[command(subcommand)] action: FluidVariationalWidthAction },
+    FluidNelsonClosure { #[command(subcommand)] action: FluidNelsonClosureAction },
     Obezite { #[command(subcommand)] action: ObeziteAction },
     PnnRules { #[command(subcommand)] action: PnnRulesAction },
     PnnDocking { #[command(subcommand)] action: PnnDockingAction },
@@ -320,6 +321,16 @@ pub enum FluidBridgeAction {
     Horizon { omega: f64 },
     Coeffs { s0: f64, st: f64, horizon_t: f64, omega: f64, hbar: f64, mass: f64 },
     Path { #[arg(long)] coeffs: String, #[arg(long)] times: String, #[arg(long)] omega: f64 },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum FluidNelsonClosureAction {
+    Osmotic { #[arg(long, required = true)] xs: String, #[arg(long)] dx: f64 },
+    FpResidual { #[arg(long, required = true)] xs: String, #[arg(long)] dx: f64, #[arg(long, default_value_t = 0.5)] diffusion: f64 },
+    ResidualScaling,
+    SigmaMap,
+    Instances,
+    Scales,
 }
 
 #[derive(Debug, Subcommand)]
@@ -728,6 +739,7 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::FluidVortexCore { .. } | Commands::HydrogenRadial { .. }
         | Commands::FluidTopology { .. } | Commands::FluidCirculant { .. }
         | Commands::FluidReduction { .. } | Commands::FluidVariationalWidth { .. }
+        | Commands::FluidNelsonClosure { .. }
         | Commands::Obezite { .. }
         | Commands::PnnRules { .. } | Commands::PnnDocking { .. } | Commands::Providers { .. }) {
         initialize(&conn)?;
@@ -921,6 +933,48 @@ pub fn run(cli: &Cli) -> Result<Output> {
                     let result = obezite::deduplicate(&list, std::path::Path::new(retracted),
                         std::path::Path::new(archive), std::path::Path::new(updated), stamp)?;
                     emit(result.clone(), to_stable_json(&result))
+                }
+            }
+        }
+        Commands::FluidNelsonClosure { action } => {
+            use crate::domains_fluid_nelson_closure as nc;
+            fn xs(raw: &str) -> Result<Vec<f64>> {
+                serde_json::from_str(raw).map_err(|e| EngineError::new(
+                    format!("invalid xs JSON: {e}"), "xs must be a JSON array of numbers",
+                    "pass an array of numbers"))
+            }
+            match action {
+                FluidNelsonClosureAction::Osmotic { xs: raw, dx } => {
+                    let value = Value::Array(nc::osmotic_velocity(&xs(raw)?, *dx)?
+                        .into_iter().map(Value::from).collect());
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                FluidNelsonClosureAction::FpResidual { xs: raw, dx, diffusion } => {
+                    let value = Value::Array(nc::fp_residual(&xs(raw)?, *dx, *diffusion)?
+                        .into_iter().map(Value::from).collect());
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                FluidNelsonClosureAction::ResidualScaling => {
+                    let value = nc::residual_scaling()?;
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                FluidNelsonClosureAction::SigmaMap => {
+                    let value = nc::frozen_drift_sigma_map()?;
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                FluidNelsonClosureAction::Instances => {
+                    let value = nc::ou_free_packet_instances()?;
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                FluidNelsonClosureAction::Scales => {
+                    let value = nc::closure_scales()?;
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
                 }
             }
         }
