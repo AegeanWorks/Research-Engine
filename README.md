@@ -29,10 +29,9 @@ A falsification-first research engine for provenance-backed claims, executable k
 
 ## Why this is not "just lattice"
 
-`lattice` is an evidence store, not a lifecycle. The merged host adds `adapters/lattice`
-(discovery/ingest/extraction/snapshots), `studio` (web/MCP/API), `experiments` (N1) and
-isolated `domains/{pnn,fluid_universe,obezite,atlas}` packs. Data stays external; see
-[docs/merge/READINESS.md](docs/merge/READINESS.md).
+`lattice` is an evidence store, not a lifecycle. The host adds `adapters/lattice`, `studio`,
+`experiments` and isolated `domains/{pnn,fluid_universe,obezite,atlas}` packs. Data stays
+external; see [docs/merge/READINESS.md](docs/merge/READINESS.md).
 
 ## How It Works
 
@@ -77,11 +76,9 @@ isolated `domains/{pnn,fluid_universe,obezite,atlas}` packs. Data stays external
     closed-taxonomy reason; `source prisma` shows the flow, and citing an excluded source
     warns (`SCREEN-001`).
 15. **Measurements are recorded, not retyped.** `observation add` stores each value in a named
-   group, with optional instrument, rater, protocol and unit. Incomparable groups need
-   `--allow-incomparable`, and `--provenance-class
-    self_reported` quarantines a system-produced number. `observation void` retires one with a
-    reason. Missing statistics warn (`OBS-001`), as do unprovenanced, unclassified and
-    self-reported measurements (`OBS-002`..`OBS-004`).
+   group with instrument, rater, protocol and unit. Incomparable groups need
+   `--allow-incomparable`; `--provenance-class self_reported` quarantines a system number.
+   `observation void` retires one with a reason (`OBS-001`..`OBS-004` warn).
 16. **Every non-verdict action is logged.** Status changes, screening, merges, reports and
     migrations append to a hash-chained log; `events --verify` checks continuity,
     `events --tree`/`--path` render causality.
@@ -260,10 +257,8 @@ carries `revision_of`, `superseded_by`, `revision_reason`; revisions are new row
 `migration_run` deduplicates a source snapshot by SHA-256.
 `observation` carries its instrument, rater and protocol. `event` carries `seq`, `root_id`,
 `parent_id`, `prev_hash`, `event_hash`.
-`verdict`, `test_run`, `test_attempt`, `event`, `observation`, `invalidation`,
-`analysis_plan`, `amendment` are append-only. `export` includes evidence, plans,
-AI artifacts and the event log.
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+Verdicts, runs, events, observations and amendments are append-only. See
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Non-Negotiables
 
@@ -271,10 +266,8 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 - No promotion without a named kill test and an evidence path.
 - No NUMERIC verdict without two agreeing runs; a single run is recorded as evidence, not proof.
 - The earliest non-replaceable attempt is authoritative; a later pass cannot displace an earlier
-  subject failure.
-- A NUMERIC promotion cites a current verified run group.
-- Numeric evidence must still match the current engine code, declared inputs and command; stale
-  evidence is an error, not a pass.
+  subject failure. A promotion cites a current verified run group and current code, inputs and
+  command; stale evidence is an error, not a pass.
 - Retracting a source retires its claims across twin rows; a live claim citing one is an error.
 - A committed report is only valid alongside its manifest, and `report --check` must stay clean.
 - Negative results are kept; corrections are new verdicts.
@@ -362,18 +355,9 @@ research-engine/
 
 ## Rust implementation (in progress)
 
-The Rust rewrite writes the same schema-14 SQLite graph as `engine/`, so both
-entry points can read the same database. Build and test it from the project root:
-
-```bash
-cd rust
-cargo build
-cargo test
-```
-
-The binary is `target/x86_64-pc-windows-gnu/debug/research-engine.exe`; it takes
-the same global `--db` and `--json` flags as `python -m engine`. Its ported
-surface and remaining work are listed in [rust/README.md](rust/README.md).
+`rust/` writes the same schema-14 graph as `engine/`. Build with `cd rust && cargo build`,
+test with `cargo test`; the binary takes the same global `--db`/`--json` flags.
+See [rust/README.md](rust/README.md) for ported commands and remaining work.
 
 ## Deliberate Limits
 
