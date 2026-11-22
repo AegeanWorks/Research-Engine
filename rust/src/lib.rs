@@ -4,6 +4,7 @@
 //! the same schema-14 SQLite graph as the Python engine, so migration is incremental
 //! and evidence is never discarded.
 
+pub mod ai;
 pub mod analysis;
 pub mod bundle;
 pub mod calibration;
@@ -11,8 +12,9 @@ pub mod cascade;
 pub mod cli;
 pub mod context;
 pub mod core;
-pub mod discovery;
 pub mod db;
+pub mod diffing;
+pub mod discovery;
 pub mod error;
 pub mod integrity;
 pub mod killtest;

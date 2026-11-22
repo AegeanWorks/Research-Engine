@@ -221,6 +221,51 @@ fn search_is_phrase_first_and_program_scoped() {
 }
 
 #[test]
+fn ai_artifacts_notarize_without_storing_raw_text() {
+    let path = temp_db("ai");
+    let conn = open(path.to_str().unwrap()).unwrap();
+    initialize(&conn).unwrap();
+    let research = core::add_research(&conn, "AI Program", "", None).unwrap();
+    let rid = field(&research, "id");
+    let source = core::add_source(&conn, &rid, "Paper", Some(2024), "", "", "", "paper").unwrap();
+    let cited = vec![serde_json::json!({"source_id": field(&source, "id"), "locator": "p. 3"})];
+    let artifact = research_engine::ai::record(&conn, &rid, "extraction", "local:test",
+        "prompt bytes", "output bytes", &cited).unwrap();
+    assert_eq!(field(&artifact, "prompt_sha256"),
+        research_engine::util::sha256_text("prompt bytes"));
+    assert_eq!(field(&artifact, "actor"), "model:local:test");
+    assert!(field(&artifact, "cited_json").contains("p. 3"));
+    assert!(!field(&artifact, "cited_json").contains("prompt bytes"));
+
+    assert!(research_engine::ai::record(&conn, &rid, "sweep", "", "p", "o", &[]).is_err());
+    let claim = research_engine::ai::ingest_claim(&conn, &field(&artifact, "id"), "AI claim",
+        "empirical", Some(&field(&source, "id")), "quote", "p. 3", 0.5, "", "", &[], None,
+        "supports", "agent").unwrap();
+    assert_eq!(field(&claim, "status"), "UNVERIFIED");
+    let events: i64 = conn.query_row("SELECT COUNT(*) FROM event WHERE kind IN ('ai.record','ai.ingest')", [], |r| r.get(0)).unwrap();
+    assert_eq!(events, 2);
+}
+
+#[test]
+fn diff_detects_added_records() {
+    let path = temp_db("diff");
+    let conn = open(path.to_str().unwrap()).unwrap();
+    initialize(&conn).unwrap();
+    let research = core::add_research(&conn, "Diff", "", None).unwrap();
+    let old = path.with_extension("old.jsonl");
+    let new = path.with_extension("new.jsonl");
+    research_engine::bundle::export_jsonl(&conn, &old, None).unwrap();
+    core::add_claim(&conn, &field(&research, "id"), "Added", "derived",
+        None, "", "", 0.5, "", "basis", &[]).unwrap();
+    research_engine::bundle::export_jsonl(&conn, &new, None).unwrap();
+    let result = research_engine::diffing::diff_files(&old, &new, true).unwrap();
+    assert_eq!(result.get("counts").and_then(|c| c.get("added")).and_then(Value::as_u64), Some(1));
+    assert_eq!(result.get("identical").and_then(Value::as_bool), Some(false));
+    let same = research_engine::diffing::diff_files(&old, &old, true).unwrap();
+    assert_eq!(same.get("identical").and_then(Value::as_bool), Some(true));
+}
+
+#[test]
 fn discovery_ranks_from_the_graph() {
     let path = temp_db("discovery");
     let conn = open(path.to_str().unwrap()).unwrap();

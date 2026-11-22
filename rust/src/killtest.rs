@@ -121,6 +121,12 @@ struct RunOutcome {
     stderr: String,
 }
 
+/// Capture one bounded command's stdout, used to resolve the local interpreter
+/// for the fixed AI test templates without an untimed subprocess.
+pub fn capture(command: &str, timeout_seconds: i64) -> Result<String> {
+    Ok(run_once(command, timeout_seconds).stdout.trim().to_string())
+}
+
 fn run_once(command: &str, timeout_seconds: i64) -> RunOutcome {
     use std::process::Stdio;
     use std::time::{Duration, Instant};

@@ -49,6 +49,8 @@ argparse requires in `python -m engine`.
 | Views | `outline`, `brief`, `claim context` with exact token-budget packing and pruning |
 | Manifests | `report --out/--check/--strict` with schema-3 manifests, license pin, content/graph digests and drift detection |
 | Export | `export` JSONL with byte-identical records, `export --check` self-verification |
+| AI provenance | `ai sweep/extract/idea/propose-test/draft/artifacts` with hash-only notarization, fixed probe templates and refuse-on-error ingest |
+| Diff | `diff` with semantic run-churn collapsing and exact mode |
 | Search | deterministic phrase-first lexical `search` with exact snippet/token-budget output |
 | Markdown | `sanitize`/`cell`/`estimate_tokens`/`pack` shared with reports and search |
 | Integrity | 24 finding codes including `PROV-*`, `EVID-*`, `GRAPH-*`, `GAP-*`, `LEDGER-001` |
@@ -72,9 +74,11 @@ argparse requires in `python -m engine`.
   manifests and export verification; digests and checks compare equal.
 - `analysis_extra_parity.py <db>` compares the remaining `analysis` commands;
   all seven compare equal.
+- `ai_parity.py` copies a base graph and compares all six `ai` commands plus
+  `diff`; all seven compare equal.
 
 ## Still to port
 
-AI artifacts, `diff`, studio/adapters/experiments/domains, and the Python CLI
-text renderer. These remain served by `python -m engine` until their Rust
-equivalents land; the SQLite graph is shared throughout.
+studio/adapters/experiments/domains and the Python CLI text renderer. These
+remain served by their Python entry points until their Rust equivalents land;
+the SQLite graph is shared throughout.

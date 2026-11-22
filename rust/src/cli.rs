@@ -36,6 +36,8 @@ pub enum Commands {
         #[arg(long)] research: Option<String>,
         #[arg(long)] check: bool,
     },
+    Diff { old: String, new: String, #[arg(long)] exact: bool },
+    Ai { #[command(subcommand)] action: AiAction },
     Search {
         query: String,
         #[arg(long)] research: Option<String>,
@@ -252,6 +254,51 @@ pub enum AnalysisAction {
 }
 
 #[derive(Debug, Subcommand)]
+pub enum AiAction {
+    Sweep {
+        research: String,
+        #[arg(long, default_value = "sweep")] kind: String,
+        #[arg(long, required = true)] model: String,
+        #[arg(long, required = true)] prompt_file: String,
+        #[arg(long, required = true)] output_file: String,
+        #[arg(long, default_value = "[]")] cited: String,
+    },
+    Extract {
+        #[arg(long, required = true)] artifact: String,
+        #[arg(long, required = true)] text: String,
+        #[arg(long, required = true)] kind: String,
+        #[arg(long)] source: Option<String>,
+        #[arg(long, default_value = "")] quote: String,
+        #[arg(long, default_value = "")] locator: String,
+        #[arg(long, default_value_t = 0.5)] confidence: f64,
+        #[arg(long, default_value = "")] kill_test: String,
+        #[arg(long, default_value = "")] basis: String,
+        #[arg(long = "from")] prerequisites: Vec<String>,
+        #[arg(long)] question: Option<String>,
+        #[arg(long, default_value = "supports")] stance: String,
+        #[arg(long, default_value = "agent")] actor: String,
+    },
+    Idea {
+        #[arg(long, required = true)] artifact: String,
+        #[arg(long, required = true)] statement: String,
+        #[arg(long, required = true)] criterion: String,
+        #[arg(long, default_value_t = 0.5)] confidence: f64,
+        #[arg(long)] question: Option<String>,
+        #[arg(long, default_value = "agent")] actor: String,
+    },
+    ProposeTest {
+        #[arg(long, required = true)] artifact: String,
+        #[arg(long, required = true)] template: String,
+        #[arg(long, required = true)] name: String,
+        #[arg(long)] claim: Option<String>,
+        #[arg(long)] hypothesis: Option<String>,
+        #[arg(long, default_value = "agent")] actor: String,
+    },
+    Draft { reference: String, #[arg(long)] out: Option<String> },
+    Artifacts { #[arg(long)] research: Option<String> },
+}
+
+#[derive(Debug, Subcommand)]
 pub enum ProtocolAction {
     Add {
         #[arg(long, required = true)] id: String,
@@ -449,6 +496,12 @@ pub fn run(cli: &Cli) -> Result<Output> {
             let counts = bundle::export_jsonl(&conn, std::path::Path::new(path), research.as_deref())?;
             emit(counts, format!("exported graph to {path}\n"))
         }
+        Commands::Diff { old, new, exact } => {
+            let result = crate::diffing::diff_files(std::path::Path::new(old),
+                std::path::Path::new(new), !*exact)?;
+            emit(result.clone(), crate::diffing::render(&result))
+        }
+        Commands::Ai { action } => run_ai(&conn, action),
         Commands::Report { reference, out, check, strict } => {
             use crate::manifest;
             if *strict && check.is_none() {
@@ -687,6 +740,68 @@ fn run_hypothesis(conn: &Connection, action: &HypothesisAction) -> Result<Output
         HypothesisAction::Outcome { reference, status, evidence, note, actor } => {
             let record = core::record_outcome(conn, reference, status, evidence, note, actor)?;
             emit_record(record, format!("{} -> {}", reference, status))
+        }
+    }
+}
+
+fn run_ai(conn: &Connection, action: &AiAction) -> Result<Output> {
+    use crate::ai;
+    match action {
+        AiAction::Sweep { research, kind, model, prompt_file, output_file, cited } => {
+            let cited: Value = serde_json::from_str(cited).map_err(|e| EngineError::new(
+                format!("cited payload is not valid JSON: {e}"), "citations arrive as data, not prose.",
+                "pass --cited '[{\"source_id\": \"s_000001\", \"locator\": \"p. 3\"}]'."))?;
+            let Some(cited_list) = cited.as_array() else {
+                return Err(EngineError::new("cited payload is not a list",
+                    "citations arrive as a list of {source_id, locator} objects.",
+                    "pass --cited '[{\"source_id\": \"s_000001\", \"locator\": \"p. 3\"}]'."));
+            };
+            let prompt = std::fs::read_to_string(prompt_file).map_err(|e| EngineError::new(
+                format!("cannot read model I/O file: {prompt_file}"),
+                "the adapter notarizes exact bytes; a missing file proves nothing.",
+                format!("{e}")))?;
+            let output = std::fs::read_to_string(output_file).map_err(|e| EngineError::new(
+                format!("cannot read model I/O file: {output_file}"),
+                "the adapter notarizes exact bytes; a missing file proves nothing.",
+                format!("{e}")))?;
+            let record = ai::record(conn, research, kind, model, &prompt, &output, cited_list)?;
+            emit_record(record.clone(), format!("{} {} {}", field(&record, "id"),
+                field(&record, "kind"), field(&record, "model_id")))
+        }
+        AiAction::Extract { artifact, text, kind, source, quote, locator, confidence, kill_test,
+            basis, prerequisites, question, stance, actor } => {
+            let claim = ai::ingest_claim(conn, artifact, text, kind, source.as_deref(), quote,
+                locator, *confidence, kill_test, basis, prerequisites, question.as_deref(), stance, actor)?;
+            emit_record(claim.clone(), format!("{} UNVERIFIED {}", field(&claim, "id"), field(&claim, "text")))
+        }
+        AiAction::Idea { artifact, statement, criterion, confidence, question, actor } => {
+            let hypothesis = ai::ingest_hypothesis(conn, artifact, statement, criterion,
+                *confidence, question.as_deref(), actor)?;
+            emit_record(hypothesis.clone(), format!("{} {} {}", field(&hypothesis, "id"),
+                field(&hypothesis, "status"), field(&hypothesis, "statement")))
+        }
+        AiAction::ProposeTest { artifact, template, name, claim, hypothesis, actor } => {
+            let test = ai::propose_test(conn, artifact, template, name, claim.as_deref(),
+                hypothesis.as_deref(), actor)?;
+            emit_record(test.clone(), format!("{} {}", field(&test, "id"), field(&test, "name")))
+        }
+        AiAction::Draft { reference, out } => {
+            let text = ai::render_draft(conn, reference)?;
+            if let Some(path) = out {
+                crate::util::atomic_write_text(std::path::Path::new(path), &text)?;
+                return emit(json!({"draft": path}), format!("wrote {path}\n"));
+            }
+            emit(json!({"draft": text.clone()}), text)
+        }
+        AiAction::Artifacts { research } => {
+            let rows = ai::list_artifacts(conn, research.as_deref())?;
+            let text = if rows.is_empty() { "no AI artifacts\n".to_string() } else {
+                rows.iter().map(|a| format!("{}  {:<10} {}  prompt={}  output={}\n",
+                    field(a, "id"), field(a, "kind"), field(a, "model_id"),
+                    field(a, "prompt_sha256").chars().take(12).collect::<String>(),
+                    field(a, "output_sha256").chars().take(12).collect::<String>())).collect()
+            };
+            emit(Value::Array(rows), text)
         }
     }
 }
