@@ -72,6 +72,7 @@ pub enum Commands {
     PnnReports { #[command(subcommand)] action: PnnReportsAction },
     WaterWell { #[command(subcommand)] action: WaterWellAction },
     WaterElectron { #[command(subcommand)] action: WaterElectronAction },
+    WaterVde { #[command(subcommand)] action: WaterVdeAction },
     Providers { #[command(subcommand)] action: ProvidersAction },
     Search {
         query: String,
@@ -298,6 +299,13 @@ pub enum ProvidersAction {
 pub enum PnnRulesAction {
     Evaluate { #[arg(long, required = true)] compound: String },
     Weight { criterion: String },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum WaterVdeAction {
+    Depth { radius_m: f64, binding_ev: f64 },
+    Cavity { #[arg(long, default_value_t = 3.27)] binding_ev: f64, #[arg(long, default_value_t = 1.7)] gap_ev: f64 },
+    Scales,
 }
 
 #[derive(Debug, Subcommand)]
@@ -848,7 +856,7 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::PnnTables { .. } | Commands::PnnCuration { .. }
         | Commands::WaterAnalogue { .. } | Commands::PnnReports { .. }
         | Commands::WaterWell { .. } | Commands::WaterElectron { .. }
-        | Commands::Providers { .. }) {
+        | Commands::WaterVde { .. } | Commands::Providers { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -961,6 +969,25 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::WaterVde { action } => {
+            use crate::domains_fluid_water_vde as vde;
+            match action {
+                WaterVdeAction::Depth { radius_m, binding_ev } => {
+                    let value = vde::depth_for_binding(*radius_m, *binding_ev)?;
+                    emit(json!({"value": value}), format!("{value}\n"))
+                }
+                WaterVdeAction::Cavity { binding_ev, gap_ev } => {
+                    let value = vde::cavity_for_observables(*binding_ev, *gap_ev)?;
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                WaterVdeAction::Scales => {
+                    let value = vde::vde_scales()?;
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+            }
+        }
         Commands::WaterElectron { action } => {
             use crate::domains_fluid_water_electron as we;
             let (mass, hbar, gamma) = (we::MASS, we::HBAR, we::GAMMA_WATER);

@@ -433,6 +433,27 @@ fn fluid_frank_oseen_dispersion() {
 }
 
 #[test]
+fn hydrated_electron_vde_inversion() {
+    use research_engine::domains_fluid_water_vde as vde;
+    let depth = vde::depth_for_binding(3.732e-10, 3.27).unwrap();
+    assert!(depth > 0.0);
+    assert!(vde::depth_for_binding(0.0, 3.27).is_err());
+    assert!(vde::depth_for_binding(3.2e-10, 0.0).is_err());
+    let cavity = vde::cavity_for_observables(3.27, 1.7).unwrap();
+    let radius = cavity["radius_m"].as_f64().unwrap();
+    assert!(radius > 3.0e-10 && radius < 4.5e-10);
+    assert!((cavity["binding_ev"].as_f64().unwrap() - 3.27).abs() < 1e-6);
+    assert!((cavity["gap_ev"].as_f64().unwrap() - 1.7).abs() < 1e-6);
+    assert!(cavity["excess_ev"].as_f64().unwrap() > 0.0);
+    assert!(vde::cavity_for_observables(0.0, 1.7).is_err());
+    assert!(vde::cavity_for_observables(3.27, 0.0).is_err());
+    let scales = vde::vde_scales().unwrap();
+    assert_eq!(scales["vde_ev"].as_f64(), Some(3.27));
+    assert!(scales["capillary"]["radius_ratio"].as_f64().unwrap() > 1.0);
+    assert!(scales["reorganization_ev"].as_f64().unwrap() > 0.0);
+}
+
+#[test]
 fn hydrated_electron_cavity_scale() {
     use research_engine::domains_fluid_water_electron as we;
     assert!((we::screened_bohr_radius(78.4).unwrap() - 78.4 * we::BOHR).abs() < 1e-20);
