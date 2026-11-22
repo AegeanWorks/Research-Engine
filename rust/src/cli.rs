@@ -77,6 +77,7 @@ pub enum Commands {
     TwoStateMarcus { #[command(subcommand)] action: TwoStateMarcusAction },
     ExcitedFluid { #[command(subcommand)] action: ExcitedFluidAction },
     WaterRays { #[command(subcommand)] action: WaterRaysAction },
+    VortexCascade { #[command(subcommand)] action: VortexCascadeAction },
     Providers { #[command(subcommand)] action: ProvidersAction },
     Search {
         query: String,
@@ -303,6 +304,15 @@ pub enum ProvidersAction {
 pub enum PnnRulesAction {
     Evaluate { #[arg(long, required = true)] compound: String },
     Weight { criterion: String },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum VortexCascadeAction {
+    Koide { #[arg(long, required = true)] xs: String },
+    Geometric { ratio: f64, #[arg(long, default_value_t = 3)] generations: usize },
+    Power { exponent: f64, #[arg(long, default_value_t = 3)] generations: usize },
+    Solve { #[arg(long, default_value_t = 2.0 / 3.0)] target: f64, #[arg(long, default_value_t = 0.0)] lower: f64, #[arg(long, default_value_t = 50.0)] upper: f64 },
+    Hypotheses { #[arg(long, required = true)] masses: String },
 }
 
 #[derive(Debug, Subcommand)]
@@ -900,7 +910,8 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::WaterWell { .. } | Commands::WaterElectron { .. }
         | Commands::WaterVde { .. } | Commands::WaterDispersive { .. }
         | Commands::TwoStateMarcus { .. } | Commands::ExcitedFluid { .. }
-        | Commands::WaterRays { .. } | Commands::Providers { .. }) {
+        | Commands::WaterRays { .. } | Commands::VortexCascade { .. }
+        | Commands::Providers { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -1013,6 +1024,44 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::VortexCascade { action } => {
+            use crate::domains_fluid_vortex_cascade as vc;
+            fn numbers(raw: &str) -> Result<Vec<f64>> {
+                serde_json::from_str(raw).map_err(|e| EngineError::new(
+                    format!("invalid JSON: {e}"), "expected a JSON array of numbers",
+                    "pass an array of numbers"))
+            }
+            macro_rules! array {
+                ($expr:expr) => {{
+                    let value = Value::Array($expr?.into_iter().map(Value::from).collect());
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }};
+            }
+            match action {
+                VortexCascadeAction::Koide { xs } => {
+                    let value = vc::koide_q(&numbers(xs)?)?;
+                    emit(json!({"value": value}), format!("{value}\n"))
+                }
+                VortexCascadeAction::Geometric { ratio, generations } =>
+                    array!(vc::geometric_spectrum(*ratio, *generations)),
+                VortexCascadeAction::Power { exponent, generations } => {
+                    let values = vc::power_law_spectrum(*exponent, *generations);
+                    let value = Value::Array(values.into_iter().map(Value::from).collect());
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                VortexCascadeAction::Solve { target, lower, upper } => {
+                    let value = vc::solve_power_for_koide(*target, *lower, *upper)?;
+                    emit(json!({"value": value}), format!("{value}\n"))
+                }
+                VortexCascadeAction::Hypotheses { masses } => {
+                    let value = vc::run_hypotheses(&numbers(masses)?)?;
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+            }
+        }
         Commands::WaterRays { action } => {
             use crate::domains_fluid_water_rays as wr;
             macro_rules! scalar {

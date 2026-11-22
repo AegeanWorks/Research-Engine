@@ -433,6 +433,30 @@ fn fluid_frank_oseen_dispersion() {
 }
 
 #[test]
+fn vortex_hierarchy_hypotheses() {
+    use research_engine::domains_fluid_vortex_cascade as vc;
+    let masses = [0.511, 105.7, 1776.9];
+    let q = vc::koide_q(&masses).unwrap();
+    assert!((q - 2.0 / 3.0).abs() < 1e-3);
+    assert!(vc::koide_q(&[]).is_err());
+    assert!(vc::koide_q(&[-1.0]).is_err());
+    let geometric = vc::geometric_spectrum(2.0, 3).unwrap();
+    assert_eq!(geometric, vec![1.0, 2.0, 4.0]);
+    assert!(vc::geometric_spectrum(0.0, 3).is_err());
+    assert_eq!(vc::power_law_spectrum(2.0, 3), vec![1.0, 4.0, 9.0]);
+    let p = vc::solve_power_for_koide(vc::KOIDE_TARGET, 0.0, 50.0).unwrap();
+    assert!(p > 0.0 && p < 50.0);
+    assert!(vc::solve_power_for_koide(0.2, 0.0, 50.0).is_err());
+    assert!(vc::solve_power_for_koide(vc::KOIDE_TARGET, 20.0, 50.0).is_err());
+    let result = vc::run_hypotheses(&masses).unwrap();
+    assert_eq!(result["models"].as_object().unwrap().len(), 3);
+    assert_eq!(result.get("falsified").and_then(Value::as_bool), Some(true));
+    assert!(result.get("status").and_then(Value::as_str).unwrap().starts_with("FALSIFIED"));
+    assert!(vc::run_hypotheses(&[1.0, 2.0]).is_err());
+    assert!(vc::run_hypotheses(&[1.0, -2.0, 3.0]).is_err());
+}
+
+#[test]
 fn acoustic_horizon_rays() {
     use research_engine::domains_fluid_water_rays as wr;
     let flow = 1e-3;
