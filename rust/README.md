@@ -55,6 +55,7 @@ argparse requires in `python -m engine`.
 | Lattice adapter | Identity rules (SHA-1 paper ids, study types, tags, refs) and BibTeX/RIS/CSV/CSL-JSON parsers (`lattice` CLI) |
 | Lattice repository | Schema-v2 paper/claim/question/edge graph with duplicate merging, lexical search, stats and detail views (`lattice-repo` CLI, `--db` points at a lattice store) |
 | Lattice snapshots | JSONL, BibTeX, GraphML and Cytoscape exports with byte-identical serializers (`lattice-snap` CLI) |
+| Meta-analysis | Fixed/DerSimonian-Laird random-effects pooling, Q/I²/τ², Hedges' g study construction and ASCII forest plots (`meta` CLI) |
 | Search | deterministic phrase-first lexical `search` with exact snippet/token-budget output |
 | Markdown | `sanitize`/`cell`/`estimate_tokens`/`pack` shared with reports and search |
 | Integrity | 24 finding codes including `PROV-*`, `EVID-*`, `GRAPH-*`, `GAP-*`, `LEDGER-001` |
@@ -88,9 +89,11 @@ argparse requires in `python -m engine`.
   detail views and stats against Python; all 8 checks match.
 - `lattice_snapshots_parity.py` compares JSONL records, BibTeX, Cytoscape and
   GraphML serialization against Python; all four formats match.
+- `meta_parity.py` compares study construction, pooling and forest rendering;
+  all five checks match.
 
 ## Still to port
 
-the lattice analysis/discovery/context/meta modules, studio, domains and the
-Python CLI text renderer. These remain served by their Python entry points
-until their Rust equivalents land; the SQLite graph is shared throughout.
+the lattice analysis/discovery/context modules, studio, domains and the Python
+CLI text renderer. These remain served by their Python entry points until their
+Rust equivalents land; the SQLite graph is shared throughout.

@@ -221,6 +221,30 @@ fn search_is_phrase_first_and_program_scoped() {
 }
 
 #[test]
+fn meta_analysis_pools_studies() {
+    use research_engine::meta;
+    let studies = vec![
+        serde_json::json!({"id": "s1", "effect_size": 0.5, "ci_lower": 0.1, "ci_upper": 0.9}),
+        serde_json::json!({"id": "s2", "effect_size": 0.8, "ci_lower": 0.3, "ci_upper": 1.3}),
+    ];
+    let result = meta::compute_meta_analysis(&studies, "random").unwrap();
+    assert_eq!(field(&result, "model"), "random");
+    assert_eq!(result.get("studies").and_then(Value::as_array).map(|v| v.len()), Some(2));
+    assert!(result.get("pooled_effect").and_then(Value::as_f64).unwrap() > 0.0);
+    let ci = meta::study_from_ci("s", "Study", 0.5, 0.1, 0.9, "").unwrap();
+    assert!(number(&ci, "se") > 0.0);
+    let groups = meta::study_from_groups("g", "Groups", 30, 10.0, 2.0, 28, 8.5, 2.1, "").unwrap();
+    assert!(number(&groups, "effect_size") > 0.0);
+    let forest = meta::render_forest_ascii(&result, 40);
+    assert!(forest.contains("Heterogeneity:"));
+    assert!(meta::compute_meta_analysis(&[], "random").is_err());
+}
+
+fn number(value: &Value, key: &str) -> f64 {
+    value.get(key).and_then(Value::as_f64).unwrap_or(0.0)
+}
+
+#[test]
 fn lattice_snapshots_are_deterministic() {
     let path = temp_db("lattice_snaps");
     let conn = research_engine::lattice_repo::open(path.to_str().unwrap()).unwrap();

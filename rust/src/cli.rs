@@ -42,6 +42,7 @@ pub enum Commands {
     Lattice { #[command(subcommand)] action: LatticeAction },
     LatticeRepo { #[command(subcommand)] action: LatticeRepoAction },
     LatticeSnap { #[command(subcommand)] action: LatticeSnapAction },
+    Meta { #[command(subcommand)] action: MetaAction },
     Search {
         query: String,
         #[arg(long)] research: Option<String>,
@@ -254,6 +255,24 @@ pub enum AnalysisAction {
         #[arg(long)] allow_self_reported: bool,
         #[arg(long, default_value = "")] since: String,
         #[arg(long, default_value = "")] until: String,
+    },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum MetaAction {
+    StudyCi {
+        id: String, label: String, effect: f64, lower: f64, upper: f64,
+        #[arg(long, default_value = "General Study")] study_type: String,
+    },
+    StudyGroups {
+        id: String, label: String, n1: i64, m1: f64, sd1: f64, n2: i64, m2: f64, sd2: f64,
+        #[arg(long, default_value = "Randomized Controlled Trial")] study_type: String,
+    },
+    Analyze { #[arg(long, required = true)] studies: String, #[arg(long, default_value = "random")] model: String },
+    Forest {
+        #[arg(long, required = true)] studies: String,
+        #[arg(long, default_value = "random")] model: String,
+        #[arg(long, default_value_t = 40)] width: usize,
     },
 }
 
@@ -490,7 +509,7 @@ fn list_text(rows: &[Value]) -> String {
 pub fn run(cli: &Cli) -> Result<Output> {
     let conn = open(&cli.db)?;
     if !matches!(cli.command, Commands::Init | Commands::Lattice { .. }
-        | Commands::LatticeRepo { .. } | Commands::LatticeSnap { .. }) {
+        | Commands::LatticeRepo { .. } | Commands::LatticeSnap { .. } | Commands::Meta { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -603,6 +622,31 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::Meta { action } => match action {
+            MetaAction::StudyCi { id, label, effect, lower, upper, study_type } => {
+                let result = crate::meta::study_from_ci(id, label, *effect, *lower, *upper, study_type)?;
+                emit(result.clone(), to_stable_json(&result))
+            }
+            MetaAction::StudyGroups { id, label, n1, m1, sd1, n2, m2, sd2, study_type } => {
+                let result = crate::meta::study_from_groups(id, label, *n1, *m1, *sd1, *n2, *m2, *sd2, study_type)?;
+                emit(result.clone(), to_stable_json(&result))
+            }
+            MetaAction::Analyze { studies, model } => {
+                let list: Vec<Value> = serde_json::from_str(studies).map_err(|e| EngineError::new(
+                    format!("invalid studies JSON: {e}"), "studies must be a JSON array of study objects.",
+                    "pass --studies '[{\"id\":\"s1\",\"effect_size\":0.5,\"se\":0.2}]'."))?;
+                let result = crate::meta::compute_meta_analysis(&list, model)?;
+                emit(result.clone(), to_stable_json(&result))
+            }
+            MetaAction::Forest { studies, model, width } => {
+                let list: Vec<Value> = serde_json::from_str(studies).map_err(|e| EngineError::new(
+                    format!("invalid studies JSON: {e}"), "studies must be a JSON array of study objects.",
+                    "pass --studies '[{\"id\":\"s1\",\"effect_size\":0.5,\"se\":0.2}]'."))?;
+                let result = crate::meta::compute_meta_analysis(&list, model)?;
+                let text = crate::meta::render_forest_ascii(&result, *width);
+                emit(json!({"text": text.clone()}), text)
+            }
+        },
         Commands::LatticeSnap { action } => {
             use crate::lattice_snapshots as snaps;
             let lattice = crate::lattice_repo::open(&cli.db)?;

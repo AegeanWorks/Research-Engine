@@ -24,6 +24,7 @@ pub mod lattice_repo;
 pub mod lattice_snapshots;
 pub mod manifest;
 pub mod markdown;
+pub mod meta;
 pub mod observations;
 pub mod protocols;
 pub mod provenance;

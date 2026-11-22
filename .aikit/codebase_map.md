@@ -6,15 +6,15 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `428`
+- **Total Python Modules**: `430`
 - **Total Classes**: `317`
-- **Total Top-Level Functions**: `1976`
+- **Total Top-Level Functions**: `1978`
 - **Total Class Methods**: `1545`
-- **Total Source Lines**: `90000`
+- **Total Source Lines**: `90083`
 
 ## 🧭 Map Coverage
-- **Indexed**: python (`428` module(s))
-- **Not indexed by this map**: javascript (`1` file(s)), rust (`31` file(s))
+- **Indexed**: python (`430` module(s))
+- **Not indexed by this map**: javascript (`1` file(s)), rust (`32` file(s))
 
 > Only Python symbols are catalogued. A language above is reported as not indexed, never as verified by this map.
 
@@ -4715,6 +4715,22 @@
 
 **Functions:**
 - `def run(cmd, cwd)`
+
+---
+
+### [`rust/meta_expected.py`](rust/meta_expected.py)
+> *Python reference for the Rust `meta` CLI commands.*
+
+**Size**: `53` lines
+
+---
+
+### [`rust/meta_parity.py`](rust/meta_parity.py)
+**Size**: `30` lines
+
+**Functions:**
+- `def run(cmd)`
+- `def compare(label, args)`
 
 ---
 

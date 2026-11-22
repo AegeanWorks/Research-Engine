@@ -5,37 +5,13 @@
     "last_phase": "in_progress",
     "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1795352732.1544435,
+    "updated_at": 1795353242.918258,
     "owner": "opencode:rust-rewrite",
-    "lease_until": 1795359932.1544435,
+    "lease_until": 1795360442.918258,
     "started_by": "opencode:rust-rewrite",
     "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "T-026-rust-rewrite",
-      "phase": "in_progress",
-      "phase_num": 4,
-      "description": "[6/6 extension] Verification: cargo test 17/17; Rust and Python JSON equal for analysis stats and trend; project gates pending",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795346299.2044723,
-      "timestamp_str": "2026-11-22 14:18:19",
-      "agent": "opencode:rust-rewrite",
-      "checklists": "passed"
-    },
-    {
-      "task_id": "T-026-rust-rewrite",
-      "phase": "in_progress",
-      "phase_num": 4,
-      "description": "[6/6 verification final] cargo test 17/17; Python engine JSON equal for analysis stats/trend; 1180 Python tests OK; hygiene, KB and secrets gates pass",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795346924.0712879,
-      "timestamp_str": "2026-11-22 14:28:44",
-      "agent": "opencode:rust-rewrite",
-      "checklists": "passed"
-    },
     {
       "task_id": "T-026-rust-rewrite",
       "phase": "completed",
@@ -264,6 +240,29 @@
       "status": "in_progress",
       "timestamp": 1795352732.1544435,
       "timestamp_str": "2026-11-22 16:05:32",
+      "agent": "opencode:rust-rewrite",
+      "checklists": "passed"
+    },
+    {
+      "task_id": "T-028-outer-layers",
+      "phase": "in_progress",
+      "phase_num": 3,
+      "description": "[4/6] Ported lattice meta-analysis: study construction, fixed/random pooling, heterogeneity statistics and ASCII forest plots",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795353242.643958,
+      "timestamp_str": "2026-11-22 16:14:02",
+      "agent": "opencode:rust-rewrite"
+    },
+    {
+      "task_id": "T-028-outer-layers",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[4/6] Verification: cargo test 27/27; meta_parity.py 5/5 exact matches; project gates passing",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795353242.918258,
+      "timestamp_str": "2026-11-22 16:14:02",
       "agent": "opencode:rust-rewrite",
       "checklists": "passed"
     }
