@@ -54,6 +54,7 @@ pub enum Commands {
     FluidBridge { #[command(subcommand)] action: FluidBridgeAction },
     Obezite { #[command(subcommand)] action: ObeziteAction },
     PnnRules { #[command(subcommand)] action: PnnRulesAction },
+    PnnDocking { #[command(subcommand)] action: PnnDockingAction },
     Providers { #[command(subcommand)] action: ProvidersAction },
     Search {
         query: String,
@@ -280,6 +281,18 @@ pub enum ProvidersAction {
 pub enum PnnRulesAction {
     Evaluate { #[arg(long, required = true)] compound: String },
     Weight { criterion: String },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum PnnDockingAction {
+    /// Parse raw docking rows from a JSON file into score records.
+    Parse { #[arg(long, required = true)] rows: String, #[arg(long, default_value = "input")] source: String },
+    /// Parse, filter, normalize and aggregate docking rows into per-compound best targets.
+    Rank {
+        #[arg(long, required = true)] rows: String,
+        #[arg(long)] max_rmsd: Option<f64>,
+        #[arg(long)] min_vina: Option<f64>,
+    },
 }
 
 #[derive(Debug, Subcommand)]
@@ -617,7 +630,7 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::Mcp { .. } | Commands::Web { .. } | Commands::Atlas { .. }
         | Commands::PnnSafety { .. } | Commands::Client { .. }
         | Commands::FluidBridge { .. } | Commands::Obezite { .. }
-        | Commands::PnnRules { .. } | Commands::Providers { .. }) {
+        | Commands::PnnRules { .. } | Commands::PnnDocking { .. } | Commands::Providers { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -730,6 +743,43 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::PnnDocking { action } => {
+            use crate::domains_pnn_docking as docking;
+            fn read_rows(path: &str) -> Result<Vec<std::collections::BTreeMap<String, String>>> {
+                let text = std::fs::read_to_string(path).map_err(|e| EngineError::new(
+                    format!("cannot read docking rows: {e}"),
+                    "the rows file must be a readable UTF-8 JSON array of string maps",
+                    "pass a readable JSON file"))?;
+                serde_json::from_str(&text).map_err(|e| EngineError::new(
+                    format!("invalid docking rows JSON: {e}"),
+                    "each row must be an object of string values",
+                    "pass an array of string-keyed objects"))
+            }
+            match action {
+                PnnDockingAction::Parse { rows, source } => {
+                    let rows = read_rows(rows)?;
+                    let scores = docking::parse_rows(&rows, source)?;
+                    emit(Value::Array(scores.clone()), to_stable_json(&Value::Array(scores)))
+                }
+                PnnDockingAction::Rank { rows, max_rmsd, min_vina } => {
+                    let rows = read_rows(rows)?;
+                    let scores = docking::parse_rows(&rows, "input")?;
+                    let (kept, dropped) = docking::filter_scores(&scores, *max_rmsd, *min_vina);
+                    let ranks = docking::normalize_scores(&kept);
+                    let aggregated = docking::aggregate_best(&ranks);
+                    let aggregated_json = Value::Object(aggregated.into_iter().map(|(k, v)| (k, v)).collect());
+                    let out = json!({
+                        "scores": scores,
+                        "kept": kept.len(),
+                        "dropped": dropped,
+                        "ranks": ranks,
+                        "aggregated": aggregated_json,
+                    });
+                    let stable = to_stable_json(&out);
+                    emit(out, stable)
+                }
+            }
+        }
         Commands::Providers { action } => {
             use crate::lattice_providers as providers;
             match action {

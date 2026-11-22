@@ -6,15 +6,15 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `454`
+- **Total Python Modules**: `456`
 - **Total Classes**: `317`
-- **Total Top-Level Functions**: `1999`
+- **Total Top-Level Functions**: `2000`
 - **Total Class Methods**: `1545`
-- **Total Source Lines**: `91053`
+- **Total Source Lines**: `91133`
 
 ## 🧭 Map Coverage
-- **Indexed**: python (`454` module(s))
-- **Not indexed by this map**: javascript (`1` file(s)), rust (`48` file(s))
+- **Indexed**: python (`456` module(s))
+- **Not indexed by this map**: javascript (`1` file(s)), rust (`49` file(s))
 
 > Only Python symbols are catalogued. A language above is reported as not indexed, never as verified by this map.
 
@@ -4849,6 +4849,21 @@
 
 ### [`rust/parity_check.py`](rust/parity_check.py)
 **Size**: `36` lines
+
+**Functions:**
+- `def run(cmd, cwd)`
+
+---
+
+### [`rust/pnn_docking_expected.py`](rust/pnn_docking_expected.py)
+> *Python reference for the Rust `pnn-docking` CLI commands.*
+
+**Size**: `32` lines
+
+---
+
+### [`rust/pnn_docking_parity.py`](rust/pnn_docking_parity.py)
+**Size**: `48` lines
 
 **Functions:**
 - `def run(cmd, cwd)`

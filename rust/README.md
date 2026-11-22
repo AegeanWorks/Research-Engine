@@ -18,7 +18,7 @@ cargo test
 `rust-toolchain.toml` and `.cargo/config.toml` select
 `stable-x86_64-pc-windows-gnu` and `gcc`; `Cargo.lock` pins every dependency.
 Declared dependencies: `rusqlite` (bundled SQLite), `clap`, `chrono`,
-`serde_json`, `sha2`.
+`serde_json`, `regex`, `sha2`.
 
 Run the binary with the same global flags as the Python entry point:
 
@@ -67,6 +67,7 @@ argparse requires in `python -m engine`.
 | Domains: fluid bridge | Diffusivity, horizon, Pinney coefficients and bridge paths (`fluid-bridge` CLI) |
 | Domains: obezite | Citation-number extraction with bibliography-noise stripping and claim-row de-duplication (`obezite` CLI) |
 | Domains: PNN rules | CNS/property design-rule evaluation and criterion weighting (`pnn-rules` CLI) |
+| Domains: PNN docking | Docking-score alias parsing, RMSD/Vina filtering, weighted consensus normalization and per-compound best-target aggregation (`pnn-docking` CLI) |
 | Search | deterministic phrase-first lexical `search` with exact snippet/token-budget output |
 | Markdown | `sanitize`/`cell`/`estimate_tokens`/`pack` shared with reports and search |
 | Integrity | 24 finding codes including `PROV-*`, `EVID-*`, `GRAPH-*`, `GAP-*`, `LEDGER-001` |
@@ -125,6 +126,8 @@ argparse requires in `python -m engine`.
   checks match.
 - `providers_parity.py` compares all four provider URLs and parsed candidates;
   all eight checks match.
+- `pnn_docking_parity.py` compares score parsing, default/filtered ranking and
+  best-target aggregation; all three checks match.
 
 ## Still to port
 

@@ -221,6 +221,29 @@ fn search_is_phrase_first_and_program_scoped() {
 }
 
 #[test]
+fn pnn_docking_consensus_ranking() {
+    use research_engine::domains_pnn_docking as docking;
+    use std::collections::BTreeMap;
+    let raw = serde_json::json!([
+        {"Compound ID": "C1", "Target": "TP53", "Vina (kcal/mol)": "-9.2", "Glide": "-6.1", "mmGBSA": "-45.3", "RMSD": "1.2"},
+        {"id": "C1", "receptor": "MDM2", "vinaaffinity": "-8.0", "dG": "-40.0"},
+        {"compound": "C2", "targetname": "TP53", "affinity": "-7.5", "mmgbsadg": "-35.0"},
+    ]);
+    let rows: Vec<BTreeMap<String, String>> = serde_json::from_value(raw).unwrap();
+    let scores = docking::parse_rows(&rows, "input").unwrap();
+    assert_eq!(scores.len(), 3);
+    let (kept, dropped) = docking::filter_scores(&scores, Some(2.0), Some(-8.5));
+    assert_eq!(dropped, 2);
+    assert_eq!(kept.len(), 1);
+    let ranks = docking::normalize_scores(&kept);
+    let aggregated = docking::aggregate_best(&ranks);
+    assert_eq!(aggregated.len(), 1);
+    assert!(aggregated.contains_key("C1"));
+    assert_eq!(aggregated["C1"].get("targets_docked").and_then(Value::as_u64), Some(1));
+    assert!(docking::parse_rows(&[], "empty").is_err());
+}
+
+#[test]
 fn lattice_provider_parsers_and_urls() {
     use research_engine::lattice_providers as providers;
     let url = providers::query_url("crossref", "sleep memory", 5).unwrap();
