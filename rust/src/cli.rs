@@ -51,6 +51,7 @@ pub enum Commands {
     Atlas { #[command(subcommand)] action: AtlasAction },
     PnnSafety { #[arg(long, required = true)] tox: String, #[arg(long, default_value = "{}")] pharm: String },
     Client { #[command(subcommand)] action: ClientAction },
+    FluidBridge { #[command(subcommand)] action: FluidBridgeAction },
     Search {
         query: String,
         #[arg(long)] research: Option<String>,
@@ -264,6 +265,14 @@ pub enum AnalysisAction {
         #[arg(long, default_value = "")] since: String,
         #[arg(long, default_value = "")] until: String,
     },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum FluidBridgeAction {
+    Diffusivity { hbar: f64, mass: f64 },
+    Horizon { omega: f64 },
+    Coeffs { s0: f64, st: f64, horizon_t: f64, omega: f64, hbar: f64, mass: f64 },
+    Path { #[arg(long)] coeffs: String, #[arg(long)] times: String, #[arg(long)] omega: f64 },
 }
 
 #[derive(Debug, Subcommand)]
@@ -579,7 +588,8 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::LatticeRepo { .. } | Commands::LatticeSnap { .. } | Commands::Meta { .. }
         | Commands::LatticeQuery { .. } | Commands::Discovery { .. } | Commands::Studio { .. }
         | Commands::Mcp { .. } | Commands::Web { .. } | Commands::Atlas { .. }
-        | Commands::PnnSafety { .. } | Commands::Client { .. }) {
+        | Commands::PnnSafety { .. } | Commands::Client { .. }
+        | Commands::FluidBridge { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -692,6 +702,32 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::FluidBridge { action } => {
+            use crate::domains_fluid_bridge as bridge;
+            match action {
+                FluidBridgeAction::Diffusivity { hbar, mass } => {
+                    let value = bridge::diffusivity(*hbar, *mass)?;
+                    emit(json!({"value": value}), format!("{value}\n"))
+                }
+                FluidBridgeAction::Horizon { omega } => {
+                    let value = bridge::horizon(*omega)?;
+                    emit(json!({"value": value}), format!("{value}\n"))
+                }
+                FluidBridgeAction::Coeffs { s0, st, horizon_t, omega, hbar, mass } => {
+                    let rows = bridge::pinney_coeffs(*s0, *st, *horizon_t, *omega, *hbar, *mass)?;
+                    emit(Value::Array(rows.clone()), to_stable_json(&Value::Array(rows)))
+                }
+                FluidBridgeAction::Path { coeffs, times, omega } => {
+                    let coeff: Value = serde_json::from_str(coeffs).map_err(|e| EngineError::new(
+                        format!("invalid coeffs JSON: {e}"), "coeffs must be a JSON object.", "pass A/B/C numbers."))?;
+                    let list: Vec<f64> = serde_json::from_str(times).map_err(|e| EngineError::new(
+                        format!("invalid times JSON: {e}"), "times must be a JSON array of numbers.", "pass a JSON array."))?;
+                    let values: Vec<Value> = bridge::pinney_path(&coeff, &list, *omega)
+                        .into_iter().map(Value::from).collect();
+                    emit(Value::Array(values.clone()), to_stable_json(&Value::Array(values)))
+                }
+            }
+        }
         Commands::Client { action } => {
             use crate::studio_client as client;
             let conn = crate::lattice_repo::open(&cli.db)?;

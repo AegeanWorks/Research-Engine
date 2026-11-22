@@ -64,6 +64,7 @@ argparse requires in `python -m engine`.
 | Studio client | `LatticeClient` facade: tool/resource/prompt schemas, read-only policy and MCP tool calls (`client` CLI) |
 | Domains: Atlas | Visual-knowledge schema validation, Muse payload coercion, analysis merging and JSON Schema (`atlas` CLI) |
 | Domains: PNN safety | NOAEL→HED conversion, most-sensitive study selection, IND safety thresholds and Markdown report (`pnn-safety` CLI) |
+| Domains: fluid bridge | Diffusivity, horizon, Pinney coefficients and bridge paths (`fluid-bridge` CLI) |
 | Search | deterministic phrase-first lexical `search` with exact snippet/token-budget output |
 | Markdown | `sanitize`/`cell`/`estimate_tokens`/`pack` shared with reports and search |
 | Integrity | 24 finding codes including `PROV-*`, `EVID-*`, `GRAPH-*`, `GAP-*`, `LEDGER-001` |
@@ -115,10 +116,11 @@ argparse requires in `python -m engine`.
   checks match.
 - `pnn_safety_parity.py` compares safety assessments and the Markdown package;
   both match.
+- `fluid_bridge_parity.py` compares the bridge primitives; all four checks match.
 
 ## Still to port
 
 the network-backed lattice providers (arXiv, Crossref, OpenAlex, EuropePMC),
-the remaining fluid-universe/obezite domain packs and other PNN modules, and
+the remaining fluid-universe/obezite domain modules and other PNN modules, and
 the Python CLI text renderer. These remain served by their Python entry points
 until their Rust equivalents land; the SQLite graph is shared throughout.

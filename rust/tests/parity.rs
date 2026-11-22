@@ -221,6 +221,19 @@ fn search_is_phrase_first_and_program_scoped() {
 }
 
 #[test]
+fn fluid_bridge_primitives() {
+    use research_engine::domains_fluid_bridge as bridge;
+    assert!((bridge::diffusivity(1.0, 2.0).unwrap() - 0.25).abs() < 1e-12);
+    assert!(bridge::diffusivity(-1.0, 2.0).is_err());
+    assert!((bridge::horizon(1.0).unwrap() - std::f64::consts::PI / 4.0).abs() < 1e-12);
+    let coeffs = bridge::pinney_coeffs(1.2, 1.0, 0.7853981633974483, 1.0, 1.0, 1.0).unwrap();
+    assert_eq!(coeffs.len(), 2);
+    let values = bridge::pinney_path(&coeffs[0], &[0.0, 0.5], 1.0);
+    assert_eq!(values.len(), 2);
+    assert!(values.iter().all(|v| *v >= 0.0));
+}
+
+#[test]
 fn studio_client_read_only_policy() {
     let path = temp_db("client");
     let conn = research_engine::lattice_repo::open(path.to_str().unwrap()).unwrap();

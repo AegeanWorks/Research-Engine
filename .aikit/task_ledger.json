@@ -5,9 +5,9 @@
     "last_phase": "in_progress",
     "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1795361406.7769058,
+    "updated_at": 1795362387.8082464,
     "owner": "opencode:rust-rewrite",
-    "lease_until": 1795368606.7769058,
+    "lease_until": 1795369587.8082464,
     "started_by": "opencode:rust-rewrite",
     "continuations": []
   },
@@ -92,29 +92,6 @@
         "mitigation": "Port bounded modules with Python parity helpers, keep separate schema initialization for lattice stores, verify with cargo test plus direct hygiene/KB/secret/test scripts before each commit."
       },
       "plan_digest": "aa86d74d20a2aa574d309dbaebd42d9d88ae476163fffe70a12c668f65645169"
-    },
-    {
-      "task_id": "T-028-outer-layers",
-      "phase": "in_progress",
-      "phase_num": 3,
-      "description": "[5/6 extension] Ported the offline lattice discovery provider, provider registry, candidate de-duplication and Crossref/OpenAlex helper parsers into rust/src/lattice_discovery.rs",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795355171.545773,
-      "timestamp_str": "2026-11-22 16:46:11",
-      "agent": "opencode:rust-rewrite"
-    },
-    {
-      "task_id": "T-028-outer-layers",
-      "phase": "in_progress",
-      "phase_num": 4,
-      "description": "[5/6 extension] Verification: cargo test 29/29; discovery_parity.py 6/6 exact matches; project gates passing",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795355171.9581423,
-      "timestamp_str": "2026-11-22 16:46:11",
-      "agent": "opencode:rust-rewrite",
-      "checklists": "passed"
     },
     {
       "task_id": "T-028-outer-layers",
@@ -251,6 +228,29 @@
       "status": "in_progress",
       "timestamp": 1795361406.7769058,
       "timestamp_str": "2026-11-22 18:30:06",
+      "agent": "opencode:rust-rewrite",
+      "checklists": "passed"
+    },
+    {
+      "task_id": "T-028-outer-layers",
+      "phase": "in_progress",
+      "phase_num": 3,
+      "description": "[6/6 partial] Ported fluid-universe Gaussian bridge primitives (diffusivity, horizon, Pinney coefficients, bridge paths) into rust/src/domains_fluid_bridge.rs",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795362387.6096723,
+      "timestamp_str": "2026-11-22 18:46:27",
+      "agent": "opencode:rust-rewrite"
+    },
+    {
+      "task_id": "T-028-outer-layers",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[6/6 partial] Verification: cargo test 37/37; fluid_bridge_parity.py 4/4 matches; project gates passing",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795362387.8082464,
+      "timestamp_str": "2026-11-22 18:46:27",
       "agent": "opencode:rust-rewrite",
       "checklists": "passed"
     }

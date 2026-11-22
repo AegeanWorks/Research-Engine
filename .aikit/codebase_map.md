@@ -6,15 +6,15 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `446`
+- **Total Python Modules**: `448`
 - **Total Classes**: `317`
-- **Total Top-Level Functions**: `1991`
+- **Total Top-Level Functions**: `1994`
 - **Total Class Methods**: `1545`
-- **Total Source Lines**: `90749`
+- **Total Source Lines**: `90826`
 
 ## 🧭 Map Coverage
-- **Indexed**: python (`446` module(s))
-- **Not indexed by this map**: javascript (`1` file(s)), rust (`44` file(s))
+- **Indexed**: python (`448` module(s))
+- **Not indexed by this map**: javascript (`1` file(s)), rust (`45` file(s))
 
 > Only Python symbols are catalogued. A language above is reported as not indexed, never as verified by this map.
 
@@ -4715,6 +4715,23 @@
 
 ### [`rust/fix_literals.py`](rust/fix_literals.py)
 **Size**: `10` lines
+
+---
+
+### [`rust/fluid_bridge_expected.py`](rust/fluid_bridge_expected.py)
+> *Python reference for the Rust `fluid-bridge` CLI commands.*
+
+**Size**: `39` lines
+
+---
+
+### [`rust/fluid_bridge_parity.py`](rust/fluid_bridge_parity.py)
+**Size**: `38` lines
+
+**Functions:**
+- `def run(cmd, cwd)`
+- `def close(a, b, tol)`
+- `def compare(label, args)`
 
 ---
 
