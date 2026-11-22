@@ -5,52 +5,13 @@
     "last_phase": "in_progress",
     "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1795344775.0652297,
+    "updated_at": 1795346924.0712879,
     "owner": "opencode:rust-rewrite",
-    "lease_until": 1795351975.0652297,
+    "lease_until": 1795354124.0712879,
     "started_by": "opencode:rust-rewrite",
     "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "T-022-windows-dryrun-holm",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'T-022-windows-dryrun-holm' completed successfully.",
-      "status": "completed",
-      "timestamp": 1793913385.9789965,
-      "timestamp_str": "2026-11-06 00:16:25",
-      "agent": "kilo:goal"
-    },
-    {
-      "task_id": "T-023-trend-window",
-      "phase": "in_progress",
-      "phase_num": 2,
-      "description": "[1/3] Planning trend since/until to close window asymmetry",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793913573.8118606,
-      "timestamp_str": "2026-11-06 00:19:33",
-      "agent": "kilo:goal",
-      "impact_assessment": {
-        "why": "Stats, batch and correlation slice by record time but trend reads the full group, so paired analyses disagree on n",
-        "benefits": "Consistent windowing across all analysis reads; window stored in result and event detail",
-        "risks": "contract: x stays recording position re-indexed within window; trend still records claim.trend event; dependency: stdlib only; concurrency: single writer; state: no schema change",
-        "mitigation": "Failing-first window tests; golden windowed trend before report out; full suite plus aikit check; explicit staging"
-      },
-      "plan_digest": "3919dfdcb20b5b4e87638d0f0406b62dd8c657cb9d0d63d056554c4a818130fd"
-    },
-    {
-      "task_id": "T-023-trend-window",
-      "phase": "in_progress",
-      "phase_num": 4,
-      "description": "[2/3] Trend window shipped: since/until on claim_trend with re-indexed positions plus windowed event detail, tests green, checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793913682.2145815,
-      "timestamp_str": "2026-11-06 00:21:22",
-      "agent": "kilo:goal"
-    },
     {
       "task_id": "T-023-trend-window",
       "phase": "in_progress",
@@ -256,6 +217,41 @@
       "status": "in_progress",
       "timestamp": 1795344775.0652297,
       "timestamp_str": "2026-11-22 13:52:55",
+      "agent": "opencode:rust-rewrite",
+      "checklists": "passed"
+    },
+    {
+      "task_id": "T-026-rust-rewrite",
+      "phase": "in_progress",
+      "phase_num": 3,
+      "description": "[6/6 extension] Ported analysis stats/trend with CPython-exact bootstrap and comparability gates",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795346298.8866096,
+      "timestamp_str": "2026-11-22 14:18:18",
+      "agent": "opencode:rust-rewrite"
+    },
+    {
+      "task_id": "T-026-rust-rewrite",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[6/6 extension] Verification: cargo test 17/17; Rust and Python JSON equal for analysis stats and trend; project gates pending",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795346299.2044723,
+      "timestamp_str": "2026-11-22 14:18:19",
+      "agent": "opencode:rust-rewrite",
+      "checklists": "passed"
+    },
+    {
+      "task_id": "T-026-rust-rewrite",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[6/6 verification final] cargo test 17/17; Python engine JSON equal for analysis stats/trend; 1180 Python tests OK; hygiene, KB and secrets gates pass",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795346924.0712879,
+      "timestamp_str": "2026-11-22 14:28:44",
       "agent": "opencode:rust-rewrite",
       "checklists": "passed"
     }

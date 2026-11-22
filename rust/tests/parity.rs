@@ -168,6 +168,35 @@ fn protocols_and_observations_enforce_provenance() {
 }
 
 #[test]
+fn analysis_stats_and_trend_record_evidence() {
+    let path = temp_db("analysis");
+    let conn = open(path.to_str().unwrap()).unwrap();
+    initialize(&conn).unwrap();
+    let research = core::add_research(&conn, "Analysis", "", None).unwrap();
+    let claim = core::add_claim(&conn, &field(&research, "id"), "Compared", "derived",
+        None, "", "", 0.5, "", "basis", &[]).unwrap();
+    for value in [1.0, 2.0, 3.0, 4.0] {
+        research_engine::observations::add(&conn, &field(&claim, "id"), "baseline", value,
+            "", "", "", "", "", "", "", "", 1, "raw", "", "unclassified", "", "").unwrap();
+    }
+    for value in [2.0, 4.0, 5.0, 7.0] {
+        research_engine::observations::add(&conn, &field(&claim, "id"), "treatment", value,
+            "", "", "", "", "", "", "", "", 1, "raw", "", "unclassified", "", "").unwrap();
+    }
+    let stats = research_engine::analysis::claim_statistics(&conn, &field(&claim, "id"),
+        "baseline", "treatment", 0, 2000, false, false, "agent", "", "", "").unwrap();
+    assert_eq!(stats.get("claim").and_then(Value::as_str), Some(field(&claim, "id").as_str()));
+    assert_eq!(stats.get("baseline").and_then(|b| b.get("n")).and_then(Value::as_u64), Some(4));
+    assert!(stats.get("comparability").is_some());
+    let trend = research_engine::analysis::claim_trend(&conn, &field(&claim, "id"),
+        "baseline", "agent", "", "").unwrap();
+    assert_eq!(trend.get("group").and_then(Value::as_str), Some("baseline"));
+    let events: i64 = conn.query_row(
+        "SELECT COUNT(*) FROM event WHERE kind IN ('claim.stats','claim.trend')", [], |r| r.get(0)).unwrap();
+    assert_eq!(events, 2);
+}
+
+#[test]
 fn search_is_phrase_first_and_program_scoped() {
     let path = temp_db("search");
     let conn = open(path.to_str().unwrap()).unwrap();

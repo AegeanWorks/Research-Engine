@@ -37,6 +37,7 @@ pub enum Commands {
         #[arg(long, default_value_t = 800)] budget: i64,
         #[arg(long)] all: bool,
     },
+    Analysis { #[command(subcommand)] action: AnalysisAction },
     Protocol { #[command(subcommand)] action: ProtocolAction },
     Observation { #[command(subcommand)] action: ObservationAction },
     Report {
@@ -202,6 +203,30 @@ pub enum TestAction {
 }
 
 #[derive(Debug, Subcommand)]
+pub enum AnalysisAction {
+    Stats {
+        claim: String,
+        #[arg(long, required = true)] baseline: String,
+        #[arg(long, required = true)] treatment: String,
+        #[arg(long, default_value_t = 0)] seed: i64,
+        #[arg(long, default_value_t = 2000)] resamples: usize,
+        #[arg(long)] allow_incomparable: bool,
+        #[arg(long)] allow_self_reported: bool,
+        #[arg(long, default_value = "")] plan: String,
+        #[arg(long, default_value = "")] since: String,
+        #[arg(long, default_value = "")] until: String,
+        #[arg(long, default_value = "agent")] actor: String,
+    },
+    Trend {
+        claim: String,
+        #[arg(long, required = true)] group: String,
+        #[arg(long, default_value = "")] since: String,
+        #[arg(long, default_value = "")] until: String,
+        #[arg(long, default_value = "agent")] actor: String,
+    },
+}
+
+#[derive(Debug, Subcommand)]
 pub enum ProtocolAction {
     Add {
         #[arg(long, required = true)] id: String,
@@ -332,6 +357,19 @@ pub fn run(cli: &Cli) -> Result<Output> {
             payload.remove("text"); // python CLI omits the rendered text from --json
             emit(Value::Object(payload), text)
         }
+        Commands::Analysis { action } => match action {
+            AnalysisAction::Stats { claim, baseline, treatment, seed, resamples,
+                allow_incomparable, allow_self_reported, plan, since, until, actor } => {
+                let result = crate::analysis::claim_statistics(&conn, claim, baseline, treatment,
+                    *seed, *resamples, *allow_incomparable, *allow_self_reported, actor,
+                    plan, since, until)?;
+                emit(result.clone(), to_stable_json(&result))
+            }
+            AnalysisAction::Trend { claim, group, since, until, actor } => {
+                let result = crate::analysis::claim_trend(&conn, claim, group, actor, since, until)?;
+                emit(result.clone(), to_stable_json(&result))
+            }
+        },
         Commands::Protocol { action } => run_protocol(&conn, action),
         Commands::Observation { action } => run_observation(&conn, action),
         Commands::Report { reference, out, check, strict } => {

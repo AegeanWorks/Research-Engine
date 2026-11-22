@@ -160,5 +160,6 @@ still names every top-level and archived directory.
 | `kiln` | out of scope - AIKit tooling, not a research primitive |
 | `knot` | out of scope - AIKit tooling, not a research primitive |
 | `sextant` | out of scope - AIKit tooling, not a research primitive |
+| `traceglass` | out of scope - AIKit tooling, not a research primitive |
 | `archive/atelier` | archived; read-only |
 | `archive/vaultbreak` | archived; read-only |

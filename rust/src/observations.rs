@@ -205,8 +205,8 @@ pub fn group_values(
     let claim = get_claim(conn, claim_ref)?;
     let mut sql = String::from("SELECT group_label, value FROM observation WHERE claim_id=?1 AND voided=0");
     let mut bindings: Vec<Box<dyn rusqlite::ToSql>> = vec![Box::new(field(&claim, "id"))];
-    if let Some(since) = since { sql.push_str(" AND at>=?2"); bindings.push(Box::new(since.to_string())); }
-    if let Some(until) = until { sql.push_str(" AND at<=?3"); bindings.push(Box::new(until.to_string())); }
+    if let Some(since) = since { if !since.is_empty() { sql.push_str(" AND at>=?2"); bindings.push(Box::new(since.to_string())); } }
+    if let Some(until) = until { if !until.is_empty() { sql.push_str(" AND at<=?3"); bindings.push(Box::new(until.to_string())); } }
     sql.push_str(" ORDER BY id");
     let args: Vec<&dyn rusqlite::ToSql> = bindings.iter().map(|b| b.as_ref()).collect();
     let rows = query_json(conn, &sql, args.as_slice())?;
