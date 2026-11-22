@@ -221,6 +221,23 @@ fn search_is_phrase_first_and_program_scoped() {
 }
 
 #[test]
+fn fluid_frank_oseen_dispersion() {
+    use research_engine::domains_fluid_frank_oseen as fo;
+    let matrix = fo::elastic_matrix(1.0, 2.0, 3.0, 1.2, 0.8, 1.5);
+    assert_eq!(matrix[0][1], matrix[1][0]);
+    let values = fo::dispersion(1.0, 2.0, 3.0, 1.2, 0.8, 1.5, 1.3).unwrap();
+    assert!(values[0] <= values[1]);
+    assert!(values.iter().all(|v| v.is_finite()));
+    assert!(fo::dispersion(1.0, 2.0, 3.0, 1.0, 1.0, 1.0, 0.0).is_err());
+    let omega = fo::equal_constant_dispersion(3.0, 2.0, 1.0).unwrap();
+    assert!((omega - 3.0 * 2.0_f64.sqrt()).abs() < 1e-12);
+    let a = fo::anisotropy([1.0, 2.0, 2.0], 1.2, 0.8, 1.5, 1.0).unwrap();
+    assert!(a.get("fractional_split").and_then(Value::as_f64).unwrap() >= 0.0);
+    assert!(fo::anisotropy([0.0, 0.0, 0.0], 1.0, 1.0, 1.0, 1.0).is_err());
+    assert_eq!(fo::modes().get("can_be_photon").and_then(Value::as_bool), Some(false));
+}
+
+#[test]
 fn pnn_docking_consensus_ranking() {
     use research_engine::domains_pnn_docking as docking;
     use std::collections::BTreeMap;

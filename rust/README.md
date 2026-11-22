@@ -65,6 +65,7 @@ argparse requires in `python -m engine`.
 | Domains: Atlas | Visual-knowledge schema validation, Muse payload coercion, analysis merging and JSON Schema (`atlas` CLI) |
 | Domains: PNN safety | NOAEL→HED conversion, most-sensitive study selection, IND safety thresholds and Markdown report (`pnn-safety` CLI) |
 | Domains: fluid bridge | Diffusivity, horizon, Pinney coefficients and bridge paths (`fluid-bridge` CLI) |
+| Domains: Frank-Oseen | Linearised director elastic matrix, transverse dispersion, equal-K mode, anisotropy and mode classification (`fluid-frank-oseen` CLI) |
 | Domains: obezite | Citation-number extraction with bibliography-noise stripping and claim-row de-duplication (`obezite` CLI) |
 | Domains: PNN rules | CNS/property design-rule evaluation and criterion weighting (`pnn-rules` CLI) |
 | Domains: PNN docking | Docking-score alias parsing, RMSD/Vina filtering, weighted consensus normalization and per-compound best-target aggregation (`pnn-docking` CLI) |
@@ -128,6 +129,8 @@ argparse requires in `python -m engine`.
   all eight checks match.
 - `pnn_docking_parity.py` compares score parsing, default/filtered ranking and
   best-target aggregation; all three checks match.
+- `fluid_frank_oseen_parity.py` compares the elastic matrix, dispersion,
+  equal-K modes, anisotropy and mode metadata; all twelve checks match.
 
 ## Still to port
 

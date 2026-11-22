@@ -6,15 +6,15 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `456`
+- **Total Python Modules**: `457`
 - **Total Classes**: `317`
-- **Total Top-Level Functions**: `2000`
+- **Total Top-Level Functions**: `2003`
 - **Total Class Methods**: `1545`
-- **Total Source Lines**: `91133`
+- **Total Source Lines**: `91190`
 
 ## 🧭 Map Coverage
-- **Indexed**: python (`456` module(s))
-- **Not indexed by this map**: javascript (`1` file(s)), rust (`49` file(s))
+- **Indexed**: python (`457` module(s))
+- **Not indexed by this map**: javascript (`1` file(s)), rust (`50` file(s))
 
 > Only Python symbols are catalogued. A language above is reported as not indexed, never as verified by this map.
 
@@ -4732,6 +4732,16 @@
 - `def run(cmd, cwd)`
 - `def close(a, b, tol)`
 - `def compare(label, args)`
+
+---
+
+### [`rust/fluid_frank_oseen_parity.py`](rust/fluid_frank_oseen_parity.py)
+**Size**: `57` lines
+
+**Functions:**
+- `def run(*args)`
+- `def close(a, b)`
+- `def check(label, rust, py)`
 
 ---
 

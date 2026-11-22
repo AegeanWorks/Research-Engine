@@ -52,6 +52,7 @@ pub enum Commands {
     PnnSafety { #[arg(long, required = true)] tox: String, #[arg(long, default_value = "{}")] pharm: String },
     Client { #[command(subcommand)] action: ClientAction },
     FluidBridge { #[command(subcommand)] action: FluidBridgeAction },
+    FluidFrankOseen { #[command(subcommand)] action: FluidFrankOseenAction },
     Obezite { #[command(subcommand)] action: ObeziteAction },
     PnnRules { #[command(subcommand)] action: PnnRulesAction },
     PnnDocking { #[command(subcommand)] action: PnnDockingAction },
@@ -313,6 +314,15 @@ pub enum FluidBridgeAction {
     Horizon { omega: f64 },
     Coeffs { s0: f64, st: f64, horizon_t: f64, omega: f64, hbar: f64, mass: f64 },
     Path { #[arg(long)] coeffs: String, #[arg(long)] times: String, #[arg(long)] omega: f64 },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum FluidFrankOseenAction {
+    Matrix { kx: f64, ky: f64, kz: f64, k1: f64, k2: f64, k3: f64 },
+    Dispersion { kx: f64, ky: f64, kz: f64, k1: f64, k2: f64, k3: f64, #[arg(long, default_value_t = 1.0)] rho: f64 },
+    Equal { k: f64, k_const: f64, #[arg(long, default_value_t = 1.0)] rho: f64 },
+    Anisotropy { dx: f64, dy: f64, dz: f64, k1: f64, k2: f64, k3: f64, #[arg(long, default_value_t = 1.0)] rho: f64 },
+    Modes,
 }
 
 #[derive(Debug, Subcommand)]
@@ -629,7 +639,8 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::LatticeQuery { .. } | Commands::Discovery { .. } | Commands::Studio { .. }
         | Commands::Mcp { .. } | Commands::Web { .. } | Commands::Atlas { .. }
         | Commands::PnnSafety { .. } | Commands::Client { .. }
-        | Commands::FluidBridge { .. } | Commands::Obezite { .. }
+        | Commands::FluidBridge { .. } | Commands::FluidFrankOseen { .. }
+        | Commands::Obezite { .. }
         | Commands::PnnRules { .. } | Commands::PnnDocking { .. } | Commands::Providers { .. }) {
         initialize(&conn)?;
     }
@@ -822,6 +833,35 @@ pub fn run(cli: &Cli) -> Result<Output> {
                     let result = obezite::deduplicate(&list, std::path::Path::new(retracted),
                         std::path::Path::new(archive), std::path::Path::new(updated), stamp)?;
                     emit(result.clone(), to_stable_json(&result))
+                }
+            }
+        }
+        Commands::FluidFrankOseen { action } => {
+            use crate::domains_fluid_frank_oseen as fo;
+            match action {
+                FluidFrankOseenAction::Matrix { kx, ky, kz, k1, k2, k3 } => {
+                    let m = fo::elastic_matrix(*kx, *ky, *kz, *k1, *k2, *k3);
+                    let value = json!([m[0], m[1]]);
+                    emit(value.clone(), to_stable_json(&value))
+                }
+                FluidFrankOseenAction::Dispersion { kx, ky, kz, k1, k2, k3, rho } => {
+                    let values = fo::dispersion(*kx, *ky, *kz, *k1, *k2, *k3, *rho)?;
+                    let value = Value::Array(values.iter().copied().map(Value::from).collect());
+                    emit(value.clone(), to_stable_json(&value))
+                }
+                FluidFrankOseenAction::Equal { k, k_const, rho } => {
+                    let value = fo::equal_constant_dispersion(*k, *k_const, *rho)?;
+                    emit(json!({"value": value}), format!("{value}\n"))
+                }
+                FluidFrankOseenAction::Anisotropy { dx, dy, dz, k1, k2, k3, rho } => {
+                    let value = fo::anisotropy([*dx, *dy, *dz], *k1, *k2, *k3, *rho)?;
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                FluidFrankOseenAction::Modes => {
+                    let value = fo::modes();
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
                 }
             }
         }

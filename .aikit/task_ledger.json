@@ -5,9 +5,9 @@
     "last_phase": "in_progress",
     "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1795368633.6159377,
+    "updated_at": 1795369052.4945679,
     "owner": "opencode:rust-rewrite",
-    "lease_until": 1795375833.6159377,
+    "lease_until": 1795376252.4945679,
     "started_by": "opencode:rust-rewrite",
     "continuations": []
   },
@@ -92,29 +92,6 @@
         "mitigation": "Port bounded modules with Python parity helpers, keep separate schema initialization for lattice stores, verify with cargo test plus direct hygiene/KB/secret/test scripts before each commit."
       },
       "plan_digest": "aa86d74d20a2aa574d309dbaebd42d9d88ae476163fffe70a12c668f65645169"
-    },
-    {
-      "task_id": "T-028-outer-layers",
-      "phase": "in_progress",
-      "phase_num": 3,
-      "description": "[6/6 partial] Ported the studio client facade, read-only policy and web POST mutation routes into rust/src/studio_client.rs and rust/src/studio_web.rs",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795361406.4350526,
-      "timestamp_str": "2026-11-22 18:30:06",
-      "agent": "opencode:rust-rewrite"
-    },
-    {
-      "task_id": "T-028-outer-layers",
-      "phase": "in_progress",
-      "phase_num": 4,
-      "description": "[6/6 partial] Verification: cargo test 36/36; client_parity.py 8/8 and web_parity.py 16/16 exact matches; project gates passing",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795361406.7769058,
-      "timestamp_str": "2026-11-22 18:30:06",
-      "agent": "opencode:rust-rewrite",
-      "checklists": "passed"
     },
     {
       "task_id": "T-028-outer-layers",
@@ -251,6 +228,29 @@
       "status": "in_progress",
       "timestamp": 1795368633.6159377,
       "timestamp_str": "2026-11-22 20:30:33",
+      "agent": "opencode:rust-rewrite",
+      "checklists": "passed"
+    },
+    {
+      "task_id": "T-028-outer-layers",
+      "phase": "in_progress",
+      "phase_num": 3,
+      "description": "[6/6 final] Ported fluid-universe Frank-Oseen director dispersion (elastic matrix, eigenvalues, anisotropy, mode classification) into rust/src/domains_fluid_frank_oseen.rs",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795369052.3017783,
+      "timestamp_str": "2026-11-22 20:37:32",
+      "agent": "opencode:rust-rewrite"
+    },
+    {
+      "task_id": "T-028-outer-layers",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[6/6 final] Verification: cargo test 42/42; fluid_frank_oseen_parity.py 12/12 matches; project gates passing",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795369052.4945679,
+      "timestamp_str": "2026-11-22 20:37:32",
       "agent": "opencode:rust-rewrite",
       "checklists": "passed"
     }
