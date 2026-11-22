@@ -221,6 +221,35 @@ fn search_is_phrase_first_and_program_scoped() {
 }
 
 #[test]
+fn fluid_reduction_moment_audit() {
+    use research_engine::domains_fluid_reduction as red;
+    assert!((red::wall_tension(1.0).unwrap() - 8.0 / 3.0).abs() < 1e-12);
+    assert!((red::wall_lower_bound_2d(1.0, 2.0).unwrap() - 16.0 / 3.0).abs() < 1e-12);
+    assert_eq!(red::moment_power(4.0), -1.0);
+    assert!(!red::moment_finite(4.0));
+    assert!(red::moment_log_divergent(4.0));
+    assert!(red::moment_finite(5.0));
+    let log_value = red::moment_numeric(4.0, 1.0, 1.0e4).unwrap();
+    assert!((log_value - 2.0 * std::f64::consts::PI * 1.0e4_f64.ln()).abs() < 1e-9);
+    assert!(red::moment_numeric(2.0, 1.0, 1.0e4).unwrap() > log_value);
+    assert!(red::moment_numeric(4.0, 1.0, 1.0).is_err());
+    let v = red::verdict(4.0);
+    assert_eq!(v.get("stated_tail_status").and_then(Value::as_str), Some("log-divergent"));
+    assert_eq!(v.get("6b_iii_moment_finite_for_stated_profile").and_then(Value::as_bool), Some(false));
+    let payload = serde_json::json!({
+        "wall_tension": 8.0 / 3.0, "lower_bound_example": 16.0 / 3.0,
+        "verdict": v,
+        "meta": {"config_sha256": "abc", "git": {"commit": "def", "dirty": false}},
+    });
+    let markdown = red::render_markdown(&payload).unwrap();
+    assert!(markdown.contains("# Dimensional reduction and moment of inertia (claim 6b)"));
+    assert!(markdown.contains("T = 2.666666666667."));
+    assert!(markdown.contains("(dirty=False)"));
+    assert!(red::render_markdown(&serde_json::json!({})).is_err());
+    assert!(red::wall_tension(-1.0).is_err());
+}
+
+#[test]
 fn fluid_topology_z3_audit() {
     use research_engine::domains_fluid_topology as topo;
     assert!(!topo::has_z3_factor());

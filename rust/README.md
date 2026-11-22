@@ -70,6 +70,7 @@ argparse requires in `python -m engine`.
 | Domains: hydrogen nodes | Hydrogen-2s two-branch split, nodal shell, pi phase slip, radial norm/overlap/peaks, 1s force-balance residuals and 2p loop circulation (`hydrogen-radial` CLI) |
 | Domains: topology | Nematic RP² homotopy audit, Z3 extension review and claim-13 Markdown report (`fluid-topology` CLI) |
 | Domains: circulant | Hermitian 3×3 circulant algebra: eigenvalues, DFT vectors, Koide Q variants, inverse DFT, mass fit and tau prediction (`fluid-circulant` CLI) |
+| Domains: reduction | Wall tension, 2D lower bound, power-tail moment integrability, numeric moment and claim-6b Markdown report (`fluid-reduction` CLI) |
 | Domains: obezite | Citation-number extraction with bibliography-noise stripping and claim-row de-duplication (`obezite` CLI) |
 | Domains: PNN rules | CNS/property design-rule evaluation and criterion weighting (`pnn-rules` CLI) |
 | Domains: PNN docking | Docking-score alias parsing, RMSD/Vina filtering, weighted consensus normalization and per-compound best-target aggregation (`pnn-docking` CLI) |
@@ -144,6 +145,8 @@ argparse requires in `python -m engine`.
   all five checks match.
 - `fluid_circulant_parity.py` compares the matrix, spectra, DFT vectors, all Q
   variants, inverse DFT, mass fit and tau prediction; all ten checks match.
+- `fluid_reduction_parity.py` compares tensions, tail integrability, numeric
+  moments, verdicts and the Markdown report; all 23 checks match.
 
 ## Still to port
 

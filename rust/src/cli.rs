@@ -57,6 +57,7 @@ pub enum Commands {
     HydrogenRadial { #[command(subcommand)] action: HydrogenRadialAction },
     FluidTopology { #[command(subcommand)] action: FluidTopologyAction },
     FluidCirculant { #[command(subcommand)] action: FluidCirculantAction },
+    FluidReduction { #[command(subcommand)] action: FluidReductionAction },
     Obezite { #[command(subcommand)] action: ObeziteAction },
     PnnRules { #[command(subcommand)] action: PnnRulesAction },
     PnnDocking { #[command(subcommand)] action: PnnDockingAction },
@@ -318,6 +319,18 @@ pub enum FluidBridgeAction {
     Horizon { omega: f64 },
     Coeffs { s0: f64, st: f64, horizon_t: f64, omega: f64, hbar: f64, mass: f64 },
     Path { #[arg(long)] coeffs: String, #[arg(long)] times: String, #[arg(long)] omega: f64 },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum FluidReductionAction {
+    Tension { mu: f64 },
+    Lower { mu: f64, length_y: f64 },
+    Power { alpha: f64 },
+    Finite { alpha: f64 },
+    LogDivergent { alpha: f64 },
+    Numeric { alpha: f64, #[arg(long, default_value_t = 1.0)] r_min: f64, #[arg(long, default_value_t = 1.0e4)] r_max: f64 },
+    Verdict { #[arg(long, default_value_t = 4.0)] alpha: f64 },
+    Render { #[arg(long, required = true)] payload: String },
 }
 
 #[derive(Debug, Subcommand)]
@@ -696,6 +709,7 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::FluidBridge { .. } | Commands::FluidFrankOseen { .. }
         | Commands::FluidVortexCore { .. } | Commands::HydrogenRadial { .. }
         | Commands::FluidTopology { .. } | Commands::FluidCirculant { .. }
+        | Commands::FluidReduction { .. }
         | Commands::Obezite { .. }
         | Commands::PnnRules { .. } | Commands::PnnDocking { .. } | Commands::Providers { .. }) {
         initialize(&conn)?;
@@ -889,6 +903,45 @@ pub fn run(cli: &Cli) -> Result<Output> {
                     let result = obezite::deduplicate(&list, std::path::Path::new(retracted),
                         std::path::Path::new(archive), std::path::Path::new(updated), stamp)?;
                     emit(result.clone(), to_stable_json(&result))
+                }
+            }
+        }
+        Commands::FluidReduction { action } => {
+            use crate::domains_fluid_reduction as red;
+            macro_rules! scalar {
+                ($expr:expr) => {{
+                    let value = $expr?;
+                    emit(json!({"value": value}), format!("{value}\n"))
+                }};
+            }
+            match action {
+                FluidReductionAction::Tension { mu } => scalar!(red::wall_tension(*mu)),
+                FluidReductionAction::Lower { mu, length_y } => scalar!(red::wall_lower_bound_2d(*mu, *length_y)),
+                FluidReductionAction::Power { alpha } => {
+                    let value = red::moment_power(*alpha);
+                    emit(json!({"value": value}), format!("{value}\n"))
+                }
+                FluidReductionAction::Finite { alpha } => {
+                    let value = red::moment_finite(*alpha);
+                    emit(json!({"value": value}), format!("{value}\n"))
+                }
+                FluidReductionAction::LogDivergent { alpha } => {
+                    let value = red::moment_log_divergent(*alpha);
+                    emit(json!({"value": value}), format!("{value}\n"))
+                }
+                FluidReductionAction::Numeric { alpha, r_min, r_max } =>
+                    scalar!(red::moment_numeric(*alpha, *r_min, *r_max)),
+                FluidReductionAction::Verdict { alpha } => {
+                    let value = red::verdict(*alpha);
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                FluidReductionAction::Render { payload } => {
+                    let payload: Value = serde_json::from_str(payload).map_err(|e| EngineError::new(
+                        format!("invalid payload JSON: {e}"), "payload must be a JSON object",
+                        "pass a JSON object with verdict, wall_tension, lower_bound_example and meta"))?;
+                    let markdown = red::render_markdown(&payload)?;
+                    emit(json!({"markdown": markdown.clone()}), format!("{markdown}\n"))
                 }
             }
         }
