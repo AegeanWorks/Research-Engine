@@ -57,7 +57,7 @@ argparse requires in `python -m engine`.
 | Lattice snapshots | JSONL, BibTeX, GraphML and Cytoscape exports with byte-identical serializers (`lattice-snap` CLI) |
 | Meta-analysis | Fixed/DerSimonian-Laird random-effects pooling, Q/I²/τ², Hedges' g study construction and ASCII forest plots (`meta` CLI) |
 | Lattice queries | Contradiction detection, bounded outline/search views and GraphRAG context packs (`lattice-query` CLI) |
-| Lattice discovery | Offline seed-corpus provider, candidate de-duplication, provider registry and Crossref/OpenAlex helper parsers (`discovery` CLI) |
+| Lattice discovery | Offline corpus plus arXiv/Crossref/OpenAlex/EuropePMC URL builders and response parsers with injectable fetchers (`discovery`, `providers` CLI) |
 | Studio API | Paper×Question evidence matrix, filtered matrices and per-question evidence grouping (`studio` CLI) |
 | Studio MCP | JSON-RPC dispatcher with all 28 tool declarations, resources, prompts and ported tool handlers (`mcp` CLI) |
 | Studio web | GET and POST request dispatchers for the UI, overview, matrix bundle, search, literature, exports, mutations and integrity checks (`web` CLI) |
@@ -123,10 +123,11 @@ argparse requires in `python -m engine`.
   all four checks match.
 - `pnn_rules_parity.py` compares compound rule verdicts and weights; all four
   checks match.
+- `providers_parity.py` compares all four provider URLs and parsed candidates;
+  all eight checks match.
 
 ## Still to port
 
-the network-backed lattice providers (arXiv, Crossref, OpenAlex, EuropePMC),
-the remaining fluid-universe/obezite/PNN domain modules and the Python CLI text
-renderer. These remain served by their Python entry points until their Rust
-equivalents land; the SQLite graph is shared throughout.
+the remaining fluid-universe/obezite/PNN modules and the Python CLI text
+renderer. These remain served by their Python entry points; the SQLite graph
+is shared throughout.

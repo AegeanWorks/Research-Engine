@@ -221,6 +221,20 @@ fn search_is_phrase_first_and_program_scoped() {
 }
 
 #[test]
+fn lattice_provider_parsers_and_urls() {
+    use research_engine::lattice_providers as providers;
+    let url = providers::query_url("crossref", "sleep memory", 5).unwrap();
+    assert!(url.contains("query=sleep+memory") && url.contains("rows=5"));
+    let crossref = r#"{"message":{"items":[{"title":["Quantum"],"DOI":"10.1/x"}]}}"#;
+    let rows = providers::parse("crossref", crossref, 5).unwrap();
+    assert_eq!(rows.len(), 1);
+    assert_eq!(rows[0].get("source").and_then(Value::as_str), Some("crossref"));
+    let arxiv = r#"<feed xmlns="http://www.w3.org/2005/Atom"><entry><id>http://arxiv.org/abs/1</id><title>T</title></entry></feed>"#;
+    assert_eq!(providers::parse("arxiv", arxiv, 5).unwrap().len(), 1);
+    assert!(providers::parse("unknown", "{}", 5).is_err());
+}
+
+#[test]
 fn pnn_design_rules_evaluate_compound() {
     use research_engine::domains_pnn_rules as rules;
     let compound = serde_json::json!({

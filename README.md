@@ -61,9 +61,7 @@ A falsification-first research engine for provenance-backed claims, executable k
    retires every claim citing that work, twins included, and cascades.
 10. **Missing evidence is explicit.** `claim verdict --status UNKNOWN` records what is missing,
     carries no weight, never promotes and never cascades.
-11. **The graph is readable under a budget.** `outline` gives one line per question, hypothesis
-    and test; `brief` gives the strongest support and contradiction per question; `claim context`
-    gives one claim with provenance, premises and history. Each states omitted lines.
+11. **Budgeted views.** `outline`, `brief` and `claim context` report omitted lines.
 12. **Duplicates merge; refinements revise.** `claim merge` repoints edges and bound tests to
     the survivor and records duplicates as RETRACTED. `claim revise` supersedes the old claim,
     moves its edges to the new head, and starts untested; old verdicts stay visible.
@@ -294,6 +292,8 @@ research-engine/
 ├── LICENSES/
 ├── REUSE.toml
 ├── README.md
+├── research-engine           <- canonical Rust runtime launcher (POSIX)
+├── research-engine.cmd       <- canonical Rust runtime launcher (Windows)
 ├── docs/
 │   ├── ARCHITECTURE.md       <- layers, schema, transactions, extension points
 │   ├── MECHANICS.md          <- reference mechanics and their clean-room rules

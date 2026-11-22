@@ -28,6 +28,7 @@ pub mod killtest;
 pub mod lattice;
 pub mod lattice_checks;
 pub mod lattice_discovery;
+pub mod lattice_providers;
 pub mod lattice_query;
 pub mod lattice_repo;
 pub mod lattice_snapshots;

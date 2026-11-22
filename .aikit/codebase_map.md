@@ -6,15 +6,15 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `452`
+- **Total Python Modules**: `454`
 - **Total Classes**: `317`
-- **Total Top-Level Functions**: `1997`
+- **Total Top-Level Functions**: `1999`
 - **Total Class Methods**: `1545`
-- **Total Source Lines**: `90964`
+- **Total Source Lines**: `91053`
 
 ## 🧭 Map Coverage
-- **Indexed**: python (`452` module(s))
-- **Not indexed by this map**: javascript (`1` file(s)), rust (`47` file(s))
+- **Indexed**: python (`454` module(s))
+- **Not indexed by this map**: javascript (`1` file(s)), rust (`48` file(s))
 
 > Only Python symbols are catalogued. A language above is reported as not indexed, never as verified by this map.
 
@@ -4879,6 +4879,24 @@
 
 ### [`rust/pnn_safety_parity.py`](rust/pnn_safety_parity.py)
 **Size**: `54` lines
+
+---
+
+### [`rust/providers_expected.py`](rust/providers_expected.py)
+> *Python reference for the Rust `providers` CLI commands.*
+
+**Size**: `24` lines
+
+**Functions:**
+- `def fetcher(url, timeout)`
+
+---
+
+### [`rust/providers_parity.py`](rust/providers_parity.py)
+**Size**: `65` lines
+
+**Functions:**
+- `def run(cmd, cwd)`
 
 ---
 

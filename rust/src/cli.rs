@@ -54,6 +54,7 @@ pub enum Commands {
     FluidBridge { #[command(subcommand)] action: FluidBridgeAction },
     Obezite { #[command(subcommand)] action: ObeziteAction },
     PnnRules { #[command(subcommand)] action: PnnRulesAction },
+    Providers { #[command(subcommand)] action: ProvidersAction },
     Search {
         query: String,
         #[arg(long)] research: Option<String>,
@@ -267,6 +268,12 @@ pub enum AnalysisAction {
         #[arg(long, default_value = "")] since: String,
         #[arg(long, default_value = "")] until: String,
     },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum ProvidersAction {
+    Url { source: String, query: String, #[arg(long, default_value_t = 10)] limit: i64 },
+    Parse { source: String, #[arg(long, required = true)] payload_file: String, #[arg(long, default_value_t = 10)] limit: i64 },
 }
 
 #[derive(Debug, Subcommand)]
@@ -610,7 +617,7 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::Mcp { .. } | Commands::Web { .. } | Commands::Atlas { .. }
         | Commands::PnnSafety { .. } | Commands::Client { .. }
         | Commands::FluidBridge { .. } | Commands::Obezite { .. }
-        | Commands::PnnRules { .. }) {
+        | Commands::PnnRules { .. } | Commands::Providers { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -723,6 +730,22 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::Providers { action } => {
+            use crate::lattice_providers as providers;
+            match action {
+                ProvidersAction::Url { source, query, limit } => {
+                    let value = providers::query_url(source, query, *limit)?;
+                    emit(json!({"url": value.clone()}), format!("{value}\n"))
+                }
+                ProvidersAction::Parse { source, payload_file, limit } => {
+                    let payload = std::fs::read_to_string(payload_file).map_err(|e| EngineError::new(
+                        format!("cannot read payload: {e}"), "the provider fixture must be a readable UTF-8 file",
+                        "pass a readable payload file"))?;
+                    let rows = providers::parse(source, &payload, *limit)?;
+                    emit(Value::Array(rows.clone()), to_stable_json(&Value::Array(rows)))
+                }
+            }
+        }
         Commands::PnnRules { action } => match action {
             PnnRulesAction::Evaluate { compound } => {
                 let value: Value = serde_json::from_str(compound).map_err(|e| EngineError::new(
