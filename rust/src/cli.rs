@@ -69,6 +69,7 @@ pub enum Commands {
     PnnTables { #[command(subcommand)] action: PnnTablesAction },
     PnnCuration { #[command(subcommand)] action: PnnCurationAction },
     WaterAnalogue { #[command(subcommand)] action: WaterAnalogueAction },
+    PnnReports { #[command(subcommand)] action: PnnReportsAction },
     Providers { #[command(subcommand)] action: ProvidersAction },
     Search {
         query: String,
@@ -295,6 +296,13 @@ pub enum ProvidersAction {
 pub enum PnnRulesAction {
     Evaluate { #[arg(long, required = true)] compound: String },
     Weight { criterion: String },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum PnnReportsAction {
+    Csv { #[arg(long, required = true)] path: String, #[arg(long, required = true)] fieldnames: String, #[arg(long, required = true)] rows: String },
+    Json { #[arg(long, required = true)] path: String, #[arg(long, required = true)] report: String },
+    Text { #[arg(long, required = true)] path: String, #[arg(long, required = true)] text: String },
 }
 
 #[derive(Debug, Subcommand)]
@@ -814,7 +822,8 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::PnnRules { .. } | Commands::PnnDocking { .. }
         | Commands::PnnCompounds { .. } | Commands::PnnScreen { .. }
         | Commands::PnnTables { .. } | Commands::PnnCuration { .. }
-        | Commands::WaterAnalogue { .. } | Commands::Providers { .. }) {
+        | Commands::WaterAnalogue { .. } | Commands::PnnReports { .. }
+        | Commands::Providers { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -927,6 +936,33 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::PnnReports { action } => {
+            use crate::domains_pnn_reports as reports;
+            match action {
+                PnnReportsAction::Csv { path, fieldnames, rows } => {
+                    let fields: Vec<String> = serde_json::from_str(fieldnames).map_err(|e| EngineError::new(
+                        format!("invalid fieldnames JSON: {e}"), "fieldnames must be a JSON array of strings",
+                        "pass an array of column names"))?;
+                    let rows: Vec<Value> = serde_json::from_str(rows).map_err(|e| EngineError::new(
+                        format!("invalid rows JSON: {e}"), "rows must be a JSON array of objects",
+                        "pass an array of row objects"))?;
+                    reports::write_csv(std::path::Path::new(path), &fields, &rows)?;
+                    emit(json!({"path": path}), format!("{path}\n"))
+                }
+                PnnReportsAction::Json { path, report } => {
+                    let report: Value = serde_json::from_str(report).map_err(|e| EngineError::new(
+                        format!("invalid report JSON: {e}"), "report must be a JSON object",
+                        "pass a JSON object"))?;
+                    let text = serde_json::to_string_pretty(&report).unwrap_or_default();
+                    reports::write_json(std::path::Path::new(path), &report)?;
+                    emit(json!({"path": path}), format!("{text}\n"))
+                }
+                PnnReportsAction::Text { path, text } => {
+                    reports::write_text(std::path::Path::new(path), text)?;
+                    emit(json!({"path": path}), format!("{path}\n"))
+                }
+            }
+        }
         Commands::WaterAnalogue { action } => {
             use crate::domains_fluid_water_analogue as wa;
             macro_rules! scalar {

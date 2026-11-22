@@ -433,6 +433,30 @@ fn fluid_frank_oseen_dispersion() {
 }
 
 #[test]
+fn pnn_atomic_report_writers() {
+    use research_engine::domains_pnn_reports as reports;
+    let path = temp_db("pnn-reports").parent().unwrap()
+        .join(format!("report-{}.csv", COUNTER.load(Ordering::Relaxed)));
+    let fields = vec!["compound_id".to_string(), "note".to_string(), "score".to_string()];
+    let rows = vec![serde_json::json!({
+        "compound_id": "C1", "note": "has, comma", "score": 0.985,
+    })];
+    reports::write_csv(&path, &fields, &rows).unwrap();
+    let csv = std::fs::read(&path).unwrap();
+    let text = String::from_utf8(csv).unwrap();
+    assert!(text.starts_with("compound_id,note,score\r\n"));
+    assert!(text.contains("\"has, comma\""));
+    assert!(reports::write_csv(&path, &[], &rows).is_err());
+    let json_path = path.with_extension("json");
+    reports::write_json(&json_path, &serde_json::json!({"z": 1, "a": 2})).unwrap();
+    let json_text = std::fs::read_to_string(&json_path).unwrap();
+    assert!(json_text.starts_with("{\n  \"a\": 2,\n  \"z\": 1\n}\n"));
+    let text_path = path.with_extension("txt");
+    reports::write_text(&text_path, "line\n").unwrap();
+    assert_eq!(std::fs::read_to_string(&text_path).unwrap(), "line\n");
+}
+
+#[test]
 fn shallow_water_acoustic_horizon() {
     use research_engine::domains_fluid_water_analogue as wa;
     assert!((wa::sound_speed(0.1, 9.81).unwrap() - 0.9904544411531507).abs() < 1e-9);
