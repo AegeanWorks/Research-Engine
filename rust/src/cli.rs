@@ -79,6 +79,7 @@ pub enum Commands {
     WaterRays { #[command(subcommand)] action: WaterRaysAction },
     VortexCascade { #[command(subcommand)] action: VortexCascadeAction },
     VortexParticles { #[command(subcommand)] action: VortexParticlesAction },
+    ObservedShape { #[command(subcommand)] action: ObservedShapeAction },
     Providers { #[command(subcommand)] action: ProvidersAction },
     Search {
         query: String,
@@ -305,6 +306,14 @@ pub enum ProvidersAction {
 pub enum PnnRulesAction {
     Evaluate { #[arg(long, required = true)] compound: String },
     Weight { criterion: String },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum ObservedShapeAction {
+    Width { #[arg(long, default_value_t = 45.0)] span_k: f64 },
+    Evidence,
+    Scales,
+    SideWidths { #[arg(long, default_value_t = 299.15)] temperature_k: f64 },
 }
 
 #[derive(Debug, Subcommand)]
@@ -926,7 +935,8 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::WaterVde { .. } | Commands::WaterDispersive { .. }
         | Commands::TwoStateMarcus { .. } | Commands::ExcitedFluid { .. }
         | Commands::WaterRays { .. } | Commands::VortexCascade { .. }
-        | Commands::VortexParticles { .. } | Commands::Providers { .. }) {
+        | Commands::VortexParticles { .. } | Commands::ObservedShape { .. }
+        | Commands::Providers { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -1039,6 +1049,26 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::ObservedShape { action } => {
+            use crate::domains_fluid_observed_shape as os;
+            macro_rules! bundle {
+                ($expr:expr) => {{
+                    let value = $expr?;
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }};
+            }
+            match action {
+                ObservedShapeAction::Width { span_k } => bundle!(os::observed_width_change_ev(*span_k)),
+                ObservedShapeAction::Evidence => {
+                    let value = os::shape_evidence();
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                ObservedShapeAction::Scales => bundle!(os::observed_scales()),
+                ObservedShapeAction::SideWidths { temperature_k } => bundle!(os::jou_freeman_side_widths(*temperature_k)),
+            }
+        }
         Commands::VortexParticles { action } => {
             use crate::domains_fluid_vortex_particles as vp;
             fn numbers(raw: &str) -> Result<Vec<f64>> {

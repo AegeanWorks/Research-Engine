@@ -433,6 +433,26 @@ fn fluid_frank_oseen_dispersion() {
 }
 
 #[test]
+fn observed_band_shape_comparator() {
+    use research_engine::domains_fluid_observed_shape as os;
+    let width = os::observed_width_change_ev(45.0).unwrap();
+    assert!((width["change_as_stated_ev"].as_f64().unwrap() - 0.009).abs() < 1e-15);
+    assert!((width["change_if_hwhm_ev"].as_f64().unwrap() - 0.018).abs() < 1e-15);
+    assert!(os::observed_width_change_ev(0.0).is_err());
+    let evidence = os::shape_evidence();
+    assert_eq!(evidence["component_width_ratio"].as_f64(), Some(0.71 / 0.37));
+    assert_eq!(evidence["single_gaussian_compatible"].as_bool(), Some(false));
+    assert_eq!(evidence["sources"].as_array().unwrap().len(), 3);
+    let scales = os::observed_scales().unwrap();
+    assert_eq!(scales["emax_ev"].as_f64(), Some(1.72));
+    let sides = os::jou_freeman_side_widths(299.15).unwrap();
+    assert_eq!(sides["red_gaussian_hwhm_ev"].as_f64(), Some(0.1517 + 0.00051 * 299.15));
+    assert_eq!(sides["blue_lorentzian_hwhm_ev"].as_f64(), Some(0.5124 - 0.00010 * 299.15));
+    assert!((sides["fwhm_ev"].as_f64().unwrap() - 0.786).abs() < 0.01);
+    assert!(os::jou_freeman_side_widths(0.0).is_err());
+}
+
+#[test]
 fn vortex_knot_mass_hypothesis() {
     use research_engine::domains_fluid_vortex_particles as vp;
     let (points, tangents) = vp::torus_knot(3, 2.0, 1.0, 64).unwrap();
