@@ -221,6 +221,45 @@ fn search_is_phrase_first_and_program_scoped() {
 }
 
 #[test]
+fn fluid_topology_z3_audit() {
+    use research_engine::domains_fluid_topology as topo;
+    assert!(!topo::has_z3_factor());
+    let direct = topo::direct_result();
+    assert_eq!(direct.get("order_parameter_space").and_then(Value::as_str), Some("RP^2"));
+    let verdict = topo::verdict();
+    assert_eq!(verdict.get("direct_claim_status").and_then(Value::as_str), Some("FALSIFIED"));
+    let payload = serde_json::json!({
+        "verdict": verdict,
+        "meta": {"config_sha256": "abc", "git": {"commit": "def", "dirty": true}},
+    });
+    let markdown = topo::render_markdown(&payload).unwrap();
+    assert!(markdown.contains("# Nematic topology and Z3 (claim 13)"));
+    assert!(markdown.contains("| three_fold_lattice | False |"));
+    assert!(markdown.contains("(dirty=True)"));
+    assert!(topo::render_markdown(&serde_json::json!({})).is_err());
+}
+
+#[test]
+fn fluid_circulant_mass_matrix() {
+    use research_engine::domains_fluid_circulant as circ;
+    let values = circ::eigenvalues(1.2, 0.35, 0.4);
+    assert_eq!(values.len(), 3);
+    assert!((values.iter().sum::<f64>() - 3.6).abs() < 1e-12);
+    let dft = circ::dft_vectors();
+    assert!((dft[0][0].0 - 1.0 / 3.0_f64.sqrt()).abs() < 1e-12);
+    let (a, c, delta) = circ::extract_ac_delta(&[1.0, 2.0, 3.0]).unwrap();
+    assert!((a - 2.0).abs() < 1e-12);
+    assert!(c >= 0.0);
+    assert!(delta >= 0.0 && delta < std::f64::consts::PI * 2.0);
+    assert!(circ::extract_ac_delta(&[1.0, 2.0]).is_err());
+    let fit = circ::fit_masses(&[0.511, 105.7, 1776.9]).unwrap();
+    assert!(fit.get("max_abs_residual").and_then(Value::as_f64).unwrap() < 1e-6);
+    assert_eq!(fit.get("all_roots_positive").and_then(Value::as_bool), Some(true));
+    assert!(circ::fit_masses(&[-1.0]).is_err());
+    assert!((circ::koide_tau_prediction(0.511, 105.7).unwrap() - 1776.9).abs() < 5.0);
+}
+
+#[test]
 fn hydrogen_radial_two_branch_representation() {
     use research_engine::domains_hydrogen_radial as hr;
     let xs = vec![0.0, 1.0, 2.0, 4.0];

@@ -20,6 +20,8 @@ pub mod domains_fluid_bridge;
 pub mod domains_fluid_frank_oseen;
 pub mod domains_fluid_vortex_core;
 pub mod domains_hydrogen_radial;
+pub mod domains_fluid_circulant;
+pub mod domains_fluid_topology;
 pub mod domains_obezite;
 pub mod domains_pnn_docking;
 pub mod domains_pnn_rules;

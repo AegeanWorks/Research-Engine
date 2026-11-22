@@ -6,15 +6,15 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `459`
+- **Total Python Modules**: `461`
 - **Total Classes**: `317`
-- **Total Top-Level Functions**: `2009`
+- **Total Top-Level Functions**: `2015`
 - **Total Class Methods**: `1545`
-- **Total Source Lines**: `91314`
+- **Total Source Lines**: `91416`
 
 ## 🧭 Map Coverage
-- **Indexed**: python (`459` module(s))
-- **Not indexed by this map**: javascript (`1` file(s)), rust (`52` file(s))
+- **Indexed**: python (`461` module(s))
+- **Not indexed by this map**: javascript (`1` file(s)), rust (`54` file(s))
 
 > Only Python symbols are catalogued. A language above is reported as not indexed, never as verified by this map.
 
@@ -4735,12 +4735,32 @@
 
 ---
 
+### [`rust/fluid_circulant_parity.py`](rust/fluid_circulant_parity.py)
+**Size**: `63` lines
+
+**Functions:**
+- `def run(*args)`
+- `def complex_json(matrix)`
+- `def close(a, b)`
+- `def check(label, rust, py)`
+
+---
+
 ### [`rust/fluid_frank_oseen_parity.py`](rust/fluid_frank_oseen_parity.py)
 **Size**: `57` lines
 
 **Functions:**
 - `def run(*args)`
 - `def close(a, b)`
+- `def check(label, rust, py)`
+
+---
+
+### [`rust/fluid_topology_parity.py`](rust/fluid_topology_parity.py)
+**Size**: `39` lines
+
+**Functions:**
+- `def run(*args)`
 - `def check(label, rust, py)`
 
 ---

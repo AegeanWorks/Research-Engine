@@ -55,6 +55,8 @@ pub enum Commands {
     FluidFrankOseen { #[command(subcommand)] action: FluidFrankOseenAction },
     FluidVortexCore { #[command(subcommand)] action: FluidVortexCoreAction },
     HydrogenRadial { #[command(subcommand)] action: HydrogenRadialAction },
+    FluidTopology { #[command(subcommand)] action: FluidTopologyAction },
+    FluidCirculant { #[command(subcommand)] action: FluidCirculantAction },
     Obezite { #[command(subcommand)] action: ObeziteAction },
     PnnRules { #[command(subcommand)] action: PnnRulesAction },
     PnnDocking { #[command(subcommand)] action: PnnDockingAction },
@@ -316,6 +318,28 @@ pub enum FluidBridgeAction {
     Horizon { omega: f64 },
     Coeffs { s0: f64, st: f64, horizon_t: f64, omega: f64, hbar: f64, mass: f64 },
     Path { #[arg(long)] coeffs: String, #[arg(long)] times: String, #[arg(long)] omega: f64 },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum FluidTopologyAction {
+    Direct,
+    Extensions,
+    Verdict,
+    Render { #[arg(long, required = true)] payload: String },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum FluidCirculantAction {
+    Matrix { #[arg(long)] a: f64, #[arg(long)] c: f64, #[arg(long)] delta: f64 },
+    Eigenvalues { #[arg(long)] a: f64, #[arg(long)] c: f64, #[arg(long)] delta: f64 },
+    Dft,
+    QSigned { #[arg(long, required = true)] xs: String },
+    QMasses { #[arg(long, required = true)] xs: String },
+    QPhysical { #[arg(long, required = true)] xs: String },
+    QFromAc { #[arg(long)] a: f64, #[arg(long)] c: f64 },
+    Extract { #[arg(long, required = true)] xs: String },
+    Fit { #[arg(long, required = true)] xs: String },
+    Koide { #[arg(long)] me: f64, #[arg(long)] mmu: f64 },
 }
 
 #[derive(Debug, Subcommand)]
@@ -671,6 +695,7 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::PnnSafety { .. } | Commands::Client { .. }
         | Commands::FluidBridge { .. } | Commands::FluidFrankOseen { .. }
         | Commands::FluidVortexCore { .. } | Commands::HydrogenRadial { .. }
+        | Commands::FluidTopology { .. } | Commands::FluidCirculant { .. }
         | Commands::Obezite { .. }
         | Commands::PnnRules { .. } | Commands::PnnDocking { .. } | Commands::Providers { .. }) {
         initialize(&conn)?;
@@ -865,6 +890,97 @@ pub fn run(cli: &Cli) -> Result<Output> {
                         std::path::Path::new(archive), std::path::Path::new(updated), stamp)?;
                     emit(result.clone(), to_stable_json(&result))
                 }
+            }
+        }
+        Commands::FluidTopology { action } => {
+            use crate::domains_fluid_topology as topo;
+            match action {
+                FluidTopologyAction::Direct => {
+                    let value = topo::direct_result();
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                FluidTopologyAction::Extensions => {
+                    let value = topo::extensions();
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                FluidTopologyAction::Verdict => {
+                    let value = topo::verdict();
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                FluidTopologyAction::Render { payload } => {
+                    let payload: Value = serde_json::from_str(payload).map_err(|e| EngineError::new(
+                        format!("invalid payload JSON: {e}"), "payload must be a JSON object",
+                        "pass a JSON object with verdict and meta"))?;
+                    let markdown = topo::render_markdown(&payload)?;
+                    emit(json!({"markdown": markdown.clone()}), format!("{markdown}\n"))
+                }
+            }
+        }
+        Commands::FluidCirculant { action } => {
+            use crate::domains_fluid_circulant as circ;
+            fn complex_matrix(m: [[(f64, f64); 3]; 3]) -> Value {
+                Value::Array(m.iter().map(|row| Value::Array(row.iter().map(|(re, im)|
+                    json!([re, im])).collect())).collect())
+            }
+            fn xs(raw: &str) -> Result<Vec<f64>> {
+                serde_json::from_str(raw).map_err(|e| EngineError::new(
+                    format!("invalid xs JSON: {e}"), "xs must be a JSON array of numbers",
+                    "pass an array of three numbers"))
+            }
+            macro_rules! scalar {
+                ($expr:expr) => {{
+                    let value = $expr?;
+                    emit(json!({"value": value}), format!("{value}\n"))
+                }};
+            }
+            match action {
+                FluidCirculantAction::Matrix { a, c, delta } => {
+                    let value = complex_matrix(circ::circulant_matrix(*a, *c, *delta));
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                FluidCirculantAction::Eigenvalues { a, c, delta } => {
+                    let value = Value::Array(circ::eigenvalues(*a, *c, *delta)
+                        .into_iter().map(Value::from).collect());
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                FluidCirculantAction::Dft => {
+                    let value = complex_matrix(circ::dft_vectors());
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                FluidCirculantAction::QSigned { xs: raw } => {
+                    let value = circ::q_signed(&xs(raw)?);
+                    emit(json!({"value": value}), format!("{value}\n"))
+                }
+                FluidCirculantAction::QMasses { xs: raw } => {
+                    let value = circ::q_masses(&xs(raw)?);
+                    emit(json!({"value": value}), format!("{value}\n"))
+                }
+                FluidCirculantAction::QPhysical { xs: raw } => {
+                    let value = circ::q_physical_from_roots(&xs(raw)?);
+                    emit(json!({"value": value}), format!("{value}\n"))
+                }
+                FluidCirculantAction::QFromAc { a, c } => {
+                    let value = circ::q_from_ac(*a, *c);
+                    emit(json!({"value": value}), format!("{value}\n"))
+                }
+                FluidCirculantAction::Extract { xs: raw } => {
+                    let (a, c, delta) = circ::extract_ac_delta(&xs(raw)?)?;
+                    let value = json!({"a": a, "c": c, "delta": delta});
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                FluidCirculantAction::Fit { xs: raw } => {
+                    let value = circ::fit_masses(&xs(raw)?)?;
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                FluidCirculantAction::Koide { me, mmu } => scalar!(circ::koide_tau_prediction(*me, *mmu)),
             }
         }
         Commands::HydrogenRadial { action } => {
