@@ -20,6 +20,7 @@ pub mod experiments;
 pub mod integrity;
 pub mod killtest;
 pub mod lattice;
+pub mod lattice_repo;
 pub mod manifest;
 pub mod markdown;
 pub mod observations;

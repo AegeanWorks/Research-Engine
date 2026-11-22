@@ -6,15 +6,15 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `424`
+- **Total Python Modules**: `426`
 - **Total Classes**: `317`
-- **Total Top-Level Functions**: `1972`
+- **Total Top-Level Functions**: `1975`
 - **Total Class Methods**: `1545`
-- **Total Source Lines**: `89806`
+- **Total Source Lines**: `89929`
 
 ## 🧭 Map Coverage
-- **Indexed**: python (`424` module(s))
-- **Not indexed by this map**: javascript (`1` file(s)), rust (`29` file(s))
+- **Indexed**: python (`426` module(s))
+- **Not indexed by this map**: javascript (`1` file(s)), rust (`30` file(s))
 
 > Only Python symbols are catalogued. A language above is reported as not indexed, never as verified by this map.
 
@@ -4683,6 +4683,23 @@
 **Functions:**
 - `def run(cmd, cwd)`
 - `def compare(label, args, py_args)`
+
+---
+
+### [`rust/lattice_repo_expected.py`](rust/lattice_repo_expected.py)
+> *Python reference for the Rust `lattice-repo` CLI commands.*
+
+**Size**: `73` lines
+
+---
+
+### [`rust/lattice_repo_parity.py`](rust/lattice_repo_parity.py)
+**Size**: `50` lines
+
+**Functions:**
+- `def run(cmd, cwd)`
+- `def strip_volatile(value)`
+- `def compare(label, args, write)`
 
 ---
 

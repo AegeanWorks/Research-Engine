@@ -40,6 +40,7 @@ pub enum Commands {
     Ai { #[command(subcommand)] action: AiAction },
     Experiment { #[command(subcommand)] action: ExperimentAction },
     Lattice { #[command(subcommand)] action: LatticeAction },
+    LatticeRepo { #[command(subcommand)] action: LatticeRepoAction },
     Search {
         query: String,
         #[arg(long)] research: Option<String>,
@@ -256,6 +257,35 @@ pub enum AnalysisAction {
 }
 
 #[derive(Debug, Subcommand)]
+pub enum LatticeRepoAction {
+    PaperAdd {
+        #[arg(long, required = true)] title: String,
+        #[arg(long, default_value = "")] authors: String,
+        #[arg(long, default_value = "")] year: String,
+        #[arg(long, default_value = "")] venue: String,
+        #[arg(long, default_value = "")] doi: String,
+        #[arg(long, default_value = "")] arxiv: String,
+        #[arg(long, default_value = "")] url: String,
+        #[arg(long, default_value = "")] abstract_text: String,
+        #[arg(long, default_value = "")] tags: String,
+        #[arg(long, default_value = "")] study_type: String,
+    },
+    ClaimAdd {
+        paper: String,
+        #[arg(long, required = true)] text: String,
+        #[arg(long, required = true)] quote: String,
+        #[arg(long, default_value = "")] locator: String,
+        #[arg(long, default_value = "mentions")] stance: String,
+        #[arg(long, default_value_t = 0.5)] confidence: f64,
+    },
+    QuestionAdd { text: String },
+    EdgeAdd { src: String, dst: String, #[arg(long, required = true)] kind: String, #[arg(long, default_value = "")] note: String },
+    Get { reference: String },
+    Search { query: String, #[arg(long, default_value_t = 20)] limit: i64 },
+    Stats,
+}
+
+#[derive(Debug, Subcommand)]
 pub enum LatticeAction {
     Normalize { text: String },
     Tags { text: String },
@@ -449,7 +479,7 @@ fn list_text(rows: &[Value]) -> String {
 /// Execute a parsed command against an initialized database.
 pub fn run(cli: &Cli) -> Result<Output> {
     let conn = open(&cli.db)?;
-    if !matches!(cli.command, Commands::Init) {
+    if !matches!(cli.command, Commands::Init | Commands::Lattice { .. } | Commands::LatticeRepo { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -561,6 +591,7 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Ai { action } => run_ai(&conn, action),
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
+        Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
         Commands::Report { reference, out, check, strict } => {
             use crate::manifest;
             if *strict && check.is_none() {
@@ -861,6 +892,50 @@ fn run_ai(conn: &Connection, action: &AiAction) -> Result<Output> {
                     field(a, "output_sha256").chars().take(12).collect::<String>())).collect()
             };
             emit(Value::Array(rows), text)
+        }
+    }
+}
+
+fn run_lattice_repo(db: &str, action: &LatticeRepoAction) -> Result<Output> {
+    use crate::lattice_repo;
+    let conn = lattice_repo::open(db)?;
+    match action {
+        LatticeRepoAction::PaperAdd { title, authors, year, venue, doi, arxiv, url,
+            abstract_text, tags, study_type } => {
+            let mut metadata = std::collections::BTreeMap::new();
+            for (key, value) in [("title", title.as_str()), ("authors", authors), ("year", year),
+                ("venue", venue), ("doi", doi), ("arxiv", arxiv), ("url", url),
+                ("abstract", abstract_text), ("tags", tags), ("study_type", study_type)] {
+                metadata.insert(key.to_string(), value.to_string());
+            }
+            let (record, created) = lattice_repo::add_paper(&conn, &metadata)?;
+            let line = format!("{} {} {}", field(&record, "id"),
+                if created { "added" } else { "merged" }, field(&record, "title"));
+            emit(json!({"paper": record, "created": created}), line)
+        }
+        LatticeRepoAction::ClaimAdd { paper, text, quote, locator, stance, confidence } => {
+            let record = lattice_repo::add_claim(&conn, paper, text, quote, locator, stance, *confidence)?;
+            emit(record.clone(), format!("{} {}", field(&record, "id"), field(&record, "text")))
+        }
+        LatticeRepoAction::QuestionAdd { text } => {
+            let record = lattice_repo::add_question(&conn, text)?;
+            emit(record.clone(), format!("{} {}", field(&record, "id"), field(&record, "text")))
+        }
+        LatticeRepoAction::EdgeAdd { src, dst, kind, note } => {
+            let record = lattice_repo::add_edge(&conn, src, dst, kind, note)?;
+            emit(record.clone(), to_stable_json(&record))
+        }
+        LatticeRepoAction::Get { reference } => {
+            let result = lattice_repo::get(&conn, reference)?;
+            emit(result.clone(), to_stable_json(&result))
+        }
+        LatticeRepoAction::Search { query, limit } => {
+            let result = lattice_repo::search(&conn, query, *limit)?;
+            emit(result.clone(), to_stable_json(&result))
+        }
+        LatticeRepoAction::Stats => {
+            let result = lattice_repo::stats(&conn)?;
+            emit(result.clone(), to_stable_json(&result))
         }
     }
 }

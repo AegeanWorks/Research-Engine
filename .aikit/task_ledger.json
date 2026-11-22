@@ -1,63 +1,17 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "T-027-rust-layers",
+    "task_id": "T-028-outer-layers",
     "last_phase": "in_progress",
     "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1795351115.3985991,
+    "updated_at": 1795351921.6066496,
     "owner": "opencode:rust-rewrite",
-    "lease_until": 1795358315.3985991,
+    "lease_until": 1795359121.6066496,
     "started_by": "opencode:rust-rewrite",
     "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "T-026-rust-rewrite",
-      "phase": "in_progress",
-      "phase_num": 4,
-      "description": "[3/6] Verification: cargo test 7/7 passed; python -m engine check reports 0 errors on Rust-written graphs; project gates 4/4 passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795341185.3334901,
-      "timestamp_str": "2026-11-22 12:53:05",
-      "agent": "opencode:rust-rewrite",
-      "checklists": "passed"
-    },
-    {
-      "task_id": "T-026-rust-rewrite",
-      "phase": "in_progress",
-      "phase_num": 3,
-      "description": "[4/6] Cascades and generated reports ported: preview digests, transitive invalidation, source retraction, inventory/consensus/report/scorecard",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795342286.038002,
-      "timestamp_str": "2026-11-22 13:11:26",
-      "agent": "opencode:rust-rewrite"
-    },
-    {
-      "task_id": "T-026-rust-rewrite",
-      "phase": "in_progress",
-      "phase_num": 4,
-      "description": "[5/6] Verification: cargo test 9/9 passed; Python engine agrees with Rust integrity output on cascade graphs; project gates 4/4 passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795342286.2162497,
-      "timestamp_str": "2026-11-22 13:11:26",
-      "agent": "opencode:rust-rewrite",
-      "checklists": "passed"
-    },
-    {
-      "task_id": "T-026-rust-rewrite",
-      "phase": "in_progress",
-      "phase_num": 3,
-      "description": "[6/6] Port observations, protocol registry and lexical search into rust/src with Python parity tests",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795342513.4636097,
-      "timestamp_str": "2026-11-22 13:15:13",
-      "agent": "opencode:rust-rewrite"
-    },
     {
       "task_id": "T-026-rust-rewrite",
       "phase": "in_progress",
@@ -252,6 +206,64 @@
       "status": "in_progress",
       "timestamp": 1795351115.3985991,
       "timestamp_str": "2026-11-22 15:38:35",
+      "agent": "opencode:rust-rewrite",
+      "checklists": "passed"
+    },
+    {
+      "task_id": "T-027-rust-layers",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'T-027-rust-layers' completed successfully.",
+      "status": "completed",
+      "timestamp": 1795351344.7049847,
+      "timestamp_str": "2026-11-22 15:42:24",
+      "agent": "opencode:rust-rewrite",
+      "head": "13bcd81855ec89ecdc4c95c45d394d79fe79b69e",
+      "delivery": {
+        "roots": [
+          "."
+        ],
+        "forced": false
+      }
+    },
+    {
+      "task_id": "T-028-outer-layers",
+      "phase": "in_progress",
+      "phase_num": 2,
+      "description": "[1/6] Plan: port remaining lattice repository/analysis/snapshots, studio and domains modules, then switch the runtime entry point to Rust",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795351910.0768654,
+      "timestamp_str": "2026-11-22 15:51:50",
+      "agent": "opencode:rust-rewrite",
+      "impact_assessment": {
+        "why": "The prior rewrite task closed with the core, analysis, AI, experiments and first lattice parsers ported, but the outer layers and runtime entry point remain Python-only.",
+        "benefits": "A complete Rust runtime with no Python-only surface; the shared SQLite graph and parity harnesses let each layer be ported and verified independently.",
+        "risks": "contract: lattice schema v2 and studio/domain APIs must stay compatible; dependency: only declared crates; concurrency: ledger owned by opencode:rust-rewrite; state: existing graph files and lattice databases must remain readable.",
+        "mitigation": "Port bounded modules with Python parity helpers, keep separate schema initialization for lattice stores, verify with cargo test plus direct hygiene/KB/secret/test scripts before each commit."
+      },
+      "plan_digest": "aa86d74d20a2aa574d309dbaebd42d9d88ae476163fffe70a12c668f65645169"
+    },
+    {
+      "task_id": "T-028-outer-layers",
+      "phase": "in_progress",
+      "phase_num": 3,
+      "description": "[2/6] Ported the lattice schema-v2 repository (papers, claims, questions, edges, search, stats, detail views) into rust/src/lattice_repo.rs",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795351921.262475,
+      "timestamp_str": "2026-11-22 15:52:01",
+      "agent": "opencode:rust-rewrite"
+    },
+    {
+      "task_id": "T-028-outer-layers",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[2/6] Verification: cargo test 25/25; lattice_repo_parity.py 8/8 exact matches; project gates passing",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795351921.6066496,
+      "timestamp_str": "2026-11-22 15:52:01",
       "agent": "opencode:rust-rewrite",
       "checklists": "passed"
     }

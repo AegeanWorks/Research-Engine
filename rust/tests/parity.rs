@@ -221,6 +221,35 @@ fn search_is_phrase_first_and_program_scoped() {
 }
 
 #[test]
+fn lattice_repository_graph() {
+    let path = temp_db("lattice_repo");
+    let conn = research_engine::lattice_repo::open(path.to_str().unwrap()).unwrap();
+    let mut metadata = std::collections::BTreeMap::new();
+    metadata.insert("title".to_string(), "Quantum Effects".to_string());
+    metadata.insert("doi".to_string(), "https://doi.org/10.1/q".to_string());
+    metadata.insert("year".to_string(), "2024".to_string());
+    let (paper, created) = research_engine::lattice_repo::add_paper(&conn, &metadata).unwrap();
+    assert!(created);
+    assert_eq!(field(&paper, "doi"), "10.1/q");
+    let (same, created_again) = research_engine::lattice_repo::add_paper(&conn, &metadata).unwrap();
+    assert!(!created_again);
+    assert_eq!(field(&same, "id"), field(&paper, "id"));
+
+    let claim = research_engine::lattice_repo::add_claim(&conn, &field(&paper, "id"),
+        "The effect reproduced", "we observed it", "abstract:s1", "supports", 0.8).unwrap();
+    let question = research_engine::lattice_repo::add_question(&conn, "Does it reproduce?").unwrap();
+    research_engine::lattice_repo::add_edge(&conn, &field(&claim, "id"), &field(&question, "id"),
+        "supports", "").unwrap();
+    let found = research_engine::lattice_repo::search(&conn, "effect", 20).unwrap();
+    assert_eq!(found.get("papers").and_then(Value::as_array).map(|v| v.len()), Some(1));
+    assert_eq!(found.get("claims").and_then(Value::as_array).map(|v| v.len()), Some(1));
+    let stats = research_engine::lattice_repo::stats(&conn).unwrap();
+    assert_eq!(stats.get("edges").and_then(Value::as_i64), Some(1));
+    let entity = research_engine::lattice_repo::get(&conn, &field(&claim, "id")).unwrap();
+    assert!(entity.get("edges").and_then(Value::as_array).map(|v| v.len()).unwrap_or(0) > 0);
+}
+
+#[test]
 fn lattice_value_rules_and_parsers() {
     use research_engine::lattice as l;
     assert_eq!(l::normalize_text("Fluid   Universe—101!"), "fluid universe 101");
