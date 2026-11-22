@@ -5,9 +5,9 @@
     "last_phase": "in_progress",
     "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1795369449.6997912,
+    "updated_at": 1795369846.1439395,
     "owner": "opencode:rust-rewrite",
-    "lease_until": 1795376649.6997912,
+    "lease_until": 1795377046.1439395,
     "started_by": "opencode:rust-rewrite",
     "continuations": []
   },
@@ -92,29 +92,6 @@
         "mitigation": "Port bounded modules with Python parity helpers, keep separate schema initialization for lattice stores, verify with cargo test plus direct hygiene/KB/secret/test scripts before each commit."
       },
       "plan_digest": "aa86d74d20a2aa574d309dbaebd42d9d88ae476163fffe70a12c668f65645169"
-    },
-    {
-      "task_id": "T-028-outer-layers",
-      "phase": "in_progress",
-      "phase_num": 3,
-      "description": "[6/6 partial] Ported obezite domain citation extraction and claim de-duplication into rust/src/domains_obezite.rs",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795363396.1538093,
-      "timestamp_str": "2026-11-22 19:03:16",
-      "agent": "opencode:rust-rewrite"
-    },
-    {
-      "task_id": "T-028-outer-layers",
-      "phase": "in_progress",
-      "phase_num": 4,
-      "description": "[6/6 partial] Verification: cargo test 38/38; obezite_parity.py 4/4 exact matches; project gates passing",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795363396.5593436,
-      "timestamp_str": "2026-11-22 19:03:16",
-      "agent": "opencode:rust-rewrite",
-      "checklists": "passed"
     },
     {
       "task_id": "T-028-outer-layers",
@@ -251,6 +228,29 @@
       "status": "in_progress",
       "timestamp": 1795369449.6997912,
       "timestamp_str": "2026-11-22 20:44:09",
+      "agent": "opencode:rust-rewrite",
+      "checklists": "passed"
+    },
+    {
+      "task_id": "T-028-outer-layers",
+      "phase": "in_progress",
+      "phase_num": 3,
+      "description": "[6/6 final] Ported hydrogen-2s radial-node representation with shared Bohr radius, force-balance and loop-circulation helpers",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795369845.9077966,
+      "timestamp_str": "2026-11-22 20:50:45",
+      "agent": "opencode:rust-rewrite"
+    },
+    {
+      "task_id": "T-028-outer-layers",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[6/6 final] Verification: cargo test 44/44; hydrogen_radial_parity.py 12/12 matches; project gates passing",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795369846.1439395,
+      "timestamp_str": "2026-11-22 20:50:46",
       "agent": "opencode:rust-rewrite",
       "checklists": "passed"
     }

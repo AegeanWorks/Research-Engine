@@ -54,6 +54,7 @@ pub enum Commands {
     FluidBridge { #[command(subcommand)] action: FluidBridgeAction },
     FluidFrankOseen { #[command(subcommand)] action: FluidFrankOseenAction },
     FluidVortexCore { #[command(subcommand)] action: FluidVortexCoreAction },
+    HydrogenRadial { #[command(subcommand)] action: HydrogenRadialAction },
     Obezite { #[command(subcommand)] action: ObeziteAction },
     PnnRules { #[command(subcommand)] action: PnnRulesAction },
     PnnDocking { #[command(subcommand)] action: PnnDockingAction },
@@ -315,6 +316,22 @@ pub enum FluidBridgeAction {
     Horizon { omega: f64 },
     Coeffs { s0: f64, st: f64, horizon_t: f64, omega: f64, hbar: f64, mass: f64 },
     Path { #[arg(long)] coeffs: String, #[arg(long)] times: String, #[arg(long)] omega: f64 },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum HydrogenRadialAction {
+    Radial10 { #[arg(long, required = true)] xs: String, #[arg(long, default_value_t = 1.0)] radius: f64 },
+    Radial20 { #[arg(long, required = true)] xs: String, #[arg(long, default_value_t = 1.0)] radius: f64 },
+    Probability { #[arg(long, required = true)] xs: String, #[arg(long, default_value_t = 1.0)] radius: f64 },
+    Branch { #[arg(long, required = true)] xs: String, #[arg(long, default_value_t = 1.0)] radius: f64 },
+    Phase { #[arg(long, required = true)] xs: String, #[arg(long, default_value_t = 1.0)] radius: f64 },
+    Node { #[arg(long, default_value_t = 1.0)] radius: f64 },
+    Overlap { #[arg(long, default_value_t = 1.0)] radius: f64 },
+    Norm { #[arg(long, default_value_t = 1.0)] radius: f64 },
+    Peaks { #[arg(long, default_value_t = 1.0)] radius: f64 },
+    Balance,
+    Circulation { r: f64, theta: f64, m: i64, #[arg(long, default_value_t = 4000)] samples: usize },
+    Scales,
 }
 
 #[derive(Debug, Subcommand)]
@@ -653,7 +670,7 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::Mcp { .. } | Commands::Web { .. } | Commands::Atlas { .. }
         | Commands::PnnSafety { .. } | Commands::Client { .. }
         | Commands::FluidBridge { .. } | Commands::FluidFrankOseen { .. }
-        | Commands::FluidVortexCore { .. }
+        | Commands::FluidVortexCore { .. } | Commands::HydrogenRadial { .. }
         | Commands::Obezite { .. }
         | Commands::PnnRules { .. } | Commands::PnnDocking { .. } | Commands::Providers { .. }) {
         initialize(&conn)?;
@@ -847,6 +864,63 @@ pub fn run(cli: &Cli) -> Result<Output> {
                     let result = obezite::deduplicate(&list, std::path::Path::new(retracted),
                         std::path::Path::new(archive), std::path::Path::new(updated), stamp)?;
                     emit(result.clone(), to_stable_json(&result))
+                }
+            }
+        }
+        Commands::HydrogenRadial { action } => {
+            use crate::domains_hydrogen_radial as hr;
+            macro_rules! scalar {
+                ($expr:expr) => {{
+                    let value = $expr?;
+                    emit(json!({"value": value}), format!("{value}\n"))
+                }};
+            }
+            macro_rules! curve {
+                ($expr:expr) => {{
+                    let value = hr::json_array($expr?);
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }};
+            }
+            match action {
+                HydrogenRadialAction::Radial10 { xs, radius } => {
+                    let xs = hr::parse_grid(xs)?;
+                    curve!(hr::radial_10(&xs, *radius))
+                }
+                HydrogenRadialAction::Radial20 { xs, radius } => {
+                    let xs = hr::parse_grid(xs)?;
+                    curve!(hr::radial_20(&xs, *radius))
+                }
+                HydrogenRadialAction::Probability { xs, radius } => {
+                    let xs = hr::parse_grid(xs)?;
+                    curve!(hr::radial_probability_20(&xs, *radius))
+                }
+                HydrogenRadialAction::Branch { xs, radius } => {
+                    let xs = hr::parse_grid(xs)?;
+                    let value = hr::branch_split_20(&xs, *radius)?;
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                HydrogenRadialAction::Phase { xs, radius } => {
+                    let xs = hr::parse_grid(xs)?;
+                    scalar!(hr::phase_slip_20(&xs, *radius))
+                }
+                HydrogenRadialAction::Node { radius } => scalar!(hr::node_position(*radius)),
+                HydrogenRadialAction::Overlap { radius } => scalar!(hr::overlap_10_20(*radius)),
+                HydrogenRadialAction::Norm { radius } => scalar!(hr::norm_20(*radius)),
+                HydrogenRadialAction::Peaks { radius } => {
+                    let (inner, outer) = hr::peak_radii_20(*radius)?;
+                    let value = json!({"inner": inner, "outer": outer});
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                HydrogenRadialAction::Balance => curve!(hr::balance_residuals()),
+                HydrogenRadialAction::Circulation { r, theta, m, samples } =>
+                    scalar!(hr::loop_circulation(*r, *theta, *m, *samples)),
+                HydrogenRadialAction::Scales => {
+                    let value = hr::representation_scales()?;
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
                 }
             }
         }

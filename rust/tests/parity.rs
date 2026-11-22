@@ -221,6 +221,30 @@ fn search_is_phrase_first_and_program_scoped() {
 }
 
 #[test]
+fn hydrogen_radial_two_branch_representation() {
+    use research_engine::domains_hydrogen_radial as hr;
+    let xs = vec![0.0, 1.0, 2.0, 4.0];
+    let r10 = hr::radial_10(&xs, 1.0).unwrap();
+    let r20 = hr::radial_20(&xs, 1.0).unwrap();
+    assert!(r10[0] > r10[3]);
+    assert!(r20[0] > 0.0 && r20[3] < 0.0);
+    assert!((hr::node_position(1.0).unwrap() - 2.0).abs() < 1e-12);
+    assert!((hr::phase_slip_20(&xs, 1.0).unwrap() - std::f64::consts::PI).abs() < 1e-12);
+    let branch = hr::branch_split_20(&xs, 1.0).unwrap();
+    assert_eq!(branch.get("identity_residual").and_then(Value::as_f64), Some(0.0));
+    assert!((hr::norm_20(1.0).unwrap() - 1.0).abs() < 1e-9);
+    assert!(hr::overlap_10_20(1.0).unwrap().abs() < 1e-9);
+    let (inner, outer) = hr::peak_radii_20(1.0).unwrap();
+    assert!(inner < outer);
+    assert!(hr::balance_residuals().unwrap().iter().all(|v| v.abs() < 1e-12));
+    assert!((hr::loop_circulation(2.0, std::f64::consts::FRAC_PI_2, 1, 4000).unwrap()
+        - 2.0 * std::f64::consts::PI).abs() < 1e-12);
+    let scales = hr::representation_scales().unwrap();
+    assert_eq!(scales.get("radius").and_then(Value::as_f64), Some(1.0));
+    assert!(hr::radial_10(&xs, 0.0).is_err());
+}
+
+#[test]
 fn fluid_vortex_core_probe() {
     use research_engine::domains_fluid_vortex_core as vc;
     assert!((vc::core_radius().unwrap() - 0.1).abs() < 1e-12);
