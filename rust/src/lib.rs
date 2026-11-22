@@ -44,6 +44,7 @@ pub mod domains_fluid_water_rays;
 pub mod domains_fluid_vortex_cascade;
 pub mod domains_fluid_vortex_particles;
 pub mod domains_fluid_observed_shape;
+pub mod domains_fluid_hydrogen_vortex;
 pub mod domains_pnn_rules;
 pub mod domains_pnn_safety;
 pub mod discovery;

@@ -85,6 +85,7 @@ argparse requires in `python -m engine`.
 | Domains: vortex hierarchy | Koide Q, geometric/power-law mass spectra, Koide-power bisection and one-parameter hierarchy falsification (`vortex-cascade` CLI) |
 | Domains: vortex particles | T(2,n) torus-knot filaments, chord tangents, length, regularized Biot–Savart energy and knot-mass falsification (`vortex-particles` CLI) |
 | Domains: observed shape | Citable band-shape comparator data: width-change slopes, Jou–Freeman components/tail and temperature side half-widths (`observed-shape` CLI) |
+| Domains: hydrogen vortex | Hydrogen 2p radial function/probability, most-probable radius, azimuthal velocity, circulation, loop integral and angular momentum (`hydrogen-vortex` CLI) |
 | Domains: obezite | Citation-number extraction with bibliography-noise stripping and claim-row de-duplication (`obezite` CLI) |
 | Domains: PNN rules | CNS/property design-rule evaluation and criterion weighting (`pnn-rules` CLI) |
 | Domains: PNN docking | Docking-score alias parsing, RMSD/Vina filtering, weighted consensus normalization and per-compound best-target aggregation (`pnn-docking` CLI) |
@@ -205,6 +206,8 @@ argparse requires in `python -m engine`.
   energies and the full mass hypothesis; all six checks match.
 - `observed_shape_parity.py` compares width changes, shape evidence, scales and
   side half-width fits; all seven checks match.
+- `hydrogen_vortex_parity.py` compares the 2p radial curve, vortex velocities,
+  circulation, loop integral and radial norm; all eight checks match.
 
 ## Still to port
 

@@ -433,6 +433,28 @@ fn fluid_frank_oseen_dispersion() {
 }
 
 #[test]
+fn hydrogen_2p_vortex_identification() {
+    use research_engine::domains_fluid_hydrogen_vortex as hv;
+    let xs = [0.0, 1.0, 2.0, 4.0];
+    let radial = hv::radial_2p(&xs, 1.0).unwrap();
+    assert!(radial[0] == 0.0 && radial[2] > radial[3]);
+    assert!(hv::radial_2p(&xs, 0.0).is_err());
+    let probability = hv::radial_probability(&xs, 1.0).unwrap();
+    assert!(probability.iter().all(|v| *v >= 0.0));
+    assert_eq!(hv::most_probable_radius(1.0).unwrap(), 4.0);
+    assert!(hv::most_probable_radius(0.0).is_err());
+    let theta = std::f64::consts::FRAC_PI_2;
+    assert!((hv::azimuthal_velocity(2.0, theta, 1, 1.0, 1.0).unwrap() - 0.5).abs() < 1e-12);
+    assert!(hv::azimuthal_velocity(2.0, 0.0, 1, 1.0, 1.0).is_err());
+    assert!((hv::circulation(1, 1.0, 1.0).unwrap() - 2.0 * std::f64::consts::PI).abs() < 1e-12);
+    assert!((hv::loop_circulation(2.0, theta, 1, 1.0, 1.0, 4000).unwrap()
+        - 2.0 * std::f64::consts::PI).abs() < 1e-12);
+    assert!(hv::loop_circulation(2.0, theta, 1, 1.0, 1.0, 8).is_err());
+    assert_eq!(hv::angular_momentum(1, 1.0).unwrap(), 1.0);
+    assert!(hv::angular_momentum(1, 0.0).is_err());
+}
+
+#[test]
 fn observed_band_shape_comparator() {
     use research_engine::domains_fluid_observed_shape as os;
     let width = os::observed_width_change_ev(45.0).unwrap();

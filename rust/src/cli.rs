@@ -80,6 +80,7 @@ pub enum Commands {
     VortexCascade { #[command(subcommand)] action: VortexCascadeAction },
     VortexParticles { #[command(subcommand)] action: VortexParticlesAction },
     ObservedShape { #[command(subcommand)] action: ObservedShapeAction },
+    HydrogenVortex { #[command(subcommand)] action: HydrogenVortexAction },
     Providers { #[command(subcommand)] action: ProvidersAction },
     Search {
         query: String,
@@ -306,6 +307,18 @@ pub enum ProvidersAction {
 pub enum PnnRulesAction {
     Evaluate { #[arg(long, required = true)] compound: String },
     Weight { criterion: String },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum HydrogenVortexAction {
+    Radial { #[arg(long, required = true)] xs: String, #[arg(long, default_value_t = 1.0)] radius: f64 },
+    Probability { #[arg(long, required = true)] xs: String, #[arg(long, default_value_t = 1.0)] radius: f64 },
+    MostProbable { #[arg(long, default_value_t = 1.0)] radius: f64 },
+    Azimuthal { r: f64, theta: f64, m: i64 },
+    Circulation { m: i64 },
+    Loop { r: f64, theta: f64, m: i64, #[arg(long, default_value_t = 4000)] samples: usize },
+    AngularMomentum { m: i64 },
+    Norm { #[arg(long, default_value_t = 1.0)] radius: f64 },
 }
 
 #[derive(Debug, Subcommand)]
@@ -936,7 +949,7 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::TwoStateMarcus { .. } | Commands::ExcitedFluid { .. }
         | Commands::WaterRays { .. } | Commands::VortexCascade { .. }
         | Commands::VortexParticles { .. } | Commands::ObservedShape { .. }
-        | Commands::Providers { .. }) {
+        | Commands::HydrogenVortex { .. } | Commands::Providers { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -1049,6 +1062,49 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::HydrogenVortex { action } => {
+            use crate::domains_fluid_hydrogen_vortex as hv;
+            match action {
+                HydrogenVortexAction::Radial { xs, radius } => {
+                    let value = hv::json_array(hv::radial_2p(&hv::parse_xs(xs)?, *radius)?);
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                HydrogenVortexAction::Probability { xs, radius } => {
+                    let value = hv::json_array(hv::radial_probability(&hv::parse_xs(xs)?, *radius)?);
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                HydrogenVortexAction::MostProbable { radius } => {
+                    let value = hv::most_probable_radius(*radius)?;
+                    emit(json!({"value": value}), format!("{value}\n"))
+                }
+                HydrogenVortexAction::Azimuthal { r, theta, m } => {
+                    let value = hv::azimuthal_velocity(*r, *theta, *m, 1.0, 1.0)?;
+                    emit(json!({"value": value}), format!("{value}\n"))
+                }
+                HydrogenVortexAction::Circulation { m } => {
+                    let value = hv::circulation(*m, 1.0, 1.0)?;
+                    emit(json!({"value": value}), format!("{value}\n"))
+                }
+                HydrogenVortexAction::Loop { r, theta, m, samples } => {
+                    let value = hv::loop_circulation(*r, *theta, *m, 1.0, 1.0, *samples)?;
+                    emit(json!({"value": value}), format!("{value}\n"))
+                }
+                HydrogenVortexAction::AngularMomentum { m } => {
+                    let value = hv::angular_momentum(*m, 1.0)?;
+                    emit(json!({"value": value}), format!("{value}\n"))
+                }
+                HydrogenVortexAction::Norm { radius } => {
+                    let step = 80.0 / 160000.0;
+                    let mut xs: Vec<f64> = (0..160001).map(|i| i as f64 * step).collect();
+                    xs[160000] = 80.0;
+                    let values = hv::radial_probability(&xs, *radius)?;
+                    let value = crate::domains_fluid_nelson_closure::trapezoid(&values, &xs);
+                    emit(json!({"value": value}), format!("{value}\n"))
+                }
+            }
+        }
         Commands::ObservedShape { action } => {
             use crate::domains_fluid_observed_shape as os;
             macro_rules! bundle {

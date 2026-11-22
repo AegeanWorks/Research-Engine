@@ -6,15 +6,15 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `481`
+- **Total Python Modules**: `482`
 - **Total Classes**: `317`
-- **Total Top-Level Functions**: `2077`
+- **Total Top-Level Functions**: `2080`
 - **Total Class Methods**: `1545`
-- **Total Source Lines**: `92523`
+- **Total Source Lines**: `92571`
 
 ## 🧭 Map Coverage
-- **Indexed**: python (`481` module(s))
-- **Not indexed by this map**: javascript (`1` file(s)), rust (`74` file(s))
+- **Indexed**: python (`482` module(s))
+- **Not indexed by this map**: javascript (`1` file(s)), rust (`75` file(s))
 
 > Only Python symbols are catalogued. A language above is reported as not indexed, never as verified by this map.
 
@@ -4828,6 +4828,16 @@
 
 ### [`rust/hydrogen_radial_parity.py`](rust/hydrogen_radial_parity.py)
 **Size**: `61` lines
+
+**Functions:**
+- `def run(*args)`
+- `def close(a, b)`
+- `def check(label, rust, py)`
+
+---
+
+### [`rust/hydrogen_vortex_parity.py`](rust/hydrogen_vortex_parity.py)
+**Size**: `48` lines
 
 **Functions:**
 - `def run(*args)`
