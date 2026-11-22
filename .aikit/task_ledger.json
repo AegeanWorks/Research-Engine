@@ -5,34 +5,13 @@
     "last_phase": "in_progress",
     "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1795349797.2363584,
+    "updated_at": 1795350387.9280262,
     "owner": "opencode:rust-rewrite",
-    "lease_until": 1795356997.2363584,
+    "lease_until": 1795357587.9280262,
     "started_by": "opencode:rust-rewrite",
     "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "T-025-research-functions-merge",
-      "phase": "in_progress",
-      "phase_num": 4,
-      "description": "[6/6] M2-M5 shipped: fluid rigor+physics, lattice adapters/studio, N1 experiments+CSV, PNN/obezite/Atlas packs, schema 14, dry-run evidence; 1075 host tests pass, Atlas 148 passed/5 skipped, 4/4 gates pass, checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794073879.5991619,
-      "timestamp_str": "2026-11-07 20:51:19",
-      "agent": "opencode:goal"
-    },
-    {
-      "task_id": "T-025-research-functions-merge",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'T-025-research-functions-merge' completed successfully.",
-      "status": "completed",
-      "timestamp": 1794074335.0688937,
-      "timestamp_str": "2026-11-07 20:58:55",
-      "agent": "opencode:goal"
-    },
     {
       "task_id": "T-026-rust-rewrite",
       "phase": "in_progress",
@@ -256,6 +235,29 @@
       "status": "in_progress",
       "timestamp": 1795349797.2363584,
       "timestamp_str": "2026-11-22 15:16:37",
+      "agent": "opencode:rust-rewrite",
+      "checklists": "passed"
+    },
+    {
+      "task_id": "T-027-rust-layers",
+      "phase": "in_progress",
+      "phase_num": 3,
+      "description": "[5/6] Ported the experiments layer (N1 intervention/metric/event records and baseline-vs-intervention, correlation, multi-metric analysis) into rust/src/experiments.rs",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795350387.6627598,
+      "timestamp_str": "2026-11-22 15:26:27",
+      "agent": "opencode:rust-rewrite"
+    },
+    {
+      "task_id": "T-027-rust-layers",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[5/6] Verification: cargo test 23/23; experiments_parity.py 34/34 checks match Python within 1e-12; project gates passing",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795350387.9280262,
+      "timestamp_str": "2026-11-22 15:26:27",
       "agent": "opencode:rust-rewrite",
       "checklists": "passed"
     }

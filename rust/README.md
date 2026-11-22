@@ -51,6 +51,7 @@ argparse requires in `python -m engine`.
 | Export | `export` JSONL with byte-identical records, `export --check` self-verification |
 | AI provenance | `ai sweep/extract/idea/propose-test/draft/artifacts` with hash-only notarization, fixed probe templates and refuse-on-error ingest |
 | Diff | `diff` with semantic run-churn collapsing and exact mode |
+| Experiments | N1 intervention/metric/event records and baseline-vs-intervention, correlation and multi-metric analysis (`experiment` CLI) |
 | Search | deterministic phrase-first lexical `search` with exact snippet/token-budget output |
 | Markdown | `sanitize`/`cell`/`estimate_tokens`/`pack` shared with reports and search |
 | Integrity | 24 finding codes including `PROV-*`, `EVID-*`, `GRAPH-*`, `GAP-*`, `LEDGER-001` |
@@ -76,9 +77,11 @@ argparse requires in `python -m engine`.
   all seven compare equal.
 - `ai_parity.py` copies a base graph and compares all six `ai` commands plus
   `diff`; all seven compare equal.
+- `experiments_parity.py` compares the N1 experiment record and analysis CLI
+  against the Python `experiments` API; all 34 checks match (floats within 1e-12).
 
 ## Still to port
 
-studio/adapters/experiments/domains and the Python CLI text renderer. These
-remain served by their Python entry points until their Rust equivalents land;
-the SQLite graph is shared throughout.
+studio/adapters/domains and the Python CLI text renderer. These remain served
+by their Python entry points until their Rust equivalents land; the SQLite
+graph is shared throughout.

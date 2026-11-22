@@ -16,6 +16,7 @@ pub mod db;
 pub mod diffing;
 pub mod discovery;
 pub mod error;
+pub mod experiments;
 pub mod integrity;
 pub mod killtest;
 pub mod manifest;

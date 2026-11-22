@@ -221,6 +221,39 @@ fn search_is_phrase_first_and_program_scoped() {
 }
 
 #[test]
+fn experiment_records_and_analysis() {
+    let path = temp_db("experiments");
+    let conn = open(path.to_str().unwrap()).unwrap();
+    initialize(&conn).unwrap();
+    let research = core::add_research(&conn, "N1 Program", "", None).unwrap();
+    let rid = field(&research, "id");
+    let intervention = research_engine::experiments::add_intervention(&conn, &rid, "dose A",
+        "2026-01-01", None, Some("2026-02-14"), "10mg", "").unwrap();
+    assert_eq!(field(&intervention, "id"), "iv_000001");
+    research_engine::experiments::add_metric_definition(&conn, &rid, "m1", "desc", "mg").unwrap();
+    for day in 18..32 {
+        research_engine::experiments::add_metric(&conn, &rid, "m1", &format!("2026-01-{day:02}"),
+            day as f64 / 10.0, Some("iv_000001"), "").unwrap();
+    }
+    for day in 1..15 {
+        research_engine::experiments::add_metric(&conn, &rid, "m1", &format!("2026-02-{day:02}"),
+            2.0 + day as f64 / 10.0, None, "").unwrap();
+    }
+    research_engine::experiments::add_event(&conn, &rid, "adverse", "2026-02-05T09:00:00+00:00",
+        Some(2), "", Some("iv_000001")).unwrap();
+    let metrics = research_engine::experiments::list_metrics(&conn, Some(&rid), Some("m1")).unwrap();
+    assert_eq!(metrics.len(), 28);
+    let analysis = research_engine::experiments::analyze_baseline_vs_intervention(&conn, &rid,
+        "m1", "2026-02-01", 14, 14).unwrap();
+    assert!(analysis.get("analysis").is_some());
+    let correlation = research_engine::experiments::correlation_matrix(&conn, &rid, None).unwrap();
+    assert_eq!(correlation.get("metrics").and_then(Value::as_array).map(|v| v.len()), Some(1));
+    let sparse = research_engine::experiments::analyze_baseline_vs_intervention(&conn, &rid,
+        "m1", "2027-01-01", 14, 14).unwrap();
+    assert!(sparse.get("error").is_some());
+}
+
+#[test]
 fn ai_artifacts_notarize_without_storing_raw_text() {
     let path = temp_db("ai");
     let conn = open(path.to_str().unwrap()).unwrap();

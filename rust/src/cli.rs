@@ -38,6 +38,7 @@ pub enum Commands {
     },
     Diff { old: String, new: String, #[arg(long)] exact: bool },
     Ai { #[command(subcommand)] action: AiAction },
+    Experiment { #[command(subcommand)] action: ExperimentAction },
     Search {
         query: String,
         #[arg(long)] research: Option<String>,
@@ -299,6 +300,47 @@ pub enum AiAction {
 }
 
 #[derive(Debug, Subcommand)]
+pub enum ExperimentAction {
+    InterventionAdd {
+        research: String, name: String, start: String,
+        #[arg(long, default_value = "")] projected: String,
+        #[arg(long, default_value = "")] end: String,
+        #[arg(long, default_value = "")] dosage: String,
+        #[arg(long, default_value = "")] notes: String,
+    },
+    MetricDefAdd {
+        research: String, name: String,
+        #[arg(long, default_value = "")] description: String,
+        #[arg(long, default_value = "")] unit: String,
+    },
+    MetricAdd {
+        research: String, metric: String, date: String, value: f64,
+        #[arg(long, default_value = "")] intervention: String,
+        #[arg(long, default_value = "")] note: String,
+    },
+    EventAdd {
+        research: String, name: String, timestamp: String,
+        #[arg(long)] severity: Option<i64>,
+        #[arg(long, default_value = "")] notes: String,
+        #[arg(long, default_value = "")] intervention: String,
+    },
+    List { research: String, #[arg(long, default_value = "metric")] kind: String },
+    Analyze {
+        research: String, metric: String, start: String,
+        #[arg(long, default_value_t = 14)] baseline_days: i64,
+        #[arg(long, default_value_t = 14)] intervention_days: i64,
+    },
+    Correlation { research: String, #[arg(long, default_value = "")] metrics: String },
+    Multi {
+        research: String,
+        #[arg(long, required = true)] metrics: String,
+        start: String,
+        #[arg(long, default_value_t = 14)] baseline_days: i64,
+        #[arg(long, default_value_t = 14)] intervention_days: i64,
+    },
+}
+
+#[derive(Debug, Subcommand)]
 pub enum ProtocolAction {
     Add {
         #[arg(long, required = true)] id: String,
@@ -502,6 +544,7 @@ pub fn run(cli: &Cli) -> Result<Output> {
             emit(result.clone(), crate::diffing::render(&result))
         }
         Commands::Ai { action } => run_ai(&conn, action),
+        Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Report { reference, out, check, strict } => {
             use crate::manifest;
             if *strict && check.is_none() {
@@ -802,6 +845,56 @@ fn run_ai(conn: &Connection, action: &AiAction) -> Result<Output> {
                     field(a, "output_sha256").chars().take(12).collect::<String>())).collect()
             };
             emit(Value::Array(rows), text)
+        }
+    }
+}
+
+fn run_experiment(conn: &Connection, action: &ExperimentAction) -> Result<Output> {
+    use crate::experiments;
+    match action {
+        ExperimentAction::InterventionAdd { research, name, start, projected, end, dosage, notes } => {
+            let row = experiments::add_intervention(conn, research, name, start,
+                Some(projected), Some(end), dosage, notes)?;
+            emit(row.clone(), to_stable_json(&row))
+        }
+        ExperimentAction::MetricDefAdd { research, name, description, unit } => {
+            let row = experiments::add_metric_definition(conn, research, name, description, unit)?;
+            emit(row.clone(), to_stable_json(&row))
+        }
+        ExperimentAction::MetricAdd { research, metric, date, value, intervention, note } => {
+            let row = experiments::add_metric(conn, research, metric, date, *value,
+                Some(intervention), note)?;
+            emit(row.clone(), to_stable_json(&row))
+        }
+        ExperimentAction::EventAdd { research, name, timestamp, severity, notes, intervention } => {
+            let row = experiments::add_event(conn, research, name, timestamp, *severity, notes,
+                Some(intervention))?;
+            emit(row.clone(), to_stable_json(&row))
+        }
+        ExperimentAction::List { research, kind } => {
+            let rows = match kind.as_str() {
+                "intervention" => experiments::list_rows(conn, "experiment_intervention", Some(research), "start_date, id")?,
+                "metricdef" => experiments::list_rows(conn, "experiment_metric_definition", Some(research), "name")?,
+                "event" => experiments::list_rows(conn, "experiment_event", Some(research), "timestamp, id")?,
+                _ => experiments::list_metrics(conn, Some(research), None)?,
+            };
+            emit(Value::Array(rows.clone()), list_text(&rows))
+        }
+        ExperimentAction::Analyze { research, metric, start, baseline_days, intervention_days } => {
+            let result = experiments::analyze_baseline_vs_intervention(conn, research, metric,
+                start, *baseline_days, *intervention_days)?;
+            emit(result.clone(), to_stable_json(&result))
+        }
+        ExperimentAction::Correlation { research, metrics } => {
+            let list: Vec<String> = metrics.split(',').map(|m| m.trim().to_string()).filter(|m| !m.is_empty()).collect();
+            let result = experiments::correlation_matrix(conn, research, if list.is_empty() { None } else { Some(list.as_slice()) })?;
+            emit(result.clone(), to_stable_json(&result))
+        }
+        ExperimentAction::Multi { research, metrics, start, baseline_days, intervention_days } => {
+            let list: Vec<String> = metrics.split(',').map(|m| m.trim().to_string()).filter(|m| !m.is_empty()).collect();
+            let result = experiments::analyze_multiple_metrics(conn, research, &list, start,
+                *baseline_days, *intervention_days)?;
+            emit(result.clone(), to_stable_json(&result))
         }
     }
 }

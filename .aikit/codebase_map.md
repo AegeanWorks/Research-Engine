@@ -6,15 +6,15 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `420`
+- **Total Python Modules**: `422`
 - **Total Classes**: `317`
-- **Total Top-Level Functions**: `1967`
+- **Total Top-Level Functions**: `1970`
 - **Total Class Methods**: `1545`
-- **Total Source Lines**: `89555`
+- **Total Source Lines**: `89699`
 
 ## 🧭 Map Coverage
-- **Indexed**: python (`420` module(s))
-- **Not indexed by this map**: javascript (`1` file(s)), rust (`27` file(s))
+- **Indexed**: python (`422` module(s))
+- **Not indexed by this map**: javascript (`1` file(s)), rust (`28` file(s))
 
 > Only Python symbols are catalogued. A language above is reported as not indexed, never as verified by this map.
 
@@ -4645,6 +4645,23 @@
 
 **Functions:**
 - `def run(cmd, cwd)`
+
+---
+
+### [`rust/experiments_expected.py`](rust/experiments_expected.py)
+> *Python reference implementation of the Rust `experiment` CLI commands.*
+
+**Size**: `54` lines
+
+---
+
+### [`rust/experiments_parity.py`](rust/experiments_parity.py)
+**Size**: `90` lines
+
+**Functions:**
+- `def run(cmd, cwd)`
+- `def close(a, b, tol)`
+- `def compare(label, args, rust_args, ignore)`
 
 ---
 
