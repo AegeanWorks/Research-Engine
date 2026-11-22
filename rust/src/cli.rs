@@ -52,6 +52,7 @@ pub enum Commands {
     PnnSafety { #[arg(long, required = true)] tox: String, #[arg(long, default_value = "{}")] pharm: String },
     Client { #[command(subcommand)] action: ClientAction },
     FluidBridge { #[command(subcommand)] action: FluidBridgeAction },
+    Obezite { #[command(subcommand)] action: ObeziteAction },
     Search {
         query: String,
         #[arg(long)] research: Option<String>,
@@ -264,6 +265,18 @@ pub enum AnalysisAction {
         #[arg(long)] allow_self_reported: bool,
         #[arg(long, default_value = "")] since: String,
         #[arg(long, default_value = "")] until: String,
+    },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum ObeziteAction {
+    Atiflar { text: String },
+    Dedupe {
+        #[arg(long, required = true)] chunks: String,
+        #[arg(long, required = true)] retracted: String,
+        #[arg(long, required = true)] archive: String,
+        #[arg(long, required = true)] updated: String,
+        #[arg(long, default_value = "")] stamp: String,
     },
 }
 
@@ -589,7 +602,7 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::LatticeQuery { .. } | Commands::Discovery { .. } | Commands::Studio { .. }
         | Commands::Mcp { .. } | Commands::Web { .. } | Commands::Atlas { .. }
         | Commands::PnnSafety { .. } | Commands::Client { .. }
-        | Commands::FluidBridge { .. }) {
+        | Commands::FluidBridge { .. } | Commands::Obezite { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -702,6 +715,22 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::Obezite { action } => {
+            use crate::domains_obezite as obezite;
+            match action {
+                ObeziteAction::Atiflar { text } => {
+                    let ids: Vec<Value> = obezite::atiflar(text).into_iter().map(Value::from).collect();
+                    emit(Value::Array(ids.clone()), to_stable_json(&Value::Array(ids)))
+                }
+                ObeziteAction::Dedupe { chunks, retracted, archive, updated, stamp } => {
+                    let list: Vec<std::path::PathBuf> = chunks.split(',').map(|p| std::path::PathBuf::from(p.trim()))
+                        .filter(|p| !p.as_os_str().is_empty()).collect();
+                    let result = obezite::deduplicate(&list, std::path::Path::new(retracted),
+                        std::path::Path::new(archive), std::path::Path::new(updated), stamp)?;
+                    emit(result.clone(), to_stable_json(&result))
+                }
+            }
+        }
         Commands::FluidBridge { action } => {
             use crate::domains_fluid_bridge as bridge;
             match action {

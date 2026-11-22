@@ -17,6 +17,7 @@ pub mod diffing;
 pub mod domains_atlas;
 pub mod domains_atlas_schema_spec;
 pub mod domains_fluid_bridge;
+pub mod domains_obezite;
 pub mod domains_pnn_safety;
 pub mod discovery;
 pub mod error;

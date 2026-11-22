@@ -6,15 +6,15 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `448`
+- **Total Python Modules**: `450`
 - **Total Classes**: `317`
-- **Total Top-Level Functions**: `1994`
+- **Total Top-Level Functions**: `1996`
 - **Total Class Methods**: `1545`
-- **Total Source Lines**: `90826`
+- **Total Source Lines**: `90909`
 
 ## 🧭 Map Coverage
-- **Indexed**: python (`448` module(s))
-- **Not indexed by this map**: javascript (`1` file(s)), rust (`45` file(s))
+- **Indexed**: python (`450` module(s))
+- **Not indexed by this map**: javascript (`1` file(s)), rust (`46` file(s))
 
 > Only Python symbols are catalogued. A language above is reported as not indexed, never as verified by this map.
 
@@ -4828,6 +4828,22 @@
 **Functions:**
 - `def run(cmd)`
 - `def compare(label, args)`
+
+---
+
+### [`rust/obezite_expected.py`](rust/obezite_expected.py)
+> *Python reference for the Rust `obezite` CLI commands.*
+
+**Size**: `29` lines
+
+---
+
+### [`rust/obezite_parity.py`](rust/obezite_parity.py)
+**Size**: `54` lines
+
+**Functions:**
+- `def run(cmd, cwd)`
+- `def check(label, rust, py)`
 
 ---
 

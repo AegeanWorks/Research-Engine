@@ -65,6 +65,7 @@ argparse requires in `python -m engine`.
 | Domains: Atlas | Visual-knowledge schema validation, Muse payload coercion, analysis merging and JSON Schema (`atlas` CLI) |
 | Domains: PNN safety | NOAEL→HED conversion, most-sensitive study selection, IND safety thresholds and Markdown report (`pnn-safety` CLI) |
 | Domains: fluid bridge | Diffusivity, horizon, Pinney coefficients and bridge paths (`fluid-bridge` CLI) |
+| Domains: obezite | Citation-number extraction with bibliography-noise stripping and claim-row de-duplication (`obezite` CLI) |
 | Search | deterministic phrase-first lexical `search` with exact snippet/token-budget output |
 | Markdown | `sanitize`/`cell`/`estimate_tokens`/`pack` shared with reports and search |
 | Integrity | 24 finding codes including `PROV-*`, `EVID-*`, `GRAPH-*`, `GAP-*`, `LEDGER-001` |
@@ -117,10 +118,12 @@ argparse requires in `python -m engine`.
 - `pnn_safety_parity.py` compares safety assessments and the Markdown package;
   both match.
 - `fluid_bridge_parity.py` compares the bridge primitives; all four checks match.
+- `obezite_parity.py` compares citation extraction and de-duplication outputs;
+  all four checks match.
 
 ## Still to port
 
 the network-backed lattice providers (arXiv, Crossref, OpenAlex, EuropePMC),
-the remaining fluid-universe/obezite domain modules and other PNN modules, and
-the Python CLI text renderer. These remain served by their Python entry points
-until their Rust equivalents land; the SQLite graph is shared throughout.
+the remaining fluid-universe/obezite/PNN domain modules and the Python CLI text
+renderer. These remain served by their Python entry points until their Rust
+equivalents land; the SQLite graph is shared throughout.

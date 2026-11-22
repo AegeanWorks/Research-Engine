@@ -221,6 +221,25 @@ fn search_is_phrase_first_and_program_scoped() {
 }
 
 #[test]
+fn obezite_citation_extraction_and_dedupe() {
+    use research_engine::domains_obezite as obezite;
+    let ids = obezite::atiflar("Bulgur 74, Nature. 2020;578(7795):444-448, PMID: 12345, 120 ve 42");
+    assert_eq!(ids, vec![42, 74, 120]);
+    let path = temp_db("obezite");
+    let dir = path.parent().unwrap();
+    let chunk = dir.join(format!("{}-chunk.md", path.file_name().unwrap().to_string_lossy()));
+    let retracted = dir.join(format!("{}-cur.md", path.file_name().unwrap().to_string_lossy()));
+    std::fs::write(&chunk, "| **1** | first | x |\n").unwrap();
+    std::fs::write(&retracted, "| **1** | old | y |\n| **2** | keep | z |\n").unwrap();
+    let archive = dir.join(format!("{}-archive.md", path.file_name().unwrap().to_string_lossy()));
+    let updated = dir.join(format!("{}-updated.md", path.file_name().unwrap().to_string_lossy()));
+    let result = obezite::deduplicate(&[chunk], &retracted, &archive, &updated, "2026-01-01").unwrap();
+    assert_eq!(result.get("duplicates").and_then(Value::as_u64), Some(1));
+    assert_eq!(result.get("remaining").and_then(Value::as_u64), Some(1));
+    assert!(std::fs::read_to_string(&archive).unwrap().contains("### İddia 1"));
+}
+
+#[test]
 fn fluid_bridge_primitives() {
     use research_engine::domains_fluid_bridge as bridge;
     assert!((bridge::diffusivity(1.0, 2.0).unwrap() - 0.25).abs() < 1e-12);
