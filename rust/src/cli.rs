@@ -82,6 +82,7 @@ pub enum Commands {
     ObservedShape { #[command(subcommand)] action: ObservedShapeAction },
     HydrogenVortex { #[command(subcommand)] action: HydrogenVortexAction },
     NodeDefect { #[command(subcommand)] action: NodeDefectAction },
+    WaterPressure { #[command(subcommand)] action: WaterPressureAction },
     Providers { #[command(subcommand)] action: ProvidersAction },
     Search {
         query: String,
@@ -308,6 +309,15 @@ pub enum ProvidersAction {
 pub enum PnnRulesAction {
     Evaluate { #[arg(long, required = true)] compound: String },
     Weight { criterion: String },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum WaterPressureAction {
+    Surface { radius_m: f64 },
+    Total { radius_m: f64, depth_ev: f64 },
+    Equilibrium { depth_ev: f64, #[arg(long, default_value_t = 1.5e-10)] lower_m: f64, #[arg(long, default_value_t = 6.0e-10)] upper_m: f64 },
+    VdeMatched { #[arg(long, default_value_t = 3.27)] binding_ev: f64 },
+    Scales,
 }
 
 #[derive(Debug, Subcommand)]
@@ -960,7 +970,7 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::WaterRays { .. } | Commands::VortexCascade { .. }
         | Commands::VortexParticles { .. } | Commands::ObservedShape { .. }
         | Commands::HydrogenVortex { .. } | Commands::NodeDefect { .. }
-        | Commands::Providers { .. }) {
+        | Commands::WaterPressure { .. } | Commands::Providers { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -1073,6 +1083,34 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::WaterPressure { action } => {
+            use crate::domains_fluid_water_pressure as wp;
+            match action {
+                WaterPressureAction::Surface { radius_m } => {
+                    let value = wp::surface_energy_ev(*radius_m)?;
+                    emit(json!({"value": value}), format!("{value}\n"))
+                }
+                WaterPressureAction::Total { radius_m, depth_ev } => {
+                    let value = wp::total_energy_ev(*radius_m, *depth_ev)?;
+                    emit(json!({"value": value}), to_stable_json(&json!({"value": value})))
+                }
+                WaterPressureAction::Equilibrium { depth_ev, lower_m, upper_m } => {
+                    let value = wp::equilibrium_radius(*depth_ev, *lower_m, *upper_m)?;
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                WaterPressureAction::VdeMatched { binding_ev } => {
+                    let value = wp::vde_matched_depth(*binding_ev)?;
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                WaterPressureAction::Scales => {
+                    let value = wp::pressure_scales()?;
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+            }
+        }
         Commands::NodeDefect { action } => {
             use crate::domains_fluid_node_defect as nd;
             macro_rules! bundle {

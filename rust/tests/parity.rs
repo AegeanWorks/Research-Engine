@@ -433,6 +433,29 @@ fn fluid_frank_oseen_dispersion() {
 }
 
 #[test]
+fn pressure_balanced_cavity() {
+    use research_engine::domains_fluid_water_pressure as wp;
+    let radius = research_engine::domains_fluid_water_electron::capillary_cavity_radius(0.0728, 9.1093837015e-31, 1.054571817e-34).unwrap();
+    assert!(wp::surface_energy_ev(radius).unwrap() > 0.0);
+    assert!(wp::surface_energy_ev(0.0).is_err());
+    let born = research_engine::domains_fluid_water_well::born_depth_ev(radius, 78.4).unwrap();
+    assert!(wp::total_energy_ev(radius, born).unwrap().is_some());
+    assert!(wp::total_energy_ev(radius, 0.0).is_err());
+    let equilibrium = wp::equilibrium_radius(4.0, 1.5e-10, 6.0e-10).unwrap();
+    let r = equilibrium["radius_m"].as_f64().unwrap();
+    assert!(r > 1.5e-10 && r < 6.0e-10);
+    assert!(equilibrium["total_energy_ev"].as_f64().unwrap() < 0.0);
+    assert!(wp::equilibrium_radius(0.0, 1.5e-10, 6.0e-10).is_err());
+    assert!(wp::equilibrium_radius(4.0, 6.0e-10, 1.5e-10).is_err());
+    let matched = wp::vde_matched_depth(3.27).unwrap();
+    assert!(matched["radius_m"].as_f64().unwrap() > 0.0);
+    assert!(wp::vde_matched_depth(0.0).is_err());
+    let scales = wp::pressure_scales().unwrap();
+    assert_eq!(scales["scans"].as_array().unwrap().len(), 7);
+    assert!(scales.get("vde_matched").is_some());
+}
+
+#[test]
 fn two_branch_nodal_defect() {
     use research_engine::domains_fluid_node_defect as nd;
     let xs = [-2.0, -1.0, 0.0, 1.0, 2.0];
