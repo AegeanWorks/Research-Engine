@@ -221,6 +221,26 @@ fn search_is_phrase_first_and_program_scoped() {
 }
 
 #[test]
+fn studio_mcp_message_dispatch() {
+    let path = temp_db("mcp");
+    let conn = research_engine::lattice_repo::open(path.to_str().unwrap()).unwrap();
+    let ping = serde_json::json!({"jsonrpc": "2.0", "id": 1, "method": "ping"});
+    let response = research_engine::studio_mcp::handle_message(&conn, &ping).unwrap();
+    assert_eq!(response.get("id").and_then(Value::as_i64), Some(1));
+    assert!(response.get("result").is_some());
+    let tools = research_engine::studio_mcp::handle_message(&conn,
+        &serde_json::json!({"jsonrpc": "2.0", "id": 2, "method": "tools/list"})).unwrap();
+    assert!(tools.get("result").and_then(|r| r.get("tools")).and_then(Value::as_array)
+        .map(|list| list.len()).unwrap_or(0) >= 28);
+    let notification = research_engine::studio_mcp::handle_message(&conn,
+        &serde_json::json!({"jsonrpc": "2.0", "method": "notifications/initialized"}));
+    assert!(notification.is_none());
+    let unknown = research_engine::studio_mcp::handle_message(&conn,
+        &serde_json::json!({"jsonrpc": "2.0", "id": 3, "method": "nope"})).unwrap();
+    assert_eq!(unknown.get("error").and_then(|e| e.get("code")).and_then(Value::as_i64), Some(-32601));
+}
+
+#[test]
 fn studio_evidence_matrix_and_question_evidence() {
     let path = temp_db("studio");
     let conn = research_engine::lattice_repo::open(path.to_str().unwrap()).unwrap();

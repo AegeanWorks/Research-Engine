@@ -5,36 +5,13 @@
     "last_phase": "in_progress",
     "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1795355795.526915,
+    "updated_at": 1795356630.4448907,
     "owner": "opencode:rust-rewrite",
-    "lease_until": 1795362995.526915,
+    "lease_until": 1795363830.4448907,
     "started_by": "opencode:rust-rewrite",
     "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "T-027-rust-layers",
-      "phase": "in_progress",
-      "phase_num": 3,
-      "description": "[4/6] Ported AI artifact notarization/ingest/draft and snapshot diff into rust/src/ai.rs and rust/src/diffing.rs",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795349797.036032,
-      "timestamp_str": "2026-11-22 15:16:37",
-      "agent": "opencode:rust-rewrite"
-    },
-    {
-      "task_id": "T-027-rust-layers",
-      "phase": "in_progress",
-      "phase_num": 4,
-      "description": "[4/6] Verification: cargo test 22/22; Python parity equal for all six ai commands and diff; project gates passing",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795349797.2363584,
-      "timestamp_str": "2026-11-22 15:16:37",
-      "agent": "opencode:rust-rewrite",
-      "checklists": "passed"
-    },
     {
       "task_id": "T-027-rust-layers",
       "phase": "in_progress",
@@ -251,6 +228,29 @@
       "status": "in_progress",
       "timestamp": 1795355795.526915,
       "timestamp_str": "2026-11-22 16:56:35",
+      "agent": "opencode:rust-rewrite",
+      "checklists": "passed"
+    },
+    {
+      "task_id": "T-028-outer-layers",
+      "phase": "in_progress",
+      "phase_num": 3,
+      "description": "[6/6 partial] Ported the studio MCP JSON-RPC dispatcher with all tool/resource/prompt declarations and the implemented tool handlers",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795356629.9738333,
+      "timestamp_str": "2026-11-22 17:10:29",
+      "agent": "opencode:rust-rewrite"
+    },
+    {
+      "task_id": "T-028-outer-layers",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[6/6 partial] Verification: cargo test 31/31; mcp_parity.py 11/11 exact matches (timestamps normalized); project gates passing",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795356630.4448907,
+      "timestamp_str": "2026-11-22 17:10:30",
       "agent": "opencode:rust-rewrite",
       "checklists": "passed"
     }

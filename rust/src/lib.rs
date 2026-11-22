@@ -33,6 +33,8 @@ pub mod provenance;
 pub mod search;
 pub mod stats;
 pub mod studio_api;
+pub mod studio_mcp;
+pub mod studio_mcp_specs;
 pub mod synthesis;
 pub mod util;
 pub mod vocab;

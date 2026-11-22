@@ -6,15 +6,15 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `436`
+- **Total Python Modules**: `438`
 - **Total Classes**: `317`
-- **Total Top-Level Functions**: `1982`
+- **Total Top-Level Functions**: `1985`
 - **Total Class Methods**: `1545`
-- **Total Source Lines**: `90344`
+- **Total Source Lines**: `90412`
 
 ## 🧭 Map Coverage
-- **Indexed**: python (`436` module(s))
-- **Not indexed by this map**: javascript (`1` file(s)), rust (`35` file(s))
+- **Indexed**: python (`438` module(s))
+- **Not indexed by this map**: javascript (`1` file(s)), rust (`37` file(s))
 
 > Only Python symbols are catalogued. A language above is reported as not indexed, never as verified by this map.
 
@@ -4746,6 +4746,23 @@
 
 **Functions:**
 - `def run(cmd, cwd)`
+
+---
+
+### [`rust/mcp_expected.py`](rust/mcp_expected.py)
+> *Python reference for the Rust `mcp` CLI command.*
+
+**Size**: `19` lines
+
+---
+
+### [`rust/mcp_parity.py`](rust/mcp_parity.py)
+**Size**: `49` lines
+
+**Functions:**
+- `def normalize(value)`
+- `def run(cmd, cwd)`
+- `def compare(label, message, db_rust, db_py)`
 
 ---
 

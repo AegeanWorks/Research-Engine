@@ -46,6 +46,7 @@ pub enum Commands {
     LatticeQuery { #[command(subcommand)] action: LatticeQueryAction },
     Discovery { #[command(subcommand)] action: DiscoveryAction },
     Studio { #[command(subcommand)] action: StudioAction },
+    Mcp { message: String },
     Search {
         query: String,
         #[arg(long)] research: Option<String>,
@@ -546,7 +547,8 @@ pub fn run(cli: &Cli) -> Result<Output> {
     let conn = open(&cli.db)?;
     if !matches!(cli.command, Commands::Init | Commands::Lattice { .. }
         | Commands::LatticeRepo { .. } | Commands::LatticeSnap { .. } | Commands::Meta { .. }
-        | Commands::LatticeQuery { .. } | Commands::Discovery { .. } | Commands::Studio { .. }) {
+        | Commands::LatticeQuery { .. } | Commands::Discovery { .. } | Commands::Studio { .. }
+        | Commands::Mcp { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -659,6 +661,16 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::Mcp { message } => {
+            let conn = crate::lattice_repo::open(&cli.db)?;
+            let request: Value = serde_json::from_str(message).map_err(|e| EngineError::new(
+                format!("invalid JSON-RPC message: {e}"), "MCP messages must be JSON objects.",
+                "pass a JSON object such as {\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"ping\"}."))?;
+            match crate::studio_mcp::handle_message(&conn, &request) {
+                Some(response) => emit(response.clone(), to_stable_json(&response)),
+                None => emit(Value::Null, String::new()),
+            }
+        }
         Commands::Studio { action } => {
             use crate::studio_api;
             let lattice = crate::lattice_repo::open(&cli.db)?;
