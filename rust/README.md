@@ -62,6 +62,7 @@ argparse requires in `python -m engine`.
 | Studio MCP | JSON-RPC dispatcher with all 28 tool declarations, resources, prompts and ported tool handlers (`mcp` CLI) |
 | Studio web | GET request dispatcher for the UI, overview, matrix bundle, search, literature, exports and integrity checks (`web` CLI) |
 | Domains: Atlas | Visual-knowledge schema validation, Muse payload coercion, analysis merging and JSON Schema (`atlas` CLI) |
+| Domains: PNN safety | NOAEL→HED conversion, most-sensitive study selection, IND safety thresholds and Markdown report (`pnn-safety` CLI) |
 | Search | deterministic phrase-first lexical `search` with exact snippet/token-budget output |
 | Markdown | `sanitize`/`cell`/`estimate_tokens`/`pack` shared with reports and search |
 | Integrity | 24 finding codes including `PROV-*`, `EVID-*`, `GRAPH-*`, `GAP-*`, `LEDGER-001` |
@@ -109,10 +110,13 @@ argparse requires in `python -m engine`.
   overview, matrix bundle and exports; all 11 checks match.
 - `atlas_parity.py` compares Muse coercion, schema and chunk merging; all three
   checks match.
+- `pnn_safety_parity.py` compares safety assessments and the Markdown package;
+  both match.
 
 ## Still to port
 
 the network-backed lattice providers (arXiv, Crossref, OpenAlex, EuropePMC),
-studio's client and POST routes, the PNN/fluid-universe/obezite domain packs,
-and the Python CLI text renderer. These remain served by their Python entry
-points until their Rust equivalents land; the SQLite graph is shared throughout.
+studio's client and POST routes, the remaining fluid-universe/obezite domain
+packs and PNN modules, and the Python CLI text renderer. These remain served by
+their Python entry points until their Rust equivalents land; the SQLite graph
+is shared throughout.

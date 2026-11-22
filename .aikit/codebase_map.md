@@ -6,15 +6,15 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `442`
+- **Total Python Modules**: `444`
 - **Total Classes**: `317`
 - **Total Top-Level Functions**: `1989`
 - **Total Class Methods**: `1545`
-- **Total Source Lines**: `90570`
+- **Total Source Lines**: `90643`
 
 ## 🧭 Map Coverage
-- **Indexed**: python (`442` module(s))
-- **Not indexed by this map**: javascript (`1` file(s)), rust (`42` file(s))
+- **Indexed**: python (`444` module(s))
+- **Not indexed by this map**: javascript (`1` file(s)), rust (`43` file(s))
 
 > Only Python symbols are catalogued. A language above is reported as not indexed, never as verified by this map.
 
@@ -4803,6 +4803,18 @@
 
 **Functions:**
 - `def run(cmd, cwd)`
+
+---
+
+### [`rust/pnn_safety_expected.py`](rust/pnn_safety_expected.py)
+> *Python reference for the Rust `pnn-safety` CLI command.*
+
+**Size**: `19` lines
+
+---
+
+### [`rust/pnn_safety_parity.py`](rust/pnn_safety_parity.py)
+**Size**: `54` lines
 
 ---
 

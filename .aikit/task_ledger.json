@@ -5,9 +5,9 @@
     "last_phase": "in_progress",
     "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1795358085.180043,
+    "updated_at": 1795359479.7165732,
     "owner": "opencode:rust-rewrite",
-    "lease_until": 1795365285.180043,
+    "lease_until": 1795366679.7165732,
     "started_by": "opencode:rust-rewrite",
     "continuations": []
   },
@@ -92,29 +92,6 @@
         "mitigation": "Port bounded modules with Python parity helpers, keep separate schema initialization for lattice stores, verify with cargo test plus direct hygiene/KB/secret/test scripts before each commit."
       },
       "plan_digest": "aa86d74d20a2aa574d309dbaebd42d9d88ae476163fffe70a12c668f65645169"
-    },
-    {
-      "task_id": "T-028-outer-layers",
-      "phase": "in_progress",
-      "phase_num": 3,
-      "description": "[4/6] Ported lattice meta-analysis: study construction, fixed/random pooling, heterogeneity statistics and ASCII forest plots",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795353242.643958,
-      "timestamp_str": "2026-11-22 16:14:02",
-      "agent": "opencode:rust-rewrite"
-    },
-    {
-      "task_id": "T-028-outer-layers",
-      "phase": "in_progress",
-      "phase_num": 4,
-      "description": "[4/6] Verification: cargo test 27/27; meta_parity.py 5/5 exact matches; project gates passing",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795353242.918258,
-      "timestamp_str": "2026-11-22 16:14:02",
-      "agent": "opencode:rust-rewrite",
-      "checklists": "passed"
     },
     {
       "task_id": "T-028-outer-layers",
@@ -251,6 +228,29 @@
       "status": "in_progress",
       "timestamp": 1795358085.180043,
       "timestamp_str": "2026-11-22 17:34:45",
+      "agent": "opencode:rust-rewrite",
+      "checklists": "passed"
+    },
+    {
+      "task_id": "T-028-outer-layers",
+      "phase": "in_progress",
+      "phase_num": 3,
+      "description": "[6/6 partial] Ported PNN safety domain: NOAEL-to-HED conversion, most-sensitive study, IND thresholds and Markdown safety package",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795359479.4567623,
+      "timestamp_str": "2026-11-22 17:57:59",
+      "agent": "opencode:rust-rewrite"
+    },
+    {
+      "task_id": "T-028-outer-layers",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[6/6 partial] Verification: cargo test 34/34; pnn_safety_parity.py assessments and report match; project gates passing",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795359479.7165732,
+      "timestamp_str": "2026-11-22 17:57:59",
       "agent": "opencode:rust-rewrite",
       "checklists": "passed"
     }

@@ -221,6 +221,29 @@ fn search_is_phrase_first_and_program_scoped() {
 }
 
 #[test]
+fn pnn_safety_assessment_and_report() {
+    use research_engine::domains_pnn_safety as safety;
+    let heds = safety::noael_hed(50.0, "rat", 37.0).unwrap();
+    assert!((heds - 8.108108108108109).abs() < 1e-12);
+    assert!(safety::noael_hed(1.0, "unknown", 37.0).is_err());
+    let studies = vec![serde_json::json!({
+        "compound_id": "X", "species": "rat", "study_type": "subchronic",
+        "noael_mg_kg": 50.0, "target_organ": "liver",
+    })];
+    let pharm = serde_json::json!({"X": {
+        "herg_ic50_um": 30.0, "free_cmax_um": 0.5, "cyp3a4_inhibition_pct": 20.0,
+        "ames_positive": false, "micronucleus_positive": false,
+        "respiratory_noael_mg_kg": 100.0, "cns_noael_mg_kg": 80.0,
+    }});
+    let assessments = safety::assess(&studies, Some(&pharm), 10.0, 30.0, 10.0,
+        50.0, 30.0, 60.0).unwrap();
+    assert_eq!(assessments.len(), 1);
+    assert!(["SAFE_TO_PROGRESS", "CAUTION", "FAIL_SAFETY"].contains(&field(&assessments[0], "status").as_str()));
+    let report = safety::render_report(&assessments, &serde_json::json!({}));
+    assert!(report.contains("PNN IND-Enabling Safety Pharmacology"));
+}
+
+#[test]
 fn atlas_visual_schema_coercion_and_merge() {
     use research_engine::domains_atlas as atlas;
     let payload = serde_json::json!({

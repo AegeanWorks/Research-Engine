@@ -49,6 +49,7 @@ pub enum Commands {
     Mcp { message: String },
     Web { method: String, path: String, #[arg(long, default_value = "")] body: String },
     Atlas { #[command(subcommand)] action: AtlasAction },
+    PnnSafety { #[arg(long, required = true)] tox: String, #[arg(long, default_value = "{}")] pharm: String },
     Search {
         query: String,
         #[arg(long)] research: Option<String>,
@@ -562,7 +563,8 @@ pub fn run(cli: &Cli) -> Result<Output> {
     if !matches!(cli.command, Commands::Init | Commands::Lattice { .. }
         | Commands::LatticeRepo { .. } | Commands::LatticeSnap { .. } | Commands::Meta { .. }
         | Commands::LatticeQuery { .. } | Commands::Discovery { .. } | Commands::Studio { .. }
-        | Commands::Mcp { .. } | Commands::Web { .. } | Commands::Atlas { .. }) {
+        | Commands::Mcp { .. } | Commands::Web { .. } | Commands::Atlas { .. }
+        | Commands::PnnSafety { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -675,6 +677,19 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::PnnSafety { tox, pharm } => {
+            use crate::domains_pnn_safety as safety;
+            let studies: Vec<Value> = serde_json::from_str(tox).map_err(|e| EngineError::new(
+                format!("invalid tox JSON: {e}"), "tox studies must be a JSON array.",
+                "pass a JSON array of study objects."))?;
+            let pharm_value: Value = serde_json::from_str(pharm).map_err(|e| EngineError::new(
+                format!("invalid pharm JSON: {e}"), "pharm map must be a JSON object.",
+                "pass a JSON object keyed by compound id."))?;
+            let assessments = safety::assess(&studies, Some(&pharm_value), 10.0, 30.0, 10.0,
+                50.0, 30.0, 60.0)?;
+            let report = safety::render_report(&assessments, &json!({}));
+            emit(json!({"assessments": assessments, "report": report}), report)
+        }
         Commands::Atlas { action } => match action {
             AtlasAction::Coerce { payload, document_ref, source_page, figure_id } => {
                 let value: Value = serde_json::from_str(payload).map_err(|e| EngineError::new(
