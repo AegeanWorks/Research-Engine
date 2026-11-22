@@ -47,6 +47,7 @@ pub enum Commands {
     Discovery { #[command(subcommand)] action: DiscoveryAction },
     Studio { #[command(subcommand)] action: StudioAction },
     Mcp { message: String },
+    Web { method: String, path: String, #[arg(long, default_value = "")] body: String },
     Search {
         query: String,
         #[arg(long)] research: Option<String>,
@@ -548,7 +549,7 @@ pub fn run(cli: &Cli) -> Result<Output> {
     if !matches!(cli.command, Commands::Init | Commands::Lattice { .. }
         | Commands::LatticeRepo { .. } | Commands::LatticeSnap { .. } | Commands::Meta { .. }
         | Commands::LatticeQuery { .. } | Commands::Discovery { .. } | Commands::Studio { .. }
-        | Commands::Mcp { .. }) {
+        | Commands::Mcp { .. } | Commands::Web { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -661,6 +662,12 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::Web { method, path, body } => {
+            let conn = crate::lattice_repo::open(&cli.db)?;
+            let response = crate::studio_web::dispatch_web_request(&conn, method, path,
+                if body.is_empty() { None } else { Some(body.as_str()) })?;
+            emit(response.clone(), field(&response, "body"))
+        }
         Commands::Mcp { message } => {
             let conn = crate::lattice_repo::open(&cli.db)?;
             let request: Value = serde_json::from_str(message).map_err(|e| EngineError::new(

@@ -34,6 +34,14 @@ pub fn collect_records(conn: &Connection) -> Result<Vec<Value>> {
     Ok(records)
 }
 
+pub fn export_jsonl_string(conn: &Connection) -> Result<String> {
+    let records = collect_records(conn)?;
+    let lines: Vec<String> = records.iter().map(to_python_json).collect();
+    let mut payload = lines.join("\n");
+    if !lines.is_empty() { payload.push('\n'); }
+    Ok(payload)
+}
+
 pub fn export_snapshot(conn: &Connection, path: &std::path::Path) -> Result<Value> {
     let records = collect_records(conn)?;
     let lines: Vec<String> = records.iter().map(to_python_json).collect();

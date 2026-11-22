@@ -221,6 +221,21 @@ fn search_is_phrase_first_and_program_scoped() {
 }
 
 #[test]
+fn studio_web_routes_dispatch() {
+    let path = temp_db("web");
+    let conn = research_engine::lattice_repo::open(path.to_str().unwrap()).unwrap();
+    let index = research_engine::studio_web::dispatch_web_request(&conn, "GET", "/", None).unwrap();
+    assert_eq!(index.get("status").and_then(Value::as_i64), Some(200));
+    assert!(field(&index, "body").contains("GraphRAG") || field(&index, "body").contains("Lattice"));
+    let matrix = research_engine::studio_web::dispatch_web_request(&conn, "GET", "/api/matrix", None).unwrap();
+    assert!(field(&matrix, "body").contains("\"matrix\""));
+    let export = research_engine::studio_web::dispatch_web_request(&conn, "GET", "/api/export", None).unwrap();
+    assert_eq!(field(&export, "content_type"), "application/x-ndjson; charset=utf-8");
+    let missing = research_engine::studio_web::dispatch_web_request(&conn, "GET", "/api/nope", None).unwrap();
+    assert_eq!(missing.get("status").and_then(Value::as_i64), Some(404));
+}
+
+#[test]
 fn studio_mcp_message_dispatch() {
     let path = temp_db("mcp");
     let conn = research_engine::lattice_repo::open(path.to_str().unwrap()).unwrap();

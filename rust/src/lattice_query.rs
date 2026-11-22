@@ -144,6 +144,63 @@ pub fn detect_contradictions(conn: &Connection, auto_link: bool) -> Result<Vec<V
     Ok(pairs)
 }
 
+pub fn rank_influential_entities(conn: &Connection, limit: i64) -> Result<Value> {
+    let cap = limit.max(1) as usize;
+    let edges = query_json(conn, "SELECT src, dst, kind FROM edges", [])?;
+    let mut degree: BTreeMap<String, i64> = BTreeMap::new();
+    let mut citations: BTreeMap<String, i64> = BTreeMap::new();
+    for row in &edges {
+        let src = field(row, "src");
+        let dst = field(row, "dst");
+        *degree.entry(src.clone()).or_insert(0) += 1;
+        *degree.entry(dst.clone()).or_insert(0) += 1;
+        if field(row, "kind") == "cites" && entity_type(&dst).map(|k| k == "paper").unwrap_or(false) {
+            let id = bare_id(&dst).unwrap_or_default();
+            *citations.entry(id).or_insert(0) += 1;
+        }
+    }
+    let claim_rows = query_json(conn,
+        "SELECT id, paper_id, text, stance, confidence FROM claims ORDER BY id", [])?;
+    let mut by_paper: BTreeMap<String, Vec<Value>> = BTreeMap::new();
+    let mut ranked_claims = Vec::new();
+    for row in &claim_rows {
+        let id = field(row, "id");
+        let paper_id = field(row, "paper_id");
+        let confidence = number(row, "confidence");
+        let deg = *degree.get(&format!("claim:{id}")).unwrap_or(&0);
+        let score = ((confidence + deg as f64 * 0.35) * 1000.0).round() / 1000.0;
+        let entry = json!({"id": id, "paper_id": paper_id, "text": field(row, "text"),
+            "stance": field(row, "stance"), "confidence": confidence,
+            "edge_degree": deg, "score": score});
+        by_paper.entry(paper_id).or_default().push(entry.clone());
+        ranked_claims.push(entry);
+    }
+    ranked_claims.sort_by(|a, b| (number(b, "score"), number(b, "confidence"))
+        .partial_cmp(&(number(a, "score"), number(a, "confidence"))).unwrap_or(std::cmp::Ordering::Equal));
+    let paper_rows = query_json(conn, "SELECT id, title, authors, year, doi FROM papers ORDER BY id", [])?;
+    let mut ranked_papers = Vec::new();
+    for row in &paper_rows {
+        let id = field(row, "id");
+        let claims = by_paper.get(&id).cloned().unwrap_or_default();
+        let claim_weight: f64 = claims.iter().map(|c| number(c, "score")).sum();
+        let cite_count = *citations.get(&id).unwrap_or(&0);
+        let deg = *degree.get(&format!("paper:{id}")).unwrap_or(&0);
+        let score = ((claim_weight + cite_count as f64 * 0.75 + deg as f64 * 0.25 + 0.1) * 1000.0).round() / 1000.0;
+        ranked_papers.push(json!({
+            "id": id, "title": field(row, "title"), "authors": field(row, "authors"),
+            "year": field(row, "year"), "doi": field(row, "doi"),
+            "claim_count": claims.len(), "citation_count": cite_count,
+            "edge_degree": deg, "score": score,
+        }));
+    }
+    ranked_papers.sort_by(|a, b| (number(b, "score"),
+        b.get("claim_count").and_then(Value::as_u64).unwrap_or(0))
+        .partial_cmp(&(number(a, "score"), a.get("claim_count").and_then(Value::as_u64).unwrap_or(0)))
+        .unwrap_or(std::cmp::Ordering::Equal));
+    Ok(json!({"papers": ranked_papers.into_iter().take(cap).collect::<Vec<_>>(),
+        "claims": ranked_claims.into_iter().take(cap).collect::<Vec<_>>()}))
+}
+
 pub fn outline(conn: &Connection, tokens: i64) -> Result<Value> {
     let tokens = budget(tokens)?;
     let stats = repo::stats(conn)?;

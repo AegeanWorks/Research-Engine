@@ -6,15 +6,15 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `438`
+- **Total Python Modules**: `440`
 - **Total Classes**: `317`
-- **Total Top-Level Functions**: `1985`
+- **Total Top-Level Functions**: `1987`
 - **Total Class Methods**: `1545`
-- **Total Source Lines**: `90412`
+- **Total Source Lines**: `90479`
 
 ## 🧭 Map Coverage
-- **Indexed**: python (`438` module(s))
-- **Not indexed by this map**: javascript (`1` file(s)), rust (`37` file(s))
+- **Indexed**: python (`440` module(s))
+- **Not indexed by this map**: javascript (`1` file(s)), rust (`40` file(s))
 
 > Only Python symbols are catalogued. A language above is reported as not indexed, never as verified by this map.
 
@@ -4811,6 +4811,22 @@
 **Functions:**
 - `def run(cmd, cwd)`
 - `def compare(label, args)`
+
+---
+
+### [`rust/web_expected.py`](rust/web_expected.py)
+> *Python reference for the Rust `web` CLI command.*
+
+**Size**: `22` lines
+
+---
+
+### [`rust/web_parity.py`](rust/web_parity.py)
+**Size**: `45` lines
+
+**Functions:**
+- `def run(cmd, cwd)`
+- `def compare(label, method, path)`
 
 ---
 

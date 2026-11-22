@@ -5,9 +5,9 @@
     "last_phase": "in_progress",
     "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1795356630.4448907,
+    "updated_at": 1795357446.564754,
     "owner": "opencode:rust-rewrite",
-    "lease_until": 1795363830.4448907,
+    "lease_until": 1795364646.564754,
     "started_by": "opencode:rust-rewrite",
     "continuations": []
   },
@@ -92,29 +92,6 @@
         "mitigation": "Port bounded modules with Python parity helpers, keep separate schema initialization for lattice stores, verify with cargo test plus direct hygiene/KB/secret/test scripts before each commit."
       },
       "plan_digest": "aa86d74d20a2aa574d309dbaebd42d9d88ae476163fffe70a12c668f65645169"
-    },
-    {
-      "task_id": "T-028-outer-layers",
-      "phase": "in_progress",
-      "phase_num": 3,
-      "description": "[2/6] Ported the lattice schema-v2 repository (papers, claims, questions, edges, search, stats, detail views) into rust/src/lattice_repo.rs",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795351921.262475,
-      "timestamp_str": "2026-11-22 15:52:01",
-      "agent": "opencode:rust-rewrite"
-    },
-    {
-      "task_id": "T-028-outer-layers",
-      "phase": "in_progress",
-      "phase_num": 4,
-      "description": "[2/6] Verification: cargo test 25/25; lattice_repo_parity.py 8/8 exact matches; project gates passing",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795351921.6066496,
-      "timestamp_str": "2026-11-22 15:52:01",
-      "agent": "opencode:rust-rewrite",
-      "checklists": "passed"
     },
     {
       "task_id": "T-028-outer-layers",
@@ -251,6 +228,29 @@
       "status": "in_progress",
       "timestamp": 1795356630.4448907,
       "timestamp_str": "2026-11-22 17:10:30",
+      "agent": "opencode:rust-rewrite",
+      "checklists": "passed"
+    },
+    {
+      "task_id": "T-028-outer-layers",
+      "phase": "in_progress",
+      "phase_num": 3,
+      "description": "[6/6 partial] Ported studio web GET routes, lattice integrity checks, influential-entity ranking and the static UI page into rust/src/studio_web.rs",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795357446.369759,
+      "timestamp_str": "2026-11-22 17:24:06",
+      "agent": "opencode:rust-rewrite"
+    },
+    {
+      "task_id": "T-028-outer-layers",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[6/6 partial] Verification: cargo test 32/32; web_parity.py 11/11 exact matches; project gates passing",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795357446.564754,
+      "timestamp_str": "2026-11-22 17:24:06",
       "agent": "opencode:rust-rewrite",
       "checklists": "passed"
     }

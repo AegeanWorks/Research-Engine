@@ -271,6 +271,65 @@ fn log(conn: &Connection, action: &str, payload: &Value) -> Result<()> {
     Ok(())
 }
 
+const LITERATURE_STOPWORDS: &[&str] = &[
+    "a", "an", "and", "are", "as", "at", "be", "by", "for", "from", "in", "into", "is", "it",
+    "of", "on", "or", "that", "the", "to", "was", "were", "with",
+];
+
+pub fn search_literature(
+    conn: &Connection,
+    query: &str,
+    tags: &str,
+    study_type: &str,
+    year: Option<&str>,
+    limit: i64,
+) -> Result<Value> {
+    let value: String = query.split_whitespace().collect::<Vec<_>>().join(" ");
+    let tag_filter: Vec<String> = crate::lattice::normalize_tags(tags)
+        .split(", ").filter(|tag| !tag.is_empty()).map(|s| s.to_string()).collect();
+    let type_filter = crate::lattice::normalize_study_type(study_type).to_lowercase();
+    let terms: Vec<String> = crate::lattice::normalize_text(&value).split_whitespace()
+        .filter(|term| term.len() >= 2 && !LITERATURE_STOPWORDS.contains(term))
+        .map(|s| s.to_string()).collect();
+    let rows = query_json(conn, "SELECT * FROM papers ORDER BY year DESC, title", [])?;
+    let needle = value.to_lowercase();
+    let normalized_needle = crate::lattice::normalize_text(&value);
+    let mut scored: Vec<(i64, i64, Value)> = Vec::new();
+    for (index, row) in rows.into_iter().enumerate() {
+        if let Some(filter) = year {
+            if field(&row, "year") != filter { continue; }
+        }
+        let paper_tags: BTreeSet<String> = crate::lattice::normalize_tags(&field(&row, "tags"))
+            .split(", ").filter(|tag| !tag.is_empty()).map(|s| s.to_string()).collect();
+        if !tag_filter.is_empty() && !tag_filter.iter().all(|tag| paper_tags.contains(tag)) { continue; }
+        if !type_filter.is_empty() && !field(&row, "study_type").to_lowercase().contains(&type_filter) { continue; }
+        let blob = format!("{} {} {} {} {} {} {} {} {} {}", field(&row, "title"), field(&row, "authors"),
+            field(&row, "year"), field(&row, "venue"), field(&row, "doi"), field(&row, "arxiv"),
+            field(&row, "url"), field(&row, "abstract"), field(&row, "tags"), field(&row, "study_type")).to_lowercase();
+        let primary = field(&row, "title").to_lowercase();
+        let mut score = 0i64;
+        if blob.contains(&needle) { score += 100; }
+        if primary.contains(&needle) { score += 50; }
+        let matched: Vec<&String> = terms.iter().filter(|term| blob.contains(term.as_str())).collect();
+        if !matched.is_empty() {
+            score += matched.iter().map(|term| if primary.contains(term.as_str()) { 3 } else { 1 }).sum::<i64>();
+        }
+        if !normalized_needle.is_empty() && !blob.contains(&needle)
+            && crate::lattice::normalize_text(&blob).contains(&normalized_needle) { score += 100; }
+        if score > 0 { scored.push((score, -(index as i64), row)); }
+    }
+    scored.sort_by(|a, b| (b.0, b.1).cmp(&(a.0, a.1)));
+    let total = scored.len();
+    let papers: Vec<Value> = scored.into_iter().take(limit.max(0) as usize).map(|(_, _, row)| row).collect();
+    Ok(json!({
+        "query": value,
+        "tags": tag_filter.join(", "),
+        "study_type": crate::lattice::normalize_study_type(study_type),
+        "total": total,
+        "papers": papers,
+    }))
+}
+
 pub fn get_paper(conn: &Connection, reference: &str) -> Result<Value> {
     let bare = lattice::bare_id(&resolve(reference)?)?;
     one(conn, "papers", &bare).ok_or_else(|| EngineError::new(
