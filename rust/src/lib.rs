@@ -21,6 +21,7 @@ pub mod integrity;
 pub mod killtest;
 pub mod lattice;
 pub mod lattice_repo;
+pub mod lattice_snapshots;
 pub mod manifest;
 pub mod markdown;
 pub mod observations;

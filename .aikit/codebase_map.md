@@ -6,15 +6,15 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `426`
+- **Total Python Modules**: `428`
 - **Total Classes**: `317`
-- **Total Top-Level Functions**: `1975`
+- **Total Top-Level Functions**: `1976`
 - **Total Class Methods**: `1545`
-- **Total Source Lines**: `89929`
+- **Total Source Lines**: `90000`
 
 ## 🧭 Map Coverage
-- **Indexed**: python (`426` module(s))
-- **Not indexed by this map**: javascript (`1` file(s)), rust (`30` file(s))
+- **Indexed**: python (`428` module(s))
+- **Not indexed by this map**: javascript (`1` file(s)), rust (`31` file(s))
 
 > Only Python symbols are catalogued. A language above is reported as not indexed, never as verified by this map.
 
@@ -4700,6 +4700,21 @@
 - `def run(cmd, cwd)`
 - `def strip_volatile(value)`
 - `def compare(label, args, write)`
+
+---
+
+### [`rust/lattice_snapshots_expected.py`](rust/lattice_snapshots_expected.py)
+> *Python reference for the Rust `lattice-snap` CLI commands.*
+
+**Size**: `30` lines
+
+---
+
+### [`rust/lattice_snapshots_parity.py`](rust/lattice_snapshots_parity.py)
+**Size**: `41` lines
+
+**Functions:**
+- `def run(cmd, cwd)`
 
 ---
 

@@ -221,6 +221,36 @@ fn search_is_phrase_first_and_program_scoped() {
 }
 
 #[test]
+fn lattice_snapshots_are_deterministic() {
+    let path = temp_db("lattice_snaps");
+    let conn = research_engine::lattice_repo::open(path.to_str().unwrap()).unwrap();
+    let mut metadata = std::collections::BTreeMap::new();
+    metadata.insert("title".to_string(), "Quantum Effects".to_string());
+    metadata.insert("doi".to_string(), "10.1/q".to_string());
+    let (paper, _) = research_engine::lattice_repo::add_paper(&conn, &metadata).unwrap();
+    let claim = research_engine::lattice_repo::add_claim(&conn, &field(&paper, "id"),
+        "Effect reproduced", "we observed it", "abstract:s1", "supports", 0.5).unwrap();
+    let question = research_engine::lattice_repo::add_question(&conn, "Does it reproduce?").unwrap();
+    research_engine::lattice_repo::add_edge(&conn, &field(&claim, "id"), &field(&question, "id"),
+        "supports", "").unwrap();
+
+    let records = research_engine::lattice_snapshots::collect_records(&conn).unwrap();
+    assert_eq!(records.len(), 4);
+    assert_eq!(field(&records[0], "record_type"), "paper");
+    let bibtex = research_engine::lattice_snapshots::format_bibtex(&conn).unwrap();
+    assert!(bibtex.contains("@article{"));
+    let cytoscape = research_engine::lattice_snapshots::cytoscape_data(&conn).unwrap();
+    assert_eq!(cytoscape.get("elements").and_then(|e| e.get("nodes"))
+        .and_then(Value::as_array).map(|v| v.len()), Some(3));
+    let graphml = research_engine::lattice_snapshots::graphml_string(&conn).unwrap();
+    assert!(graphml.contains("edge:1"));
+    let out = path.with_extension("jsonl");
+    let counts = research_engine::lattice_snapshots::export_snapshot(&conn, &out).unwrap();
+    assert_eq!(counts.get("papers").and_then(Value::as_u64), Some(1));
+    assert_eq!(std::fs::read_to_string(&out).unwrap().lines().count(), 4);
+}
+
+#[test]
 fn lattice_repository_graph() {
     let path = temp_db("lattice_repo");
     let conn = research_engine::lattice_repo::open(path.to_str().unwrap()).unwrap();

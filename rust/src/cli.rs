@@ -41,6 +41,7 @@ pub enum Commands {
     Experiment { #[command(subcommand)] action: ExperimentAction },
     Lattice { #[command(subcommand)] action: LatticeAction },
     LatticeRepo { #[command(subcommand)] action: LatticeRepoAction },
+    LatticeSnap { #[command(subcommand)] action: LatticeSnapAction },
     Search {
         query: String,
         #[arg(long)] research: Option<String>,
@@ -254,6 +255,15 @@ pub enum AnalysisAction {
         #[arg(long, default_value = "")] since: String,
         #[arg(long, default_value = "")] until: String,
     },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum LatticeSnapAction {
+    Records,
+    Export { path: String },
+    Bibtex,
+    Cytoscape,
+    Graphml,
 }
 
 #[derive(Debug, Subcommand)]
@@ -479,7 +489,8 @@ fn list_text(rows: &[Value]) -> String {
 /// Execute a parsed command against an initialized database.
 pub fn run(cli: &Cli) -> Result<Output> {
     let conn = open(&cli.db)?;
-    if !matches!(cli.command, Commands::Init | Commands::Lattice { .. } | Commands::LatticeRepo { .. }) {
+    if !matches!(cli.command, Commands::Init | Commands::Lattice { .. }
+        | Commands::LatticeRepo { .. } | Commands::LatticeSnap { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -592,6 +603,32 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::LatticeSnap { action } => {
+            use crate::lattice_snapshots as snaps;
+            let lattice = crate::lattice_repo::open(&cli.db)?;
+            match action {
+                LatticeSnapAction::Records => {
+                    let rows = snaps::collect_records(&lattice)?;
+                    emit(Value::Array(rows.clone()), to_stable_json(&Value::Array(rows)))
+                }
+                LatticeSnapAction::Export { path } => {
+                    let result = snaps::export_snapshot(&lattice, std::path::Path::new(path))?;
+                    emit(result.clone(), to_stable_json(&result))
+                }
+                LatticeSnapAction::Bibtex => {
+                    let text = snaps::format_bibtex(&lattice)?;
+                    emit(json!({"text": text.clone()}), text)
+                }
+                LatticeSnapAction::Cytoscape => {
+                    let result = snaps::cytoscape_data(&lattice)?;
+                    emit(result.clone(), to_stable_json(&result))
+                }
+                LatticeSnapAction::Graphml => {
+                    let text = snaps::graphml_string(&lattice)?;
+                    emit(json!({"text": text.clone()}), text)
+                }
+            }
+        }
         Commands::Report { reference, out, check, strict } => {
             use crate::manifest;
             if *strict && check.is_none() {

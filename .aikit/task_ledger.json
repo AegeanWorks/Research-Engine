@@ -5,36 +5,13 @@
     "last_phase": "in_progress",
     "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1795351921.6066496,
+    "updated_at": 1795352732.1544435,
     "owner": "opencode:rust-rewrite",
-    "lease_until": 1795359121.6066496,
+    "lease_until": 1795359932.1544435,
     "started_by": "opencode:rust-rewrite",
     "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "T-026-rust-rewrite",
-      "phase": "in_progress",
-      "phase_num": 4,
-      "description": "[6/6] Verification: cargo test 13/13 passed; Rust and Python JSON equal for search, observation list and check; project gates 4/4 passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795344775.0652297,
-      "timestamp_str": "2026-11-22 13:52:55",
-      "agent": "opencode:rust-rewrite",
-      "checklists": "passed"
-    },
-    {
-      "task_id": "T-026-rust-rewrite",
-      "phase": "in_progress",
-      "phase_num": 3,
-      "description": "[6/6 extension] Ported analysis stats/trend with CPython-exact bootstrap and comparability gates",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795346298.8866096,
-      "timestamp_str": "2026-11-22 14:18:18",
-      "agent": "opencode:rust-rewrite"
-    },
     {
       "task_id": "T-026-rust-rewrite",
       "phase": "in_progress",
@@ -264,6 +241,29 @@
       "status": "in_progress",
       "timestamp": 1795351921.6066496,
       "timestamp_str": "2026-11-22 15:52:01",
+      "agent": "opencode:rust-rewrite",
+      "checklists": "passed"
+    },
+    {
+      "task_id": "T-028-outer-layers",
+      "phase": "in_progress",
+      "phase_num": 3,
+      "description": "[3/6] Ported lattice snapshot exports: JSONL records, BibTeX, GraphML and Cytoscape data into rust/src/lattice_snapshots.rs",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795352731.6505563,
+      "timestamp_str": "2026-11-22 16:05:31",
+      "agent": "opencode:rust-rewrite"
+    },
+    {
+      "task_id": "T-028-outer-layers",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[3/6] Verification: cargo test 26/26; lattice_snapshots_parity.py 4/4 formats match; project gates passing",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795352732.1544435,
+      "timestamp_str": "2026-11-22 16:05:32",
       "agent": "opencode:rust-rewrite",
       "checklists": "passed"
     }
