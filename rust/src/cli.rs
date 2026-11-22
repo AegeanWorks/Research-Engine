@@ -70,6 +70,7 @@ pub enum Commands {
     PnnCuration { #[command(subcommand)] action: PnnCurationAction },
     WaterAnalogue { #[command(subcommand)] action: WaterAnalogueAction },
     PnnReports { #[command(subcommand)] action: PnnReportsAction },
+    WaterWell { #[command(subcommand)] action: WaterWellAction },
     Providers { #[command(subcommand)] action: ProvidersAction },
     Search {
         query: String,
@@ -296,6 +297,17 @@ pub enum ProvidersAction {
 pub enum PnnRulesAction {
     Evaluate { #[arg(long, required = true)] compound: String },
     Weight { criterion: String },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum WaterWellAction {
+    Born { radius_m: f64, #[arg(long, default_value_t = 78.4)] epsilon_r: f64 },
+    Threshold { radius_m: f64 },
+    Infinite { radius_m: f64 },
+    Roots { radius_m: f64, depth_ev: f64 },
+    Required { radius_m: f64, #[arg(long, default_value_t = 1.7)] target_ev: f64 },
+    Minimum { #[arg(long, default_value_t = 1.7)] target_ev: f64 },
+    Scales,
 }
 
 #[derive(Debug, Subcommand)]
@@ -823,7 +835,7 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::PnnCompounds { .. } | Commands::PnnScreen { .. }
         | Commands::PnnTables { .. } | Commands::PnnCuration { .. }
         | Commands::WaterAnalogue { .. } | Commands::PnnReports { .. }
-        | Commands::Providers { .. }) {
+        | Commands::WaterWell { .. } | Commands::Providers { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -936,6 +948,34 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::WaterWell { action } => {
+            use crate::domains_fluid_water_well as well;
+            macro_rules! scalar {
+                ($expr:expr) => {{
+                    let value = $expr?;
+                    emit(json!({"value": value}), format!("{value}\n"))
+                }};
+            }
+            macro_rules! bundle {
+                ($expr:expr) => {{
+                    let value = $expr?;
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }};
+            }
+            match action {
+                WaterWellAction::Born { radius_m, epsilon_r } => scalar!(well::born_depth_ev(*radius_m, *epsilon_r)),
+                WaterWellAction::Threshold { radius_m } => scalar!(well::threshold_depth_ev(*radius_m)),
+                WaterWellAction::Infinite { radius_m } => scalar!(well::infinite_well_transition_ev(*radius_m)),
+                WaterWellAction::Roots { radius_m, depth_ev } => bundle!(well::well_roots(*radius_m, *depth_ev)),
+                WaterWellAction::Required { radius_m, target_ev } => {
+                    let value = well::required_depth_ev(*radius_m, *target_ev)?;
+                    emit(json!({"value": value}), to_stable_json(&json!({"value": value})))
+                }
+                WaterWellAction::Minimum { target_ev } => bundle!(well::minimum_required_depth(*target_ev)),
+                WaterWellAction::Scales => bundle!(well::well_scales()),
+            }
+        }
         Commands::PnnReports { action } => {
             use crate::domains_pnn_reports as reports;
             match action {

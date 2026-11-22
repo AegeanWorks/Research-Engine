@@ -5,9 +5,9 @@
     "last_phase": "in_progress",
     "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1795376221.2566698,
+    "updated_at": 1795376788.7119565,
     "owner": "opencode:rust-rewrite",
-    "lease_until": 1795383421.2566698,
+    "lease_until": 1795383988.7119565,
     "started_by": "opencode:rust-rewrite",
     "continuations": []
   },
@@ -92,29 +92,6 @@
         "mitigation": "Port bounded modules with Python parity helpers, keep separate schema initialization for lattice stores, verify with cargo test plus direct hygiene/KB/secret/test scripts before each commit."
       },
       "plan_digest": "aa86d74d20a2aa574d309dbaebd42d9d88ae476163fffe70a12c668f65645169"
-    },
-    {
-      "task_id": "T-028-outer-layers",
-      "phase": "in_progress",
-      "phase_num": 3,
-      "description": "[6/6 final] Ported claim-15 convergence diagnostics: resolution/temporal scan comparison and linear trend projection with pre-registered tolerances",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795372253.764712,
-      "timestamp_str": "2026-11-22 21:30:53",
-      "agent": "opencode:rust-rewrite"
-    },
-    {
-      "task_id": "T-028-outer-layers",
-      "phase": "in_progress",
-      "phase_num": 4,
-      "description": "[6/6 final] Verification: cargo test 50/50; fluid_convergence_parity.py 4/4 matches; project gates passing",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795372253.9970112,
-      "timestamp_str": "2026-11-22 21:30:53",
-      "agent": "opencode:rust-rewrite",
-      "checklists": "passed"
     },
     {
       "task_id": "T-028-outer-layers",
@@ -251,6 +228,29 @@
       "status": "in_progress",
       "timestamp": 1795376221.2566698,
       "timestamp_str": "2026-11-22 22:37:01",
+      "agent": "opencode:rust-rewrite",
+      "checklists": "passed"
+    },
+    {
+      "task_id": "T-028-outer-layers",
+      "phase": "in_progress",
+      "phase_num": 3,
+      "description": "[6/6 final] Ported hydrated-electron finite spherical well with Born depth, 1s/1p root finding, inverse depth and scales bundle",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795376788.4947398,
+      "timestamp_str": "2026-11-22 22:46:28",
+      "agent": "opencode:rust-rewrite"
+    },
+    {
+      "task_id": "T-028-outer-layers",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[6/6 final] Verification: cargo test 57/57; water_well_parity.py 17/17 matches; project gates passing",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795376788.7119565,
+      "timestamp_str": "2026-11-22 22:46:28",
       "agent": "opencode:rust-rewrite",
       "checklists": "passed"
     }

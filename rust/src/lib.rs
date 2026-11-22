@@ -34,6 +34,7 @@ pub mod domains_pnn_tables;
 pub mod domains_pnn_curation;
 pub mod domains_fluid_water_analogue;
 pub mod domains_pnn_reports;
+pub mod domains_fluid_water_well;
 pub mod domains_pnn_rules;
 pub mod domains_pnn_safety;
 pub mod discovery;

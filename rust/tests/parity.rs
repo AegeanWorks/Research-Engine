@@ -433,6 +433,32 @@ fn fluid_frank_oseen_dispersion() {
 }
 
 #[test]
+fn hydrated_electron_finite_well() {
+    use research_engine::domains_fluid_water_well as well;
+    let radius = well::capillary_cavity_radius();
+    assert!((radius - 2.8580710555848763e-10).abs() < 1e-22);
+    let born = well::born_depth_ev(radius, 78.4).unwrap();
+    assert!(born > 0.0 && born < 3.0);
+    assert!(well::threshold_depth_ev(radius).unwrap() > born);
+    assert!(well::infinite_well_transition_ev(radius).unwrap() > 0.0);
+    let roots = well::well_roots(radius, born).unwrap();
+    assert!(roots.get("u_1s").and_then(Value::as_f64).is_some());
+    assert!(roots.get("u_1p").and_then(Value::as_f64).is_none());
+    assert!(roots.get("transition_ev").and_then(Value::as_f64).is_none());
+    let deep = well::well_roots(radius, 30.0).unwrap();
+    assert!(deep.get("transition_ev").and_then(Value::as_f64).is_some());
+    assert!(well::required_depth_ev(radius, 1.7).unwrap().is_none());
+    let minimum = well::minimum_required_depth(1.7).unwrap();
+    assert!(minimum.get("excess_ev").and_then(Value::as_f64).unwrap() > 0.0);
+    let scales = well::well_scales().unwrap();
+    assert_eq!(scales.get("model").unwrap().get("epsilon_water").and_then(Value::as_f64), Some(78.4));
+    assert!(scales.get("depth_scan").unwrap().as_array().unwrap().len() == 4);
+    assert!(well::born_depth_ev(0.0, 78.4).is_err());
+    assert!(well::well_roots(radius, 0.0).is_err());
+    assert!(well::minimum_required_depth(0.0).is_err());
+}
+
+#[test]
 fn pnn_atomic_report_writers() {
     use research_engine::domains_pnn_reports as reports;
     let path = temp_db("pnn-reports").parent().unwrap()
