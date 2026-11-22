@@ -433,6 +433,38 @@ fn fluid_frank_oseen_dispersion() {
 }
 
 #[test]
+fn pnn_csv_row_contracts() {
+    use research_engine::domains_pnn_tables as tables;
+    let compound = serde_json::json!({
+        "compound_id": "C1", "mw": 345.5, "logp": 2.6, "tpsa": 58.0,
+        "hbd": 2, "hba": 5, "rotatable_bonds": 4, "name": "Compound A",
+        "smiles": "CCO", "pka": 8.2, "charge": "basic", "logbb": -0.3,
+    });
+    let bins = tables::property_bin(&compound, 0.1).unwrap();
+    assert_eq!(bins.len(), 6);
+    assert!(bins.iter().all(|value| *value >= 0 && *value < 10));
+    assert!(tables::property_bin(&compound, 0.0).is_err());
+    let result = serde_json::json!({
+        "compound": compound,
+        "tier": "A", "score": 0.98512345,
+        "failed_criteria": ["logbb", "herg_liability"],
+        "unknown_criteria": ["pka"],
+    });
+    let row = tables::screen_row(&result);
+    assert_eq!(row.get("score").and_then(Value::as_str), Some("0.9851"));
+    assert_eq!(row.get("failed_criteria").and_then(Value::as_str), Some("logbb;herg_liability"));
+    assert_eq!(row.get("unknown_criteria").and_then(Value::as_str), Some("pka"));
+    let candidate = serde_json::json!({
+        "compound": compound, "source": "synthetic-library", "result": result,
+    });
+    let curated = tables::curated_row(&candidate, 0.1).unwrap();
+    assert_eq!(curated.get("source").and_then(Value::as_str), Some("synthetic-library"));
+    assert!(curated.get("property_bin").and_then(Value::as_str).unwrap().contains('-'));
+    assert_eq!(tables::CURATED_FIELDS.len(), 17);
+    assert_eq!(tables::SCREEN_FIELDS.len(), 21);
+}
+
+#[test]
 fn pnn_screen_tiering_and_ranking() {
     use research_engine::domains_pnn_screen as screen;
     let good = serde_json::json!({

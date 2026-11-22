@@ -66,6 +66,7 @@ pub enum Commands {
     PnnDocking { #[command(subcommand)] action: PnnDockingAction },
     PnnCompounds { #[command(subcommand)] action: PnnCompoundsAction },
     PnnScreen { #[command(subcommand)] action: PnnScreenAction },
+    PnnTables { #[command(subcommand)] action: PnnTablesAction },
     Providers { #[command(subcommand)] action: ProvidersAction },
     Search {
         query: String,
@@ -292,6 +293,14 @@ pub enum ProvidersAction {
 pub enum PnnRulesAction {
     Evaluate { #[arg(long, required = true)] compound: String },
     Weight { criterion: String },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum PnnTablesAction {
+    Bin { #[arg(long, required = true)] compound: String, #[arg(long, default_value_t = 0.1)] width: f64 },
+    Screen { #[arg(long, required = true)] results: String },
+    Curated { #[arg(long, required = true)] candidates: String, #[arg(long, default_value_t = 0.1)] width: f64 },
+    Fields,
 }
 
 #[derive(Debug, Subcommand)]
@@ -773,7 +782,8 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::FluidNelsonClosure { .. } | Commands::FluidConvergence { .. }
         | Commands::Obezite { .. }
         | Commands::PnnRules { .. } | Commands::PnnDocking { .. }
-        | Commands::PnnCompounds { .. } | Commands::PnnScreen { .. } | Commands::Providers { .. }) {
+        | Commands::PnnCompounds { .. } | Commands::PnnScreen { .. }
+        | Commands::PnnTables { .. } | Commands::Providers { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -886,6 +896,47 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::PnnTables { action } => {
+            use crate::domains_pnn_tables as tables;
+            fn parse(raw: &str, name: &str) -> Result<Value> {
+                serde_json::from_str(raw).map_err(|e| EngineError::new(
+                    format!("invalid {name} JSON: {e}"), "expected a JSON object or array",
+                    &format!("pass valid JSON for {name}")))
+            }
+            match action {
+                PnnTablesAction::Bin { compound, width } => {
+                    let compound = parse(compound, "compound")?;
+                    let cells = tables::property_bin(&compound, *width)?;
+                    let value = Value::Array(cells.into_iter().map(Value::from).collect());
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                PnnTablesAction::Screen { results } => {
+                    let results: Vec<Value> = serde_json::from_str(results).map_err(|e| EngineError::new(
+                        format!("invalid results JSON: {e}"), "results must be a JSON array",
+                        "pass an array of screen result objects"))?;
+                    let rows: Vec<Value> = results.iter().map(tables::screen_row).collect();
+                    let value = Value::Array(rows);
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                PnnTablesAction::Curated { candidates, width } => {
+                    let candidates: Vec<Value> = serde_json::from_str(candidates).map_err(|e| EngineError::new(
+                        format!("invalid candidates JSON: {e}"), "candidates must be a JSON array",
+                        "pass an array of candidate objects"))?;
+                    let rows: Vec<Value> = candidates.iter()
+                        .map(|v| tables::curated_row(v, *width)).collect::<Result<_>>()?;
+                    let value = Value::Array(rows);
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                PnnTablesAction::Fields => {
+                    let value = json!({"curated": tables::CURATED_FIELDS, "screen": tables::SCREEN_FIELDS});
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+            }
+        }
         Commands::PnnScreen { action } => {
             use crate::domains_pnn_screen as screen;
             fn compound(raw: &str) -> Result<Value> {

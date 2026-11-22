@@ -79,6 +79,7 @@ argparse requires in `python -m engine`.
 | Domains: PNN docking | Docking-score alias parsing, RMSD/Vina filtering, weighted consensus normalization and per-compound best-target aggregation (`pnn-docking` CLI) |
 | Domains: PNN compounds | Compound CSV header aliasing, numeric validation, charge normalization and duplicate handling (`pnn-compounds` CLI) |
 | Domains: PNN screen | Weighted-criterion scoring, A/B/C/Reject tiering, compound ranking and screen summary (`pnn-screen` CLI) |
+| Domains: PNN tables | Curated/screen CSV row contracts, optional-field coercion and six-property binning (`pnn-tables` CLI) |
 | Search | deterministic phrase-first lexical `search` with exact snippet/token-budget output |
 | Markdown | `sanitize`/`cell`/`estimate_tokens`/`pack` shared with reports and search |
 | Integrity | 24 finding codes including `PROV-*`, `EVID-*`, `GRAPH-*`, `GAP-*`, `LEDGER-001` |
@@ -143,6 +144,8 @@ argparse requires in `python -m engine`.
   duplicate rejection; all eleven checks match.
 - `pnn_screen_parity.py` compares single-compound evaluation, tier ranking and
   the screen summary; all three checks match.
+- `pnn_tables_parity.py` compares property bins, both CSV row contracts and
+  the field manifests; all seven checks match.
 - `fluid_frank_oseen_parity.py` compares the elastic matrix, dispersion,
   equal-K modes, anisotropy and mode metadata; all twelve checks match.
 - `fluid_vortex_core_parity.py` compares the core radius, width, norm, sampled
