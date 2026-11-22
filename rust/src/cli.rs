@@ -85,6 +85,7 @@ pub enum Commands {
     WaterPressure { #[command(subcommand)] action: WaterPressureAction },
     WaterReorganization { #[command(subcommand)] action: WaterReorganizationAction },
     BornCavity { #[command(subcommand)] action: BornCavityAction },
+    WaterMarcus { #[command(subcommand)] action: WaterMarcusAction },
     Providers { #[command(subcommand)] action: ProvidersAction },
     Search {
         query: String,
@@ -311,6 +312,13 @@ pub enum ProvidersAction {
 pub enum PnnRulesAction {
     Evaluate { #[arg(long, required = true)] compound: String },
     Weight { criterion: String },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum WaterMarcusAction {
+    Width { #[arg(long, default_value_t = 1.6171325440878093)] lambda_ev: f64, #[arg(long, default_value_t = 300.0)] temperature_k: f64 },
+    Line { energy_ev: f64, center_ev: f64, fwhm_ev: f64 },
+    Scales,
 }
 
 #[derive(Debug, Subcommand)]
@@ -988,7 +996,8 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::VortexParticles { .. } | Commands::ObservedShape { .. }
         | Commands::HydrogenVortex { .. } | Commands::NodeDefect { .. }
         | Commands::WaterPressure { .. } | Commands::WaterReorganization { .. }
-        | Commands::BornCavity { .. } | Commands::Providers { .. }) {
+        | Commands::BornCavity { .. } | Commands::WaterMarcus { .. }
+        | Commands::Providers { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -1101,6 +1110,24 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::WaterMarcus { action } => {
+            use crate::domains_fluid_water_marcus as wm;
+            match action {
+                WaterMarcusAction::Width { lambda_ev, temperature_k } => {
+                    let value = wm::marcus_width_ev(*lambda_ev, *temperature_k)?;
+                    emit(json!({"value": value}), format!("{value}\n"))
+                }
+                WaterMarcusAction::Line { energy_ev, center_ev, fwhm_ev } => {
+                    let value = wm::gaussian_line_shape(*energy_ev, *center_ev, *fwhm_ev)?;
+                    emit(json!({"value": value}), format!("{value}\n"))
+                }
+                WaterMarcusAction::Scales => {
+                    let value = wm::marcus_scales()?;
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+            }
+        }
         Commands::BornCavity { action } => {
             use crate::domains_fluid_water_born_cavity as bc;
             match action {

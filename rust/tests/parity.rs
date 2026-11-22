@@ -433,6 +433,23 @@ fn fluid_frank_oseen_dispersion() {
 }
 
 #[test]
+fn marcus_band_width() {
+    use research_engine::domains_fluid_water_marcus as wm;
+    let width = wm::marcus_width_ev(1.6171325440878093, 300.0).unwrap();
+    assert!((width - 0.680915).abs() < 0.001);
+    assert!(wm::marcus_width_ev(0.0, 300.0).is_err());
+    assert!(wm::marcus_width_ev(1.0, 0.0).is_err());
+    assert_eq!(wm::gaussian_line_shape(1.7, 1.7, 0.68).unwrap(), 1.0);
+    assert!(wm::gaussian_line_shape(2.0, 1.7, 0.68).unwrap() < 1.0);
+    assert!(wm::gaussian_line_shape(1.7, 1.7, 0.0).is_err());
+    let scales = wm::marcus_scales().unwrap();
+    assert_eq!(scales["center_ev"].as_f64(), Some(1.70));
+    assert_eq!(scales["widths_ev"].as_object().unwrap().len(), 5);
+    assert!(scales["ratio_classical"].as_f64().unwrap() > 0.0);
+    assert!((scales["sqrt_ratio_350_300"].as_f64().unwrap() - (350.0_f64 / 300.0_f64).sqrt()).abs() < 1e-12);
+}
+
+#[test]
 fn born_cavity_synthesis() {
     use research_engine::domains_fluid_water_born_cavity as bc;
     let energy = bc::born_cavity_energy(2.86e-10).unwrap();
