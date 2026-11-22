@@ -39,6 +39,7 @@ pub enum Commands {
     Diff { old: String, new: String, #[arg(long)] exact: bool },
     Ai { #[command(subcommand)] action: AiAction },
     Experiment { #[command(subcommand)] action: ExperimentAction },
+    Lattice { #[command(subcommand)] action: LatticeAction },
     Search {
         query: String,
         #[arg(long)] research: Option<String>,
@@ -252,6 +253,20 @@ pub enum AnalysisAction {
         #[arg(long, default_value = "")] since: String,
         #[arg(long, default_value = "")] until: String,
     },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum LatticeAction {
+    Normalize { text: String },
+    Tags { text: String },
+    DeriveTags { title: String, #[arg(long, default_value = "")] abstract_text: String, #[arg(long, default_value_t = 6)] limit: i64 },
+    StudyType { text: String },
+    InferStudy { title: String, #[arg(long, default_value = "")] abstract_text: String },
+    PaperId { title: String, #[arg(long, default_value = "")] doi: String, #[arg(long, default_value = "")] arxiv: String },
+    ParseBibtex { text: String },
+    ParseRis { text: String },
+    ParseCsv { text: String },
+    ParseCsl { text: String },
 }
 
 #[derive(Debug, Subcommand)]
@@ -545,6 +560,7 @@ pub fn run(cli: &Cli) -> Result<Output> {
         }
         Commands::Ai { action } => run_ai(&conn, action),
         Commands::Experiment { action } => run_experiment(&conn, action),
+        Commands::Lattice { action } => run_lattice(action),
         Commands::Report { reference, out, check, strict } => {
             use crate::manifest;
             if *strict && check.is_none() {
@@ -845,6 +861,46 @@ fn run_ai(conn: &Connection, action: &AiAction) -> Result<Output> {
                     field(a, "output_sha256").chars().take(12).collect::<String>())).collect()
             };
             emit(Value::Array(rows), text)
+        }
+    }
+}
+
+fn run_lattice(action: &LatticeAction) -> Result<Output> {
+    use crate::lattice;
+    match action {
+        LatticeAction::Normalize { text } => emit(json!({"value": lattice::normalize_text(text)}),
+            format!("{}\n", lattice::normalize_text(text))),
+        LatticeAction::Tags { text } => emit(json!({"value": lattice::normalize_tags(text)}),
+            format!("{}\n", lattice::normalize_tags(text))),
+        LatticeAction::DeriveTags { title, abstract_text, limit } => {
+            let value = lattice::derive_tags(title, abstract_text, *limit)?;
+            emit(json!({"value": value.clone()}), format!("{}\n", value))
+        }
+        LatticeAction::StudyType { text } => emit(json!({"value": lattice::normalize_study_type(text)}),
+            format!("{}\n", lattice::normalize_study_type(text))),
+        LatticeAction::InferStudy { title, abstract_text } => {
+            let value = lattice::infer_study_type(title, abstract_text);
+            emit(json!({"value": value.clone()}), format!("{}\n", value))
+        }
+        LatticeAction::PaperId { title, doi, arxiv } => {
+            let value = lattice::paper_id(title, doi, arxiv)?;
+            emit(json!({"value": value.clone()}), format!("{}\n", value))
+        }
+        LatticeAction::ParseBibtex { text } => {
+            let rows = lattice::parse_bibtex(text)?;
+            emit(Value::Array(rows.clone()), to_stable_json(&Value::Array(rows)))
+        }
+        LatticeAction::ParseRis { text } => {
+            let rows = lattice::parse_ris(text);
+            emit(Value::Array(rows.clone()), to_stable_json(&Value::Array(rows)))
+        }
+        LatticeAction::ParseCsv { text } => {
+            let rows = lattice::parse_csv(text)?;
+            emit(Value::Array(rows.clone()), to_stable_json(&Value::Array(rows)))
+        }
+        LatticeAction::ParseCsl { text } => {
+            let rows = lattice::parse_csl_json(text)?;
+            emit(Value::Array(rows.clone()), to_stable_json(&Value::Array(rows)))
         }
     }
 }

@@ -221,6 +221,30 @@ fn search_is_phrase_first_and_program_scoped() {
 }
 
 #[test]
+fn lattice_value_rules_and_parsers() {
+    use research_engine::lattice as l;
+    assert_eq!(l::normalize_text("Fluid   Universe—101!"), "fluid universe 101");
+    assert_eq!(l::normalize_tags("Physics; physics, AI ; ML"), "physics, ai, ml");
+    assert_eq!(l::derive_tags("Quantum Field", "A computational simulation", 3).unwrap(),
+        "quantum, field, computational");
+    assert_eq!(l::normalize_study_type("RCT"), "Randomized Controlled Trial");
+    assert_eq!(l::infer_study_type("A meta-analysis of trials", ""), "Meta-Analysis");
+    assert_eq!(l::paper_id("Fluid Universe", "10.1/fluid", "").unwrap(), "p_ef3b1839141c");
+    assert_eq!(l::validate_ref("claim:c_000001").unwrap(), "claim:c_000001");
+    assert!(l::validate_ref("claim:p_000001").is_err());
+    assert_eq!(l::parse_confidence(None).unwrap(), 0.5);
+    assert!(l::parse_confidence(Some(1.5)).is_err());
+
+    let bib = "@article{k, title={Quantum Effects}, author={Ada and Alan}, year={2024}, doi={10.1/q}}";
+    let records = l::parse_bibtex(bib).unwrap();
+    assert_eq!(records.len(), 1);
+    assert_eq!(records[0].get("authors").and_then(Value::as_str), Some("Ada; Alan"));
+    let csl = r#"[{"title":"Quantum Effects","author":[{"family":"Lovelace","given":"Ada"}],"issued":{"date-parts":[[2024]]}}]"#;
+    let records = l::parse_csl_json(csl).unwrap();
+    assert_eq!(records[0].get("year").and_then(Value::as_str), Some("2024"));
+}
+
+#[test]
 fn experiment_records_and_analysis() {
     let path = temp_db("experiments");
     let conn = open(path.to_str().unwrap()).unwrap();
