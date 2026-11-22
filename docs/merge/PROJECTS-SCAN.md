@@ -164,3 +164,4 @@ still names every top-level and archived directory.
 | `archive/atelier` | archived; read-only |
 | `archive/vaultbreak` | archived; read-only |
 | `archive/kiln` | archived; read-only |
+| `archive/muse` | archived; read-only |

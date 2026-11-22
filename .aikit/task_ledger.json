@@ -5,48 +5,13 @@
     "last_phase": "in_progress",
     "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1795353242.918258,
+    "updated_at": 1795354171.4633446,
     "owner": "opencode:rust-rewrite",
-    "lease_until": 1795360442.918258,
+    "lease_until": 1795361371.4633446,
     "started_by": "opencode:rust-rewrite",
     "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "T-026-rust-rewrite",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'T-026-rust-rewrite' completed successfully.",
-      "status": "completed",
-      "timestamp": 1795346938.064874,
-      "timestamp_str": "2026-11-22 14:28:58",
-      "agent": "opencode:rust-rewrite",
-      "head": "8b4a673cfd702104683007fa7d469073013c72f9",
-      "delivery": {
-        "roots": [
-          "."
-        ],
-        "forced": false
-      }
-    },
-    {
-      "task_id": "T-027-rust-layers",
-      "phase": "in_progress",
-      "phase_num": 2,
-      "description": "[1/6] Plan: port outline/brief, manifest, AI artifacts and bundle export into the Rust crate",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795346947.40709,
-      "timestamp_str": "2026-11-22 14:29:07",
-      "agent": "opencode:rust-rewrite",
-      "impact_assessment": {
-        "why": "The first rewrite task closed with the schema-14 core, graph, evidence, cascades, reports, measurements, search and analysis ported; the remaining runtime-critical surface and outer layers still run only in Python.",
-        "benefits": "Every command the engine exposes will have a Rust implementation backed by the same SQLite graph, with parity tests before the Python entry point is retired.",
-        "risks": "contract: JSON/text shapes, manifest digests and bundle formats must match Python exactly; dependency: only declared crates and the shared graph; concurrency: other agents are editing AIKit's native gates, so project gates must be verified with direct scripts when the root native bridge is stale; state: existing research.db files must stay readable.",
-        "mitigation": "Read each Python module before porting; add CLI-level parity scripts for every subsystem; keep new Rust modules pure and dependency-light; verify with cargo test plus direct hygiene/KB/secret/test scripts."
-      },
-      "plan_digest": "17029adfed65c2752337af20f36255cbaa4ce464afa98dd1bec7a99e7e8d8c30"
-    },
     {
       "task_id": "T-027-rust-layers",
       "phase": "in_progress",
@@ -263,6 +228,29 @@
       "status": "in_progress",
       "timestamp": 1795353242.918258,
       "timestamp_str": "2026-11-22 16:14:02",
+      "agent": "opencode:rust-rewrite",
+      "checklists": "passed"
+    },
+    {
+      "task_id": "T-028-outer-layers",
+      "phase": "in_progress",
+      "phase_num": 3,
+      "description": "[5/6] Ported contradiction detection, token-budgeted outline/search views and GraphRAG context packs into rust/src/lattice_query.rs",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795354170.8992524,
+      "timestamp_str": "2026-11-22 16:29:30",
+      "agent": "opencode:rust-rewrite"
+    },
+    {
+      "task_id": "T-028-outer-layers",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[5/6] Verification: cargo test 28/28; lattice_query_parity.py 5/5 exact matches; project gates passing",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795354171.4633446,
+      "timestamp_str": "2026-11-22 16:29:31",
       "agent": "opencode:rust-rewrite",
       "checklists": "passed"
     }

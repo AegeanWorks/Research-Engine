@@ -6,15 +6,15 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `430`
+- **Total Python Modules**: `432`
 - **Total Classes**: `317`
-- **Total Top-Level Functions**: `1978`
+- **Total Top-Level Functions**: `1979`
 - **Total Class Methods**: `1545`
-- **Total Source Lines**: `90083`
+- **Total Source Lines**: `90183`
 
 ## 🧭 Map Coverage
-- **Indexed**: python (`430` module(s))
-- **Not indexed by this map**: javascript (`1` file(s)), rust (`32` file(s))
+- **Indexed**: python (`432` module(s))
+- **Not indexed by this map**: javascript (`1` file(s)), rust (`33` file(s))
 
 > Only Python symbols are catalogued. A language above is reported as not indexed, never as verified by this map.
 
@@ -4683,6 +4683,21 @@
 **Functions:**
 - `def run(cmd, cwd)`
 - `def compare(label, args, py_args)`
+
+---
+
+### [`rust/lattice_query_expected.py`](rust/lattice_query_expected.py)
+> *Python reference for the Rust `lattice-query` CLI commands.*
+
+**Size**: `47` lines
+
+---
+
+### [`rust/lattice_query_parity.py`](rust/lattice_query_parity.py)
+**Size**: `53` lines
+
+**Functions:**
+- `def run(cmd, cwd)`
 
 ---
 

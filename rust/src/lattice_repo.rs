@@ -263,6 +263,36 @@ fn log(conn: &Connection, action: &str, payload: &Value) -> Result<()> {
     Ok(())
 }
 
+pub fn get_paper(conn: &Connection, reference: &str) -> Result<Value> {
+    let bare = lattice::bare_id(&resolve(reference)?)?;
+    one(conn, "papers", &bare).ok_or_else(|| EngineError::new(
+        format!("paper '{reference}' does not exist"), "the graph has no such record", "use `search` to find an ingested paper"))
+}
+
+pub fn get_claim(conn: &Connection, reference: &str) -> Result<Value> {
+    let bare = lattice::bare_id(&resolve(reference)?)?;
+    one(conn, "claims", &bare).ok_or_else(|| EngineError::new(
+        format!("claim '{reference}' does not exist"), "the graph has no such record", "use `search` to find a recorded claim"))
+}
+
+pub fn get_question(conn: &Connection, reference: &str) -> Result<Value> {
+    let bare = lattice::bare_id(&resolve(reference)?)?;
+    one(conn, "questions", &bare).ok_or_else(|| EngineError::new(
+        format!("question '{reference}' does not exist"), "the graph has no such record", "use `search` or add it with the question command"))
+}
+
+pub fn neighbors(conn: &Connection, reference: &str) -> Result<Vec<Value>> {
+    let resolved = resolve(reference)?;
+    let edges = query_json(conn, "SELECT * FROM edges WHERE src=?1 OR dst=?2 ORDER BY id",
+        params![resolved, resolved])?;
+    Ok(edges.into_iter().map(|mut edge| {
+        let other = if field(&edge, "src") == resolved { field(&edge, "dst") } else { field(&edge, "src") };
+        let details = json!({"other": summary(conn, &other)});
+        edge.as_object_mut().unwrap().insert("details".to_string(), details);
+        edge
+    }).collect())
+}
+
 fn summary(conn: &Connection, reference: &str) -> Value {
     let resolved = match resolve(reference) { Ok(value) => value, Err(_) => return json!({"ref": reference, "missing": true}) };
     let kind = resolved.split(':').next().unwrap_or("");

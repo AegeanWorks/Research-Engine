@@ -221,6 +221,33 @@ fn search_is_phrase_first_and_program_scoped() {
 }
 
 #[test]
+fn lattice_queries_detect_contradictions_and_pack_context() {
+    let path = temp_db("lattice_query");
+    let conn = research_engine::lattice_repo::open(path.to_str().unwrap()).unwrap();
+    let mut metadata = std::collections::BTreeMap::new();
+    metadata.insert("title".to_string(), "Quantum Effects".to_string());
+    metadata.insert("doi".to_string(), "10.1/qq".to_string());
+    let (paper, _) = research_engine::lattice_repo::add_paper(&conn, &metadata).unwrap();
+    let pid = field(&paper, "id");
+    research_engine::lattice_repo::add_claim(&conn, &pid, "Quantum simulation improves diffusion",
+        "diffusion increased", "abstract:s1", "supports", 0.8).unwrap();
+    research_engine::lattice_repo::add_claim(&conn, &pid, "Quantum simulation fails to improve diffusion",
+        "diffusion unchanged", "abstract:s2", "contradicts", 0.7).unwrap();
+    let question = research_engine::lattice_repo::add_question(&conn, "Does it improve?").unwrap();
+    research_engine::lattice_repo::add_edge(&conn, "c_000001", &field(&question, "id"), "supports", "").unwrap();
+    research_engine::lattice_repo::add_edge(&conn, "c_000002", &field(&question, "id"), "contradicts", "").unwrap();
+
+    let pairs = research_engine::lattice_query::detect_contradictions(&conn, false).unwrap();
+    assert_eq!(pairs.len(), 1);
+    let outline = research_engine::lattice_query::outline(&conn, 400).unwrap();
+    assert_eq!(outline.get("questions").and_then(Value::as_array).map(|v| v.len()), Some(1));
+    let pack = research_engine::lattice_query::build_context_pack(&conn, &[], 2000, "markdown").unwrap();
+    assert!(field(&pack, "content").contains("GraphRAG Evidence Pack"));
+    let json_pack = research_engine::lattice_query::build_context_pack(&conn, &[], 2000, "json").unwrap();
+    assert!(field(&json_pack, "content").contains("\"claims\""));
+}
+
+#[test]
 fn meta_analysis_pools_studies() {
     use research_engine::meta;
     let studies = vec![

@@ -201,7 +201,7 @@ pub fn validate_locator(locator: &str) -> Result<String> {
     Ok(value)
 }
 
-fn entity_type(reference: &str) -> Result<&'static str> {
+pub fn entity_type(reference: &str) -> Result<&'static str> {
     let Some((prefix, _)) = reference.split_once(':') else {
         return Err(fail(format!("'{reference}' is not a reference"),
             "references look like paper:p_xxx or claim:c_xxx", "pass a reference including its prefix"));

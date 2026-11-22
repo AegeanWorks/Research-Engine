@@ -43,6 +43,7 @@ pub enum Commands {
     LatticeRepo { #[command(subcommand)] action: LatticeRepoAction },
     LatticeSnap { #[command(subcommand)] action: LatticeSnapAction },
     Meta { #[command(subcommand)] action: MetaAction },
+    LatticeQuery { #[command(subcommand)] action: LatticeQueryAction },
     Search {
         query: String,
         #[arg(long)] research: Option<String>,
@@ -255,6 +256,18 @@ pub enum AnalysisAction {
         #[arg(long)] allow_self_reported: bool,
         #[arg(long, default_value = "")] since: String,
         #[arg(long, default_value = "")] until: String,
+    },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum LatticeQueryAction {
+    Outline { #[arg(long, default_value_t = 400)] tokens: i64 },
+    Contradictions { #[arg(long)] auto_link: bool },
+    CompactSearch { query: String, #[arg(long, default_value_t = 20)] limit: i64, #[arg(long, default_value_t = 800)] tokens: i64 },
+    ContextPack {
+        #[arg(long, default_value = "")] targets: String,
+        #[arg(long, default_value_t = 2000)] max_tokens: i64,
+        #[arg(long, default_value = "markdown")] format: String,
     },
 }
 
@@ -509,7 +522,8 @@ fn list_text(rows: &[Value]) -> String {
 pub fn run(cli: &Cli) -> Result<Output> {
     let conn = open(&cli.db)?;
     if !matches!(cli.command, Commands::Init | Commands::Lattice { .. }
-        | Commands::LatticeRepo { .. } | Commands::LatticeSnap { .. } | Commands::Meta { .. }) {
+        | Commands::LatticeRepo { .. } | Commands::LatticeSnap { .. } | Commands::Meta { .. }
+        | Commands::LatticeQuery { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -622,6 +636,30 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::LatticeQuery { action } => {
+            use crate::lattice_query;
+            let lattice = crate::lattice_repo::open(&cli.db)?;
+            match action {
+                LatticeQueryAction::Outline { tokens } => {
+                    let result = lattice_query::outline(&lattice, *tokens)?;
+                    emit(result.clone(), to_stable_json(&result))
+                }
+                LatticeQueryAction::Contradictions { auto_link } => {
+                    let result = lattice_query::detect_contradictions(&lattice, *auto_link)?;
+                    emit(Value::Array(result.clone()), to_stable_json(&Value::Array(result)))
+                }
+                LatticeQueryAction::CompactSearch { query, limit, tokens } => {
+                    let found = crate::lattice_repo::search(&lattice, query, *limit)?;
+                    let result = lattice_query::compact_search(&found, *tokens)?;
+                    emit(result.clone(), to_stable_json(&result))
+                }
+                LatticeQueryAction::ContextPack { targets, max_tokens, format } => {
+                    let list: Vec<String> = targets.split(',').map(|t| t.trim().to_string()).filter(|t| !t.is_empty()).collect();
+                    let result = lattice_query::build_context_pack(&lattice, &list, *max_tokens, format)?;
+                    emit(result.clone(), field(&result, "content"))
+                }
+            }
+        }
         Commands::Meta { action } => match action {
             MetaAction::StudyCi { id, label, effect, lower, upper, study_type } => {
                 let result = crate::meta::study_from_ci(id, label, *effect, *lower, *upper, study_type)?;
