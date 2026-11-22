@@ -32,6 +32,14 @@ pub fn cell(text: &str, width: usize) -> String {
     sanitize(text, width).replace('\\', "\\\\").replace('|', "\\|").replace('`', "\\`")
 }
 
+pub fn bullet(text: &str, width: usize) -> String {
+    sanitize(text, width).replace('`', "\\`")
+}
+
+pub fn code(text: &str, width: usize) -> String {
+    sanitize(text, width).replace('`', "'")
+}
+
 pub fn estimate_tokens(text: &str) -> usize {
     (text.len() + CHARS_PER_TOKEN - 1) / CHARS_PER_TOKEN
 }

@@ -129,7 +129,8 @@ fn report_numbers_come_from_the_graph() {
     core::set_verdict(&conn, &field(&claim, "id"), "PROVEN", "evidence", "", "", "agent").unwrap();
     let report = research_engine::synthesis::report(&conn, &field(&research, "id")).unwrap();
     assert!(report.contains("- claims: 1"));
-    assert!(report.contains("Measured claim"));
+    assert!(report.contains("_No questions recorded._"));
+    assert!(report.contains("_No hypotheses pre-registered._"));
     assert!(report.contains("no hand-written numbers"));
     let scorecard = research_engine::synthesis::scorecard(&conn, &field(&research, "id")).unwrap();
     assert!(scorecard.contains("| PROVEN |"));
@@ -217,6 +218,53 @@ fn search_is_phrase_first_and_program_scoped() {
     assert!(result.get("text").and_then(Value::as_str).unwrap().contains("SEARCH \"quantum\""));
     let scoped = research_engine::search::search(&conn, "quantum", Some(&field(&research, "id")), None, 5, false, 800).unwrap();
     assert_eq!(scoped.get("research").and_then(Value::as_str), Some(field(&research, "id").as_str()));
+}
+
+#[test]
+fn bounded_views_and_manifest_digests() {
+    let path = temp_db("views");
+    let conn = open(path.to_str().unwrap()).unwrap();
+    initialize(&conn).unwrap();
+    let research = core::add_research(&conn, "Views", "", None).unwrap();
+    let question = core::add_question(&conn, &field(&research, "id"), "Is it real?").unwrap();
+    let claim = core::add_claim(&conn, &field(&research, "id"), "It is real", "derived",
+        None, "", "", 0.5, "", "basis", &[]).unwrap();
+    core::record_edge(&conn, "claim", &field(&claim, "id"), "question", &field(&question, "id"), "supports").unwrap();
+    core::set_verdict(&conn, &field(&claim, "id"), "PROVEN", "evidence", "", "", "agent").unwrap();
+
+    let outline = research_engine::context::outline(&conn, &field(&research, "id"), 800).unwrap();
+    assert!(field(&outline, "text").starts_with("OUTLINE r_000001"));
+    let brief = research_engine::context::brief(&conn, &field(&research, "id"), 800).unwrap();
+    assert!(field(&brief, "text").contains("Is it real?"));
+    let tiny = research_engine::context::outline(&conn, &field(&research, "id"), 1).unwrap();
+    assert!(tiny.get("omitted").and_then(Value::as_u64).unwrap() > 0);
+    assert!(field(&tiny, "text").contains("OUTLINE"));
+
+    let report_text = research_engine::synthesis::report(&conn, &field(&research, "id")).unwrap();
+    let manifest = research_engine::manifest::build_manifest(&conn, &field(&research, "id"), &report_text).unwrap();
+    assert_eq!(field(&manifest, "schema"), "research-engine.report/3");
+    assert_eq!(field(&manifest, "report_sha256"),
+        research_engine::util::digest("report/1", report_text.as_bytes()));
+    assert_eq!(field(&manifest, "content_sha256"),
+        research_engine::bundle::content_sha256(&conn, Some(&field(&research, "id"))).unwrap());
+    assert_eq!(field(&manifest, "graph_sha256"),
+        research_engine::bundle::graph_sha256(&conn, Some(&field(&research, "id"))).unwrap());
+}
+
+#[test]
+fn export_is_self_verifying() {
+    let path = temp_db("export");
+    let conn = open(path.to_str().unwrap()).unwrap();
+    initialize(&conn).unwrap();
+    let research = core::add_research(&conn, "Export", "", None).unwrap();
+    core::add_claim(&conn, &field(&research, "id"), "Exported", "derived",
+        None, "", "", 0.5, "", "basis", &[]).unwrap();
+    let out = path.with_extension("jsonl");
+    let counts = research_engine::bundle::export_jsonl(&conn, &out, None).unwrap();
+    assert_eq!(counts.get("claim").and_then(Value::as_u64), Some(1));
+    let verified = research_engine::bundle::verify_export(&out).unwrap();
+    assert_eq!(verified.get("ok").and_then(Value::as_bool), Some(true));
+    assert_eq!(verified.get("records").and_then(Value::as_u64), Some(2)); // research + claim
 }
 
 #[test]

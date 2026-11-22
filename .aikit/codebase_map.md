@@ -6,15 +6,15 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `417`
+- **Total Python Modules**: `418`
 - **Total Classes**: `317`
-- **Total Top-Level Functions**: `1961`
+- **Total Top-Level Functions**: `1963`
 - **Total Class Methods**: `1545`
-- **Total Source Lines**: `89392`
+- **Total Source Lines**: `89438`
 
 ## 🧭 Map Coverage
-- **Indexed**: python (`417` module(s))
-- **Not indexed by this map**: javascript (`1` file(s)), rust (`20` file(s))
+- **Indexed**: python (`418` module(s))
+- **Not indexed by this map**: javascript (`1` file(s)), rust (`24` file(s))
 
 > Only Python symbols are catalogued. A language above is reported as not indexed, never as verified by this map.
 
@@ -4640,6 +4640,15 @@
 
 **Functions:**
 - `def run(cmd, cwd)`
+
+---
+
+### [`rust/views_parity.py`](rust/views_parity.py)
+**Size**: `46` lines
+
+**Functions:**
+- `def run(cmd, cwd)`
+- `def compare(label, args)`
 
 ---
 

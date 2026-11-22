@@ -29,6 +29,13 @@ pub enum Commands {
     Demo,
     Check,
     Inventory,
+    Outline { reference: String, #[arg(long, default_value_t = 800)] budget: i64 },
+    Brief { reference: String, #[arg(long, default_value_t = 800)] budget: i64 },
+    Export {
+        path: String,
+        #[arg(long)] research: Option<String>,
+        #[arg(long)] check: bool,
+    },
     Search {
         query: String,
         #[arg(long)] research: Option<String>,
@@ -152,6 +159,7 @@ pub enum ClaimAction {
         #[arg(long, default_value = "agent")] actor: String,
     },
     History { reference: String },
+    Context { reference: String, #[arg(long, default_value_t = 800)] budget: i64 },
     Invalidate {
         reference: String,
         #[arg(long, required = true)] status: String,
@@ -372,30 +380,50 @@ pub fn run(cli: &Cli) -> Result<Output> {
         },
         Commands::Protocol { action } => run_protocol(&conn, action),
         Commands::Observation { action } => run_observation(&conn, action),
+        Commands::Outline { reference, budget } => {
+            let view = crate::context::outline(&conn, reference, *budget)?;
+            emit(view.clone(), field(&view, "text"))
+        }
+        Commands::Brief { reference, budget } => {
+            let view = crate::context::brief(&conn, reference, *budget)?;
+            emit(view.clone(), field(&view, "text"))
+        }
+        Commands::Export { path, research, check } => {
+            use crate::bundle;
+            if *check {
+                let result = bundle::verify_export(std::path::Path::new(path))?;
+                let text = format!("intact: {} ({})\n  records: {}\n  digest: {}\n",
+                    result.get("ok").and_then(Value::as_bool).unwrap_or(false), path,
+                    result.get("records").and_then(Value::as_u64).unwrap_or(0),
+                    field(&result, "digest"));
+                return emit(result, text);
+            }
+            let counts = bundle::export_jsonl(&conn, std::path::Path::new(path), research.as_deref())?;
+            emit(counts, format!("exported graph to {path}\n"))
+        }
         Commands::Report { reference, out, check, strict } => {
-            use crate::synthesis;
+            use crate::manifest;
+            if *strict && check.is_none() {
+                return Err(EngineError::new("--strict needs --check",
+                    "strictness only changes manifest comparison, not rendering.",
+                    "pass --check PATH together with --strict, or drop --strict."));
+            }
             if let Some(path) = check {
-                let expected = std::fs::read_to_string(path)?;
-                let actual = synthesis::report(&conn, reference)?;
-                let equal = expected == actual;
-                let value = json!({"ok": equal, "path": path, "strict": strict});
-                return emit(value.clone(), to_stable_json(&value));
+                let result = manifest::check_report(&conn, reference, std::path::Path::new(path), *strict)?;
+                let clean = result.get("clean").and_then(Value::as_bool).unwrap_or(false);
+                let mut text = format!("clean: {clean} ({})\n", field(&result, "manifest"));
+                for item in result.get("drift").and_then(Value::as_array).into_iter().flatten() {
+                    text.push_str(&format!("  drift: {}\n", item.as_str().unwrap_or("")));
+                }
+                return emit(result, text);
             }
-            let text = synthesis::report(&conn, reference)?;
-            if let Some(dir) = out {
-                let base = std::path::Path::new(dir);
-                let report_path = base.join("report.md");
-                crate::util::atomic_write_text(&report_path, &text)?;
-                let manifest = json!({
-                    "report_sha256": crate::util::sha256_text(&text),
-                    "schema_version": 14,
-                    "generated_by": "research-engine-rs",
-                });
-                crate::util::atomic_write_text(&base.join("report.manifest.json"),
-                    &to_stable_json(&manifest))?;
-                return emit(json!({"path": report_path.to_string_lossy(), "manifest": manifest}),
-                    format!("report written to {}\n", report_path.to_string_lossy()));
+            if let Some(path) = out {
+                let result = manifest::write_report(&conn, reference, std::path::Path::new(path))?;
+                let text = format!("wrote {}\nwrote {}\ngraph: {}\n", field(&result, "report"),
+                    field(&result, "manifest"), field(&result, "graph_sha256"));
+                return emit(result, text);
             }
+            let text = crate::synthesis::report(&conn, reference)?;
             emit(json!({"report": text.clone()}), text)
         }
         Commands::Scorecard { reference } => {
@@ -580,6 +608,10 @@ fn run_claim(conn: &Connection, action: &ClaimAction) -> Result<Output> {
             let result = crate::cascade::invalidate(conn, reference, status, reason, evidence,
                 actor, *allow_bulk, preview_digest)?;
             emit(result.clone(), to_stable_json(&result))
+        }
+        ClaimAction::Context { reference, budget } => {
+            let view = crate::context::claim_context(conn, reference, *budget)?;
+            emit(view.clone(), field(&view, "text"))
         }
         ClaimAction::History { reference } => {
             let claim = core::get_claim(conn, reference)?;

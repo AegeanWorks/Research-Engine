@@ -79,6 +79,29 @@ pub fn event_hash_for(
     sha256_text(&payload)
 }
 
+/// Python's `json.dumps(value, sort_keys=True)` default separators `, ` and `: `.
+/// serde_json uses compact separators, so digests over serialized records would
+/// otherwise differ from the Python engine byte for byte.
+pub fn to_python_json(value: &Value) -> String {
+    match value {
+        Value::Null => "null".to_string(),
+        Value::Bool(flag) => flag.to_string(),
+        Value::Number(number) => number.to_string(),
+        Value::String(text) => serde_json::to_string(text).unwrap_or_else(|_| "\"\"".to_string()),
+        Value::Array(items) => format!(
+            "[{}]",
+            items.iter().map(to_python_json).collect::<Vec<_>>().join(", ")
+        ),
+        Value::Object(map) => format!(
+            "{{{}}}",
+            map.iter()
+                .map(|(key, item)| format!("{}: {}", to_python_json(&Value::String(key.clone())), to_python_json(item)))
+                .collect::<Vec<_>>()
+                .join(", ")
+        ),
+    }
+}
+
 /// Python-compatible stable JSON rendering: 2-space indent, sorted keys, trailing newline.
 pub fn to_stable_json(value: &Value) -> String {
     let mut text = serde_json::to_string_pretty(value).unwrap_or_else(|_| "{}".to_string());

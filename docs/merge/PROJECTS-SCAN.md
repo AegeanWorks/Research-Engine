@@ -163,3 +163,4 @@ still names every top-level and archived directory.
 | `traceglass` | out of scope - AIKit tooling, not a research primitive |
 | `archive/atelier` | archived; read-only |
 | `archive/vaultbreak` | archived; read-only |
+| `archive/kiln` | archived; read-only |

@@ -5,13 +5,17 @@
 //! and evidence is never discarded.
 
 pub mod analysis;
+pub mod bundle;
+pub mod calibration;
 pub mod cascade;
 pub mod cli;
+pub mod context;
 pub mod core;
 pub mod db;
 pub mod error;
 pub mod integrity;
 pub mod killtest;
+pub mod manifest;
 pub mod markdown;
 pub mod observations;
 pub mod protocols;

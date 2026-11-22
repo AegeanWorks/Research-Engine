@@ -46,6 +46,9 @@ argparse requires in `python -m engine`.
 | Synthesis | `report`, `scorecard`, graph-derived consensus and coverage (G-006) |
 | Measurements | `protocol add/list/amend`, `observation add/list/void/import-csv`, provenance and group gates, `OBS-001`..`OBS-004` |
 | Analysis | `analysis stats` and `analysis trend` with CPython-compatible MT19937 bootstrap, Welch t, Mann-Whitney U, comparability gates and event recording |
+| Views | `outline`, `brief`, `claim context` with exact token-budget packing and pruning |
+| Manifests | `report --out/--check/--strict` with schema-3 manifests, license pin, content/graph digests and drift detection |
+| Export | `export` JSONL with byte-identical records, `export --check` self-verification |
 | Search | deterministic phrase-first lexical `search` with exact snippet/token-budget output |
 | Markdown | `sanitize`/`cell`/`estimate_tokens`/`pack` shared with reports and search |
 | Integrity | 24 finding codes including `PROV-*`, `EVID-*`, `GRAPH-*`, `GAP-*`, `LEDGER-001` |
@@ -65,11 +68,13 @@ argparse requires in `python -m engine`.
   `observation list` and `check` on the same graph; all three compare equal.
 - `analysis_parity.py <db>` compares `analysis stats` and `analysis trend` JSON;
   both compare equal.
+- `views_parity.py <db>` compares `outline`, `brief`, `claim context`, report
+  manifests and export verification; digests and checks compare equal.
 
 ## Still to port
 
-`outline`/`brief`, full report manifest parity (`--strict` record digest),
-`analysis calibration`/`contradictions`/`matrix`, AI artifacts, bundle export/diff,
-studio/adapters/experiments/domains, and the Python CLI text renderer. These
-remain served by `python -m engine` until their Rust equivalents land; the
-SQLite graph is shared throughout.
+`analysis calibration`/`contradictions`/`matrix`/correlation (the report and
+`analysis stats` paths already use the same calibration arithmetic), AI
+artifacts, `diff`, studio/adapters/experiments/domains, and the Python CLI text
+renderer. These remain served by `python -m engine` until their Rust
+equivalents land; the SQLite graph is shared throughout.
