@@ -32,7 +32,6 @@
   "ui_evidence": [
     "domains/atlas/cli.py",
     "domains/atlas/selftest.py",
-    "domains/fluid_universe/phenomenology/extension_report.py",
     "domains/obezite/backfill.py",
     "domains/obezite/claim_index.py",
     "domains/obezite/cokus.py",
@@ -41,7 +40,8 @@
     "domains/obezite/split.py",
     "domains/obezite/split_range.py",
     "domains/pnn/cli.py",
-    "domains/pnn/curate.py"
+    "domains/pnn/curate.py",
+    "domains/pnn/mpo.py"
   ],
   "ui_checked_at": "2026-11-22",
   "ui_source": "detected",

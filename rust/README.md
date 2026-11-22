@@ -42,6 +42,8 @@ argparse requires in `python -m engine`.
 | Claims | `claim add/list/show/link/link-question/verdict/history`, G-001 provenance gate, append-only verdicts |
 | Hypotheses | `hypothesis add/list/outcome`, pre-registration fields |
 | Kill tests | `test add/list/run/verify/runs/attempts`, command/input binding, negative control, two agreeing runs, authoritative run group, G-003 NUMERIC gate |
+| Cascade | `cascade preview`, `claim invalidate`, `source retract`, preview digests and the 10-record bulk tripwire (G-004/G-005) |
+| Synthesis | `report`, `scorecard`, graph-derived consensus and coverage (G-006) |
 | Integrity | 24 finding codes including `PROV-*`, `EVID-*`, `GRAPH-*`, `GAP-*`, `LEDGER-001` |
 | Events | hash-chained event ledger, byte-identical hash algorithm to Python |
 | Maintenance | `db integrity`, `db backup`, `events --verify`, `inventory`, `check` |
@@ -58,8 +60,8 @@ argparse requires in `python -m engine`.
 
 ## Still to port
 
-`report`/`scorecard`/`outline`/`brief`, cascade invalidation and source
-retraction, observations/protocols/analysis, search, AI artifacts, bundle
-export/diff, studio/adapters/experiments/domains, and the Python CLI text
-renderer. These remain served by `python -m engine` until their Rust
-equivalents land; the SQLite graph is shared throughout.
+`outline`/`brief`, full report manifest parity (`--strict` record digest),
+observations/protocols/analysis, search, AI artifacts, bundle export/diff,
+studio/adapters/experiments/domains, and the Python CLI text renderer. These
+remain served by `python -m engine` until their Rust equivalents land; the
+SQLite graph is shared throughout.

@@ -5,42 +5,13 @@
     "last_phase": "in_progress",
     "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1795341185.3334901,
+    "updated_at": 1795342286.2162497,
     "owner": "opencode:rust-rewrite",
-    "lease_until": 1795348385.3334901,
+    "lease_until": 1795349486.2162497,
     "started_by": "opencode:rust-rewrite",
     "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "T-022-windows-dryrun-holm",
-      "phase": "in_progress",
-      "phase_num": 2,
-      "description": "[1/4] Planning time-window stats, import dry-run, cross-claim Holm",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793913065.762996,
-      "timestamp_str": "2026-11-06 00:11:05",
-      "agent": "kilo:goal",
-      "impact_assessment": {
-        "why": "Stats cannot slice by record time; CSV imports write before validation is visible; stats-all warns on multiplicity without adjustment",
-        "benefits": "Temporal slicing without domain model; safe migration preview; rigorous cross-claim family table reusing holm_adjust",
-        "risks": "contract: window filter must keep provenance gate and OBS-001 event; dry-run must write nothing; Holm is display-only; dependency: stdlib only; concurrency: single writer; state: no schema change",
-        "mitigation": "Failing-first tests per feature; golden ordering before report out; full suite plus aikit check per milestone; explicit staging"
-      },
-      "plan_digest": "bf24d38e6ff6cc9549e7d705ddf0a94ea72b00e522fc94735d94e4b875eebffa"
-    },
-    {
-      "task_id": "T-022-windows-dryrun-holm",
-      "phase": "in_progress",
-      "phase_num": 4,
-      "description": "[2/4] Time windows shipped: since/until on stats, stats-all and correlation with provenance gating plus invalid-window refusal, tests green, checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793913376.6904955,
-      "timestamp_str": "2026-11-06 00:16:16",
-      "agent": "kilo:goal"
-    },
     {
       "task_id": "T-022-windows-dryrun-holm",
       "phase": "in_progress",
@@ -261,6 +232,29 @@
       "status": "in_progress",
       "timestamp": 1795341185.3334901,
       "timestamp_str": "2026-11-22 12:53:05",
+      "agent": "opencode:rust-rewrite",
+      "checklists": "passed"
+    },
+    {
+      "task_id": "T-026-rust-rewrite",
+      "phase": "in_progress",
+      "phase_num": 3,
+      "description": "[4/6] Cascades and generated reports ported: preview digests, transitive invalidation, source retraction, inventory/consensus/report/scorecard",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795342286.038002,
+      "timestamp_str": "2026-11-22 13:11:26",
+      "agent": "opencode:rust-rewrite"
+    },
+    {
+      "task_id": "T-026-rust-rewrite",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[5/6] Verification: cargo test 9/9 passed; Python engine agrees with Rust integrity output on cascade graphs; project gates 4/4 passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795342286.2162497,
+      "timestamp_str": "2026-11-22 13:11:26",
       "agent": "opencode:rust-rewrite",
       "checklists": "passed"
     }

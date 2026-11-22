@@ -126,7 +126,7 @@ fn run_once(command: &str, timeout_seconds: i64) -> RunOutcome {
     use std::time::{Duration, Instant};
 
     let started = Instant::now();
-    let mut child = {
+    let child = {
         #[cfg(windows)]
         {
             std::process::Command::new("cmd").args(["/C", command])

@@ -29,12 +29,20 @@ pub enum Commands {
     Demo,
     Check,
     Inventory,
+    Report {
+        reference: String,
+        #[arg(long)] out: Option<String>,
+        #[arg(long)] check: Option<String>,
+        #[arg(long)] strict: bool,
+    },
+    Scorecard { reference: String },
     Research { #[command(subcommand)] action: ResearchAction },
     Question { #[command(subcommand)] action: QuestionAction },
     Source { #[command(subcommand)] action: SourceAction },
     Claim { #[command(subcommand)] action: ClaimAction },
     Hypothesis { #[command(subcommand)] action: HypothesisAction },
     Test { #[command(subcommand)] action: TestAction },
+    Cascade { #[command(subcommand)] action: CascadeAction },
     Events {
         #[arg(long)] research: Option<String>,
         #[arg(long)] kind: Option<String>,
@@ -84,6 +92,14 @@ pub enum SourceAction {
         #[arg(long)] status: String,
         #[arg(long, default_value = "")] reason: String,
     },
+    Retract {
+        reference: String,
+        #[arg(long, required = true)] reason: String,
+        #[arg(long, required = true)] evidence: String,
+        #[arg(long, default_value = "agent")] actor: String,
+        #[arg(long)] allow_bulk: bool,
+        #[arg(long, default_value = "")] preview_digest: String,
+    },
 }
 
 #[derive(Debug, Subcommand)]
@@ -125,6 +141,15 @@ pub enum ClaimAction {
         #[arg(long, default_value = "agent")] actor: String,
     },
     History { reference: String },
+    Invalidate {
+        reference: String,
+        #[arg(long, required = true)] status: String,
+        #[arg(long, required = true)] reason: String,
+        #[arg(long, required = true)] evidence: String,
+        #[arg(long, default_value = "agent")] actor: String,
+        #[arg(long)] allow_bulk: bool,
+        #[arg(long, default_value = "")] preview_digest: String,
+    },
 }
 
 #[derive(Debug, Subcommand)]
@@ -164,6 +189,11 @@ pub enum TestAction {
     Verify { reference: String },
     Runs { reference: Option<String>, #[arg(long, default_value_t = 20)] limit: i64 },
     Attempts { reference: Option<String>, #[arg(long, default_value_t = 50)] limit: i64 },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum CascadeAction {
+    Preview { reference: String },
 }
 
 #[derive(Debug, Subcommand)]
@@ -228,12 +258,49 @@ pub fn run(cli: &Cli) -> Result<Output> {
             let text = to_stable_json(&value);
             emit(value, text)
         }
+        Commands::Report { reference, out, check, strict } => {
+            use crate::synthesis;
+            if let Some(path) = check {
+                let expected = std::fs::read_to_string(path)?;
+                let actual = synthesis::report(&conn, reference)?;
+                let equal = expected == actual;
+                let value = json!({"ok": equal, "path": path, "strict": strict});
+                return emit(value.clone(), to_stable_json(&value));
+            }
+            let text = synthesis::report(&conn, reference)?;
+            if let Some(dir) = out {
+                let base = std::path::Path::new(dir);
+                let report_path = base.join("report.md");
+                crate::util::atomic_write_text(&report_path, &text)?;
+                let manifest = json!({
+                    "report_sha256": crate::util::sha256_text(&text),
+                    "schema_version": 14,
+                    "generated_by": "research-engine-rs",
+                });
+                crate::util::atomic_write_text(&base.join("report.manifest.json"),
+                    &to_stable_json(&manifest))?;
+                return emit(json!({"path": report_path.to_string_lossy(), "manifest": manifest}),
+                    format!("report written to {}\n", report_path.to_string_lossy()));
+            }
+            emit(json!({"report": text.clone()}), text)
+        }
+        Commands::Scorecard { reference } => {
+            let text = crate::synthesis::scorecard(&conn, reference)?;
+            emit(json!({"scorecard": text.clone()}), text)
+        }
         Commands::Research { action } => run_research(&conn, action),
         Commands::Question { action } => run_question(&conn, action),
         Commands::Source { action } => run_source(&conn, action),
         Commands::Claim { action } => run_claim(&conn, action),
         Commands::Hypothesis { action } => run_hypothesis(&conn, action),
         Commands::Test { action } => run_test(&conn, action),
+        Commands::Cascade { action } => match action {
+            CascadeAction::Preview { reference } => {
+                let result = crate::cascade::preview(&conn, reference)?;
+                let text = format!("{} affected\n", result.get("affected").and_then(Value::as_array).map(|a| a.len()).unwrap_or(0));
+                emit(result, text)
+            }
+        },
         Commands::Events { research, kind, limit, verify } => {
             if *verify {
                 let result = core::verify_events(&conn)?;
@@ -346,6 +413,11 @@ fn run_source(conn: &Connection, action: &SourceAction) -> Result<Output> {
             emit_record(record, format!("{} -> {}{}", reference, status,
                 if reason.is_empty() { String::new() } else { format!(" ({reason})") }))
         }
+        SourceAction::Retract { reference, reason, evidence, actor, allow_bulk, preview_digest } => {
+            let result = crate::cascade::retract_source(conn, reference, reason, evidence,
+                actor, *allow_bulk, preview_digest)?;
+            emit(result.clone(), to_stable_json(&result))
+        }
     }
 }
 
@@ -389,6 +461,11 @@ fn run_claim(conn: &Connection, action: &ClaimAction) -> Result<Output> {
         ClaimAction::Verdict { reference, status, evidence, note, group, actor } => {
             let record = core::set_verdict(conn, reference, status, evidence, note, group, actor)?;
             emit_record(record, format!("{} -> {}", reference, status))
+        }
+        ClaimAction::Invalidate { reference, status, reason, evidence, actor, allow_bulk, preview_digest } => {
+            let result = crate::cascade::invalidate(conn, reference, status, reason, evidence,
+                actor, *allow_bulk, preview_digest)?;
+            emit(result.clone(), to_stable_json(&result))
         }
         ClaimAction::History { reference } => {
             let claim = core::get_claim(conn, reference)?;

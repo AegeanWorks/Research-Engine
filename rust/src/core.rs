@@ -427,16 +427,31 @@ pub fn set_verdict(
         }
     }
     let tx = conn.unchecked_transaction()?;
-    let id = next_id(&tx, "v")?;
-    tx.execute(&(
+    let result = set_verdict_inner(&tx, &claim, status, evidence, note, group, actor)?;
+    tx.commit()?;
+    Ok(result)
+}
+
+/// Insert one verdict without opening a transaction; callers that cascade
+/// several retirements wrap this in a single transaction.
+pub fn set_verdict_inner(
+    conn: &Connection,
+    claim: &Value,
+    status: &str,
+    evidence: &str,
+    note: &str,
+    group: &str,
+    actor: &str,
+) -> Result<Value> {
+    let id = next_id(conn, "v")?;
+    conn.execute(&(
         "INSERT INTO verdict(id, subject_kind, subject_id, status, previous_status, evidence, note, actor, at, evidence_group)"
             .to_owned() + " VALUES (?1,'claim',?2,?3,?4,?5,?6,?7,?8,?9)"),
-        params![id, text(&claim, "id"), status, text(&claim, "status"), evidence, note, actor, utc_now(), group],
+        params![id, text(claim, "id"), status, text(claim, "status"), evidence, note, actor, utc_now(), group],
     )?;
-    tx.execute("UPDATE claim SET status = ?1, updated_at = ?2 WHERE id = ?3",
-        params![status, utc_now(), text(&claim, "id")])?;
-    tx.commit()?;
-    get_claim(conn, &text(&claim, "id"))
+    conn.execute("UPDATE claim SET status = ?1, updated_at = ?2 WHERE id = ?3",
+        params![status, utc_now(), text(claim, "id")])?;
+    get_claim(conn, &text(claim, "id"))
 }
 
 // ---------------------------------------------------------------------------

@@ -14,7 +14,7 @@
 
 ## 🧭 Map Coverage
 - **Indexed**: python (`415` module(s))
-- **Not indexed by this map**: javascript (`1` file(s)), rust (`12` file(s))
+- **Not indexed by this map**: javascript (`1` file(s)), rust (`14` file(s))
 
 > Only Python symbols are catalogued. A language above is reported as not indexed, never as verified by this map.
 

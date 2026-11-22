@@ -96,6 +96,45 @@ fn verdict_is_append_only() {
 }
 
 #[test]
+fn cascade_invalidates_dependents() {
+    let path = temp_db("cascade");
+    let conn = open(path.to_str().unwrap()).unwrap();
+    initialize(&conn).unwrap();
+    let research = core::add_research(&conn, "Cascade", "", None).unwrap();
+    let root = core::add_claim(&conn, &field(&research, "id"), "root", "derived",
+        None, "", "", 0.5, "", "premise", &[]).unwrap();
+    let dependent = core::add_claim(&conn, &field(&research, "id"), "dependent", "derived",
+        None, "", "", 0.5, "", "", &[field(&root, "id")]).unwrap();
+    let preview = research_engine::cascade::preview(&conn, &field(&root, "id")).unwrap();
+    assert_eq!(preview.get("affected").and_then(|v| v.as_array()).map(|a| a.len()), Some(1));
+    let digest = field(&preview, "digest");
+    let result = research_engine::cascade::invalidate(&conn, &field(&root, "id"), "FALSIFIED",
+        "bad premise", "run x", "agent", false, &digest).unwrap();
+    assert_eq!(result.get("affected").and_then(|v| v.as_array()).map(|a| a.len()), Some(1));
+    let dependent = core::get_claim(&conn, &field(&dependent, "id")).unwrap();
+    assert_eq!(field(&dependent, "status"), "INVALIDATED");
+    let n: i64 = conn.query_row("SELECT COUNT(*) FROM invalidation", [], |r| r.get(0)).unwrap();
+    assert_eq!(n, 1);
+}
+
+#[test]
+fn report_numbers_come_from_the_graph() {
+    let path = temp_db("report");
+    let conn = open(path.to_str().unwrap()).unwrap();
+    initialize(&conn).unwrap();
+    let research = core::add_research(&conn, "Report Program", "scope", None).unwrap();
+    let claim = core::add_claim(&conn, &field(&research, "id"), "Measured claim", "derived",
+        None, "", "", 0.5, "", "basis", &[]).unwrap();
+    core::set_verdict(&conn, &field(&claim, "id"), "PROVEN", "evidence", "", "", "agent").unwrap();
+    let report = research_engine::synthesis::report(&conn, &field(&research, "id")).unwrap();
+    assert!(report.contains("- claims: 1"));
+    assert!(report.contains("Measured claim"));
+    assert!(report.contains("no hand-written numbers"));
+    let scorecard = research_engine::synthesis::scorecard(&conn, &field(&research, "id")).unwrap();
+    assert!(scorecard.contains("| PROVEN |"));
+}
+
+#[test]
 fn event_hash_matches_python_algorithm() {
     // Known-answer vector produced by engine/events.py::event_hash_for.
     let expected = "3aeec2a90f93534620f34bc6221960af490a48d6d61ac926d51105ad56abd46e";
