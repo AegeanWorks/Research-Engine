@@ -1,38 +1,23 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "T-026-rust-rewrite",
+    "task_id": "T-027-rust-layers",
     "last_phase": "in_progress",
-    "active_phase": 4,
+    "active_phase": 2,
     "status": "in_progress",
-    "updated_at": 1795346924.0712879,
+    "updated_at": 1795346947.40709,
     "owner": "opencode:rust-rewrite",
-    "lease_until": 1795354124.0712879,
+    "lease_until": 1795354147.40709,
     "started_by": "opencode:rust-rewrite",
-    "continuations": []
+    "continuations": [],
+    "impact_assessment": {
+      "why": "The first rewrite task closed with the schema-14 core, graph, evidence, cascades, reports, measurements, search and analysis ported; the remaining runtime-critical surface and outer layers still run only in Python.",
+      "benefits": "Every command the engine exposes will have a Rust implementation backed by the same SQLite graph, with parity tests before the Python entry point is retired.",
+      "risks": "contract: JSON/text shapes, manifest digests and bundle formats must match Python exactly; dependency: only declared crates and the shared graph; concurrency: other agents are editing AIKit's native gates, so project gates must be verified with direct scripts when the root native bridge is stale; state: existing research.db files must stay readable.",
+      "mitigation": "Read each Python module before porting; add CLI-level parity scripts for every subsystem; keep new Rust modules pure and dependency-light; verify with cargo test plus direct hygiene/KB/secret/test scripts."
+    }
   },
   "checkpoints": [
-    {
-      "task_id": "T-023-trend-window",
-      "phase": "in_progress",
-      "phase_num": 4,
-      "description": "[3/3] Docs plus ADR shipped: README trend flags within 22500 plus ARCHITECTURE and MECHANICS plus ADR-054, golden extended, 4/4 gates pass, checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793913682.351185,
-      "timestamp_str": "2026-11-06 00:21:22",
-      "agent": "kilo:goal"
-    },
-    {
-      "task_id": "T-023-trend-window",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'T-023-trend-window' completed successfully.",
-      "status": "completed",
-      "timestamp": 1793913687.1214223,
-      "timestamp_str": "2026-11-06 00:21:27",
-      "agent": "kilo:goal"
-    },
     {
       "task_id": "T-024-audit-fixes",
       "phase": "in_progress",
@@ -254,6 +239,41 @@
       "timestamp_str": "2026-11-22 14:28:44",
       "agent": "opencode:rust-rewrite",
       "checklists": "passed"
+    },
+    {
+      "task_id": "T-026-rust-rewrite",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'T-026-rust-rewrite' completed successfully.",
+      "status": "completed",
+      "timestamp": 1795346938.064874,
+      "timestamp_str": "2026-11-22 14:28:58",
+      "agent": "opencode:rust-rewrite",
+      "head": "8b4a673cfd702104683007fa7d469073013c72f9",
+      "delivery": {
+        "roots": [
+          "."
+        ],
+        "forced": false
+      }
+    },
+    {
+      "task_id": "T-027-rust-layers",
+      "phase": "in_progress",
+      "phase_num": 2,
+      "description": "[1/6] Plan: port outline/brief, manifest, AI artifacts and bundle export into the Rust crate",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795346947.40709,
+      "timestamp_str": "2026-11-22 14:29:07",
+      "agent": "opencode:rust-rewrite",
+      "impact_assessment": {
+        "why": "The first rewrite task closed with the schema-14 core, graph, evidence, cascades, reports, measurements, search and analysis ported; the remaining runtime-critical surface and outer layers still run only in Python.",
+        "benefits": "Every command the engine exposes will have a Rust implementation backed by the same SQLite graph, with parity tests before the Python entry point is retired.",
+        "risks": "contract: JSON/text shapes, manifest digests and bundle formats must match Python exactly; dependency: only declared crates and the shared graph; concurrency: other agents are editing AIKit's native gates, so project gates must be verified with direct scripts when the root native bridge is stale; state: existing research.db files must stay readable.",
+        "mitigation": "Read each Python module before porting; add CLI-level parity scripts for every subsystem; keep new Rust modules pure and dependency-light; verify with cargo test plus direct hygiene/KB/secret/test scripts."
+      },
+      "plan_digest": "17029adfed65c2752337af20f36255cbaa4ce464afa98dd1bec7a99e7e8d8c30"
     }
   ]
 }
