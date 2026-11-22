@@ -1,0 +1,21 @@
+[package]
+name = "research-engine"
+version = "0.2.0"
+edition = "2021"
+description = "Rust implementation of the falsification-first research engine"
+license = "ASL-1.1"
+
+[lib]
+name = "research_engine"
+path = "src/lib.rs"
+
+[[bin]]
+name = "research-engine"
+path = "src/main.rs"
+
+[dependencies]
+chrono = { version = "0.4", default-features = false, features = ["clock", "std"] }
+clap = { version = "4.5", features = ["derive"] }
+rusqlite = { version = "0.32", features = ["bundled"] }
+serde_json = "1.0"
+sha2 = "0.10"

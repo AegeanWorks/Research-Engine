@@ -146,3 +146,19 @@ explicit so no directory is silently skipped.
 | `archive/NeurologyClinicTemplates-TR` | 41 | 1 | Python + .md:16, .txt:14 | archived clinical templates; no code primitive |
 | `archive/tempo` | 65 | 17 | Python + .md:20 | archived focus timer; read-only |
 | `archive/ui-sandbox` | 56 | 0 | .md:16, .json:8, .mjs:8 | archived UI sandbox; read-only |
+
+
+## Addendum: directories added after the 2026-11-08 scan
+
+The scan above is a dated snapshot. The following directories appeared in `projects/`
+afterwards and were not part of the ranked pass; each is recorded here so the appendix
+still names every top-level and archived directory.
+
+| Directory | Disposition |
+|---|---|
+| `CardMon` | out of scope - card game |
+| `kiln` | out of scope - AIKit tooling, not a research primitive |
+| `knot` | out of scope - AIKit tooling, not a research primitive |
+| `sextant` | out of scope - AIKit tooling, not a research primitive |
+| `archive/atelier` | archived; read-only |
+| `archive/vaultbreak` | archived; read-only |

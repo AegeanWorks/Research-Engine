@@ -1,16 +1,22 @@
 # Codebase Map & Symbol Catalog 🗺️
 
 > **AUTO-GENERATED & VERIFIED BY `scripts/update_knowledge_base.py`**
-> This document provides an automated, up-to-date registry of all modules, classes, and exported functions across this repository.
+> This document catalogues Python modules, classes, and exported functions. See Map Coverage for any stack it does not index.
 
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `414`
+- **Total Python Modules**: `415`
 - **Total Classes**: `317`
 - **Total Top-Level Functions**: `1959`
-- **Total Class Methods**: `1544`
-- **Total Source Lines**: `89310`
+- **Total Class Methods**: `1545`
+- **Total Source Lines**: `89334`
+
+## 🧭 Map Coverage
+- **Indexed**: python (`415` module(s))
+- **Not indexed by this map**: javascript (`1` file(s)), rust (`12` file(s))
+
+> Only Python symbols are catalogued. A language above is reported as not indexed, never as verified by this map.
 
 ---
 
@@ -19,28 +25,28 @@
 ### [`adapters/__init__.py`](adapters/__init__.py)
 > *Adapters that bind external research systems to the host.*
 
-**Size**: `1` lines (`64` bytes)
+**Size**: `1` lines
 
 ---
 
 ### [`adapters/lattice/__init__.py`](adapters/lattice/__init__.py)
 > *Lattice: a provenance-first research knowledge graph for humans and AI agents.*
 
-**Size**: `6` lines (`111` bytes)
+**Size**: `6` lines
 
 ---
 
 ### [`adapters/lattice/__main__.py`](adapters/lattice/__main__.py)
 > *Run the command-line interface with `python -m adapters.lattice`.*
 
-**Size**: `8` lines (`172` bytes)
+**Size**: `8` lines
 
 ---
 
 ### [`adapters/lattice/analysis.py`](adapters/lattice/analysis.py)
 > *Contradiction detection, related-finding links, keystone ranking and evidence matrices.*
 
-**Size**: `897` lines (`36375` bytes)
+**Size**: `897` lines
 
 **Classes:**
 - `class ContradictionPair` - *An opposing pair of empirical claims sharing a research question or high domain keyword overlap.*
@@ -69,7 +75,7 @@
 ### [`adapters/lattice/checks.py`](adapters/lattice/checks.py)
 > *Integrity gate: every citation, endpoint, quote and support cycle is decidable locally.*
 
-**Size**: `267` lines (`10956` bytes)
+**Size**: `267` lines
 
 **Classes:**
 - `class CheckIssue` - *One finding, tagged error or warning and named by a stable code.*
@@ -100,7 +106,7 @@
 ### [`adapters/lattice/cli.py`](adapters/lattice/cli.py)
 > *Command-line interface: ingest, assert, link, ask, brief, review, check and serve MCP.*
 
-**Size**: `863` lines (`39111` bytes)
+**Size**: `863` lines
 
 **Functions:**
 - `def build_parser()` - *The complete command grammar.*
@@ -142,7 +148,7 @@
 ### [`adapters/lattice/context.py`](adapters/lattice/context.py)
 > *Token-budgeted context views for AI agents: peek, search, expand, drill down.*
 
-**Size**: `549` lines (`22377` bytes)
+**Size**: `549` lines
 
 **Classes:**
 - `class ContextPack` - *Token-budgeted GraphRAG context pack for LLM reasoning and question-answering.*
@@ -166,7 +172,7 @@
 ### [`adapters/lattice/database.py`](adapters/lattice/database.py)
 > *SQLite connection, versioned schema and migration veil for the knowledge graph.*
 
-**Size**: `228` lines (`9475` bytes)
+**Size**: `228` lines
 
 **Functions:**
 - `def utc_now()` - *An ISO-8601 UTC timestamp with a stable seconds precision.*
@@ -183,7 +189,7 @@
 ### [`adapters/lattice/diff.py`](adapters/lattice/diff.py)
 > *Deterministic diffing between JSONL graph snapshots and the live repository.*
 
-**Size**: `101` lines (`4335` bytes)
+**Size**: `101` lines
 
 **Functions:**
 - `def _index_records(records)` - *Key snapshot records by `(record_type, id)`; unknown record types are skipped.*
@@ -198,7 +204,7 @@
 ### [`adapters/lattice/discovery.py`](adapters/lattice/discovery.py)
 > *Pluggable automated literature discovery: arXiv, Crossref, OpenAlex, EuropePMC, and offline corpus.*
 
-**Size**: `594` lines (`25133` bytes)
+**Size**: `594` lines
 
 **Classes:**
 - `class PaperCandidate` - *Immutable DTO returned by any literature discovery provider.*
@@ -244,7 +250,7 @@
 ### [`adapters/lattice/dogfood.py`](adapters/lattice/dogfood.py)
 > *Lattice's dogfood runner: research the way a user does, then attack the surface.*
 
-**Size**: `300` lines (`12968` bytes)
+**Size**: `300` lines
 
 **Classes:**
 - `class Report` - *Collects step outcomes: the console sees a summary, the log sees everything.*
@@ -271,7 +277,7 @@
 ### [`adapters/lattice/errors.py`](adapters/lattice/errors.py)
 > *The one error type every layer raises, carrying the Error/Why/Fix triad.*
 
-**Size**: `22` lines (`738` bytes)
+**Size**: `22` lines
 
 **Classes:**
 - `class LatticeError` - *A user-facing failure: what happened, why it matters and how to fix it.*
@@ -286,7 +292,7 @@
 ### [`adapters/lattice/extraction.py`](adapters/lattice/extraction.py)
 > *Automated knowledge creation: extract quote-backed claims and question links from papers.*
 
-**Size**: `222` lines (`8860` bytes)
+**Size**: `222` lines
 
 **Classes:**
 - `class ExtractionResult` - *Immutable summary of claims and edges extracted from a single paper.*
@@ -307,7 +313,7 @@
 ### [`adapters/lattice/ingest.py`](adapters/lattice/ingest.py)
 > *Parsers for the text bibliography formats lattice accepts, with no third-party dependencies.*
 
-**Size**: `538` lines (`21014` bytes)
+**Size**: `538` lines
 
 **Functions:**
 - `def empty_record()` - *A record with every supported metadata field present.*
@@ -329,7 +335,7 @@
 ### [`adapters/lattice/inquiry.py`](adapters/lattice/inquiry.py)
 > *Evidence-first question answering: `ask`, token-budgeted `brief` and `review` outlines.*
 
-**Size**: `344` lines (`14639` bytes)
+**Size**: `344` lines
 
 **Functions:**
 - `def ask(repository, target, limit)` - *Return evidence for a question, or matching claims when the target is a search phrase.*
@@ -356,7 +362,7 @@
 ### [`adapters/lattice/meta.py`](adapters/lattice/meta.py)
 > *Quantitative meta-analysis engine: fixed/random effects pooling, Cochran's Q, I-squared, and Forest Plots.*
 
-**Size**: `530` lines (`19971` bytes)
+**Size**: `530` lines
 
 **Classes:**
 - `class MetaStudy` - *An individual study effect size and standard error for quantitative pooling.*
@@ -379,7 +385,7 @@
 ### [`adapters/lattice/models.py`](adapters/lattice/models.py)
 > *Value objects and the validation rules shared by storage, ingestion and queries.*
 
-**Size**: `366` lines (`12975` bytes)
+**Size**: `366` lines
 
 **Classes:**
 - `class Paper` - *A source record: bibliographic metadata plus its stable identifier.*
@@ -413,7 +419,7 @@
 ### [`adapters/lattice/repository.py`](adapters/lattice/repository.py)
 > *The knowledge graph API: papers, claims, questions, typed edges and evidence queries.*
 
-**Size**: `674` lines (`32623` bytes)
+**Size**: `674` lines
 
 **Classes:**
 - `class Repository` - *One connection's view of the graph; every write is committed before it returns.*
@@ -463,7 +469,7 @@
 ### [`adapters/lattice/screening.py`](adapters/lattice/screening.py)
 > *PRISMA 2020 systematic review screening workflow and flow diagram generation.*
 
-**Size**: `359` lines (`14172` bytes)
+**Size**: `359` lines
 
 **Classes:**
 - `class ScreeningDecision` - *An auditable screening outcome for a source paper.*
@@ -484,7 +490,7 @@
 ### [`adapters/lattice/snapshots.py`](adapters/lattice/snapshots.py)
 > *Portable JSONL graph snapshots with atomic write and idempotent merge import.*
 
-**Size**: `441` lines (`17590` bytes)
+**Size**: `441` lines
 
 **Functions:**
 - `def collect_repository_records(repository)` - *Every paper, question, claim and edge as a snapshot record, in stable export order.*
@@ -508,7 +514,7 @@
 ### [`adapters/lattice/start.py`](adapters/lattice/start.py)
 > *Start file launcher for the ported Lattice Research Studio and CLI.*
 
-**Size**: `34` lines (`1114` bytes)
+**Size**: `34` lines
 
 **Functions:**
 - `def _with_project_db(argv)` - *Use the project-local database unless the caller explicitly chose one.*
@@ -519,7 +525,7 @@
 ### [`adapters/lattice/synthesis.py`](adapters/lattice/synthesis.py)
 > *Scientific literature synthesis engine: consensus scoring, thematic clustering, and BibTeX.*
 
-**Size**: `319` lines (`13256` bytes)
+**Size**: `319` lines
 
 **Classes:**
 - `class SynthesisReport` - *Immutable structured synthesis for AI agents and human literature reviews.*
@@ -541,7 +547,7 @@
 ### [`adapters/lattice/ui_inventory.py`](adapters/lattice/ui_inventory.py)
 > *Print Lattice's UI inventory, one entry per line.*
 
-**Size**: `116` lines (`4543` bytes)
+**Size**: `116` lines
 
 **Classes:**
 - `class SurfaceParser` - *Collects identified elements, click handlers, roles and live regions of the studio.*
@@ -559,21 +565,21 @@
 ---
 
 ### [`domains/__init__.py`](domains/__init__.py)
-**Size**: `0` lines (`0` bytes)
+**Size**: `0` lines
 
 ---
 
 ### [`domains/atlas/__init__.py`](domains/atlas/__init__.py)
 > *Atlas — interactive visual knowledge platform for learning material.*
 
-**Size**: `4` lines (`158` bytes)
+**Size**: `4` lines
 
 ---
 
 ### [`domains/atlas/app.py`](domains/atlas/app.py)
 > *Atlas standalone application entry point.*
 
-**Size**: `984` lines (`51816` bytes)
+**Size**: `984` lines
 
 **Classes:**
 - `class Handler`
@@ -600,7 +606,7 @@
 ### [`domains/atlas/cli.py`](domains/atlas/cli.py)
 > *Atlas headless CLI — AI agents and scripts drive Atlas without a browser.*
 
-**Size**: `312` lines (`12613` bytes)
+**Size**: `312` lines
 
 **Functions:**
 - `def cmd_create(args)`
@@ -622,7 +628,7 @@
 ### [`domains/atlas/config.py`](domains/atlas/config.py)
 > *Atlas configuration. Environment-based, no credentials in code or logs.*
 
-**Size**: `83` lines (`3210` bytes)
+**Size**: `83` lines
 
 **Classes:**
 - `class AtlasConfig` - *Resolved entirely from environment + explicit overrides.*
@@ -638,14 +644,14 @@
 ### [`domains/atlas/demo/__init__.py`](domains/atlas/demo/__init__.py)
 > *Atlas demo fixtures (source media stays external).*
 
-**Size**: `1` lines (`57` bytes)
+**Size**: `1` lines
 
 ---
 
 ### [`domains/atlas/demo/basal_ganglia_demo.py`](domains/atlas/demo/basal_ganglia_demo.py)
 > *End-to-end P0 demo: import -> figure -> Muse -> SAM -> overlay -> recall.*
 
-**Size**: `105` lines (`5044` bytes)
+**Size**: `105` lines
 
 **Functions:**
 - `def run_fixture(data_dir)`
@@ -657,14 +663,14 @@
 ### [`domains/atlas/demo/basal_ganglia_fixture.py`](domains/atlas/demo/basal_ganglia_fixture.py)
 > *Basal-ganglia direct/indirect pathway fixture (properly licensed schematic).*
 
-**Size**: `81` lines (`5199` bytes)
+**Size**: `81` lines
 
 ---
 
 ### [`domains/atlas/doc_text.py`](domains/atlas/doc_text.py)
 > *Atlas document-text extraction — fully in-project, no external dependency.*
 
-**Size**: `204` lines (`7403` bytes)
+**Size**: `204` lines
 
 **Functions:**
 - `def _extract_text_from_pdf_reader(reader, log_callback)`
@@ -683,7 +689,7 @@
 ### [`domains/atlas/flashcards.py`](domains/atlas/flashcards.py)
 > *Flashcard decks from the validated model — recall distinct from quizzes.*
 
-**Size**: `91` lines (`4022` bytes)
+**Size**: `91` lines
 
 **Functions:**
 - `def build_deck(analysis, dedupe)` - *Analysis → {"cards": [...], "deduped": n}. Deterministic order.*
@@ -695,7 +701,7 @@
 ### [`domains/atlas/ingestion.py`](domains/atlas/ingestion.py)
 > *Atlas document + figure ingestion.*
 
-**Size**: `123` lines (`4889` bytes)
+**Size**: `123` lines
 
 **Classes:**
 - `class FigureCrop`
@@ -714,7 +720,7 @@
 ### [`domains/atlas/learning.py`](domains/atlas/learning.py)
 > *Visual learning interactions — spatial recall distinct from flashcards.*
 
-**Size**: `122` lines (`5179` bytes)
+**Size**: `122` lines
 
 **Functions:**
 - `def _entities(analysis)`
@@ -730,7 +736,7 @@
 ### [`domains/atlas/materials.py`](domains/atlas/materials.py)
 > *Study-material generators: every format from the same validated model.*
 
-**Size**: `637` lines (`29732` bytes)
+**Size**: `637` lines
 
 **Functions:**
 - `def _names(analysis)`
@@ -760,7 +766,7 @@
 ### [`domains/atlas/models3d.py`](domains/atlas/models3d.py)
 > *3D from 2D knowledge: isometric view + printable OBJ export (stdlib only).*
 
-**Size**: `104` lines (`4651` bytes)
+**Size**: `104` lines
 
 **Functions:**
 - `def iso_project(x, y, z)` - *Isometric 2D projection of a 3D point (all inputs in model units).*
@@ -774,7 +780,7 @@
 ### [`domains/atlas/muse_provider.py`](domains/atlas/muse_provider.py)
 > *Meta Muse provider (Spark default, Wonder for complex reasoning).*
 
-**Size**: `221` lines (`10957` bytes)
+**Size**: `221` lines
 
 **Classes:**
 - `class MuseProvider` - *Replaceable Meta API adapter with timeouts, retries, safe errors.*
@@ -796,7 +802,7 @@
 ### [`domains/atlas/offline.py`](domains/atlas/offline.py)
 > *Offline extractive fallback: real learning models with no API key.*
 
-**Size**: `134` lines (`5735` bytes)
+**Size**: `134` lines
 
 **Functions:**
 - `def _sentences(text)`
@@ -810,7 +816,7 @@
 ### [`domains/atlas/quality.py`](domains/atlas/quality.py)
 > *Automatic quality analysis for every generated artifact (0-100 each).*
 
-**Size**: `605` lines (`30469` bytes)
+**Size**: `605` lines
 
 **Functions:**
 - `def _result(score, checks, issues)`
@@ -837,7 +843,7 @@
 ### [`domains/atlas/sam_provider.py`](domains/atlas/sam_provider.py)
 > *SAM 3.1 segmentation integration.*
 
-**Size**: `145` lines (`6583` bytes)
+**Size**: `145` lines
 
 **Classes:**
 - `class Segmentation`
@@ -856,7 +862,7 @@
 ### [`domains/atlas/schema.py`](domains/atlas/schema.py)
 > *Versioned structured scientific visual-knowledge schema.*
 
-**Size**: `376` lines (`16166` bytes)
+**Size**: `376` lines
 
 **Classes:**
 - `class BoundingBox` - *Normalized box: (0,0) top-left, (1,1) bottom-right.*
@@ -888,7 +894,7 @@
 ### [`domains/atlas/selftest.py`](domains/atlas/selftest.py)
 > *Atlas offline self-test: one command proves the app works, no key, no browser.*
 
-**Size**: `157` lines (`6649` bytes)
+**Size**: `157` lines
 
 **Classes:**
 - `class _FakeMuse`
@@ -904,7 +910,7 @@
 ### [`domains/atlas/sources.py`](domains/atlas/sources.py)
 > *Universal source ingestion: link, YouTube, book (EPUB), video, and files.*
 
-**Size**: `307` lines (`12919` bytes)
+**Size**: `307` lines
 
 **Classes:**
 - `class _TextExtractor` - *Collect readable text; drop scripts, styles, nav boilerplate.*
@@ -933,7 +939,7 @@
 ### [`domains/atlas/store.py`](domains/atlas/store.py)
 > *Atomic JSON persistence for Atlas-only data.*
 
-**Size**: `107` lines (`3975` bytes)
+**Size**: `107` lines
 
 **Classes:**
 - `class AtlasStore`
@@ -958,7 +964,7 @@
 ### [`domains/atlas/summaries.py`](domains/atlas/summaries.py)
 > *Auto study material: summaries generated from the validated model.*
 
-**Size**: `90` lines (`4043` bytes)
+**Size**: `90` lines
 
 **Functions:**
 - `def _names(analysis)`
@@ -970,7 +976,7 @@
 ### [`domains/atlas/text_backend.py`](domains/atlas/text_backend.py)
 > *Atlas document-text backend — fully in-project, no external project needed.*
 
-**Size**: `49` lines (`1689` bytes)
+**Size**: `49` lines
 
 **Classes:**
 - `class DocumentText`
@@ -983,14 +989,14 @@
 ---
 
 ### [`domains/fluid_universe/__init__.py`](domains/fluid_universe/__init__.py)
-**Size**: `0` lines (`0` bytes)
+**Size**: `0` lines
 
 ---
 
 ### [`domains/fluid_universe/claims.py`](domains/fluid_universe/claims.py)
 > *Fluid-universe claim ledger and scorecard compatibility.*
 
-**Size**: `152` lines (`4739` bytes)
+**Size**: `152` lines
 
 **Classes:**
 - `class ClaimRecord`
@@ -1012,14 +1018,14 @@
 ### [`domains/fluid_universe/phenomenology/__init__.py`](domains/fluid_universe/phenomenology/__init__.py)
 > *Phenomenology: PDG input, circulant fit, and one-loop SM running.*
 
-**Size**: `1` lines (`72` bytes)
+**Size**: `1` lines
 
 ---
 
 ### [`domains/fluid_universe/phenomenology/coherent_fluid_report.py`](domains/fluid_universe/phenomenology/coherent_fluid_report.py)
 > *Moving-center Gaussian reduction report (claim 23, ADR-014).*
 
-**Size**: `157` lines (`5285` bytes)
+**Size**: `157` lines
 
 **Functions:**
 - `def _energy_drift(result)`
@@ -1032,7 +1038,7 @@
 ### [`domains/fluid_universe/phenomenology/convergence_report.py`](domains/fluid_universe/phenomenology/convergence_report.py)
 > *Resolution report for claim 15: N=64 versus N=96 at the same physical time.*
 
-**Size**: `166` lines (`5701` bytes)
+**Size**: `166` lines
 
 **Functions:**
 - `def _run(n, deadline)`
@@ -1044,7 +1050,7 @@
 ### [`domains/fluid_universe/phenomenology/delta_search.py`](domains/fluid_universe/phenomenology/delta_search.py)
 > *Search for a closed form of the circulant phase delta, with a stated prior.*
 
-**Size**: `185` lines (`6508` bytes)
+**Size**: `185` lines
 
 **Functions:**
 - `def rational_candidates()`
@@ -1060,7 +1066,7 @@
 ### [`domains/fluid_universe/phenomenology/excited_fluid_report.py`](domains/fluid_universe/phenomenology/excited_fluid_report.py)
 > *First-excited-state node report (claim 24, ADR-015).*
 
-**Size**: `146` lines (`4817` bytes)
+**Size**: `146` lines
 
 **Functions:**
 - `def run_excited_fluid_check(write)`
@@ -1071,7 +1077,7 @@
 ### [`domains/fluid_universe/phenomenology/extension_report.py`](domains/fluid_universe/phenomenology/extension_report.py)
 > *Checkpointed N=96 extension for claim 15 (ADR-004).*
 
-**Size**: `223` lines (`7448` bytes)
+**Size**: `223` lines
 
 **Functions:**
 - `def _checkpoint(chunk)`
@@ -1088,7 +1094,7 @@
 ### [`domains/fluid_universe/phenomenology/field_variation_report.py`](domains/fluid_universe/phenomenology/field_variation_report.py)
 > *Unstructured 1D fixed-endpoint-density G-M field variation (claim 58, ADR-050).*
 
-**Size**: `390` lines (`14276` bytes)
+**Size**: `390` lines
 
 **Functions:**
 - `def _analytic_bridge_rho(problem)`
@@ -1103,7 +1109,7 @@
 ### [`domains/fluid_universe/phenomenology/fit.py`](domains/fluid_universe/phenomenology/fit.py)
 > *PDG pole-mass fit of the Hermitian circulant parametrisation.*
 
-**Size**: `228` lines (`8114` bytes)
+**Size**: `228` lines
 
 **Classes:**
 - `class PoleMass`
@@ -1122,7 +1128,7 @@
 ### [`domains/fluid_universe/phenomenology/gaussian_bridge_report.py`](domains/fluid_universe/phenomenology/gaussian_bridge_report.py)
 > *Fixed-endpoint Gaussian bridge check (claim 54, ADR-046).*
 
-**Size**: `175` lines (`6494` bytes)
+**Size**: `175` lines
 
 **Functions:**
 - `def run_gaussian_bridge_check(write)`
@@ -1133,7 +1139,7 @@
 ### [`domains/fluid_universe/phenomenology/gaussian_fluid_report.py`](domains/fluid_universe/phenomenology/gaussian_fluid_report.py)
 > *Gaussian Madelung reduction report (claim 22, ADR-013).*
 
-**Size**: `155` lines (`5316` bytes)
+**Size**: `155` lines
 
 **Functions:**
 - `def _period(result, width)`
@@ -1145,7 +1151,7 @@
 ### [`domains/fluid_universe/phenomenology/hopf_report.py`](domains/fluid_universe/phenomenology/hopf_report.py)
 > *Hopf estimator validation result payload.*
 
-**Size**: `66` lines (`2443` bytes)
+**Size**: `66` lines
 
 **Functions:**
 - `def run_hopf_check(write)`
@@ -1156,7 +1162,7 @@
 ### [`domains/fluid_universe/phenomenology/hopf_resolution_report.py`](domains/fluid_universe/phenomenology/hopf_resolution_report.py)
 > *Hopf estimator resolution report.*
 
-**Size**: `47` lines (`1532` bytes)
+**Size**: `47` lines
 
 **Functions:**
 - `def run_hopf_resolution_check(write)`
@@ -1167,7 +1173,7 @@
 ### [`domains/fluid_universe/phenomenology/hopfion3d_n64_report.py`](domains/fluid_universe/phenomenology/hopfion3d_n64_report.py)
 > *Targeted N=64 diagnostic for the 3D E2+E4+Z3 pilot.*
 
-**Size**: `104` lines (`3772` bytes)
+**Size**: `104` lines
 
 **Functions:**
 - `def run_n64_check(write)`
@@ -1178,7 +1184,7 @@
 ### [`domains/fluid_universe/phenomenology/hopfion3d_report.py`](domains/fluid_universe/phenomenology/hopfion3d_report.py)
 > *3D pilot report for the E2+E4+Z3 model.*
 
-**Size**: `83` lines (`3122` bytes)
+**Size**: `83` lines
 
 **Functions:**
 - `def run_hopfion3d_check(write)`
@@ -1189,7 +1195,7 @@
 ### [`domains/fluid_universe/phenomenology/hopfion_report.py`](domains/fluid_universe/phenomenology/hopfion_report.py)
 > *Static finite-energy H=1 configuration report.*
 
-**Size**: `61` lines (`2238` bytes)
+**Size**: `61` lines
 
 **Functions:**
 - `def run_hopfion_check(write)`
@@ -1200,7 +1206,7 @@
 ### [`domains/fluid_universe/phenomenology/hopfion_scale_report.py`](domains/fluid_universe/phenomenology/hopfion_scale_report.py)
 > *Report for the damped scale-iteration candidate.*
 
-**Size**: `71` lines (`2465` bytes)
+**Size**: `71` lines
 
 **Functions:**
 - `def run_scale_check(write)`
@@ -1211,7 +1217,7 @@
 ### [`domains/fluid_universe/phenomenology/hydrogen_fluid_report.py`](domains/fluid_universe/phenomenology/hydrogen_fluid_report.py)
 > *Hydrogen 1s Madelung reduction report (claim 25, ADR-016).*
 
-**Size**: `128` lines (`4527` bytes)
+**Size**: `128` lines
 
 **Functions:**
 - `def run_hydrogen_fluid_check(write)`
@@ -1222,7 +1228,7 @@
 ### [`domains/fluid_universe/phenomenology/hydrogen_vortex_report.py`](domains/fluid_universe/phenomenology/hydrogen_vortex_report.py)
 > *Hydrogen 2p vortex identification report (claim 26, ADR-017).*
 
-**Size**: `123` lines (`4328` bytes)
+**Size**: `123` lines
 
 **Functions:**
 - `def run_hydrogen_vortex_check(write)`
@@ -1233,7 +1239,7 @@
 ### [`domains/fluid_universe/phenomenology/length_scan_report.py`](domains/fluid_universe/phenomenology/length_scan_report.py)
 > *Box-length scan of the pure-FN N=64 candidate (ADR-007, claim 14b).*
 
-**Size**: `183` lines (`6492` bytes)
+**Size**: `183` lines
 
 **Functions:**
 - `def run_length_scan(write)`
@@ -1244,7 +1250,7 @@
 ### [`domains/fluid_universe/phenomenology/lv_bounds.py`](domains/fluid_universe/phenomenology/lv_bounds.py)
 > *Residual anisotropy and Lorentz-violation bounds (claims 11-12).*
 
-**Size**: `105` lines (`3935` bytes)
+**Size**: `105` lines
 
 **Functions:**
 - `def run_lorentz_check(write)`
@@ -1255,7 +1261,7 @@
 ### [`domains/fluid_universe/phenomenology/madelung_report.py`](domains/fluid_universe/phenomenology/madelung_report.py)
 > *Madelung fluid dictionary report (claim 20, ADR-011).*
 
-**Size**: `160` lines (`5092` bytes)
+**Size**: `160` lines
 
 **Functions:**
 - `def _grid()`
@@ -1267,7 +1273,7 @@
 ### [`domains/fluid_universe/phenomenology/nelson_closure_report.py`](domains/fluid_universe/phenomenology/nelson_closure_report.py)
 > *Osmotic-closure no-go check (claim 48, ADR-040).*
 
-**Size**: `155` lines (`5703` bytes)
+**Size**: `155` lines
 
 **Functions:**
 - `def run_nelson_closure_check(write)`
@@ -1278,7 +1284,7 @@
 ### [`domains/fluid_universe/phenomenology/nelson_report.py`](domains/fluid_universe/phenomenology/nelson_report.py)
 > *Nelson stochastic kinematics report (claim 21, ADR-012).*
 
-**Size**: `136` lines (`4437` bytes)
+**Size**: `136` lines
 
 **Functions:**
 - `def run_nelson_check(write)`
@@ -1289,7 +1295,7 @@
 ### [`domains/fluid_universe/phenomenology/neutrinos.py`](domains/fluid_universe/phenomenology/neutrinos.py)
 > *Neutrino Koide ratio scan.*
 
-**Size**: `242` lines (`8674` bytes)
+**Size**: `242` lines
 
 **Classes:**
 - `class NuFitParameters`
@@ -1309,7 +1315,7 @@
 ### [`domains/fluid_universe/phenomenology/node_defect_report.py`](domains/fluid_universe/phenomenology/node_defect_report.py)
 > *Two-branch defect representation check (claim 46, ADR-038).*
 
-**Size**: `146` lines (`5271` bytes)
+**Size**: `146` lines
 
 **Functions:**
 - `def run_node_defect_check(write)`
@@ -1320,7 +1326,7 @@
 ### [`domains/fluid_universe/phenomenology/pmns.py`](domains/fluid_universe/phenomenology/pmns.py)
 > *What a minimal circulant lepton sector predicts for PMNS mixing.*
 
-**Size**: `143` lines (`5592` bytes)
+**Size**: `143` lines
 
 **Functions:**
 - `def dft_matrix()`
@@ -1333,7 +1339,7 @@
 ### [`domains/fluid_universe/phenomenology/predictions.py`](domains/fluid_universe/phenomenology/predictions.py)
 > *Search for a genuinely new prediction beyond Q=2/3 (claim 16).*
 
-**Size**: `112` lines (`3965` bytes)
+**Size**: `112` lines
 
 **Functions:**
 - `def run_prediction_audit(write)`
@@ -1344,7 +1350,7 @@
 ### [`domains/fluid_universe/phenomenology/production_report.py`](domains/fluid_universe/phenomenology/production_report.py)
 > *Production claim-15 report: resolved Hopf charge and Z3 order.*
 
-**Size**: `218` lines (`7926` bytes)
+**Size**: `218` lines
 
 **Functions:**
 - `def run_production_check(write)`
@@ -1355,7 +1361,7 @@
 ### [`domains/fluid_universe/phenomenology/provenance.py`](domains/fluid_universe/phenomenology/provenance.py)
 > *Small reproducibility helpers: git state, versions, config hashes.*
 
-**Size**: `80` lines (`2510` bytes)
+**Size**: `80` lines
 
 **Functions:**
 - `def git_state()`
@@ -1370,7 +1376,7 @@
 ### [`domains/fluid_universe/phenomenology/purefn_stability_report.py`](domains/fluid_universe/phenomenology/purefn_stability_report.py)
 > *Pure-Faddeev-Niemi N=64 candidate Hessian (ADR-005, claims 14b/14d).*
 
-**Size**: `156` lines (`5298` bytes)
+**Size**: `156` lines
 
 **Functions:**
 - `def run_purefn_check(write)`
@@ -1381,7 +1387,7 @@
 ### [`domains/fluid_universe/phenomenology/quarks.py`](domains/fluid_universe/phenomenology/quarks.py)
 > *Quark Koide ratios from the full-SM MS-bar masses of Huang & Zhou (2021).*
 
-**Size**: `154` lines (`5316` bytes)
+**Size**: `154` lines
 
 **Classes:**
 - `class QuarkRow`
@@ -1398,7 +1404,7 @@
 ### [`domains/fluid_universe/phenomenology/radial_node_report.py`](domains/fluid_universe/phenomenology/radial_node_report.py)
 > *Hydrogen-2s radial-node representation check (claim 47, ADR-039).*
 
-**Size**: `167` lines (`5902` bytes)
+**Size**: `167` lines
 
 **Functions:**
 - `def run_radial_node_check(write)`
@@ -1409,7 +1415,7 @@
 ### [`domains/fluid_universe/phenomenology/rg.py`](domains/fluid_universe/phenomenology/rg.py)
 > *One-loop Standard-Model running of charged-lepton Yukawa couplings.*
 
-**Size**: `495` lines (`17586` bytes)
+**Size**: `495` lines
 
 **Classes:**
 - `class InitialState`
@@ -1436,7 +1442,7 @@
 ### [`domains/fluid_universe/phenomenology/rotor_potential_report.py`](domains/fluid_universe/phenomenology/rotor_potential_report.py)
 > *Real Z3 rotor potential scan report (claim 19, ADR-010).*
 
-**Size**: `77` lines (`2539` bytes)
+**Size**: `77` lines
 
 **Functions:**
 - `def run_rotor_potential_check(write)`
@@ -1447,7 +1453,7 @@
 ### [`domains/fluid_universe/phenomenology/run_all.py`](domains/fluid_universe/phenomenology/run_all.py)
 > *Regenerate every result file from scratch.*
 
-**Size**: `555` lines (`26574` bytes)
+**Size**: `555` lines
 
 **Functions:**
 - `def rotor_payload()`
@@ -1468,7 +1474,7 @@
 ### [`domains/fluid_universe/phenomenology/saddle_escape_report.py`](domains/fluid_universe/phenomenology/saddle_escape_report.py)
 > *Saddle-escape search from the pure-FN N=64 candidate (ADR-006, claim 14b).*
 
-**Size**: `205` lines (`7102` bytes)
+**Size**: `205` lines
 
 **Functions:**
 - `def _relax(field, steps, deadline)`
@@ -1480,7 +1486,7 @@
 ### [`domains/fluid_universe/phenomenology/sim_report.py`](domains/fluid_universe/phenomenology/sim_report.py)
 > *Result payload for the 1D simulation baseline.*
 
-**Size**: `162` lines (`6309` bytes)
+**Size**: `162` lines
 
 **Functions:**
 - `def run_1d_baseline(write)`
@@ -1491,7 +1497,7 @@
 ### [`domains/fluid_universe/phenomenology/stability_report.py`](domains/fluid_universe/phenomenology/stability_report.py)
 > *Report for the validated tangent-space Hessian of the scale candidate.*
 
-**Size**: `87` lines (`3381` bytes)
+**Size**: `87` lines
 
 **Functions:**
 - `def run_stability_report(write)`
@@ -1502,7 +1508,7 @@
 ### [`domains/fluid_universe/phenomenology/temporal_report.py`](domains/fluid_universe/phenomenology/temporal_report.py)
 > *Temporal-check report for claim 15: N=64 at two timesteps, same physical time.*
 
-**Size**: `159` lines (`5395` bytes)
+**Size**: `159` lines
 
 **Functions:**
 - `def _run(steps, dt, deadline)`
@@ -1514,7 +1520,7 @@
 ### [`domains/fluid_universe/phenomenology/two_state_report.py`](domains/fluid_universe/phenomenology/two_state_report.py)
 > *Shared-lambda two-state Marcus assignment (claim 44, ADR-036).*
 
-**Size**: `164` lines (`6592` bytes)
+**Size**: `164` lines
 
 **Functions:**
 - `def run_two_state_comparison(temperature_k, write)` - *Compare the shared-lambda equal-width prediction vs the observed ratio.*
@@ -1526,7 +1532,7 @@
 ### [`domains/fluid_universe/phenomenology/uv_checks.py`](domains/fluid_universe/phenomenology/uv_checks.py)
 > *Reproducible UV-track checks: Frank-Oseen modes and Derrick scaling.*
 
-**Size**: `187` lines (`7274` bytes)
+**Size**: `187` lines
 
 **Functions:**
 - `def run_frank_oseen_check(write)`
@@ -1539,7 +1545,7 @@
 ### [`domains/fluid_universe/phenomenology/uv_negatives.py`](domains/fluid_universe/phenomenology/uv_negatives.py)
 > *Result payloads for the topology, reduction, and prediction negatives.*
 
-**Size**: `63` lines (`2247` bytes)
+**Size**: `63` lines
 
 **Functions:**
 - `def run_topology_check(write)`
@@ -1550,7 +1556,7 @@
 ### [`domains/fluid_universe/phenomenology/variational_center_report.py`](domains/fluid_universe/phenomenology/variational_center_report.py)
 > *Co-emergence of Newtonian center and Ermakov width (claim 53, ADR-045).*
 
-**Size**: `161` lines (`5879` bytes)
+**Size**: `161` lines
 
 **Functions:**
 - `def run_variational_center_check(write)`
@@ -1561,7 +1567,7 @@
 ### [`domains/fluid_universe/phenomenology/variational_dynamics_report.py`](domains/fluid_universe/phenomenology/variational_dynamics_report.py)
 > *Variational dynamics reproduces Ermakov (claim 51, ADR-043).*
 
-**Size**: `145` lines (`5285` bytes)
+**Size**: `145` lines
 
 **Functions:**
 - `def run_variational_dynamics_check(write)`
@@ -1572,7 +1578,7 @@
 ### [`domains/fluid_universe/phenomenology/variational_saddle_report.py`](domains/fluid_universe/phenomenology/variational_saddle_report.py)
 > *2D Ritz saddle check (claim 50, ADR-042).*
 
-**Size**: `157` lines (`5759` bytes)
+**Size**: `157` lines
 
 **Functions:**
 - `def run_variational_saddle_check(write)`
@@ -1583,7 +1589,7 @@
 ### [`domains/fluid_universe/phenomenology/variational_width_report.py`](domains/fluid_universe/phenomenology/variational_width_report.py)
 > *Gaussian Ritz width-selection check (claim 49, ADR-041).*
 
-**Size**: `147` lines (`5391` bytes)
+**Size**: `147` lines
 
 **Functions:**
 - `def run_variational_width_check(write)`
@@ -1594,7 +1600,7 @@
 ### [`domains/fluid_universe/phenomenology/vortex_cascade_report.py`](domains/fluid_universe/phenomenology/vortex_cascade_report.py)
 > *One-parameter vortex hierarchy report (claim 18, ADR-009).*
 
-**Size**: `88` lines (`3193` bytes)
+**Size**: `88` lines
 
 **Functions:**
 - `def load_lepton_masses()`
@@ -1606,7 +1612,7 @@
 ### [`domains/fluid_universe/phenomenology/vortex_core_report.py`](domains/fluid_universe/phenomenology/vortex_core_report.py)
 > *HO-1 finite-core node probe (claim 60, ADR-054).*
 
-**Size**: `172` lines (`6034` bytes)
+**Size**: `172` lines
 
 **Functions:**
 - `def run_vortex_core_check(write)`
@@ -1617,7 +1623,7 @@
 ### [`domains/fluid_universe/phenomenology/vortex_loop_report.py`](domains/fluid_universe/phenomenology/vortex_loop_report.py)
 > *2p core-threading loop probe (claim 61, ADR-056).*
 
-**Size**: `154` lines (`5722` bytes)
+**Size**: `154` lines
 
 **Functions:**
 - `def run_vortex_loop_check(write)`
@@ -1628,7 +1634,7 @@
 ### [`domains/fluid_universe/phenomenology/vortex_spectrum_report.py`](domains/fluid_universe/phenomenology/vortex_spectrum_report.py)
 > *Vortex-knot mass spectrum report (claim 17, ADR-008).*
 
-**Size**: `110` lines (`3813` bytes)
+**Size**: `110` lines
 
 **Functions:**
 - `def load_lepton_masses()`
@@ -1640,7 +1646,7 @@
 ### [`domains/fluid_universe/phenomenology/water_absorption_report.py`](domains/fluid_universe/phenomenology/water_absorption_report.py)
 > *Bound-free absorption in the finite spherical well (claim 34, ADR-025).*
 
-**Size**: `138` lines (`5781` bytes)
+**Size**: `138` lines
 
 **Functions:**
 - `def run_water_absorption_check(write)`
@@ -1651,7 +1657,7 @@
 ### [`domains/fluid_universe/phenomenology/water_analogue_report.py`](domains/fluid_universe/phenomenology/water_analogue_report.py)
 > *Shallow-water acoustic horizon report (claim 27, ADR-018).*
 
-**Size**: `109` lines (`3772` bytes)
+**Size**: `109` lines
 
 **Functions:**
 - `def run_water_analogue_check(write)`
@@ -1662,7 +1668,7 @@
 ### [`domains/fluid_universe/phenomenology/water_born_cavity_report.py`](domains/fluid_universe/phenomenology/water_born_cavity_report.py)
 > *Self-consistent Born cavity synthesis (claim 39, ADR-030).*
 
-**Size**: `141` lines (`6015` bytes)
+**Size**: `141` lines
 
 **Functions:**
 - `def run_water_born_cavity_check(write)`
@@ -1673,7 +1679,7 @@
 ### [`domains/fluid_universe/phenomenology/water_dispersive_report.py`](domains/fluid_universe/phenomenology/water_dispersive_report.py)
 > *Dispersive shallow-water horizon report (claim 29, ADR-020).*
 
-**Size**: `108` lines (`3620` bytes)
+**Size**: `108` lines
 
 **Functions:**
 - `def run_water_dispersive_check(write)`
@@ -1684,7 +1690,7 @@
 ### [`domains/fluid_universe/phenomenology/water_electron_report.py`](domains/fluid_universe/phenomenology/water_electron_report.py)
 > *Hydrated-electron cavity scale report (claim 32, ADR-023).*
 
-**Size**: `103` lines (`4059` bytes)
+**Size**: `103` lines
 
 **Functions:**
 - `def run_water_electron_check(write)`
@@ -1695,7 +1701,7 @@
 ### [`domains/fluid_universe/phenomenology/water_lineshape_report.py`](domains/fluid_universe/phenomenology/water_lineshape_report.py)
 > *Fixed-lambda cavity-Marcus line-shape prediction (claim 43, ADR-034).*
 
-**Size**: `260` lines (`11288` bytes)
+**Size**: `260` lines
 
 **Functions:**
 - `def run_water_lineshape_comparison(write)` - *Compare the fixed-lambda prediction against citable observed shape.*
@@ -1707,7 +1713,7 @@
 ### [`domains/fluid_universe/phenomenology/water_marcus_report.py`](domains/fluid_universe/phenomenology/water_marcus_report.py)
 > *Marcus band width from the water reorganization energy (claim 40, ADR-031).*
 
-**Size**: `123` lines (`4808` bytes)
+**Size**: `123` lines
 
 **Functions:**
 - `def run_water_marcus_check(write)`
@@ -1718,7 +1724,7 @@
 ### [`domains/fluid_universe/phenomenology/water_pressure_report.py`](domains/fluid_universe/phenomenology/water_pressure_report.py)
 > *Self-consistent finite-well pressure balance (claim 37, ADR-028).*
 
-**Size**: `139` lines (`5705` bytes)
+**Size**: `139` lines
 
 **Functions:**
 - `def run_water_pressure_check(write)`
@@ -1729,7 +1735,7 @@
 ### [`domains/fluid_universe/phenomenology/water_rays_report.py`](domains/fluid_universe/phenomenology/water_rays_report.py)
 > *Radial ray report at the shallow-water horizon (claim 30, ADR-021).*
 
-**Size**: `159` lines (`5190` bytes)
+**Size**: `159` lines
 
 **Functions:**
 - `def run_water_rays_check(write)`
@@ -1740,7 +1746,7 @@
 ### [`domains/fluid_universe/phenomenology/water_reorganization_report.py`](domains/fluid_universe/phenomenology/water_reorganization_report.py)
 > *Water reorganization and the VDE-optical difference (claim 38, ADR-029).*
 
-**Size**: `140` lines (`5833` bytes)
+**Size**: `140` lines
 
 **Functions:**
 - `def run_water_reorganization_check(write)`
@@ -1751,7 +1757,7 @@
 ### [`domains/fluid_universe/phenomenology/water_scattering_report.py`](domains/fluid_universe/phenomenology/water_scattering_report.py)
 > *1D water-wave scattering report (claim 31, ADR-022).*
 
-**Size**: `116` lines (`3724` bytes)
+**Size**: `116` lines
 
 **Functions:**
 - `def run_water_scattering_check(write)`
@@ -1762,7 +1768,7 @@
 ### [`domains/fluid_universe/phenomenology/water_softwall_report.py`](domains/fluid_universe/phenomenology/water_softwall_report.py)
 > *Soft-wall cavity and the hard VDE depth bound (claim 36, ADR-027).*
 
-**Size**: `155` lines (`6536` bytes)
+**Size**: `155` lines
 
 **Functions:**
 - `def run_water_softwall_check(write)`
@@ -1773,7 +1779,7 @@
 ### [`domains/fluid_universe/phenomenology/water_temperature_report.py`](domains/fluid_universe/phenomenology/water_temperature_report.py)
 > *Temperature-dependent Born cavity (claim 41, ADR-032).*
 
-**Size**: `186` lines (`8220` bytes)
+**Size**: `186` lines
 
 **Functions:**
 - `def run_water_temperature_check(write)`
@@ -1784,7 +1790,7 @@
 ### [`domains/fluid_universe/phenomenology/water_twocomponent_report.py`](domains/fluid_universe/phenomenology/water_twocomponent_report.py)
 > *Two-component band-model comparison (claim 45, ADR-037).*
 
-**Size**: `116` lines (`4205` bytes)
+**Size**: `116` lines
 
 **Functions:**
 - `def run_water_twocomponent_check(write)`
@@ -1795,7 +1801,7 @@
 ### [`domains/fluid_universe/phenomenology/water_validity_report.py`](domains/fluid_universe/phenomenology/water_validity_report.py)
 > *Capillary validity report for the shallow-water horizon (claim 28, ADR-019).*
 
-**Size**: `116` lines (`4337` bytes)
+**Size**: `116` lines
 
 **Functions:**
 - `def _row(flow_rate)`
@@ -1807,7 +1813,7 @@
 ### [`domains/fluid_universe/phenomenology/water_vde_report.py`](domains/fluid_universe/phenomenology/water_vde_report.py)
 > *VDE and 1.7 eV absorption constrain the finite well (claim 35, ADR-026).*
 
-**Size**: `150` lines (`6409` bytes)
+**Size**: `150` lines
 
 **Functions:**
 - `def run_water_vde_check(write)`
@@ -1818,7 +1824,7 @@
 ### [`domains/fluid_universe/phenomenology/water_well_report.py`](domains/fluid_universe/phenomenology/water_well_report.py)
 > *Finite spherical well for the hydrated electron (claim 33, ADR-024).*
 
-**Size**: `169` lines (`7087` bytes)
+**Size**: `169` lines
 
 **Functions:**
 - `def run_water_well_check(write)`
@@ -1829,7 +1835,7 @@
 ### [`domains/fluid_universe/phenomenology/widened_ritz_report.py`](domains/fluid_universe/phenomenology/widened_ritz_report.py)
 > *Ritz-widened squared-Hermite trial BVP (claim 59, ADR-051).*
 
-**Size**: `360` lines (`12658` bytes)
+**Size**: `360` lines
 
 **Functions:**
 - `def _analytic_bridge_J(problem)`
@@ -1841,7 +1847,7 @@
 ### [`domains/fluid_universe/phenomenology/yasue_action_report.py`](domains/fluid_universe/phenomenology/yasue_action_report.py)
 > *Pinned-endpoint Yasue-bridge action stationarity (claim 57, ADR-049).*
 
-**Size**: `298` lines (`11042` bytes)
+**Size**: `298` lines
 
 **Functions:**
 - `def run_yasue_action_check(write)`
@@ -1852,7 +1858,7 @@
 ### [`domains/fluid_universe/phenomenology/yasue_bridge_report.py`](domains/fluid_universe/phenomenology/yasue_bridge_report.py)
 > *Pinned-endpoint Yasue bridge: the c<0 Pinney analytic family (claim 56, ADR-048).*
 
-**Size**: `322` lines (`11716` bytes)
+**Size**: `322` lines
 
 **Functions:**
 - `def _load_arc_profile()`
@@ -1864,7 +1870,7 @@
 ### [`domains/fluid_universe/phenomenology/yasue_center_report.py`](domains/fluid_universe/phenomenology/yasue_center_report.py)
 > *Yasue center-width discriminator (claim 55, ADR-047).*
 
-**Size**: `233` lines (`8580` bytes)
+**Size**: `233` lines
 
 **Functions:**
 - `def run_yasue_center_check(write)`
@@ -1875,7 +1881,7 @@
 ### [`domains/fluid_universe/phenomenology/yasue_dynamics_report.py`](domains/fluid_universe/phenomenology/yasue_dynamics_report.py)
 > *Yasui dynamical discriminator check (claim 52, ADR-044).*
 
-**Size**: `167` lines (`6076` bytes)
+**Size**: `167` lines
 
 **Functions:**
 - `def run_yasue_dynamics_check(write)`
@@ -1886,14 +1892,14 @@
 ### [`domains/fluid_universe/sims/__init__.py`](domains/fluid_universe/sims/__init__.py)
 > *Simulation package: validated 1D core and bounded 3D diagnostics.*
 
-**Size**: `1` lines (`72` bytes)
+**Size**: `1` lines
 
 ---
 
 ### [`domains/fluid_universe/sims/convergence.py`](domains/fluid_universe/sims/convergence.py)
 > *Resolution comparison for the claim-15 production scan (ADR-002).*
 
-**Size**: `218` lines (`8429` bytes)
+**Size**: `218` lines
 
 **Functions:**
 - `def _require_same_problem(low, high)`
@@ -1906,7 +1912,7 @@
 ### [`domains/fluid_universe/sims/core.py`](domains/fluid_universe/sims/core.py)
 > *Validated 1D core for the Z3 sine-Gordon sector.*
 
-**Size**: `210` lines (`6846` bytes)
+**Size**: `210` lines
 
 **Functions:**
 - `def grid(length, n)`
@@ -1929,7 +1935,7 @@
 ### [`domains/fluid_universe/sims/core3d.py`](domains/fluid_universe/sims/core3d.py)
 > *3D JAX pilot: E2 + Skyrme E4 + a Z3 azimuthal potential.*
 
-**Size**: `221` lines (`7785` bytes)
+**Size**: `221` lines
 
 **Functions:**
 - `def normalize(field)`
@@ -1946,7 +1952,7 @@
 ### [`domains/fluid_universe/sims/production.py`](domains/fluid_universe/sims/production.py)
 > *Production scan for claim 15: E2 + Skyrme E4 + Z3 potential.*
 
-**Size**: `299` lines (`11563` bytes)
+**Size**: `299` lines
 
 **Functions:**
 - `def spectral_upsample(field, factor)` - *Band-limited upsampling of a periodic real field by an integer factor.*
@@ -1959,7 +1965,7 @@
 ### [`domains/fluid_universe/sims/scale_iteration.py`](domains/fluid_universe/sims/scale_iteration.py)
 > *Damped scale iteration toward a stationary Faddeev-Niemi Hopfion.*
 
-**Size**: `95` lines (`3528` bytes)
+**Size**: `95` lines
 
 **Functions:**
 - `def rescale_field(field, dx, length, scale)`
@@ -1970,7 +1976,7 @@
 ### [`domains/fluid_universe/sims/stability.py`](domains/fluid_universe/sims/stability.py)
 > *Tangent-space Hessian of the 3D Faddeev-Niemi + Z3 energy.*
 
-**Size**: `381` lines (`13756` bytes)
+**Size**: `381` lines
 
 **Functions:**
 - `def tangent_basis(field)` - *Return two orthonormal tangent vectors at every interior site.*
@@ -1991,7 +1997,7 @@
 ### [`domains/fluid_universe/sims/water_scattering.py`](domains/fluid_universe/sims/water_scattering.py)
 > *1D shallow-water wave scattering at an acoustic horizon (claim 31, ADR-022).*
 
-**Size**: `146` lines (`4959` bytes)
+**Size**: `146` lines
 
 **Functions:**
 - `def horizon_flow(x, c, length)`
@@ -2006,14 +2012,14 @@
 ### [`domains/fluid_universe/theory/__init__.py`](domains/fluid_universe/theory/__init__.py)
 > *Exact theory utilities for the Z3/Koide core.*
 
-**Size**: `1` lines (`52` bytes)
+**Size**: `1` lines
 
 ---
 
 ### [`domains/fluid_universe/theory/circulant.py`](domains/fluid_universe/theory/circulant.py)
 > *Exact algebra of the Hermitian 3x3 circulant mass matrix.*
 
-**Size**: `172` lines (`5563` bytes)
+**Size**: `172` lines
 
 **Functions:**
 - `def circulant_matrix(a, c, delta)` - *Return the Hermitian circulant M = circ(a, c e^{i delta}, c e^{-i delta}).*
@@ -2036,7 +2042,7 @@
 ### [`domains/fluid_universe/theory/derrick.py`](domains/fluid_universe/theory/derrick.py)
 > *Derrick scaling for the exact Frank-Oseen + Skyrme + Z3 energy.*
 
-**Size**: `128` lines (`4684` bytes)
+**Size**: `128` lines
 
 **Functions:**
 - `def exponents(d)`
@@ -2053,7 +2059,7 @@
 ### [`domains/fluid_universe/theory/excited_fluid.py`](domains/fluid_universe/theory/excited_fluid.py)
 > *First excited state in the Madelung fluid (claim 24, ADR-015).*
 
-**Size**: `79` lines (`2609` bytes)
+**Size**: `79` lines
 
 **Functions:**
 - `def _sigma(omega, hbar, mass)`
@@ -2069,7 +2075,7 @@
 ### [`domains/fluid_universe/theory/field_variation.py`](domains/fluid_universe/theory/field_variation.py)
 > *Unstructured 1D fixed-endpoint-density G-M field variation (claim 58, ADR-050).*
 
-**Size**: `273` lines (`10018` bytes)
+**Size**: `273` lines
 
 **Classes:**
 - `class FieldProblem` - *Discrete G-M field action with exact flux elimination.*
@@ -2091,7 +2097,7 @@
 ### [`domains/fluid_universe/theory/frank_oseen.py`](domains/fluid_universe/theory/frank_oseen.py)
 > *Linearised Frank-Oseen director modes.*
 
-**Size**: `143` lines (`4577` bytes)
+**Size**: `143` lines
 
 **Functions:**
 - `def elastic_matrix(kx, ky, kz, k1, k2, k3)` - *2x2 elastic matrix for the two transverse director components.*
@@ -2107,7 +2113,7 @@
 ### [`domains/fluid_universe/theory/gaussian_bridge.py`](domains/fluid_universe/theory/gaussian_bridge.py)
 > *Fixed-endpoint Gaussian transport bridge (claim 54, ADR-046).*
 
-**Size**: `365` lines (`12777` bytes)
+**Size**: `365` lines
 
 **Functions:**
 - `def diffusivity(hbar, mass)`
@@ -2128,7 +2134,7 @@
 ### [`domains/fluid_universe/theory/gaussian_fluid.py`](domains/fluid_universe/theory/gaussian_fluid.py)
 > *Gaussian reduction of the Madelung fluid (claim 22, ADR-013).*
 
-**Size**: `204` lines (`5881` bytes)
+**Size**: `204` lines
 
 **Functions:**
 - `def quantum_width(omega, hbar, mass)`
@@ -2145,7 +2151,7 @@
 ### [`domains/fluid_universe/theory/hopf.py`](domains/fluid_universe/theory/hopf.py)
 > *Hopf-charge estimators for the analytic H=1 map.*
 
-**Size**: `287` lines (`10923` bytes)
+**Size**: `287` lines
 
 **Functions:**
 - `def hopf_map(x, y, z)`
@@ -2171,7 +2177,7 @@
 ### [`domains/fluid_universe/theory/hopfion.py`](domains/fluid_universe/theory/hopfion.py)
 > *Finite-energy H=1 configuration for the Faddeev-Niemi energy.*
 
-**Size**: `79` lines (`2939` bytes)
+**Size**: `79` lines
 
 **Functions:**
 - `def energies(n, length, K, kappa)`
@@ -2182,7 +2188,7 @@
 ### [`domains/fluid_universe/theory/hydrogen_fluid.py`](domains/fluid_universe/theory/hydrogen_fluid.py)
 > *Hydrogen 1s Madelung reduction (claim 25, ADR-016).*
 
-**Size**: `95` lines (`2630` bytes)
+**Size**: `95` lines
 
 **Functions:**
 - `def bohr_radius(hbar, mass, coupling)`
@@ -2198,7 +2204,7 @@
 ### [`domains/fluid_universe/theory/hydrogen_radial_nodes.py`](domains/fluid_universe/theory/hydrogen_radial_nodes.py)
 > *Hydrogen-2s radial-node two-branch representation (claim 47, ADR-039).*
 
-**Size**: `151` lines (`5140` bytes)
+**Size**: `151` lines
 
 **Functions:**
 - `def radial_10(r, radius)` - *Hydrogen 1s radial function, normalized as int r^2 R^2 dr = 1.*
@@ -2218,7 +2224,7 @@
 ### [`domains/fluid_universe/theory/hydrogen_vortex.py`](domains/fluid_universe/theory/hydrogen_vortex.py)
 > *Hydrogen 2p vortex identification (claim 26, ADR-017).*
 
-**Size**: `79` lines (`2246` bytes)
+**Size**: `79` lines
 
 **Functions:**
 - `def radial_2p(r, radius)` - *Hydrogen 2p radial function R_21(r), normalized as int r^2 R^2 dr = 1.*
@@ -2234,7 +2240,7 @@
 ### [`domains/fluid_universe/theory/lorentz.py`](domains/fluid_universe/theory/lorentz.py)
 > *Linearised director dispersion and the emergent-metric question (claims 11-12).*
 
-**Size**: `185` lines (`6318` bytes)
+**Size**: `185` lines
 
 **Functions:**
 - `def elastic_matrix(k, k1, k2, k3)`
@@ -2249,7 +2255,7 @@
 ### [`domains/fluid_universe/theory/madelung.py`](domains/fluid_universe/theory/madelung.py)
 > *Madelung fluid dictionary for the Schrodinger equation (claim 20, ADR-011).*
 
-**Size**: `194` lines (`6131` bytes)
+**Size**: `194` lines
 
 **Functions:**
 - `def _wave_numbers(n, dx)`
@@ -2267,7 +2273,7 @@
 ### [`domains/fluid_universe/theory/nelson.py`](domains/fluid_universe/theory/nelson.py)
 > *Nelson stochastic kinematics for the quantum fluid (claim 21, ADR-012).*
 
-**Size**: `122` lines (`4055` bytes)
+**Size**: `122` lines
 
 **Functions:**
 - `def ground_state_width(omega, hbar, mass)`
@@ -2284,7 +2290,7 @@
 ### [`domains/fluid_universe/theory/nelson_closure.py`](domains/fluid_universe/theory/nelson_closure.py)
 > *Osmotic-closure no-go at PDE level (claim 48, ADR-040).*
 
-**Size**: `196` lines (`6993` bytes)
+**Size**: `196` lines
 
 **Functions:**
 - `def trial_gaussian(x, sigma_sq)`
@@ -2301,7 +2307,7 @@
 ### [`domains/fluid_universe/theory/node_defect.py`](domains/fluid_universe/theory/node_defect.py)
 > *Two-branch defect representation of nodal states (claim 46, ADR-038).*
 
-**Size**: `152` lines (`5203` bytes)
+**Size**: `152` lines
 
 **Functions:**
 - `def branch_split(x, omega, hbar, mass)` - *Exact two-branch split of the first-excited state.*
@@ -2315,7 +2321,7 @@
 ### [`domains/fluid_universe/theory/reduction.py`](domains/fluid_universe/theory/reduction.py)
 > *Dimensional reduction and the effective moment of inertia (claim 6b).*
 
-**Size**: `118` lines (`4335` bytes)
+**Size**: `118` lines
 
 **Functions:**
 - `def wall_tension(mu)`
@@ -2333,7 +2339,7 @@
 ### [`domains/fluid_universe/theory/rotor.py`](domains/fluid_universe/theory/rotor.py)
 > *Quantum rotor H = L^2/(2I) + mu (1 - cos 3 phi) and its spectra.*
 
-**Size**: `177` lines (`6143` bytes)
+**Size**: `177` lines
 
 **Classes:**
 - `class RotorSpectrum`
@@ -2356,7 +2362,7 @@
 ### [`domains/fluid_universe/theory/rotor_potential.py`](domains/fluid_universe/theory/rotor_potential.py)
 > *Real Z3 rotor potential scan (claim 19, ADR-010).*
 
-**Size**: `122` lines (`4130` bytes)
+**Size**: `122` lines
 
 **Functions:**
 - `def sector_matrix(mu, nu, flux, sector, n_cutoff, inertia)`
@@ -2368,7 +2374,7 @@
 ### [`domains/fluid_universe/theory/topology.py`](domains/fluid_universe/theory/topology.py)
 > *Topology of a nematic director and the Z3 question.*
 
-**Size**: `113` lines (`4186` bytes)
+**Size**: `113` lines
 
 **Functions:**
 - `def has_z3_factor()` - *True only if one of the listed homotopy groups has a Z3 factor.*
@@ -2382,7 +2388,7 @@
 ### [`domains/fluid_universe/theory/two_state_marcus.py`](domains/fluid_universe/theory/two_state_marcus.py)
 > *Shared-lambda two-state Marcus assignment (claim 44, ADR-036).*
 
-**Size**: `94` lines (`3661` bytes)
+**Size**: `94` lines
 
 **Functions:**
 - `def shared_lambda_widths(temperature_k)` - *Predicted component widths for two Marcus states sharing lambda.*
@@ -2395,7 +2401,7 @@
 ### [`domains/fluid_universe/theory/variational_center.py`](domains/fluid_universe/theory/variational_center.py)
 > *Co-emergence of Newtonian center and Ermakov width (claim 53, ADR-045).*
 
-**Size**: `260` lines (`8576` bytes)
+**Size**: `260` lines
 
 **Functions:**
 - `def diffusivity(hbar, mass)`
@@ -2415,7 +2421,7 @@
 ### [`domains/fluid_universe/theory/variational_dynamics.py`](domains/fluid_universe/theory/variational_dynamics.py)
 > *Variational dynamics reproduces Ermakov (claim 51, ADR-043).*
 
-**Size**: `271` lines (`8986` bytes)
+**Size**: `271` lines
 
 **Functions:**
 - `def diffusivity(hbar, mass)`
@@ -2435,7 +2441,7 @@
 ### [`domains/fluid_universe/theory/variational_saddle.py`](domains/fluid_universe/theory/variational_saddle.py)
 > *Ritz saddle: G-M stationary point in (s, c) (claim 50, ADR-042).*
 
-**Size**: `263` lines (`8550` bytes)
+**Size**: `263` lines
 
 **Functions:**
 - `def diffusivity(hbar, mass)`
@@ -2455,7 +2461,7 @@
 ### [`domains/fluid_universe/theory/variational_width.py`](domains/fluid_universe/theory/variational_width.py)
 > *Gaussian Ritz width-selection: G-M vs Yasui (claim 49, ADR-041).*
 
-**Size**: `209` lines (`7480` bytes)
+**Size**: `209` lines
 
 **Functions:**
 - `def diffusivity(hbar, mass)`
@@ -2477,7 +2483,7 @@
 ### [`domains/fluid_universe/theory/vortex_cascade.py`](domains/fluid_universe/theory/vortex_cascade.py)
 > *One-parameter vortex/eddy hierarchy test (claim 18, ADR-009).*
 
-**Size**: `126` lines (`4429` bytes)
+**Size**: `126` lines
 
 **Functions:**
 - `def geometric_spectrum(ratio, generations)`
@@ -2491,7 +2497,7 @@
 ### [`domains/fluid_universe/theory/vortex_core.py`](domains/fluid_universe/theory/vortex_core.py)
 > *HO-1 finite-core node probe (claim 60, ADR-054).*
 
-**Size**: `95` lines (`3613` bytes)
+**Size**: `95` lines
 
 **Functions:**
 - `def core_radius()` - *Pre-registered core radius eps0 = 0.1 * a0 (predicted, not fit).*
@@ -2508,7 +2514,7 @@
 ### [`domains/fluid_universe/theory/vortex_loop.py`](domains/fluid_universe/theory/vortex_loop.py)
 > *2p core-threading loop probe (claim 61, ADR-056).*
 
-**Size**: `84` lines (`3303` bytes)
+**Size**: `84` lines
 
 **Functions:**
 - `def core_scale()` - *Pre-registered core scale delta0 = 0.1 * a0 (predicted, never scanned).*
@@ -2523,7 +2529,7 @@
 ### [`domains/fluid_universe/theory/vortex_particles.py`](domains/fluid_universe/theory/vortex_particles.py)
 > *Thin-filament vortex-knot mass hypothesis (claim 17, ADR-008).*
 
-**Size**: `136` lines (`5174` bytes)
+**Size**: `136` lines
 
 **Functions:**
 - `def torus_knot(n, radius, tube, samples)` - *Closed T(2,n) curve and its chord vectors.*
@@ -2537,7 +2543,7 @@
 ### [`domains/fluid_universe/theory/water_absorption.py`](domains/fluid_universe/theory/water_absorption.py)
 > *Bound-free absorption in the finite spherical well (claim 34, ADR-025).*
 
-**Size**: `346` lines (`11792` bytes)
+**Size**: `346` lines
 
 **Functions:**
 - `def _j1(x)`
@@ -2559,7 +2565,7 @@
 ### [`domains/fluid_universe/theory/water_analogue.py`](domains/fluid_universe/theory/water_analogue.py)
 > *Shallow-water acoustic horizon (claim 27, ADR-018).*
 
-**Size**: `145` lines (`4294` bytes)
+**Size**: `145` lines
 
 **Functions:**
 - `def sound_speed(depth, gravity)`
@@ -2579,7 +2585,7 @@
 ### [`domains/fluid_universe/theory/water_born_cavity.py`](domains/fluid_universe/theory/water_born_cavity.py)
 > *Self-consistent Born cavity synthesis (claim 39, ADR-030).*
 
-**Size**: `112` lines (`3959` bytes)
+**Size**: `112` lines
 
 **Functions:**
 - `def born_cavity_energy(radius_m)` - *E_1s(R, Born(R)) plus the surface energy, or None if unbound.*
@@ -2591,7 +2597,7 @@
 ### [`domains/fluid_universe/theory/water_dispersive.py`](domains/fluid_universe/theory/water_dispersive.py)
 > *Dispersive shallow-water horizon (claim 29, ADR-020).*
 
-**Size**: `118` lines (`3489` bytes)
+**Size**: `118` lines
 
 **Functions:**
 - `def dispersion(k, depth, gamma, density, gravity)`
@@ -2605,7 +2611,7 @@
 ### [`domains/fluid_universe/theory/water_electron.py`](domains/fluid_universe/theory/water_electron.py)
 > *Hydrated-electron cavity scale from water properties (claim 32, ADR-023).*
 
-**Size**: `95` lines (`3077` bytes)
+**Size**: `95` lines
 
 **Functions:**
 - `def screened_bohr_radius(epsilon_r)`
@@ -2621,7 +2627,7 @@
 ### [`domains/fluid_universe/theory/water_lineshape.py`](domains/fluid_universe/theory/water_lineshape.py)
 > *Fixed-lambda cavity-Marcus line-shape prediction (claim 43, ADR-034).*
 
-**Size**: `92` lines (`3313` bytes)
+**Size**: `92` lines
 
 **Functions:**
 - `def gaussian_moments()` - *Exact symmetry facts for a Gaussian band (no inputs, no fit).*
@@ -2634,7 +2640,7 @@
 ### [`domains/fluid_universe/theory/water_marcus.py`](domains/fluid_universe/theory/water_marcus.py)
 > *Marcus band width from the water reorganization energy (claim 40, ADR-031).*
 
-**Size**: `63` lines (`2235` bytes)
+**Size**: `63` lines
 
 **Functions:**
 - `def marcus_width_ev(lambda_ev, temperature_k)` - *Classical Marcus Gaussian FWHM in eV.*
@@ -2646,7 +2652,7 @@
 ### [`domains/fluid_universe/theory/water_observed_shape.py`](domains/fluid_universe/theory/water_observed_shape.py)
 > *Observed hydrated-electron band-shape comparator data (claim 43, ADR-035).*
 
-**Size**: `160` lines (`6873` bytes)
+**Size**: `160` lines
 
 **Functions:**
 - `def observed_width_change_ev(span_k)` - *Observed half-width change over a temperature span.*
@@ -2659,7 +2665,7 @@
 ### [`domains/fluid_universe/theory/water_pressure.py`](domains/fluid_universe/theory/water_pressure.py)
 > *Self-consistent finite-well pressure balance (claim 37, ADR-028).*
 
-**Size**: `123` lines (`4157` bytes)
+**Size**: `123` lines
 
 **Functions:**
 - `def surface_energy_ev(radius_m)` - *Surface energy 4 pi gamma R^2, in eV.*
@@ -2673,7 +2679,7 @@
 ### [`domains/fluid_universe/theory/water_rays.py`](domains/fluid_universe/theory/water_rays.py)
 > *Radial rays at the shallow-water acoustic horizon (claim 30, ADR-021).*
 
-**Size**: `82` lines (`2568` bytes)
+**Size**: `82` lines
 
 **Functions:**
 - `def outgoing_speed(r, flow_rate, depth, gravity)`
@@ -2687,7 +2693,7 @@
 ### [`domains/fluid_universe/theory/water_reorganization.py`](domains/fluid_universe/theory/water_reorganization.py)
 > *Water reorganization and the VDE-optical difference (claim 38, ADR-029).*
 
-**Size**: `112` lines (`4102` bytes)
+**Size**: `112` lines
 
 **Functions:**
 - `def _dielectric_contrast(epsilon_s, epsilon_opt)`
@@ -2700,7 +2706,7 @@
 ### [`domains/fluid_universe/theory/water_softwall.py`](domains/fluid_universe/theory/water_softwall.py)
 > *Soft-wall cavity and the hard VDE depth bound (claim 36, ADR-027).*
 
-**Size**: `212` lines (`6865` bytes)
+**Size**: `212` lines
 
 **Functions:**
 - `def woods_saxon_level(radius_m, depth_ev, diffuseness_m, angular_momentum, grid, r_max_m)` - *Lowest bound radial eigenvalue of the Woods-Saxon well, in eV.*
@@ -2713,7 +2719,7 @@
 ### [`domains/fluid_universe/theory/water_temperature.py`](domains/fluid_universe/theory/water_temperature.py)
 > *Temperature-dependent Born cavity (claim 41, ADR-032).*
 
-**Size**: `162` lines (`6079` bytes)
+**Size**: `162` lines
 
 **Functions:**
 - `def water_dielectric_constant(temperature_c)` - *Static dielectric constant of water, 0-100 C.*
@@ -2729,7 +2735,7 @@
 ### [`domains/fluid_universe/theory/water_twocomponent.py`](domains/fluid_universe/theory/water_twocomponent.py)
 > *Zero-free-parameter two-component band model (claim 45, ADR-037).*
 
-**Size**: `92` lines (`3628` bytes)
+**Size**: `92` lines
 
 **Functions:**
 - `def twocomponent_scales(temperature_k)` - *Fixed-input two-component prediction plus observed side widths.*
@@ -2739,7 +2745,7 @@
 ### [`domains/fluid_universe/theory/water_vde.py`](domains/fluid_universe/theory/water_vde.py)
 > *VDE and 1.7 eV absorption constrain the finite well (claim 35, ADR-026).*
 
-**Size**: `141` lines (`4874` bytes)
+**Size**: `141` lines
 
 **Functions:**
 - `def depth_for_binding(radius_m, binding_ev)` - *Well depth that gives a 1s binding energy of binding_ev.*
@@ -2752,7 +2758,7 @@
 ### [`domains/fluid_universe/theory/water_well.py`](domains/fluid_universe/theory/water_well.py)
 > *Finite spherical well for the hydrated electron (claim 33, ADR-024).*
 
-**Size**: `325` lines (`10958` bytes)
+**Size**: `325` lines
 
 **Functions:**
 - `def born_depth_ev(radius_m, epsilon_r)` - *Born solvation depth of a spherical cavity, in eV.*
@@ -2779,7 +2785,7 @@
 ### [`domains/fluid_universe/theory/widened_ritz.py`](domains/fluid_universe/theory/widened_ritz.py)
 > *Ritz-widened squared-Hermite trial BVP (claim 59, ADR-051).*
 
-**Size**: `375` lines (`14176` bytes)
+**Size**: `375` lines
 
 **Classes:**
 - `class WidenedProblem` - *Squared-Hermite Ritz BVP with exact mass normalization.*
@@ -2806,7 +2812,7 @@
 ### [`domains/fluid_universe/theory/yasue_action.py`](domains/fluid_universe/theory/yasue_action.py)
 > *Pinned-endpoint Yasue-bridge action stationarity (claim 57, ADR-049).*
 
-**Size**: `135` lines (`3958` bytes)
+**Size**: `135` lines
 
 **Functions:**
 - `def yasue_discrete_action(full_path, omega, hbar, mass, nu, dt)` - *Midpoint discrete Yasue action (own density: +m*nu^2/2mid^2).*
@@ -2820,7 +2826,7 @@
 ### [`domains/fluid_universe/theory/yasue_bridge.py`](domains/fluid_universe/theory/yasue_bridge.py)
 > *Pinned-endpoint Yasue bridge: the c<0 Pinney analytic family (claim 56, ADR-048).*
 
-**Size**: `298` lines (`9476` bytes)
+**Size**: `298` lines
 
 **Functions:**
 - `def diffusivity(hbar, mass)`
@@ -2839,7 +2845,7 @@
 ### [`domains/fluid_universe/theory/yasue_center.py`](domains/fluid_universe/theory/yasue_center.py)
 > *Yasue center-width discriminator: collapse under Yasue, co-emergence under G-M (claim 55, ADR-047).*
 
-**Size**: `452` lines (`16054` bytes)
+**Size**: `452` lines
 
 **Functions:**
 - `def diffusivity(hbar, mass)`
@@ -2862,7 +2868,7 @@
 ### [`domains/fluid_universe/theory/yasue_dynamics.py`](domains/fluid_universe/theory/yasue_dynamics.py)
 > *Yasui dynamical discriminator: collapse vs G-M oscillation (claim 52, ADR-044).*
 
-**Size**: `174` lines (`6044` bytes)
+**Size**: `174` lines
 
 **Functions:**
 - `def yasue_acceleration(s, omega, hbar, mass)`
@@ -2873,14 +2879,14 @@
 ---
 
 ### [`domains/fluid_universe/verification/__init__.py`](domains/fluid_universe/verification/__init__.py)
-**Size**: `0` lines (`0` bytes)
+**Size**: `0` lines
 
 ---
 
 ### [`domains/fluid_universe/verification/audit.py`](domains/fluid_universe/verification/audit.py)
 > *Independent verification of every claim marked PROVEN, VERIFIED, or NUMERIC.*
 
-**Size**: `4292` lines (`170752` bytes)
+**Size**: `4292` lines
 
 **Classes:**
 - `class Audit`
@@ -2978,7 +2984,7 @@
 ### [`domains/fluid_universe/verification/compare.py`](domains/fluid_universe/verification/compare.py)
 > *Compare two independent verification runs.*
 
-**Size**: `226` lines (`8572` bytes)
+**Size**: `226` lines
 
 **Functions:**
 - `def _load(tag, root)`
@@ -2993,7 +2999,7 @@
 ### [`domains/fluid_universe/verification/fingerprint.py`](domains/fluid_universe/verification/fingerprint.py)
 > *Stable fingerprints for the two-run claim audit.*
 
-**Size**: `221` lines (`5874` bytes)
+**Size**: `221` lines
 
 **Functions:**
 - `def default_root()` - *Locate the external fluid-universe checkout next to the host project.*
@@ -3008,7 +3014,7 @@
 ### [`domains/fluid_universe/verification/verify.py`](domains/fluid_universe/verification/verify.py)
 > *Run the full claim-verification workflow in separate processes.*
 
-**Size**: `70` lines (`2385` bytes)
+**Size**: `70` lines
 
 **Functions:**
 - `def _run(module, *args)`
@@ -3019,7 +3025,7 @@
 ### [`domains/obezite/atif.py`](domains/obezite/atif.py)
 > *İddia atıfı çıkarıcı — künye gürültüsünü ayıklayarak.*
 
-**Size**: `68` lines (`1747` bytes)
+**Size**: `68` lines
 
 **Functions:**
 - `def atiflar(bagli_sutun)` - *Bağlı sütunundan iddia numaralarını çıkar (künye gürültüsü ayıklanmış).*
@@ -3029,7 +3035,7 @@
 ### [`domains/obezite/backfill.py`](domains/obezite/backfill.py)
 > *Build skeleton backfill rows for missing obezite claims.*
 
-**Size**: `136` lines (`4804` bytes)
+**Size**: `136` lines
 
 **Functions:**
 - `def existing_ids(ledger_file)`
@@ -3046,7 +3052,7 @@
 ### [`domains/obezite/claim_index.py`](domains/obezite/claim_index.py)
 > *Create the claim cross-reference index from the obezite chunk files.*
 
-**Size**: `148` lines (`6022` bytes)
+**Size**: `148` lines
 
 **Functions:**
 - `def parse_claims_from_file(filepath)` - *Return ``(claim_id, linked_column)`` for each claim row.*
@@ -3059,7 +3065,7 @@
 ### [`domains/obezite/cokus.py`](domains/obezite/cokus.py)
 > *Audit collapse annotations: every row citing an invalidated claim needs a marker.*
 
-**Size**: `108` lines (`3698` bytes)
+**Size**: `108` lines
 
 **Functions:**
 - `def ledger_lines(ledger_file)`
@@ -3072,7 +3078,7 @@
 ### [`domains/obezite/dedup.py`](domains/obezite/dedup.py)
 > *Deduplicate obezite ledger claims across chunk files and the retracted ledger.*
 
-**Size**: `133` lines (`5271` bytes)
+**Size**: `133` lines
 
 **Functions:**
 - `def parse_claims_from_file(filepath)` - *Return ``(claim_id, line, line_index)`` for every claim row in one file.*
@@ -3088,7 +3094,7 @@
 ### [`domains/obezite/sentez.py`](domains/obezite/sentez.py)
 > *Sentez projections: the claim register and file inventory are derived from the canonical*
 
-**Size**: `264` lines (`10051` bytes)
+**Size**: `264` lines
 
 **Functions:**
 - `def split_fields(line)` - *A markdown table row as cells; `\|` stays inside a cell.*
@@ -3112,7 +3118,7 @@
 ### [`domains/obezite/split.py`](domains/obezite/split.py)
 > *Split the obezite claim ledger into active and quarantined projections.*
 
-**Size**: `81` lines (`2697` bytes)
+**Size**: `81` lines
 
 **Functions:**
 - `def split_lines(lines)` - *Return active and quarantined lines using the source's verdict-column rule.*
@@ -3124,7 +3130,7 @@
 ### [`domains/obezite/split_range.py`](domains/obezite/split_range.py)
 > *Split the obezite ledger into two range chunks plus a master index.*
 
-**Size**: `117` lines (`4700` bytes)
+**Size**: `117` lines
 
 **Functions:**
 - `def parse_claims(lines)`
@@ -3136,7 +3142,7 @@
 ### [`domains/obezite/uret.py`](domains/obezite/uret.py)
 > *uret.py — TÜRETİLMİŞ DOSYA ÜRETİCİSİ (T209, iddia 804)*
 
-**Size**: `490` lines (`10385` bytes)
+**Size**: `490` lines
 
 **Functions:**
 - `def oku(p)`
@@ -3152,7 +3158,7 @@
 ### [`domains/pnn/__init__.py`](domains/pnn/__init__.py)
 > *Phase 2-5 discovery, preclinical and translational pipeline for PNN.*
 
-**Size**: `130` lines (`4319` bytes)
+**Size**: `130` lines
 
 **Functions:**
 - `def __getattr__(name)`
@@ -3163,14 +3169,14 @@
 ### [`domains/pnn/__main__.py`](domains/pnn/__main__.py)
 > *Run the PNN screening pipeline as `python -m pnn`.*
 
-**Size**: `6` lines (`137` bytes)
+**Size**: `6` lines
 
 ---
 
 ### [`domains/pnn/assay.py`](domains/pnn/assay.py)
 > *Phase 3 in vitro assay ingestion, hit qualification, and reporting for PNN.*
 
-**Size**: `525` lines (`21705` bytes)
+**Size**: `525` lines
 
 **Classes:**
 - `class AssayError` - *Raised when in vitro assay data is malformed or violates contract.*
@@ -3195,7 +3201,7 @@
 ### [`domains/pnn/bioisostere.py`](domains/pnn/bioisostere.py)
 > *Bioisosteric replacement and metabolic soft-spot optimization engine for PNN.*
 
-**Size**: `542` lines (`20149` bytes)
+**Size**: `542` lines
 
 **Classes:**
 - `class BioisostereError` - *Raised when compound SMILES or bioisosteric transformation rules are invalid.*
@@ -3223,7 +3229,7 @@
 ### [`domains/pnn/cli.py`](domains/pnn/cli.py)
 > *Command-line entry point for the PNN Phase 2 screening pipeline.*
 
-**Size**: `91` lines (`3406` bytes)
+**Size**: `91` lines
 
 **Functions:**
 - `def build_parser()`
@@ -3237,7 +3243,7 @@
 ### [`domains/pnn/compounds.py`](domains/pnn/compounds.py)
 > *Compound records and CSV ingestion for the PNN screening pipeline.*
 
-**Size**: `234` lines (`8036` bytes)
+**Size**: `234` lines
 
 **Classes:**
 - `class CompoundError` - *Raised when input cannot be interpreted as a compound record.*
@@ -3257,7 +3263,7 @@
 ### [`domains/pnn/curate.py`](domains/pnn/curate.py)
 > *Command-line merge and diversity curation of PNN compound libraries.*
 
-**Size**: `114` lines (`4217` bytes)
+**Size**: `114` lines
 
 **Functions:**
 - `def _positive_int(text)`
@@ -3271,7 +3277,7 @@
 ### [`domains/pnn/curation.py`](domains/pnn/curation.py)
 > *Merge, deduplicate and diversify compound libraries for PNN Phase 2.*
 
-**Size**: `170` lines (`6038` bytes)
+**Size**: `170` lines
 
 **Classes:**
 - `class CurationError` - *Raised when libraries cannot be merged or curated safely.*
@@ -3291,7 +3297,7 @@
 ### [`domains/pnn/docking.py`](domains/pnn/docking.py)
 > *Docking-score ingestion and consensus ranking for PNN Phase 2.*
 
-**Size**: `273` lines (`10305` bytes)
+**Size**: `273` lines
 
 **Classes:**
 - `class DockingError` - *Raised when docking input cannot be interpreted.*
@@ -3317,7 +3323,7 @@
 ### [`domains/pnn/dynamics.py`](domains/pnn/dynamics.py)
 > *Molecular Dynamics (MD) trajectory and contact stability analyzer for PNN.*
 
-**Size**: `586` lines (`25668` bytes)
+**Size**: `586` lines
 
 **Classes:**
 - `class DynamicsError` - *Raised when MD trajectory data or parameters are malformed.*
@@ -3344,7 +3350,7 @@
 ### [`domains/pnn/ind.py`](domains/pnn/ind.py)
 > *Allometric human clinical dose projection and IND regulatory dossier compiler for PNN.*
 
-**Size**: `597` lines (`25593` bytes)
+**Size**: `597` lines
 
 **Classes:**
 - `class IndError` - *Raised when clinical projection inputs violate regulatory or pharmacological contracts.*
@@ -3370,7 +3376,7 @@
 ### [`domains/pnn/mpo.py`](domains/pnn/mpo.py)
 > *Phase 5 Multiparametric Optimization (MPO) and candidate profiling engine for PNN.*
 
-**Size**: `472` lines (`19413` bytes)
+**Size**: `472` lines
 
 **Classes:**
 - `class MpoError` - *Raised when MPO input data is invalid or missing required metrics.*
@@ -3393,7 +3399,7 @@
 ### [`domains/pnn/pathway.py`](domains/pnn/pathway.py)
 > *Hypothalamic circuit, perineuronal net turnover, and dosing dynamics simulator for PNN.*
 
-**Size**: `422` lines (`17610` bytes)
+**Size**: `422` lines
 
 **Classes:**
 - `class PathwayError` - *Raised when simulation parameters are physically invalid or malformed.*
@@ -3414,7 +3420,7 @@
 ### [`domains/pnn/pipeline.py`](domains/pnn/pipeline.py)
 > *Command-line end-to-end Phase 2 lead selection for the PNN project.*
 
-**Size**: `137` lines (`4489` bytes)
+**Size**: `137` lines
 
 **Functions:**
 - `def _positive_int(text)`
@@ -3428,7 +3434,7 @@
 ### [`domains/pnn/preclinical.py`](domains/pnn/preclinical.py)
 > *Phase 4 in vivo pharmacokinetics (PK), pharmacodynamics (PD), and preclinical candidate selection for PNN.*
 
-**Size**: `558` lines (`24181` bytes)
+**Size**: `558` lines
 
 **Classes:**
 - `class PreclinicalError` - *Raised when in vivo preclinical data is malformed or violates contract.*
@@ -3453,7 +3459,7 @@
 ### [`domains/pnn/rank.py`](domains/pnn/rank.py)
 > *Command-line consensus ranking of docking results for PNN Phase 2.*
 
-**Size**: `245` lines (`8401` bytes)
+**Size**: `245` lines
 
 **Classes:**
 - `class ShortlistRow` - *One ranked compound ready for CSV output.*
@@ -3472,7 +3478,7 @@
 ### [`domains/pnn/reports.py`](domains/pnn/reports.py)
 > *Atomic CSV, JSON and text report writers shared by the PNN command line tools.*
 
-**Size**: `68` lines (`2038` bytes)
+**Size**: `68` lines
 
 **Functions:**
 - `def _open_temp(path)`
@@ -3486,7 +3492,7 @@
 ### [`domains/pnn/rules.py`](domains/pnn/rules.py)
 > *Property rules that turn the PNN BBB/CNS design criteria into verdicts.*
 
-**Size**: `219` lines (`7784` bytes)
+**Size**: `219` lines
 
 **Classes:**
 - `class CriterionResult` - *One rule's verdict for one compound.*
@@ -3511,7 +3517,7 @@
 ### [`domains/pnn/runner.py`](domains/pnn/runner.py)
 > *One-click turnkey discovery pipeline runner for PNN.*
 
-**Size**: `540` lines (`21304` bytes)
+**Size**: `540` lines
 
 **Classes:**
 - `class RunnerError` - *Raised when one-click pipeline runner cannot execute or find input data.*
@@ -3529,7 +3535,7 @@
 ### [`domains/pnn/safety.py`](domains/pnn/safety.py)
 > *IND-enabling safety pharmacology and repeat-dose toxicology assessment for PNN.*
 
-**Size**: `644` lines (`26843` bytes)
+**Size**: `644` lines
 
 **Classes:**
 - `class SafetyError` - *Raised when safety pharmacology or toxicology data is malformed or violates contract.*
@@ -3560,7 +3566,7 @@
 ### [`domains/pnn/sar.py`](domains/pnn/sar.py)
 > *Structure-Activity Relationship (SAR) and Bemis-Murcko scaffold decomposition for PNN.*
 
-**Size**: `772` lines (`29999` bytes)
+**Size**: `772` lines
 
 **Classes:**
 - `class SarError` - *Raised when SAR data is malformed or violates scientific contract.*
@@ -3590,7 +3596,7 @@
 ### [`domains/pnn/screen.py`](domains/pnn/screen.py)
 > *Tiering and ranking for the PNN Phase 2 property screen.*
 
-**Size**: `79` lines (`3049` bytes)
+**Size**: `79` lines
 
 **Classes:**
 - `class ScreenResult` - *A compound, its verdicts, and the resulting triage tier.*
@@ -3609,7 +3615,7 @@
 ### [`domains/pnn/selection.py`](domains/pnn/selection.py)
 > *End-to-end Phase 2 lead selection for the PNN project.*
 
-**Size**: `336` lines (`12882` bytes)
+**Size**: `336` lines
 
 **Classes:**
 - `class PipelineError` - *Raised when a Phase 2 run cannot produce a defensible lead set.*
@@ -3631,7 +3637,7 @@
 ### [`domains/pnn/studio.py`](domains/pnn/studio.py)
 > *Interactive Lead & Assay Visualization Studio and Standalone HTML Dashboard for PNN.*
 
-**Size**: `1322` lines (`53893` bytes)
+**Size**: `1322` lines
 
 **Classes:**
 - `class StudioError` - *Raised when studio inputs are malformed or missing required data.*
@@ -3660,7 +3666,7 @@
 ### [`domains/pnn/tables.py`](domains/pnn/tables.py)
 > *CSV row contracts shared by the PNN Phase 2 command line tools.*
 
-**Size**: `108` lines (`3053` bytes)
+**Size**: `108` lines
 
 **Functions:**
 - `def _optional(value)`
@@ -3672,7 +3678,7 @@
 ### [`domains/pnn/target.py`](domains/pnn/target.py)
 > *Target receptor profiles, binding-pocket invariants and Vina grid generation for PNN.*
 
-**Size**: `313` lines (`12212` bytes)
+**Size**: `313` lines
 
 **Classes:**
 - `class TargetProfile` - *Molecular target profile defining receptor invariants and docking grid coordinates.*
@@ -3689,7 +3695,7 @@
 ### [`domains/pnn/waves.py`](domains/pnn/waves.py)
 > *Wave-ledger aggregation: search-wave CSVs plus obtainability proofs into report artifacts.*
 
-**Size**: `298` lines (`11835` bytes)
+**Size**: `298` lines
 
 **Classes:**
 - `class WaveLedgerError` - *Raised when wave-ledger inputs cannot be read or parsed.*
@@ -3711,21 +3717,21 @@
 ### [`engine/__init__.py`](engine/__init__.py)
 > *Research Engine: provenance-backed claims, pre-registered hypotheses, executable kill tests.*
 
-**Size**: `3` lines (`122` bytes)
+**Size**: `3` lines
 
 ---
 
 ### [`engine/__main__.py`](engine/__main__.py)
 > *Entry point for `python -m engine`.*
 
-**Size**: `6` lines (`128` bytes)
+**Size**: `6` lines
 
 ---
 
 ### [`engine/ai.py`](engine/ai.py)
 > *AI provenance adapter: notarize model I/O, ingest UNVERIFIED claims, propose template tests.*
 
-**Size**: `507` lines (`19242` bytes)
+**Size**: `507` lines
 
 **Functions:**
 - `def actor_for(model_id)` - *Attribution for AI-proximate actions: the model, not the default agent.*
@@ -3748,7 +3754,7 @@
 ### [`engine/amendments.py`](engine/amendments.py)
 > *Append-only amendment ledger: every correction keeps its before and after.*
 
-**Size**: `100` lines (`3118` bytes)
+**Size**: `100` lines
 
 **Functions:**
 - `def _to_amendment(row)`
@@ -3760,7 +3766,7 @@
 ### [`engine/analysis.py`](engine/analysis.py)
 > *Discovery and ranking over the graph: contradictions, coverage, keystones.*
 
-**Size**: `904` lines (`37096` bytes)
+**Size**: `904` lines
 
 **Functions:**
 - `def _negated(text)` - *Whether an assertion carries an explicit negation marker.*
@@ -3787,7 +3793,7 @@
 ### [`engine/artifacts.py`](engine/artifacts.py)
 > *Artifact I/O: timestamps, output digests and atomic file replacement.*
 
-**Size**: `103` lines (`3663` bytes)
+**Size**: `103` lines
 
 **Functions:**
 - `def utc_now()` - *Return a second-resolution UTC timestamp in ISO-8601 form.*
@@ -3801,7 +3807,7 @@
 ### [`engine/attempts.py`](engine/attempts.py)
 > *Append-only attempt ledger for kill-test executions.*
 
-**Size**: `131` lines (`4781` bytes)
+**Size**: `131` lines
 
 **Functions:**
 - `def _to_attempt(row)`
@@ -3815,7 +3821,7 @@
 ### [`engine/bundle.py`](engine/bundle.py)
 > *Portable JSONL export of the evidence graph, and a digest of its content.*
 
-**Size**: `285` lines (`10458` bytes)
+**Size**: `291` lines
 
 **Functions:**
 - `def _rows(conn, table, research_id)`
@@ -3833,7 +3839,7 @@
 ### [`engine/calibration.py`](engine/calibration.py)
 > *Hypothesis calibration: score preregistered confidence against recorded outcomes.*
 
-**Size**: `184` lines (`7018` bytes)
+**Size**: `184` lines
 
 **Functions:**
 - `def _clip(probability)` - *Keep log loss finite without turning a certain prediction into a free pass.*
@@ -3846,7 +3852,7 @@
 ### [`engine/cascade.py`](engine/cascade.py)
 > *Transitive invalidation: when a premise collapses, everything built on it collapses too.*
 
-**Size**: `379` lines (`14497` bytes)
+**Size**: `379` lines
 
 **Functions:**
 - `def _plan_digest(conn, claim_ids, source_ids)` - *Bind exactly the rows an action will retire: any change breaks the digest.*
@@ -3863,7 +3869,7 @@
 ### [`engine/charts.py`](engine/charts.py)
 > *Text renderers: sparklines, signed bar charts and a statistics table.*
 
-**Size**: `250` lines (`9551` bytes)
+**Size**: `250` lines
 
 **Functions:**
 - `def format_number(value)` - *A compact human label for one value, with negative zero folded to zero.*
@@ -3884,7 +3890,7 @@
 ### [`engine/claims.py`](engine/claims.py)
 > *Claims: the unit of knowledge, with provenance and an append-only verdict history.*
 
-**Size**: `588` lines (`23083` bytes)
+**Size**: `588` lines
 
 **Functions:**
 - `def _to_claim(row)`
@@ -3908,7 +3914,7 @@
 ### [`engine/cli.py`](engine/cli.py)
 > *Command-line surface: one entry point for every engine mechanic.*
 
-**Size**: `1464` lines (`72945` bytes)
+**Size**: `1464` lines
 
 **Functions:**
 - `def _build_parser()`
@@ -3932,7 +3938,7 @@
 ### [`engine/context.py`](engine/context.py)
 > *Token-budgeted views: the same graph, measured in tokens for an agent reader.*
 
-**Size**: `192` lines (`7536` bytes)
+**Size**: `192` lines
 
 **Classes:**
 - `class View` - *A rendered, bounded view of one program.*
@@ -3953,7 +3959,7 @@
 ### [`engine/database.py`](engine/database.py)
 > *SQLite connection, schema versioning and atomic transactions.*
 
-**Size**: `557` lines (`21352` bytes)
+**Size**: `557` lines
 
 **Functions:**
 - `def connect(path)` - *Open a database with durability pragmas suitable for a state file.*
@@ -3969,7 +3975,7 @@
 ### [`engine/demo.py`](engine/demo.py)
 > *A self-contained demonstration of every engine mechanic in under ten seconds.*
 
-**Size**: `153` lines (`5481` bytes)
+**Size**: `153` lines
 
 **Functions:**
 - `def seed_demo(conn)` - *Create one synthetic program that exercises provenance, tests, and cascade.*
@@ -3979,7 +3985,7 @@
 ### [`engine/diffing.py`](engine/diffing.py)
 > *Snapshot comparison: what changed between two exported graphs.*
 
-**Size**: `123` lines (`4746` bytes)
+**Size**: `123` lines
 
 **Functions:**
 - `def load_jsonl(path)` - *Read an export, dropping its meta line; a malformed file is refused.*
@@ -3995,7 +4001,7 @@
 ### [`engine/duplicates.py`](engine/duplicates.py)
 > *Duplicate-source detection by normalized DOI and title.*
 
-**Size**: `134` lines (`4517` bytes)
+**Size**: `134` lines
 
 **Functions:**
 - `def normalize_doi(value)` - *Strip resolver prefixes and case-fold a DOI so two spellings compare equal.*
@@ -4008,7 +4014,7 @@
 ### [`engine/errors.py`](engine/errors.py)
 > *Error types that carry a cause and a concrete repair step (Why/Fix triad).*
 
-**Size**: `35` lines (`1015` bytes)
+**Size**: `35` lines
 
 **Classes:**
 - `class EngineError` - *A user-facing failure with a reason and a repair step.*
@@ -4022,7 +4028,7 @@
 ### [`engine/events.py`](engine/events.py)
 > *Append-only event log for actions that are not verdicts.*
 
-**Size**: `283` lines (`9637` bytes)
+**Size**: `283` lines
 
 **Classes:**
 - `class Event`
@@ -4044,7 +4050,7 @@
 ### [`engine/evidence.py`](engine/evidence.py)
 > *Evidence identity: which verified run groups are valid for a test right now.*
 
-**Size**: `221` lines (`8354` bytes)
+**Size**: `221` lines
 
 **Functions:**
 - `def test_inputs(test)` - *The canonical declared input names of a test.*
@@ -4068,7 +4074,7 @@
 ### [`engine/hypotheses.py`](engine/hypotheses.py)
 > *Pre-registered hypotheses and their outcomes (the K13 discipline).*
 
-**Size**: `249` lines (`9334` bytes)
+**Size**: `249` lines
 
 **Functions:**
 - `def _to_hypothesis(row)`
@@ -4084,7 +4090,7 @@
 ### [`engine/information.py`](engine/information.py)
 > *Cheap information-quality checks over stored claim quotes.*
 
-**Size**: `62` lines (`2271` bytes)
+**Size**: `62` lines
 
 **Functions:**
 - `def normalize(text)` - *Fold case and punctuation so two quotes compare on their words.*
@@ -4099,7 +4105,7 @@
 ### [`engine/integrity.py`](engine/integrity.py)
 > *Graph integrity: provenance, evidence paths, dependency acyclicity and stale dependents.*
 
-**Size**: `934` lines (`35534` bytes)
+**Size**: `934` lines
 
 **Functions:**
 - `def _finding(code, severity, subject, message, fix)`
@@ -4118,7 +4124,7 @@
 ### [`engine/killtests.py`](engine/killtests.py)
 > *Executable kill tests: two agreeing runs, bound to code, inputs and command.*
 
-**Size**: `405` lines (`14976` bytes)
+**Size**: `405` lines
 
 **Functions:**
 - `def _to_test(row)`
@@ -4140,7 +4146,7 @@
 ### [`engine/maintenance.py`](engine/maintenance.py)
 > *Database maintenance: integrity verification and a crash-safe backup.*
 
-**Size**: `109` lines (`4245` bytes)
+**Size**: `109` lines
 
 **Functions:**
 - `def integrity_check(conn)` - *Run SQLite's own checks plus a few facts a reviewer wants before archiving.*
@@ -4152,7 +4158,7 @@
 ### [`engine/manifest.py`](engine/manifest.py)
 > *Generated-report manifests and drift detection.*
 
-**Size**: `172` lines (`6698` bytes)
+**Size**: `172` lines
 
 **Functions:**
 - `def license_block()` - *Identify the terms the generated artifact is offered under, by id and text digest.*
@@ -4167,7 +4173,7 @@
 ### [`engine/markdown.py`](engine/markdown.py)
 > *Markdown-safe rendering of untrusted text.*
 
-**Size**: `46` lines (`1727` bytes)
+**Size**: `46` lines
 
 **Functions:**
 - `def sanitize(text, width)` - *Collapse to one safe line: no control characters, no newlines, capped width.*
@@ -4180,7 +4186,7 @@
 ### [`engine/merging.py`](engine/merging.py)
 > *Claim merging: one survivor, every edge repointed, duplicates retired.*
 
-**Size**: `151` lines (`5780` bytes)
+**Size**: `151` lines
 
 **Functions:**
 - `def merge_claims(conn, keep_ref, drop_refs, note, actor)` - *Keep one claim, repoint edges from the duplicates, and retire the duplicates.*
@@ -4190,7 +4196,7 @@
 ### [`engine/migrations.py`](engine/migrations.py)
 > *Migration harness for lattice and N1 source databases.*
 
-**Size**: `652` lines (`22343` bytes)
+**Size**: `652` lines
 
 **Classes:**
 - `class MigrationReport` - *What one inspection or application observed and inserted.*
@@ -4226,7 +4232,7 @@
 ### [`engine/models.py`](engine/models.py)
 > *Frozen domain records and the engine's closed vocabularies.*
 
-**Size**: `279` lines (`6107` bytes)
+**Size**: `279` lines
 
 **Classes:**
 - `class Research`
@@ -4250,7 +4256,7 @@
 ### [`engine/observations.py`](engine/observations.py)
 > *Recorded observations: the raw measurements a numeric claim is computed from.*
 
-**Size**: `483` lines (`18632` bytes)
+**Size**: `483` lines
 
 **Classes:**
 - `class _DryRunComplete` - *Carry validated counts out of a rolled-back dry-run transaction.*
@@ -4271,7 +4277,7 @@
 ### [`engine/packs.py`](engine/packs.py)
 > *Domain-pack registry: declared boundaries, never cross-domain imports.*
 
-**Size**: `163` lines (`5438` bytes)
+**Size**: `163` lines
 
 **Classes:**
 - `class Pack`
@@ -4289,7 +4295,7 @@
 ### [`engine/plans.py`](engine/plans.py)
 > *Pre-registered analysis plans: comparisons declare their prediction first.*
 
-**Size**: `119` lines (`4189` bytes)
+**Size**: `119` lines
 
 **Functions:**
 - `def _to_plan(row)`
@@ -4303,7 +4309,7 @@
 ### [`engine/protocols.py`](engine/protocols.py)
 > *Measurement protocol registry.*
 
-**Size**: `188` lines (`6814` bytes)
+**Size**: `188` lines
 
 **Functions:**
 - `def _to_protocol(row)`
@@ -4317,7 +4323,7 @@
 ### [`engine/provenance.py`](engine/provenance.py)
 > *Workspace provenance: the code and input identity a test run or report is bound to.*
 
-**Size**: `187` lines (`6107` bytes)
+**Size**: `187` lines
 
 **Classes:**
 - `class Fingerprint` - *Identity of the engine code and the declared inputs.*
@@ -4341,7 +4347,7 @@
 ### [`engine/questions.py`](engine/questions.py)
 > *Research questions that collect supporting and contradicting claims.*
 
-**Size**: `73` lines (`2726` bytes)
+**Size**: `73` lines
 
 **Functions:**
 - `def _to_question(row)`
@@ -4355,7 +4361,7 @@
 ### [`engine/researches.py`](engine/researches.py)
 > *Research programs: the top-level containers the engine is asked to investigate.*
 
-**Size**: `92` lines (`3486` bytes)
+**Size**: `92` lines
 
 **Functions:**
 - `def _slugify(conn, title)`
@@ -4370,7 +4376,7 @@
 ### [`engine/screening.py`](engine/screening.py)
 > *Source screening and the PRISMA flow.*
 
-**Size**: `114` lines (`4319` bytes)
+**Size**: `114` lines
 
 **Functions:**
 - `def set_screening(conn, ref, status, reason, actor)` - *Record one screening decision; an out-status always carries a reason.*
@@ -4382,7 +4388,7 @@
 ### [`engine/search.py`](engine/search.py)
 > *Deterministic lexical search over the recorded graph.*
 
-**Size**: `226` lines (`8252` bytes)
+**Size**: `226` lines
 
 **Functions:**
 - `def _terms(query)` - *Case-folded query terms, de-duplicated and stripped of one-character noise.*
@@ -4397,7 +4403,7 @@
 ### [`engine/series.py`](engine/series.py)
 > *Numeric input parsing, summary statistics and histogram binning for gauge.*
 
-**Size**: `266` lines (`9531` bytes)
+**Size**: `266` lines
 
 **Classes:**
 - `class Summary` - *A series' count, extrema, centre and spread, with a stable JSON shape.*
@@ -4417,7 +4423,7 @@
 ### [`engine/sources.py`](engine/sources.py)
 > *Bibliographic sources: the only place literature text may enter the graph.*
 
-**Size**: `173` lines (`6090` bytes)
+**Size**: `173` lines
 
 **Functions:**
 - `def _to_source(row)`
@@ -4431,7 +4437,7 @@
 ### [`engine/stats.py`](engine/stats.py)
 > *Deterministic statistics for recorded observations.*
 
-**Size**: `358` lines (`13460` bytes)
+**Size**: `358` lines
 
 **Functions:**
 - `def sample_sd(values)` - *Sample standard deviation; zero for fewer than two values.*
@@ -4455,7 +4461,7 @@
 ### [`engine/synthesis.py`](engine/synthesis.py)
 > *Evidence synthesis: weighted consensus, contradiction pairs, and generated reports.*
 
-**Size**: `479` lines (`19723` bytes)
+**Size**: `479` lines
 
 **Functions:**
 - `def stance_claims(conn, question_id)`
@@ -4475,14 +4481,14 @@
 ### [`experiments/__init__.py`](experiments/__init__.py)
 > *N1 experiment records and baseline-vs-intervention analysis.*
 
-**Size**: `64` lines (`1603` bytes)
+**Size**: `64` lines
 
 ---
 
 ### [`experiments/analysis.py`](experiments/analysis.py)
 > *Baseline-vs-intervention analysis for N1 experiment records.*
 
-**Size**: `356` lines (`12945` bytes)
+**Size**: `356` lines
 
 **Functions:**
 - `def _start_date(value)`
@@ -4501,7 +4507,7 @@
 ### [`experiments/compat.py`](experiments/compat.py)
 > *Compatibility names for code that imported the N1-Engine classes directly.*
 
-**Size**: `39` lines (`1379` bytes)
+**Size**: `39` lines
 
 **Classes:**
 - `class AnalysisEngine` - *Static subset of the source AnalysisEngine that does not need a DataFrame.*
@@ -4516,7 +4522,7 @@
 ### [`experiments/exporter.py`](experiments/exporter.py)
 > *CSV export for N1 experiment rows, mirroring the import headers.*
 
-**Size**: `103` lines (`3136` bytes)
+**Size**: `103` lines
 
 **Functions:**
 - `def _write(path, fields, rows)`
@@ -4530,7 +4536,7 @@
 ### [`experiments/importer.py`](experiments/importer.py)
 > *CSV import for N1 experiment rows, using the host experiment model.*
 
-**Size**: `160` lines (`5574` bytes)
+**Size**: `160` lines
 
 **Functions:**
 - `def _rows(path, required)`
@@ -4545,7 +4551,7 @@
 ### [`experiments/models.py`](experiments/models.py)
 > *Experiment records: N1 interventions, metric definitions, measurements and events.*
 
-**Size**: `579` lines (`19640` bytes)
+**Size**: `579` lines
 
 **Classes:**
 - `class Intervention`
@@ -4580,7 +4586,7 @@
 ### [`experiments/reporting.py`](experiments/reporting.py)
 > *HTML report generation for N1 baseline-vs-intervention results.*
 
-**Size**: `102` lines (`4310` bytes)
+**Size**: `102` lines
 
 **Functions:**
 - `def save_report_json(results, filepath)` - *Save the raw analysis result as JSON, matching the source save_report action.*
@@ -4592,7 +4598,7 @@
 ### [`experiments/settings.py`](experiments/settings.py)
 > *Analysis settings for N1 experiments, mirroring the source SettingsManager.*
 
-**Size**: `66` lines (`2202` bytes)
+**Size**: `66` lines
 
 **Classes:**
 - `class SettingsManager` - *Load, save and expose the four analysis thresholds.*
@@ -4607,7 +4613,7 @@
 ### [`experiments/summary.py`](experiments/summary.py)
 > *Daily/weekly N1 summary, extracted from the source SummarizerWidget.*
 
-**Size**: `160` lines (`5495` bytes)
+**Size**: `160` lines
 
 **Functions:**
 - `def _date(value, field)`
@@ -4616,17 +4622,22 @@
 
 ---
 
+### [`rust/fix_literals.py`](rust/fix_literals.py)
+**Size**: `10` lines
+
+---
+
 ### [`studio/__init__.py`](studio/__init__.py)
 > *Studio surfaces: web, MCP and HTTP API.*
 
-**Size**: `1` lines (`46` bytes)
+**Size**: `1` lines
 
 ---
 
 ### [`studio/api.py`](studio/api.py)
 > *Stable public Python surface for host integrations such as neurocore.*
 
-**Size**: `361` lines (`9724` bytes)
+**Size**: `361` lines
 
 **Functions:**
 - `def _question_key(value)` - *Normalize `question:q_000001` or `q_000001` to the bare identifier.*
@@ -4638,7 +4649,7 @@
 ### [`studio/client.py`](studio/client.py)
 > *Turnkey client facade for AI hosts: own one connection, call MCP-parity tools.*
 
-**Size**: `400` lines (`18428` bytes)
+**Size**: `400` lines
 
 **Classes:**
 - `class LatticeClient` - *A synchronous, context-managed graph client with MCP tool parity.*
@@ -4707,7 +4718,7 @@
 ### [`studio/mcp.py`](studio/mcp.py)
 > *A dependency-free MCP stdio server exposing the graph as JSON-RPC tools.*
 
-**Size**: `540` lines (`27270` bytes)
+**Size**: `540` lines
 
 **Functions:**
 - `def _tool(name, description, properties, required)` - *An MCP tool declaration with a JSON Schema for its arguments.*
@@ -4729,7 +4740,7 @@
 ### [`studio/web.py`](studio/web.py)
 > *Zero-dependency web server and human-friendly Research Studio UI for Lattice.*
 
-**Size**: `2438` lines (`100831` bytes)
+**Size**: `2438` lines
 
 **Classes:**
 - `class WebResponse` - *Immutable HTTP response returned by `dispatch_web_request`.*
@@ -4759,21 +4770,21 @@
 ### [`tests/__init__.py`](tests/__init__.py)
 > *Regression shield for the research engine.*
 
-**Size**: `1` lines (`49` bytes)
+**Size**: `1` lines
 
 ---
 
 ### [`tests/atlas/__init__.py`](tests/atlas/__init__.py)
 > *Ported Atlas pack contract tests.*
 
-**Size**: `1` lines (`40` bytes)
+**Size**: `1` lines
 
 ---
 
 ### [`tests/atlas/test_3d_flashcards.py`](tests/atlas/test_3d_flashcards.py)
 > *3D export + flashcard decks (0.7.0 slice).*
 
-**Size**: `122` lines (`4755` bytes)
+**Size**: `122` lines
 
 **Functions:**
 - `def _analysis()`
@@ -4791,7 +4802,7 @@
 ### [`tests/atlas/test_autonomy.py`](tests/atlas/test_autonomy.py)
 > *Upload, auto-create, models index, contract, CLI (0.5.0 autonomy slice).*
 
-**Size**: `282` lines (`12736` bytes)
+**Size**: `282` lines
 
 **Classes:**
 - `class _FakeMuse`
@@ -4819,7 +4830,7 @@
 ### [`tests/atlas/test_cli_video.py`](tests/atlas/test_cli_video.py)
 > *CLI video regression: `video` must render (or refuse honestly), never NameError.*
 
-**Size**: `36` lines (`1321` bytes)
+**Size**: `36` lines
 
 **Functions:**
 - `def _save(tmp_path, figure_id)`
@@ -4831,7 +4842,7 @@
 ### [`tests/atlas/test_contract.py`](tests/atlas/test_contract.py)
 > *Contract coverage: every GET endpoint the machine contract promises exists.*
 
-**Size**: `55` lines (`2369` bytes)
+**Size**: `55` lines
 
 **Functions:**
 - `def test_every_contracted_get_endpoint_responds(tmp_path)`
@@ -4841,7 +4852,7 @@
 ### [`tests/atlas/test_cycle2_regressions.py`](tests/atlas/test_cycle2_regressions.py)
 > *Cycle-2 regression tests for bugs found in review.*
 
-**Size**: `74` lines (`3157` bytes)
+**Size**: `74` lines
 
 **Functions:**
 - `def test_spatial_recall_options_carry_ids()`
@@ -4854,7 +4865,7 @@
 ### [`tests/atlas/test_demo_inline_downloads.py`](tests/atlas/test_demo_inline_downloads.py)
 > *Demo inline downloads: browser-only fixture must download without a model.*
 
-**Size**: `81` lines (`3723` bytes)
+**Size**: `81` lines
 
 **Functions:**
 - `def _post(port, path, obj)`
@@ -4866,7 +4877,7 @@
 ### [`tests/atlas/test_demo_integrity.py`](tests/atlas/test_demo_integrity.py)
 > *Demo-data integrity: every committed real analysis and artifact stays valid.*
 
-**Size**: `69` lines (`2679` bytes)
+**Size**: `69` lines
 
 **Functions:**
 - `def _load(name)`
@@ -4880,7 +4891,7 @@
 ### [`tests/atlas/test_frames.py`](tests/atlas/test_frames.py)
 > *Frame quality: blank cards, duplicates, sharpness (my own viewing, automated).*
 
-**Size**: `77` lines (`3005` bytes)
+**Size**: `77` lines
 
 **Functions:**
 - `def _img(path, color, size, noise)`
@@ -4892,7 +4903,7 @@
 ---
 
 ### [`tests/atlas/test_ingestion.py`](tests/atlas/test_ingestion.py)
-**Size**: `32` lines (`1094` bytes)
+**Size**: `32` lines
 
 **Functions:**
 - `def _make_image(path, size)`
@@ -4902,7 +4913,7 @@
 ---
 
 ### [`tests/atlas/test_learning_store_demo.py`](tests/atlas/test_learning_store_demo.py)
-**Size**: `66` lines (`2925` bytes)
+**Size**: `66` lines
 
 **Functions:**
 - `def test_learning_modes_deterministic()`
@@ -4916,7 +4927,7 @@
 ### [`tests/atlas/test_materials.py`](tests/atlas/test_materials.py)
 > *Materials: diagrams, 3D tours, podcast scripts, question banks (0.10.0).*
 
-**Size**: `240` lines (`10811` bytes)
+**Size**: `240` lines
 
 **Functions:**
 - `def _analysis()`
@@ -4942,7 +4953,7 @@
 ### [`tests/atlas/test_offline_fallback.py`](tests/atlas/test_offline_fallback.py)
 > *Offline no-key path: every drop becomes a real, honestly-labelled model.*
 
-**Size**: `114` lines (`4965` bytes)
+**Size**: `114` lines
 
 **Functions:**
 - `def test_offline_builder_validates()`
@@ -4957,7 +4968,7 @@
 ---
 
 ### [`tests/atlas/test_providers.py`](tests/atlas/test_providers.py)
-**Size**: `78` lines (`3360` bytes)
+**Size**: `78` lines
 
 **Functions:**
 - `def _muse_transport(payload)`
@@ -4972,7 +4983,7 @@
 ### [`tests/atlas/test_quality_video.py`](tests/atlas/test_quality_video.py)
 > *Automatic video + quality analysis (goal slice).*
 
-**Size**: `123` lines (`5414` bytes)
+**Size**: `123` lines
 
 **Functions:**
 - `def _analysis()`
@@ -4987,7 +4998,7 @@
 ---
 
 ### [`tests/atlas/test_schema.py`](tests/atlas/test_schema.py)
-**Size**: `56` lines (`2521` bytes)
+**Size**: `56` lines
 
 **Functions:**
 - `def test_bbox_validation()`
@@ -5001,7 +5012,7 @@
 ### [`tests/atlas/test_scope.py`](tests/atlas/test_scope.py)
 > *Scope guard: Atlas is learning material, easy drag-and-drop (not figures-only).*
 
-**Size**: `39` lines (`1327` bytes)
+**Size**: `39` lines
 
 **Functions:**
 - `def _read(rel)`
@@ -5015,7 +5026,7 @@
 ### [`tests/atlas/test_segment_loop.py`](tests/atlas/test_segment_loop.py)
 > *Attach-mask endpoint + /masks/ serving tests (segmentation loop).*
 
-**Size**: `88` lines (`3667` bytes)
+**Size**: `88` lines
 
 **Functions:**
 - `def _serve(tmp_path)`
@@ -5028,7 +5039,7 @@
 ### [`tests/atlas/test_sources.py`](tests/atlas/test_sources.py)
 > *Universal ingestion: every source becomes learning material.*
 
-**Size**: `365` lines (`15754` bytes)
+**Size**: `365` lines
 
 **Classes:**
 - `class _FakeResp`
@@ -5067,7 +5078,7 @@
 ### [`tests/atlas/test_stage3_batch2_fixes.py`](tests/atlas/test_stage3_batch2_fixes.py)
 > *Stage 3 batch 2 — failing-first guards for verified deferred findings.*
 
-**Size**: `81` lines (`3302` bytes)
+**Size**: `81` lines
 
 **Functions:**
 - `def test_report_uses_supplied_flashcards_alias()`
@@ -5079,7 +5090,7 @@
 ### [`tests/atlas/test_stage3_batch3_fixes.py`](tests/atlas/test_stage3_batch3_fixes.py)
 > *Stage 3 batch 3 — failing-first guards for verified deferred findings.*
 
-**Size**: `103` lines (`3928` bytes)
+**Size**: `103` lines
 
 **Functions:**
 - `def test_pathway_empty_model_raises()`
@@ -5094,7 +5105,7 @@
 ### [`tests/atlas/test_stage3_batch4_fixes.py`](tests/atlas/test_stage3_batch4_fixes.py)
 > *Stage 3 batch 4 — failing-first guards for verified deferred findings.*
 
-**Size**: `100` lines (`3968` bytes)
+**Size**: `100` lines
 
 **Functions:**
 - `def test_weird_svg_scores_not_crashes()`
@@ -5107,7 +5118,7 @@
 ### [`tests/atlas/test_stage3_swarm_fixes.py`](tests/atlas/test_stage3_swarm_fixes.py)
 > *Stage 3 swarm fixes — failing-first guards for verified true findings.*
 
-**Size**: `61` lines (`2249` bytes)
+**Size**: `61` lines
 
 **Functions:**
 - `def test_sam_disclosure_exists()`
@@ -5122,7 +5133,7 @@
 ### [`tests/atlas/test_static_wiring.py`](tests/atlas/test_static_wiring.py)
 > *Static UI wiring: every element id the workspace JS touches must exist in HTML.*
 
-**Size**: `35` lines (`1587` bytes)
+**Size**: `35` lines
 
 **Functions:**
 - `def test_every_js_referenced_id_exists_in_html()`
@@ -5133,7 +5144,7 @@
 ### [`tests/atlas/test_study_pack.py`](tests/atlas/test_study_pack.py)
 > *Auto summaries + study pack (0.8.0 slice).*
 
-**Size**: `203` lines (`9601` bytes)
+**Size**: `203` lines
 
 **Functions:**
 - `def _analysis()`
@@ -5155,7 +5166,7 @@
 ### [`tests/atlas/test_vendored_text.py`](tests/atlas/test_vendored_text.py)
 > *Vendored text extraction + standalone adapter tests (no sibling needed).*
 
-**Size**: `93` lines (`3570` bytes)
+**Size**: `93` lines
 
 **Functions:**
 - `def test_txt_and_markdown_dispatch(tmp_path)`
@@ -5172,7 +5183,7 @@
 ### [`tests/atlas/test_wave1_honest_edges.py`](tests/atlas/test_wave1_honest_edges.py)
 > *Wave-1 honest-error edges: non-dict entities and wrong-type podcast payloads.*
 
-**Size**: `38` lines (`1566` bytes)
+**Size**: `38` lines
 
 **Functions:**
 - `def test_from_dict_non_dict_entity_raises_valueerror()`
@@ -5184,7 +5195,7 @@
 ### [`tests/atlas/test_wave2_deck_size.py`](tests/atlas/test_wave2_deck_size.py)
 > *Wave-2 regression guard: unreviewably large decks flag but don't block.*
 
-**Size**: `27` lines (`877` bytes)
+**Size**: `27` lines
 
 **Functions:**
 - `def _cards(n)`
@@ -5196,7 +5207,7 @@
 ### [`tests/atlas/test_wave3_tour_wrap.py`](tests/atlas/test_wave3_tour_wrap.py)
 > *Wave-3 regression guards: tour duration gate and unbreakable-token split.*
 
-**Size**: `46` lines (`1543` bytes)
+**Size**: `46` lines
 
 **Functions:**
 - `def _valid_tour(n)`
@@ -5209,7 +5220,7 @@
 ### [`tests/atlas/test_wave4_poster_fit.py`](tests/atlas/test_wave4_poster_fit.py)
 > *Wave-4 regression guard: poster vertical centering holds the frame.*
 
-**Size**: `27` lines (`896` bytes)
+**Size**: `27` lines
 
 **Functions:**
 - `def test_top_heavy_content_centers()`
@@ -5221,7 +5232,7 @@
 ### [`tests/atlas/test_wave5_honest_floors.py`](tests/atlas/test_wave5_honest_floors.py)
 > *Wave-5 regression guards: boxless honesty and quality floors.*
 
-**Size**: `29` lines (`1100` bytes)
+**Size**: `29` lines
 
 **Functions:**
 - `def test_boxless_spatial_refuses_with_text_route()`
@@ -5232,14 +5243,14 @@
 ### [`tests/lattice/__init__.py`](tests/lattice/__init__.py)
 > *Ported lattice contract tests.*
 
-**Size**: `1` lines (`37` bytes)
+**Size**: `1` lines
 
 ---
 
 ### [`tests/lattice/test_analysis.py`](tests/lattice/test_analysis.py)
 > *Unit tests for scientific contradiction detection, keystone centrality, and evidence matrix analysis.*
 
-**Size**: `400` lines (`20399` bytes)
+**Size**: `400` lines
 
 **Classes:**
 - `class TestAnalysis` - *Verify contradiction detection, keystone entity ranking, and Paper x Question evidence matrix.*
@@ -5268,7 +5279,7 @@
 ### [`tests/lattice/test_api.py`](tests/lattice/test_api.py)
 > *Unit tests for the public `lattice.api` integration surface.*
 
-**Size**: `369` lines (`14255` bytes)
+**Size**: `369` lines
 
 **Classes:**
 - `class PublicApiTests` - *Verify the facade stays complete, inert at import time and faithful.*
@@ -5296,7 +5307,7 @@
 ### [`tests/lattice/test_checks.py`](tests/lattice/test_checks.py)
 > *The integrity gate catches broken provenance, endpoints, duplicates and cycles.*
 
-**Size**: `101` lines (`4907` bytes)
+**Size**: `101` lines
 
 **Classes:**
 - `class CheckTests` - *Each test injects one defect into an otherwise clean graph.*
@@ -5318,7 +5329,7 @@
 ### [`tests/lattice/test_cli.py`](tests/lattice/test_cli.py)
 > *End-to-end command contracts without spawning subprocesses.*
 
-**Size**: `382` lines (`16916` bytes)
+**Size**: `382` lines
 
 **Classes:**
 - `class CliTests` - *Drive the real parser and handlers against a temporary database.*
@@ -5350,7 +5361,7 @@
 ### [`tests/lattice/test_client.py`](tests/lattice/test_client.py)
 > *Tests for the turnkey client facade used by AI hosts.*
 
-**Size**: `354` lines (`17643` bytes)
+**Size**: `354` lines
 
 **Classes:**
 - `class LatticeClientTests` - *Verify lifecycle, tool parity, convenience methods and failure modes.*
@@ -5392,7 +5403,7 @@
 ### [`tests/lattice/test_context.py`](tests/lattice/test_context.py)
 > *Unit tests for the token-budgeted, RLM-style AI context views.*
 
-**Size**: `230` lines (`11094` bytes)
+**Size**: `230` lines
 
 **Classes:**
 - `class ContextViewTests` - *Verify compact payloads, truncation, omission counts and the budget floor.*
@@ -5412,7 +5423,7 @@
 ### [`tests/lattice/test_database.py`](tests/lattice/test_database.py)
 > *Schema migration from the first release keeps an existing graph usable.*
 
-**Size**: `148` lines (`5392` bytes)
+**Size**: `148` lines
 
 **Classes:**
 - `class MigrationTests` - *A version 1 database gains the literature metadata columns without losing papers.*
@@ -5432,7 +5443,7 @@
 ### [`tests/lattice/test_diff.py`](tests/lattice/test_diff.py)
 > *Tests for graph snapshot diffing: record comparison, snapshot pairs and live-repository diffs.*
 
-**Size**: `193` lines (`9460` bytes)
+**Size**: `193` lines
 
 **Classes:**
 - `class DiffRecordsTests` - *The pure record comparison behind every diff entry point.*
@@ -5461,7 +5472,7 @@
 ### [`tests/lattice/test_discovery.py`](tests/lattice/test_discovery.py)
 > *Tests for pluggable automated literature discovery (arXiv, Crossref, and offline corpus).*
 
-**Size**: `228` lines (`9613` bytes)
+**Size**: `228` lines
 
 **Classes:**
 - `class DiscoveryTests` - *Verify the 4-layer discovery boundary: DTOs, registry, providers, and service DI.*
@@ -5481,7 +5492,7 @@
 ### [`tests/lattice/test_extraction.py`](tests/lattice/test_extraction.py)
 > *Tests for automated knowledge creation and claim extraction from ingested papers.*
 
-**Size**: `114` lines (`5341` bytes)
+**Size**: `114` lines
 
 **Classes:**
 - `class ExtractionTests` - *Verify deterministic sentence splitting, stance/confidence scoring, and claim/edge creation.*
@@ -5498,7 +5509,7 @@
 ### [`tests/lattice/test_hardening.py`](tests/lattice/test_hardening.py)
 > *Wave 21 hardening: bool-safe integer triads and brief provenance.*
 
-**Size**: `80` lines (`4021` bytes)
+**Size**: `80` lines
 
 **Classes:**
 - `class HardeningTests`
@@ -5512,7 +5523,7 @@
 ### [`tests/lattice/test_ingest.py`](tests/lattice/test_ingest.py)
 > *Format parsers stay dependency-free and deterministic.*
 
-**Size**: `243` lines (`9924` bytes)
+**Size**: `243` lines
 
 **Classes:**
 - `class BibtexTests` - *BibTeX braces, authors and identifiers.*
@@ -5549,7 +5560,7 @@
 ### [`tests/lattice/test_inquiry.py`](tests/lattice/test_inquiry.py)
 > *Ask, brief and review are deterministic and never invent a citation.*
 
-**Size**: `84` lines (`3768` bytes)
+**Size**: `84` lines
 
 **Classes:**
 - `class InquiryTests` - *A small graph with one supporting, one contradicting and one unrelated claim.*
@@ -5569,7 +5580,7 @@
 ### [`tests/lattice/test_mcp.py`](tests/lattice/test_mcp.py)
 > *MCP JSON-RPC contracts and stdio framing.*
 
-**Size**: `268` lines (`13363` bytes)
+**Size**: `268` lines
 
 **Classes:**
 - `class McpTests` - *Call the protocol handler directly; no sockets or spawns.*
@@ -5601,7 +5612,7 @@
 ### [`tests/lattice/test_meta.py`](tests/lattice/test_meta.py)
 > *Unit tests for quantitative meta-analysis, effect sizes and forest plots.*
 
-**Size**: `133` lines (`5927` bytes)
+**Size**: `133` lines
 
 **Classes:**
 - `class MetaAnalysisTests` - *Verify statistical pooling, heterogeneity metrics and forest plot renderers.*
@@ -5619,7 +5630,7 @@
 ### [`tests/lattice/test_models.py`](tests/lattice/test_models.py)
 > *Identity, validation and budget helpers.*
 
-**Size**: `110` lines (`3594` bytes)
+**Size**: `110` lines
 
 **Classes:**
 - `class IdentityTests` - *Stable identifiers make dedupe and citations reproducible.*
@@ -5644,7 +5655,7 @@
 ### [`tests/lattice/test_repository.py`](tests/lattice/test_repository.py)
 > *Graph writes, dedupe, references, search and evidence grouping.*
 
-**Size**: `205` lines (`9828` bytes)
+**Size**: `205` lines
 
 **Classes:**
 - `class RepositoryTests` - *Every test gets a fresh in-memory graph.*
@@ -5674,7 +5685,7 @@
 ### [`tests/lattice/test_screening.py`](tests/lattice/test_screening.py)
 > *Unit tests for PRISMA 2020 systematic review screening and flow generation.*
 
-**Size**: `122` lines (`5360` bytes)
+**Size**: `122` lines
 
 **Classes:**
 - `class ScreeningTests` - *Test paper screening decisions, validation, and PRISMA 2020 flow computation.*
@@ -5692,7 +5703,7 @@
 ### [`tests/lattice/test_snapshots.py`](tests/lattice/test_snapshots.py)
 > *Tests for knowledge interaction: multi-term search, subgraphs, question status, and snapshots.*
 
-**Size**: `210` lines (`9418` bytes)
+**Size**: `210` lines
 
 **Classes:**
 - `class InteractionAndSnapshotTests` - *Verify multi-term search, subgraph traversal, question status, and JSONL snapshot I/O.*
@@ -5709,7 +5720,7 @@
 ### [`tests/lattice/test_synthesis.py`](tests/lattice/test_synthesis.py)
 > *Tests for scientific literature synthesis: consensus scoring, thematic clusters, and BibTeX.*
 
-**Size**: `121` lines (`5170` bytes)
+**Size**: `121` lines
 
 **Classes:**
 - `class SynthesisTests` - *Verify consensus scoring, thematic clustering, follow-up queries, and BibTeX generation.*
@@ -5724,7 +5735,7 @@
 ### [`tests/lattice/test_ui_inventory.py`](tests/lattice/test_ui_inventory.py)
 > *The UI inventory proof covers the studio's controls, handlers, routes and theme tokens.*
 
-**Size**: `38` lines (`1510` bytes)
+**Size**: `38` lines
 
 **Classes:**
 - `class InventoryTest`
@@ -5736,7 +5747,7 @@
 ### [`tests/lattice/test_web.py`](tests/lattice/test_web.py)
 > *Tests for the web-based human UI and JSON API dispatcher (zero sockets).*
 
-**Size**: `364` lines (`16345` bytes)
+**Size**: `364` lines
 
 **Classes:**
 - `class WebInterfaceTests` - *Verify HTML rendering and REST API handlers via pure request dispatch.*
@@ -5766,14 +5777,14 @@
 ### [`tests/pnn/__init__.py`](tests/pnn/__init__.py)
 > *Ported PNN pack contract tests.*
 
-**Size**: `1` lines (`38` bytes)
+**Size**: `1` lines
 
 ---
 
 ### [`tests/pnn/test_assay.py`](tests/pnn/test_assay.py)
 > *Unit and CLI tests for Phase 3 in vitro assay ingestion and hit qualification.*
 
-**Size**: `185` lines (`6950` bytes)
+**Size**: `185` lines
 
 **Classes:**
 - `class AssayTest`
@@ -5793,7 +5804,7 @@
 ### [`tests/pnn/test_bioisostere.py`](tests/pnn/test_bioisostere.py)
 > *Unit tests for bioisosteric replacement and metabolic soft-spot optimizer.*
 
-**Size**: `164` lines (`6048` bytes)
+**Size**: `164` lines
 
 **Classes:**
 - `class TestBioisostere`
@@ -5813,7 +5824,7 @@
 ### [`tests/pnn/test_cli.py`](tests/pnn/test_cli.py)
 > *Integration tests for the `python -m pnn` CLI contract.*
 
-**Size**: `84` lines (`3727` bytes)
+**Size**: `84` lines
 
 **Classes:**
 - `class CliTest`
@@ -5831,7 +5842,7 @@
 ### [`tests/pnn/test_curation.py`](tests/pnn/test_curation.py)
 > *Unit and CLI tests for compound-library curation.*
 
-**Size**: `181` lines (`6942` bytes)
+**Size**: `181` lines
 
 **Classes:**
 - `class DeduplicationTest`
@@ -5864,7 +5875,7 @@
 ### [`tests/pnn/test_docking.py`](tests/pnn/test_docking.py)
 > *Unit tests for docking ingestion and consensus normalization.*
 
-**Size**: `113` lines (`4478` bytes)
+**Size**: `113` lines
 
 **Classes:**
 - `class DockingIngestionTest`
@@ -5885,7 +5896,7 @@
 ### [`tests/pnn/test_dynamics.py`](tests/pnn/test_dynamics.py)
 > *Unit tests for MD trajectory and contact stability analyzer.*
 
-**Size**: `145` lines (`6276` bytes)
+**Size**: `145` lines
 
 **Classes:**
 - `class TestDynamics`
@@ -5904,7 +5915,7 @@
 ### [`tests/pnn/test_ind.py`](tests/pnn/test_ind.py)
 > *Unit tests for human allometric dose projection and IND regulatory dossier generator.*
 
-**Size**: `216` lines (`8723` bytes)
+**Size**: `216` lines
 
 **Classes:**
 - `class TestIndProjection`
@@ -5923,7 +5934,7 @@
 ---
 
 ### [`tests/pnn/test_mpo.py`](tests/pnn/test_mpo.py)
-**Size**: `132` lines (`4795` bytes)
+**Size**: `132` lines
 
 **Classes:**
 - `class TestMpoCalculations`
@@ -5943,7 +5954,7 @@
 ### [`tests/pnn/test_pathway.py`](tests/pnn/test_pathway.py)
 > *Unit tests for hypothalamic circuit dynamics and dosing simulator.*
 
-**Size**: `141` lines (`5225` bytes)
+**Size**: `141` lines
 
 **Classes:**
 - `class TestPathwaySimulator`
@@ -5961,7 +5972,7 @@
 ### [`tests/pnn/test_pipeline.py`](tests/pnn/test_pipeline.py)
 > *Unit and CLI integration tests for the end-to-end Phase 2 lead selection pipeline.*
 
-**Size**: `206` lines (`8201` bytes)
+**Size**: `206` lines
 
 **Classes:**
 - `class PipelineTest`
@@ -5981,7 +5992,7 @@
 ---
 
 ### [`tests/pnn/test_preclinical.py`](tests/pnn/test_preclinical.py)
-**Size**: `224` lines (`8597` bytes)
+**Size**: `224` lines
 
 **Classes:**
 - `class TestPreclinicalNCA`
@@ -6006,7 +6017,7 @@
 ### [`tests/pnn/test_rank.py`](tests/pnn/test_rank.py)
 > *Unit and CLI tests for the docking consensus shortlist.*
 
-**Size**: `158` lines (`6554` bytes)
+**Size**: `158` lines
 
 **Classes:**
 - `class ShortlistTest`
@@ -6034,7 +6045,7 @@
 ### [`tests/pnn/test_rules.py`](tests/pnn/test_rules.py)
 > *Unit tests for the property rules (PRINCIPLE-014: failing-first boundaries).*
 
-**Size**: `89` lines (`3394` bytes)
+**Size**: `89` lines
 
 **Classes:**
 - `class PropertyRuleTest`
@@ -6054,7 +6065,7 @@
 ---
 
 ### [`tests/pnn/test_run.py`](tests/pnn/test_run.py)
-**Size**: `131` lines (`6074` bytes)
+**Size**: `131` lines
 
 **Classes:**
 - `class TestTurnkeyRunner`
@@ -6069,7 +6080,7 @@
 ### [`tests/pnn/test_safety.py`](tests/pnn/test_safety.py)
 > *Unit tests for the IND-enabling safety pharmacology and toxicology package.*
 
-**Size**: `301` lines (`13166` bytes)
+**Size**: `301` lines
 
 **Classes:**
 - `class TestSafetyIngestion`
@@ -6107,7 +6118,7 @@
 ---
 
 ### [`tests/pnn/test_sar.py`](tests/pnn/test_sar.py)
-**Size**: `138` lines (`5468` bytes)
+**Size**: `138` lines
 
 **Classes:**
 - `class TestSarSmilesScaffolding`
@@ -6128,7 +6139,7 @@
 ### [`tests/pnn/test_screen.py`](tests/pnn/test_screen.py)
 > *Unit tests for tiering, ranking and CSV ingestion.*
 
-**Size**: `167` lines (`6551` bytes)
+**Size**: `167` lines
 
 **Classes:**
 - `class TierTest`
@@ -6161,7 +6172,7 @@
 ---
 
 ### [`tests/pnn/test_studio.py`](tests/pnn/test_studio.py)
-**Size**: `429` lines (`18633` bytes)
+**Size**: `429` lines
 
 **Classes:**
 - `class TestStudioRendering`
@@ -6203,7 +6214,7 @@
 ### [`tests/pnn/test_target.py`](tests/pnn/test_target.py)
 > *Unit and CLI tests for target receptor profiles and Vina grid generation.*
 
-**Size**: `129` lines (`4865` bytes)
+**Size**: `129` lines
 
 **Classes:**
 - `class TargetProfileTest`
@@ -6223,7 +6234,7 @@
 ---
 
 ### [`tests/pnn/test_waves.py`](tests/pnn/test_waves.py)
-**Size**: `88` lines (`3348` bytes)
+**Size**: `88` lines
 
 **Classes:**
 - `class TestWaveLedger`
@@ -6241,7 +6252,7 @@
 ### [`tests/support.py`](tests/support.py)
 > *Shared fixtures: a fresh in-memory database per test.*
 
-**Size**: `64` lines (`2181` bytes)
+**Size**: `64` lines
 
 **Classes:**
 - `class DatabaseCase` - *Give each test an isolated schema and connection.*
@@ -6259,7 +6270,7 @@
 ### [`tests/test_ai.py`](tests/test_ai.py)
 > *AI integration: provenance at birth, fabricated citations die, novelty can survive.*
 
-**Size**: `417` lines (`16243` bytes)
+**Size**: `417` lines
 
 **Classes:**
 - `class ArtifactTests`
@@ -6297,7 +6308,7 @@
 ### [`tests/test_analysis.py`](tests/test_analysis.py)
 > *Discovery: contradictions, coverage matrix, keystone ranking, exposure.*
 
-**Size**: `185` lines (`8910` bytes)
+**Size**: `185` lines
 
 **Classes:**
 - `class KeywordTests`
@@ -6325,7 +6336,7 @@
 ### [`tests/test_atlas_pack.py`](tests/test_atlas_pack.py)
 > *Atlas pack contract for the host unittest gate.*
 
-**Size**: `55` lines (`2527` bytes)
+**Size**: `55` lines
 
 **Classes:**
 - `class AtlasPackTests`
@@ -6340,7 +6351,7 @@
 ### [`tests/test_attempts.py`](tests/test_attempts.py)
 > *Attempt authority: the earliest non-replaceable attempt wins.*
 
-**Size**: `218` lines (`8803` bytes)
+**Size**: `218` lines
 
 **Classes:**
 - `class AttemptAuthorityTests`
@@ -6368,7 +6379,7 @@
 ### [`tests/test_audit_fixes.py`](tests/test_audit_fixes.py)
 > *Regression tests for defects found in the T-004 audit.*
 
-**Size**: `126` lines (`5788` bytes)
+**Size**: `126` lines
 
 **Classes:**
 - `class RunIdentityTests`
@@ -6390,12 +6401,13 @@
 ### [`tests/test_bundle.py`](tests/test_bundle.py)
 > *JSONL export is complete, scoped and deterministic in order.*
 
-**Size**: `185` lines (`7822` bytes)
+**Size**: `193` lines
 
 **Classes:**
 - `class BundleTests`
   - Method `.setUp()`
   - Method `.test_export_writes_meta_first_and_every_record()`
+  - Method `.test_export_declares_the_supported_bridge()`
   - Method `.test_scoped_export_excludes_other_programs()`
   - Method `.test_export_replaces_the_file_atomically()`
   - Method `.test_export_includes_observations_and_events()`
@@ -6415,7 +6427,7 @@
 ### [`tests/test_calibration.py`](tests/test_calibration.py)
 > *Hypothesis calibration: recorded confidence is scored against recorded outcomes.*
 
-**Size**: `121` lines (`5590` bytes)
+**Size**: `121` lines
 
 **Classes:**
 - `class CalibrationTests`
@@ -6434,7 +6446,7 @@
 ### [`tests/test_cascade.py`](tests/test_cascade.py)
 > *A collapsed premise invalidates every dependent transitively.*
 
-**Size**: `155` lines (`7049` bytes)
+**Size**: `155` lines
 
 **Classes:**
 - `class CascadeTests`
@@ -6457,7 +6469,7 @@
 ### [`tests/test_charts.py`](tests/test_charts.py)
 > *Unit tests for gauge's deterministic text renderers.*
 
-**Size**: `208` lines (`8151` bytes)
+**Size**: `208` lines
 
 **Classes:**
 - `class SparklineTests` - *Eight fixed levels, a flat middle and proportional resampling.*
@@ -6503,7 +6515,7 @@
 ### [`tests/test_claims.py`](tests/test_claims.py)
 > *Provenance requirements and the append-only verdict lifecycle.*
 
-**Size**: `226` lines (`9687` bytes)
+**Size**: `226` lines
 
 **Classes:**
 - `class ClaimTests`
@@ -6532,7 +6544,7 @@
 ### [`tests/test_cli.py`](tests/test_cli.py)
 > *The CLI surface: JSON output, exit codes and the error triad.*
 
-**Size**: `628` lines (`25692` bytes)
+**Size**: `628` lines
 
 **Classes:**
 - `class CliTests`
@@ -6589,7 +6601,7 @@
 ### [`tests/test_context.py`](tests/test_context.py)
 > *Token-budgeted views: estimation, packing and omission accounting.*
 
-**Size**: `87` lines (`3067` bytes)
+**Size**: `87` lines
 
 **Classes:**
 - `class TokenTests`
@@ -6612,7 +6624,7 @@
 ### [`tests/test_controls.py`](tests/test_controls.py)
 > *Negative controls: a test must be able to fail before its pass is evidence.*
 
-**Size**: `167` lines (`7133` bytes)
+**Size**: `167` lines
 
 **Classes:**
 - `class ControlTests`
@@ -6636,7 +6648,7 @@
 ### [`tests/test_diffing.py`](tests/test_diffing.py)
 > *Snapshot diff: semantic by default, exact on request.*
 
-**Size**: `119` lines (`4724` bytes)
+**Size**: `119` lines
 
 **Classes:**
 - `class DiffTests`
@@ -6656,7 +6668,7 @@
 ### [`tests/test_docs.py`](tests/test_docs.py)
 > *Documentation and project memory stay discoverable and within budget.*
 
-**Size**: `107` lines (`3880` bytes)
+**Size**: `107` lines
 
 **Classes:**
 - `class DocsTests`
@@ -6672,7 +6684,7 @@
 ### [`tests/test_domain_isolation.py`](tests/test_domain_isolation.py)
 > *Domain packs stay isolated: no pack imports another pack or a studio surface.*
 
-**Size**: `54` lines (`2101` bytes)
+**Size**: `54` lines
 
 **Classes:**
 - `class DomainIsolationTests`
@@ -6688,7 +6700,7 @@
 ### [`tests/test_duplicates.py`](tests/test_duplicates.py)
 > *Duplicate sources: DOI and title normalization, scope, and the integrity warning.*
 
-**Size**: `93` lines (`4413` bytes)
+**Size**: `93` lines
 
 **Classes:**
 - `class NormalizationTests`
@@ -6707,7 +6719,7 @@
 ### [`tests/test_errors.py`](tests/test_errors.py)
 > *NotFound fixes must point at real CLI verbs.*
 
-**Size**: `33` lines (`1023` bytes)
+**Size**: `33` lines
 
 **Classes:**
 - `class NotFoundTests`
@@ -6718,7 +6730,7 @@
 ### [`tests/test_events.py`](tests/test_events.py)
 > *Event log: append-only record of actions that are not verdicts.*
 
-**Size**: `190` lines (`8353` bytes)
+**Size**: `190` lines
 
 **Classes:**
 - `class EventTests`
@@ -6744,7 +6756,7 @@
 ### [`tests/test_experiments.py`](tests/test_experiments.py)
 > *N1 experiment records and baseline-vs-intervention analysis on the host core.*
 
-**Size**: `186` lines (`6704` bytes)
+**Size**: `186` lines
 
 **Classes:**
 - `class ExperimentModelTests`
@@ -6765,7 +6777,7 @@
 ### [`tests/test_fluid_audit.py`](tests/test_fluid_audit.py)
 > *Fluid-universe audit primitives stay callable after the port.*
 
-**Size**: `36` lines (`1374` bytes)
+**Size**: `36` lines
 
 **Classes:**
 - `class FluidAuditPrimitiveTests`
@@ -6778,7 +6790,7 @@
 ### [`tests/test_fluid_rigor.py`](tests/test_fluid_rigor.py)
 > *Fluid-universe rigor contracts: fingerprints, two-run compare and claim statuses.*
 
-**Size**: `156` lines (`6560` bytes)
+**Size**: `156` lines
 
 **Classes:**
 - `class FingerprintTests`
@@ -6804,7 +6816,7 @@
 ### [`tests/test_golden.py`](tests/test_golden.py)
 > *Golden run: the whole command surface, end to end, in a fresh database.*
 
-**Size**: `205` lines (`9926` bytes)
+**Size**: `205` lines
 
 **Classes:**
 - `class GoldenRunTests`
@@ -6818,7 +6830,7 @@
 ### [`tests/test_hypotheses.py`](tests/test_hypotheses.py)
 > *Pre-registration precedes outcomes and cards carry the falsification criterion.*
 
-**Size**: `83` lines (`3827` bytes)
+**Size**: `83` lines
 
 **Classes:**
 - `class HypothesisTests`
@@ -6834,7 +6846,7 @@
 ### [`tests/test_information.py`](tests/test_information.py)
 > *Cheap information-quality checks over stored claim quotes.*
 
-**Size**: `57` lines (`2046` bytes)
+**Size**: `57` lines
 
 **Classes:**
 - `class InformationTests`
@@ -6851,7 +6863,7 @@
 ### [`tests/test_inputs.py`](tests/test_inputs.py)
 > *Declared inputs: glob expansion, directory refusal, absence and collision safety.*
 
-**Size**: `70` lines (`2844` bytes)
+**Size**: `70` lines
 
 **Classes:**
 - `class InputTests`
@@ -6870,7 +6882,7 @@
 ### [`tests/test_integrity.py`](tests/test_integrity.py)
 > *Every integrity rule must detect the corruption it names.*
 
-**Size**: `462` lines (`21009` bytes)
+**Size**: `462` lines
 
 **Classes:**
 - `class IntegrityTests`
@@ -6919,7 +6931,7 @@
 ### [`tests/test_killtests.py`](tests/test_killtests.py)
 > *Kill tests: binding, two-run agreement, expected exits and bounded teardown.*
 
-**Size**: `168` lines (`7490` bytes)
+**Size**: `168` lines
 
 **Classes:**
 - `class KillTestTests`
@@ -6943,7 +6955,7 @@
 ### [`tests/test_license_notices.py`](tests/test_license_notices.py)
 > *Ported packages keep their source notice, SHA and license text.*
 
-**Size**: `32` lines (`1416` bytes)
+**Size**: `32` lines
 
 **Classes:**
 - `class LicenseNoticeTests`
@@ -6955,7 +6967,7 @@
 ### [`tests/test_maintenance.py`](tests/test_maintenance.py)
 > *Database maintenance: integrity verification and verified backups.*
 
-**Size**: `166` lines (`7202` bytes)
+**Size**: `166` lines
 
 **Classes:**
 - `class MaintenanceTests`
@@ -6980,7 +6992,7 @@
 ### [`tests/test_manifest.py`](tests/test_manifest.py)
 > *Generated report manifests and drift detection.*
 
-**Size**: `190` lines (`8101` bytes)
+**Size**: `190` lines
 
 **Classes:**
 - `class ManifestTests`
@@ -7006,7 +7018,7 @@
 ### [`tests/test_markdown.py`](tests/test_markdown.py)
 > *Untrusted text: control characters, newlines and table syntax must not escape a cell.*
 
-**Size**: `50` lines (`1645` bytes)
+**Size**: `50` lines
 
 **Classes:**
 - `class SanitizeTests`
@@ -7027,7 +7039,7 @@
 ### [`tests/test_measurements.py`](tests/test_measurements.py)
 > *Measurement provenance and protocol comparability.*
 
-**Size**: `253` lines (`11173` bytes)
+**Size**: `253` lines
 
 **Classes:**
 - `class MeasurementTests`
@@ -7063,7 +7075,7 @@
 ### [`tests/test_merging.py`](tests/test_merging.py)
 > *Merging duplicates: survivor, repointed edges, retired duplicates, history kept.*
 
-**Size**: `139` lines (`6172` bytes)
+**Size**: `139` lines
 
 **Classes:**
 - `class MergeTests`
@@ -7086,7 +7098,7 @@
 ### [`tests/test_migration.py`](tests/test_migration.py)
 > *Schema migration: an older database is repaired, not rejected or wiped.*
 
-**Size**: `275` lines (`11484` bytes)
+**Size**: `275` lines
 
 **Classes:**
 - `class MigrationTests`
@@ -7113,7 +7125,7 @@
 ### [`tests/test_migration_harness.py`](tests/test_migration_harness.py)
 > *Migration harness: inspect first, then apply a source fixture without losing provenance.*
 
-**Size**: `268` lines (`12083` bytes)
+**Size**: `268` lines
 
 **Classes:**
 - `class MigrationHarnessTests`
@@ -7139,7 +7151,7 @@
 ### [`tests/test_models.py`](tests/test_models.py)
 > *Vocabularies are closed and records are immutable.*
 
-**Size**: `53` lines (`1607` bytes)
+**Size**: `53` lines
 
 **Classes:**
 - `class ModelTests`
@@ -7152,7 +7164,7 @@
 ### [`tests/test_n1_ports.py`](tests/test_n1_ports.py)
 > *N1 suitable ports: provenance-gated correlation, batch stats-all, CSV import.*
 
-**Size**: `327` lines (`14588` bytes)
+**Size**: `327` lines
 
 **Classes:**
 - `class PearsonTests`
@@ -7195,7 +7207,7 @@
 ### [`tests/test_n1_surfaces.py`](tests/test_n1_surfaces.py)
 > *N1 surfaces that were missing after the first merge: correlation, CSV, report.*
 
-**Size**: `284` lines (`12396` bytes)
+**Size**: `284` lines
 
 **Classes:**
 - `class ExperimentSurfaceTests`
@@ -7219,7 +7231,7 @@
 ### [`tests/test_neurocore_contract.py`](tests/test_neurocore_contract.py)
 > *NeuroCore consumption contract: the documented Python API and MCP surface stay callable.*
 
-**Size**: `164` lines (`6627` bytes)
+**Size**: `164` lines
 
 **Classes:**
 - `class NeuroCoreApiTests`
@@ -7239,7 +7251,7 @@
 ### [`tests/test_obezite_ledger.py`](tests/test_obezite_ledger.py)
 > *Obezite claim-ledger tooling: parsing, buckets and projections on a fixture.*
 
-**Size**: `180` lines (`8262` bytes)
+**Size**: `180` lines
 
 **Classes:**
 - `class LedgerParsingTests`
@@ -7265,7 +7277,7 @@
 ### [`tests/test_observations.py`](tests/test_observations.py)
 > *Observations: raw values, their voiding, and the statistics projection over them.*
 
-**Size**: `244` lines (`11825` bytes)
+**Size**: `244` lines
 
 **Classes:**
 - `class ObservationTests`
@@ -7304,7 +7316,7 @@
 ### [`tests/test_packs.py`](tests/test_packs.py)
 > *Domain-pack registry: an isolated pack is declared, not imported across domains.*
 
-**Size**: `84` lines (`3339` bytes)
+**Size**: `84` lines
 
 **Classes:**
 - `class PackRegistryTests`
@@ -7321,7 +7333,7 @@
 ### [`tests/test_plans.py`](tests/test_plans.py)
 > *Analysis plans are preregistered; unmatched comparisons read as exploratory.*
 
-**Size**: `101` lines (`3941` bytes)
+**Size**: `101` lines
 
 **Classes:**
 - `class PlanTests`
@@ -7338,7 +7350,7 @@
 ### [`tests/test_projects_scan.py`](tests/test_projects_scan.py)
 > *Every directory under projects/ is named in the project scan.*
 
-**Size**: `32` lines (`1019` bytes)
+**Size**: `32` lines
 
 **Classes:**
 - `class ProjectsScanCoverageTests`
@@ -7349,7 +7361,7 @@
 ### [`tests/test_promotion.py`](tests/test_promotion.py)
 > *Promotion gate: a NUMERIC verdict must cite a current, verified run group.*
 
-**Size**: `94` lines (`4148` bytes)
+**Size**: `94` lines
 
 **Classes:**
 - `class PromotionTests`
@@ -7367,7 +7379,7 @@
 ### [`tests/test_provenance.py`](tests/test_provenance.py)
 > *Workspace provenance: code and input identity used to bind evidence.*
 
-**Size**: `91` lines (`3447` bytes)
+**Size**: `91` lines
 
 **Classes:**
 - `class ProvenanceTests`
@@ -7385,7 +7397,7 @@
 ### [`tests/test_research.py`](tests/test_research.py)
 > *Program creation, slug resolution and counts.*
 
-**Size**: `45` lines (`1739` bytes)
+**Size**: `45` lines
 
 **Classes:**
 - `class ResearchTests`
@@ -7401,7 +7413,7 @@
 ### [`tests/test_revisions.py`](tests/test_revisions.py)
 > *Claim revisions: the head carries the edges, the old claim stays as history.*
 
-**Size**: `171` lines (`6027` bytes)
+**Size**: `171` lines
 
 **Classes:**
 - `class RevisionTests`
@@ -7426,7 +7438,7 @@
 ### [`tests/test_schema_v14.py`](tests/test_schema_v14.py)
 > *Schema 14: lattice paper fields, N1 experiment tables and the pack registry.*
 
-**Size**: `107` lines (`3743` bytes)
+**Size**: `107` lines
 
 **Classes:**
 - `class Schema14MigrationTests`
@@ -7441,7 +7453,7 @@
 ### [`tests/test_screening.py`](tests/test_screening.py)
 > *Screening decisions and the PRISMA flow.*
 
-**Size**: `85` lines (`3747` bytes)
+**Size**: `85` lines
 
 **Classes:**
 - `class ScreeningTests`
@@ -7461,7 +7473,7 @@
 ### [`tests/test_search.py`](tests/test_search.py)
 > *Deterministic lexical search: phrase ranking, snippets, scope and budget.*
 
-**Size**: `129` lines (`5971` bytes)
+**Size**: `129` lines
 
 **Classes:**
 - `class SearchTests`
@@ -7482,7 +7494,7 @@
 ### [`tests/test_series.py`](tests/test_series.py)
 > *Unit tests for gauge's input parsing and summary statistics.*
 
-**Size**: `240` lines (`10224` bytes)
+**Size**: `240` lines
 
 **Classes:**
 - `class ParseNumbersTests` - *One strict reader for positional arguments, files and pipes.*
@@ -7537,7 +7549,7 @@
 ### [`tests/test_sources_questions.py`](tests/test_sources_questions.py)
 > *Source identifiers and question lifecycle.*
 
-**Size**: `63` lines (`2639` bytes)
+**Size**: `63` lines
 
 **Classes:**
 - `class SourceQuestionTests`
@@ -7554,7 +7566,7 @@
 ### [`tests/test_sources_retraction.py`](tests/test_sources_retraction.py)
 > *Source status and retraction cascade.*
 
-**Size**: `257` lines (`11450` bytes)
+**Size**: `257` lines
 
 **Classes:**
 - `class SourceStatusTests`
@@ -7580,7 +7592,7 @@
 ### [`tests/test_stats.py`](tests/test_stats.py)
 > *Statistics: values checked against an independent implementation, behaviour checked here.*
 
-**Size**: `162` lines (`6501` bytes)
+**Size**: `162` lines
 
 **Classes:**
 - `class DistributionTests`
@@ -7621,7 +7633,7 @@
 ### [`tests/test_synthesis.py`](tests/test_synthesis.py)
 > *Consensus weighting and generated reports.*
 
-**Size**: `202` lines (`9381` bytes)
+**Size**: `202` lines
 
 **Classes:**
 - `class SynthesisTests`

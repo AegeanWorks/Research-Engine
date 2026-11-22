@@ -1,49 +1,17 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "T-025-research-functions-merge",
+    "task_id": "T-026-rust-rewrite",
     "last_phase": "in_progress",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1794073879.5991619,
-    "owner": "opencode:goal",
-    "started_by": "opencode:goal",
-    "continuations": [],
-    "completed_at": 1794074335.0688913
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1795341185.3334901,
+    "owner": "opencode:rust-rewrite",
+    "lease_until": 1795348385.3334901,
+    "started_by": "opencode:rust-rewrite",
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "T-021-followups",
-      "phase": "in_progress",
-      "phase_num": 4,
-      "description": "[2/3] Golden coverage shipped: import-csv template plus bulk import plus correlation plus stats-all before report out, golden green, checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793912775.1912973,
-      "timestamp_str": "2026-11-06 00:06:15",
-      "agent": "kilo:goal"
-    },
-    {
-      "task_id": "T-021-followups",
-      "phase": "in_progress",
-      "phase_num": 4,
-      "description": "[3/3] CSV template shipped: import-csv --template prints canonical header with no DB write plus README within 22500 plus ADR-052, 4/4 gates pass, checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793912775.3451784,
-      "timestamp_str": "2026-11-06 00:06:15",
-      "agent": "kilo:goal"
-    },
-    {
-      "task_id": "T-021-followups",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'T-021-followups' completed successfully.",
-      "status": "completed",
-      "timestamp": 1793912784.305589,
-      "timestamp_str": "2026-11-06 00:06:24",
-      "agent": "kilo:goal"
-    },
     {
       "task_id": "T-022-windows-dryrun-holm",
       "phase": "in_progress",
@@ -254,6 +222,47 @@
       "timestamp": 1794074335.0688937,
       "timestamp_str": "2026-11-07 20:58:55",
       "agent": "opencode:goal"
+    },
+    {
+      "task_id": "T-026-rust-rewrite",
+      "phase": "in_progress",
+      "phase_num": 2,
+      "description": "[1/6] Rust crate foundation: Cargo workspace, schema-14 SQLite store, frozen models/vocabularies, CLI skeleton",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795339366.8815405,
+      "timestamp_str": "2026-11-22 12:22:46",
+      "agent": "opencode:rust-rewrite",
+      "impact_assessment": {
+        "why": "User directive: full rewrite of research-engine in Rust; the Python core is ~10k lines and the whole tree ~79k lines, so the rewrite must be incremental, verifiable and keep the persistent contract.",
+        "benefits": "A compilable Rust core with schema-14 DB compatibility and CLI parity from milestone 1; each later milestone ports a bounded subsystem with golden tests against the Python engine.",
+        "risks": "contract: SQLite schema v14, ID formats, CLI flags and JSON shapes must stay byte-compatible; dependency: rusqlite/clap/serde must be declared and locked; concurrency: no other agent may write the project ledger; state: existing research.db files must remain readable and untouched.",
+        "mitigation": "Read each Python module before porting; keep rusqlite bundled and pinned via Cargo.lock; own the ledger as opencode:rust-rewrite; open existing DBs read-only in golden tests and write only to temp copies."
+      },
+      "plan_digest": "2539c4dc32ef547181d5daa2770692c087760d2266e97cff6d1dd95d0d4dff44"
+    },
+    {
+      "task_id": "T-026-rust-rewrite",
+      "phase": "in_progress",
+      "phase_num": 3,
+      "description": "[2/6] Core graph + kill-test subsystem ported to Rust: schema-14 store, programs, sources, questions, claims, hypotheses, edges, append-only verdicts, event ledger, two-run evidence binding and NUMERIC promotion gate",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795341177.662111,
+      "timestamp_str": "2026-11-22 12:52:57",
+      "agent": "opencode:rust-rewrite"
+    },
+    {
+      "task_id": "T-026-rust-rewrite",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[3/6] Verification: cargo test 7/7 passed; python -m engine check reports 0 errors on Rust-written graphs; project gates 4/4 passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795341185.3334901,
+      "timestamp_str": "2026-11-22 12:53:05",
+      "agent": "opencode:rust-rewrite",
+      "checklists": "passed"
     }
   ]
 }
