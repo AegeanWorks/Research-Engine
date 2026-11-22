@@ -293,6 +293,7 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 ```text
 research-engine/
 ├── .aikit/                   <- project memory: ledger, decisions, guidelines
+├── .gitattributes            <- LF line endings for tracked text
 ├── .gitignore
 ├── assets/                   <- logo and social preview images
 ├── ASSETS.md                 <- data and asset manifest
@@ -355,8 +356,24 @@ research-engine/
 ├── studio/                   <- lattice web studio, MCP and API
 ├── experiments/              <- N1 models, metrics, events and analysis
 ├── domains/                  <- pnn, fluid_universe, obezite and atlas packs
+├── rust/                     <- Rust implementation of the schema-14 core (see rust/README.md)
 └── tests/                    <- regression shield, ported contracts, golden run
 ```
+
+## Rust implementation (in progress)
+
+The Rust rewrite writes the same schema-14 SQLite graph as `engine/`, so both
+entry points can read the same database. Build and test it from the project root:
+
+```bash
+cd rust
+cargo build
+cargo test
+```
+
+The binary is `target/x86_64-pc-windows-gnu/debug/research-engine.exe`; it takes
+the same global `--db` and `--json` flags as `python -m engine`. Its ported
+surface and remaining work are listed in [rust/README.md](rust/README.md).
 
 ## Deliberate Limits
 
