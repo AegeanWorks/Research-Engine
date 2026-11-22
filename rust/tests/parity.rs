@@ -221,6 +221,29 @@ fn search_is_phrase_first_and_program_scoped() {
 }
 
 #[test]
+fn atlas_visual_schema_coercion_and_merge() {
+    use research_engine::domains_atlas as atlas;
+    let payload = serde_json::json!({
+        "entities": [
+            {"id": "e1", "name": "Hippocampus", "category": "anatomical-structure",
+             "box": [100, 200, 400, 500], "confidence": 0.9},
+            {"id": "e2", "name": "Memory", "category": "function", "confidence": 0.8},
+        ],
+        "relationships": [{"source_id": "e1", "target_id": "e2",
+                           "rel_type": "participates-in", "confidence": 0.7}],
+    });
+    let analysis = atlas::coerce_muse_payload(&payload, "doc", 1, "fig").unwrap();
+    assert_eq!(field(&analysis, "analysis_version"), "domains.atlas.visual-knowledge/v1");
+    assert_eq!(analysis.get("entities").and_then(Value::as_array).map(|v| v.len()), Some(2));
+    let merged = atlas::merge_analyses(&[analysis.clone()], "", "").unwrap();
+    assert_eq!(merged.get("entities").and_then(Value::as_array).map(|v| v.len()), Some(2));
+    assert!(atlas::coerce_muse_payload(&serde_json::json!({"entities": []}), "", 0, "").is_ok());
+    assert!(atlas::coerce_muse_payload(&serde_json::json!({
+        "entities": [{"id": "e", "name": "X", "category": "unknown", "confidence": 0.5}]
+    }), "", 0, "").is_err());
+}
+
+#[test]
 fn studio_web_routes_dispatch() {
     let path = temp_db("web");
     let conn = research_engine::lattice_repo::open(path.to_str().unwrap()).unwrap();

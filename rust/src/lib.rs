@@ -14,6 +14,8 @@ pub mod context;
 pub mod core;
 pub mod db;
 pub mod diffing;
+pub mod domains_atlas;
+pub mod domains_atlas_schema_spec;
 pub mod discovery;
 pub mod error;
 pub mod experiments;

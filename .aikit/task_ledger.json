@@ -5,9 +5,9 @@
     "last_phase": "in_progress",
     "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1795357446.564754,
+    "updated_at": 1795358085.180043,
     "owner": "opencode:rust-rewrite",
-    "lease_until": 1795364646.564754,
+    "lease_until": 1795365285.180043,
     "started_by": "opencode:rust-rewrite",
     "continuations": []
   },
@@ -92,29 +92,6 @@
         "mitigation": "Port bounded modules with Python parity helpers, keep separate schema initialization for lattice stores, verify with cargo test plus direct hygiene/KB/secret/test scripts before each commit."
       },
       "plan_digest": "aa86d74d20a2aa574d309dbaebd42d9d88ae476163fffe70a12c668f65645169"
-    },
-    {
-      "task_id": "T-028-outer-layers",
-      "phase": "in_progress",
-      "phase_num": 3,
-      "description": "[3/6] Ported lattice snapshot exports: JSONL records, BibTeX, GraphML and Cytoscape data into rust/src/lattice_snapshots.rs",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795352731.6505563,
-      "timestamp_str": "2026-11-22 16:05:31",
-      "agent": "opencode:rust-rewrite"
-    },
-    {
-      "task_id": "T-028-outer-layers",
-      "phase": "in_progress",
-      "phase_num": 4,
-      "description": "[3/6] Verification: cargo test 26/26; lattice_snapshots_parity.py 4/4 formats match; project gates passing",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795352732.1544435,
-      "timestamp_str": "2026-11-22 16:05:32",
-      "agent": "opencode:rust-rewrite",
-      "checklists": "passed"
     },
     {
       "task_id": "T-028-outer-layers",
@@ -251,6 +228,29 @@
       "status": "in_progress",
       "timestamp": 1795357446.564754,
       "timestamp_str": "2026-11-22 17:24:06",
+      "agent": "opencode:rust-rewrite",
+      "checklists": "passed"
+    },
+    {
+      "task_id": "T-028-outer-layers",
+      "phase": "in_progress",
+      "phase_num": 3,
+      "description": "[6/6 partial] Ported the Atlas domain visual-knowledge schema: Muse payload coercion, chunk merging and JSON Schema into rust/src/domains_atlas.rs",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795358084.877247,
+      "timestamp_str": "2026-11-22 17:34:44",
+      "agent": "opencode:rust-rewrite"
+    },
+    {
+      "task_id": "T-028-outer-layers",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[6/6 partial] Verification: cargo test 33/33; atlas_parity.py 3/3 exact matches; project gates passing",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795358085.180043,
+      "timestamp_str": "2026-11-22 17:34:45",
       "agent": "opencode:rust-rewrite",
       "checklists": "passed"
     }

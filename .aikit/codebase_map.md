@@ -6,15 +6,15 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `440`
+- **Total Python Modules**: `442`
 - **Total Classes**: `317`
-- **Total Top-Level Functions**: `1987`
+- **Total Top-Level Functions**: `1989`
 - **Total Class Methods**: `1545`
-- **Total Source Lines**: `90479`
+- **Total Source Lines**: `90570`
 
 ## 🧭 Map Coverage
-- **Indexed**: python (`440` module(s))
-- **Not indexed by this map**: javascript (`1` file(s)), rust (`40` file(s))
+- **Indexed**: python (`442` module(s))
+- **Not indexed by this map**: javascript (`1` file(s)), rust (`42` file(s))
 
 > Only Python symbols are catalogued. A language above is reported as not indexed, never as verified by this map.
 
@@ -4645,6 +4645,22 @@
 
 **Functions:**
 - `def run(cmd, cwd)`
+
+---
+
+### [`rust/atlas_expected.py`](rust/atlas_expected.py)
+> *Python reference for the Rust `atlas` CLI commands.*
+
+**Size**: `35` lines
+
+---
+
+### [`rust/atlas_parity.py`](rust/atlas_parity.py)
+**Size**: `56` lines
+
+**Functions:**
+- `def run(cmd, cwd)`
+- `def compare(label, args)`
 
 ---
 

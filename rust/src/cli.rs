@@ -48,6 +48,7 @@ pub enum Commands {
     Studio { #[command(subcommand)] action: StudioAction },
     Mcp { message: String },
     Web { method: String, path: String, #[arg(long, default_value = "")] body: String },
+    Atlas { #[command(subcommand)] action: AtlasAction },
     Search {
         query: String,
         #[arg(long)] research: Option<String>,
@@ -261,6 +262,18 @@ pub enum AnalysisAction {
         #[arg(long, default_value = "")] since: String,
         #[arg(long, default_value = "")] until: String,
     },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum AtlasAction {
+    Coerce {
+        #[arg(long, required = true)] payload: String,
+        #[arg(long, default_value = "")] document_ref: String,
+        #[arg(long, default_value_t = 0)] source_page: i64,
+        #[arg(long, default_value = "")] figure_id: String,
+    },
+    Merge { #[arg(long, required = true)] analyses: String },
+    Schema,
 }
 
 #[derive(Debug, Subcommand)]
@@ -549,7 +562,7 @@ pub fn run(cli: &Cli) -> Result<Output> {
     if !matches!(cli.command, Commands::Init | Commands::Lattice { .. }
         | Commands::LatticeRepo { .. } | Commands::LatticeSnap { .. } | Commands::Meta { .. }
         | Commands::LatticeQuery { .. } | Commands::Discovery { .. } | Commands::Studio { .. }
-        | Commands::Mcp { .. } | Commands::Web { .. }) {
+        | Commands::Mcp { .. } | Commands::Web { .. } | Commands::Atlas { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -662,6 +675,27 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::Atlas { action } => match action {
+            AtlasAction::Coerce { payload, document_ref, source_page, figure_id } => {
+                let value: Value = serde_json::from_str(payload).map_err(|e| EngineError::new(
+                    format!("invalid payload JSON: {e}"), "Muse payload must be a JSON object.",
+                    "pass a JSON object with entities and relationships."))?;
+                let result = crate::domains_atlas::coerce_muse_payload(&value, document_ref, *source_page, figure_id)?;
+                emit(result.clone(), to_stable_json(&result))
+            }
+            AtlasAction::Merge { analyses } => {
+                let list: Vec<Value> = serde_json::from_str(analyses).map_err(|e| EngineError::new(
+                    format!("invalid analyses JSON: {e}"), "analyses must be a JSON array.",
+                    "pass a JSON array of VisualAnalysis objects."))?;
+                let result = crate::domains_atlas::merge_analyses(&list, "", "")?;
+                emit(result.clone(), to_stable_json(&result))
+            }
+            AtlasAction::Schema => {
+                let result: Value = serde_json::from_str(crate::domains_atlas_schema_spec::MUSE_JSON_SCHEMA)
+                    .unwrap_or(Value::Null);
+                emit(result.clone(), to_stable_json(&result))
+            }
+        },
         Commands::Web { method, path, body } => {
             let conn = crate::lattice_repo::open(&cli.db)?;
             let response = crate::studio_web::dispatch_web_request(&conn, method, path,
