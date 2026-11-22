@@ -433,6 +433,29 @@ fn fluid_frank_oseen_dispersion() {
 }
 
 #[test]
+fn vortex_knot_mass_hypothesis() {
+    use research_engine::domains_fluid_vortex_particles as vp;
+    let (points, tangents) = vp::torus_knot(3, 2.0, 1.0, 64).unwrap();
+    assert_eq!(points.len(), 64);
+    assert_eq!(tangents.len(), 64);
+    assert!(vp::torus_knot(0, 2.0, 1.0, 64).is_err());
+    assert!(vp::torus_knot(3, 2.0, 1.0, 8).is_err());
+    assert!(vp::knot_length(&points) > 0.0);
+    assert!(vp::biot_savart_energy(&points, 0.1).unwrap() > 0.0);
+    assert!(vp::biot_savart_energy(&points, 0.0).is_err());
+    let q = vp::koide_q(&[0.511, 105.7, 1776.9]).unwrap();
+    assert!((q - 2.0 / 3.0).abs() < 1e-3);
+    assert!(vp::koide_q(&[]).is_err());
+    let masses = [0.511, 105.7, 1776.9];
+    let result = vp::mass_hypothesis(&masses, &[3, 5, 7], 0.1, 0.1, 0.01).unwrap();
+    assert_eq!(result["knots"].as_array().unwrap().len(), 3);
+    assert_eq!(result["falsified"].as_bool(), Some(true));
+    assert!(result["required_power"].as_f64().unwrap() > 0.0);
+    assert!(result["note"].as_str().unwrap().contains("thin filament"));
+    assert!(vp::mass_hypothesis(&[1.0], &[3], 0.1, 0.1, 0.01).is_err());
+}
+
+#[test]
 fn vortex_hierarchy_hypotheses() {
     use research_engine::domains_fluid_vortex_cascade as vc;
     let masses = [0.511, 105.7, 1776.9];

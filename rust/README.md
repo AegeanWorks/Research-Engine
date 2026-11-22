@@ -83,6 +83,7 @@ argparse requires in `python -m engine`.
 | Domains: excited fluid | First-excited HO density/wavefunction/quantum pressure, π phase slip at the node, phase-gradient divergence and log-log scaling (`excited-fluid` CLI) |
 | Domains: acoustic rays | Outgoing/ingoing radial speeds, horizon separatrix, peeling rate, analytic ray time and RK4 integration (`water-rays` CLI) |
 | Domains: vortex hierarchy | Koide Q, geometric/power-law mass spectra, Koide-power bisection and one-parameter hierarchy falsification (`vortex-cascade` CLI) |
+| Domains: vortex particles | T(2,n) torus-knot filaments, chord tangents, length, regularized Biot–Savart energy and knot-mass falsification (`vortex-particles` CLI) |
 | Domains: obezite | Citation-number extraction with bibliography-noise stripping and claim-row de-duplication (`obezite` CLI) |
 | Domains: PNN rules | CNS/property design-rule evaluation and criterion weighting (`pnn-rules` CLI) |
 | Domains: PNN docking | Docking-score alias parsing, RMSD/Vina filtering, weighted consensus normalization and per-compound best-target aggregation (`pnn-docking` CLI) |
@@ -199,6 +200,8 @@ argparse requires in `python -m engine`.
   RK4 integration; all nine checks match.
 - `vortex_cascade_parity.py` compares Koide Q, both spectra, the power solver
   and the hierarchy verdict; all nine checks match.
+- `vortex_particles_parity.py` compares Koide Q, knot lengths, Biot–Savart
+  energies and the full mass hypothesis; all six checks match.
 
 ## Still to port
 

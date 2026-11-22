@@ -78,6 +78,7 @@ pub enum Commands {
     ExcitedFluid { #[command(subcommand)] action: ExcitedFluidAction },
     WaterRays { #[command(subcommand)] action: WaterRaysAction },
     VortexCascade { #[command(subcommand)] action: VortexCascadeAction },
+    VortexParticles { #[command(subcommand)] action: VortexParticlesAction },
     Providers { #[command(subcommand)] action: ProvidersAction },
     Search {
         query: String,
@@ -304,6 +305,20 @@ pub enum ProvidersAction {
 pub enum PnnRulesAction {
     Evaluate { #[arg(long, required = true)] compound: String },
     Weight { criterion: String },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum VortexParticlesAction {
+    Koide { #[arg(long, required = true)] xs: String },
+    Length { n: i64, #[arg(long, default_value_t = 400)] samples: usize },
+    Energy { n: i64, #[arg(long, default_value_t = 0.1)] core: f64, #[arg(long, default_value_t = 400)] samples: usize },
+    Hypothesis {
+        #[arg(long, required = true)] masses: String,
+        #[arg(long, default_value = "[3,5,7]")] knots: String,
+        #[arg(long, default_value_t = 0.1)] core: f64,
+        #[arg(long, default_value_t = 0.1)] relative_tolerance: f64,
+        #[arg(long, default_value_t = 0.01)] koide_tolerance: f64,
+    },
 }
 
 #[derive(Debug, Subcommand)]
@@ -911,7 +926,7 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::WaterVde { .. } | Commands::WaterDispersive { .. }
         | Commands::TwoStateMarcus { .. } | Commands::ExcitedFluid { .. }
         | Commands::WaterRays { .. } | Commands::VortexCascade { .. }
-        | Commands::Providers { .. }) {
+        | Commands::VortexParticles { .. } | Commands::Providers { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -1024,6 +1039,40 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::VortexParticles { action } => {
+            use crate::domains_fluid_vortex_particles as vp;
+            fn numbers(raw: &str) -> Result<Vec<f64>> {
+                serde_json::from_str(raw).map_err(|e| EngineError::new(
+                    format!("invalid JSON: {e}"), "expected a JSON array of numbers",
+                    "pass an array of numbers"))
+            }
+            match action {
+                VortexParticlesAction::Koide { xs } => {
+                    let value = vp::koide_q(&numbers(xs)?)?;
+                    emit(json!({"value": value}), format!("{value}\n"))
+                }
+                VortexParticlesAction::Length { n, samples } => {
+                    let (points, _) = vp::torus_knot(*n, 2.0, 1.0, *samples)?;
+                    let value = vp::knot_length(&points);
+                    emit(json!({"value": value}), format!("{value}\n"))
+                }
+                VortexParticlesAction::Energy { n, core, samples } => {
+                    let (points, _) = vp::torus_knot(*n, 2.0, 1.0, *samples)?;
+                    let value = vp::biot_savart_energy(&points, *core)?;
+                    emit(json!({"value": value}), format!("{value}\n"))
+                }
+                VortexParticlesAction::Hypothesis { masses, knots, core, relative_tolerance, koide_tolerance } => {
+                    let masses = numbers(masses)?;
+                    let knots: Vec<i64> = serde_json::from_str(knots).map_err(|e| EngineError::new(
+                        format!("invalid knots JSON: {e}"), "knots must be a JSON array of integers",
+                        "pass an array of integers"))?;
+                    let value = vp::mass_hypothesis(&masses, &knots, *core,
+                        *relative_tolerance, *koide_tolerance)?;
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+            }
+        }
         Commands::VortexCascade { action } => {
             use crate::domains_fluid_vortex_cascade as vc;
             fn numbers(raw: &str) -> Result<Vec<f64>> {

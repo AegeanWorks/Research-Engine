@@ -42,6 +42,7 @@ pub mod domains_fluid_two_state_marcus;
 pub mod domains_fluid_excited_fluid;
 pub mod domains_fluid_water_rays;
 pub mod domains_fluid_vortex_cascade;
+pub mod domains_fluid_vortex_particles;
 pub mod domains_pnn_rules;
 pub mod domains_pnn_safety;
 pub mod discovery;
