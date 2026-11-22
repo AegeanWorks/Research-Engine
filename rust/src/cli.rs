@@ -53,6 +53,7 @@ pub enum Commands {
     Client { #[command(subcommand)] action: ClientAction },
     FluidBridge { #[command(subcommand)] action: FluidBridgeAction },
     FluidFrankOseen { #[command(subcommand)] action: FluidFrankOseenAction },
+    FluidVortexCore { #[command(subcommand)] action: FluidVortexCoreAction },
     Obezite { #[command(subcommand)] action: ObeziteAction },
     PnnRules { #[command(subcommand)] action: PnnRulesAction },
     PnnDocking { #[command(subcommand)] action: PnnDockingAction },
@@ -314,6 +315,18 @@ pub enum FluidBridgeAction {
     Horizon { omega: f64 },
     Coeffs { s0: f64, st: f64, horizon_t: f64, omega: f64, hbar: f64, mass: f64 },
     Path { #[arg(long)] coeffs: String, #[arg(long)] times: String, #[arg(long)] omega: f64 },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum FluidVortexCoreAction {
+    Radius,
+    Sigma { #[arg(long, default_value_t = 1.0)] omega: f64, #[arg(long, default_value_t = 1.0)] hbar: f64, #[arg(long, default_value_t = 1.0)] mass: f64 },
+    Norm { eps: f64, sigma: f64 },
+    Density { eps: f64, sigma: f64, #[arg(long, required = true)] xs: String },
+    Phase { eps: f64, #[arg(long, required = true)] xs: String },
+    Velocity { eps: f64, #[arg(long, default_value_t = 1.0)] hbar: f64, #[arg(long, default_value_t = 1.0)] mass: f64, #[arg(long, required = true)] xs: String },
+    QZero { eps: f64, #[arg(long, default_value_t = 1.0)] sigma: f64, #[arg(long, default_value_t = 1.0)] hbar: f64, #[arg(long, default_value_t = 1.0)] mass: f64 },
+    FdQ { eps: f64, n: usize, #[arg(long, default_value_t = crate::domains_fluid_vortex_core::GRID_LENGTH)] length: f64, #[arg(long, default_value_t = 1.0)] sigma: f64 },
 }
 
 #[derive(Debug, Subcommand)]
@@ -640,6 +653,7 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::Mcp { .. } | Commands::Web { .. } | Commands::Atlas { .. }
         | Commands::PnnSafety { .. } | Commands::Client { .. }
         | Commands::FluidBridge { .. } | Commands::FluidFrankOseen { .. }
+        | Commands::FluidVortexCore { .. }
         | Commands::Obezite { .. }
         | Commands::PnnRules { .. } | Commands::PnnDocking { .. } | Commands::Providers { .. }) {
         initialize(&conn)?;
@@ -833,6 +847,42 @@ pub fn run(cli: &Cli) -> Result<Output> {
                     let result = obezite::deduplicate(&list, std::path::Path::new(retracted),
                         std::path::Path::new(archive), std::path::Path::new(updated), stamp)?;
                     emit(result.clone(), to_stable_json(&result))
+                }
+            }
+        }
+        Commands::FluidVortexCore { action } => {
+            use crate::domains_fluid_vortex_core as vc;
+            macro_rules! scalar {
+                ($expr:expr) => {{
+                    let value = $expr?;
+                    emit(json!({"value": value}), format!("{value}\n"))
+                }};
+            }
+            match action {
+                FluidVortexCoreAction::Radius => scalar!(vc::core_radius()),
+                FluidVortexCoreAction::Sigma { omega, hbar, mass } => scalar!(vc::ho_sigma(*omega, *hbar, *mass)),
+                FluidVortexCoreAction::Norm { eps, sigma } => scalar!(vc::core_norm(*eps, *sigma)),
+                FluidVortexCoreAction::QZero { eps, sigma, hbar, mass } =>
+                    scalar!(vc::core_q_zero(*eps, *sigma, *hbar, *mass)),
+                FluidVortexCoreAction::FdQ { eps, n, length, sigma } =>
+                    scalar!(vc::fd_q_zero(*eps, *n, *length, *sigma)),
+                FluidVortexCoreAction::Density { eps, sigma, xs } => {
+                    let xs = vc::parse_xs(xs)?;
+                    let value = vc::json_array(vc::core_density(&xs, *eps, *sigma)?);
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                FluidVortexCoreAction::Phase { eps, xs } => {
+                    let xs = vc::parse_xs(xs)?;
+                    let value = vc::json_array(vc::core_phase(&xs, *eps)?);
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                FluidVortexCoreAction::Velocity { eps, hbar, mass, xs } => {
+                    let xs = vc::parse_xs(xs)?;
+                    let value = vc::json_array(vc::core_velocity(&xs, *eps, *hbar, *mass)?);
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
                 }
             }
         }

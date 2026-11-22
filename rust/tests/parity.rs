@@ -221,6 +221,26 @@ fn search_is_phrase_first_and_program_scoped() {
 }
 
 #[test]
+fn fluid_vortex_core_probe() {
+    use research_engine::domains_fluid_vortex_core as vc;
+    assert!((vc::core_radius().unwrap() - 0.1).abs() < 1e-12);
+    assert!((vc::ho_sigma(1.0, 1.0, 1.0).unwrap() - 1.0).abs() < 1e-12);
+    assert!((vc::core_norm(0.0, 2.0).unwrap() - 2.0 * std::f64::consts::PI.sqrt() * 2.0).abs() < 1e-12);
+    let xs = vec![-2.0, -1.0, 0.0, 1.0, 2.0];
+    let density = vc::core_density(&xs, 0.1, 1.0).unwrap();
+    assert_eq!(density.len(), xs.len());
+    assert!(density.iter().all(|v| *v >= 0.0));
+    let phase = vc::core_phase(&xs, 0.1).unwrap();
+    assert!(phase[0] > phase[4]);
+    let velocity = vc::core_velocity(&xs, 0.1, 1.0, 1.0).unwrap();
+    assert!(velocity.iter().all(|v| v.is_finite()));
+    assert!(vc::core_q_zero(0.1, 1.0, 1.0, 1.0).unwrap() < 0.0);
+    assert!(vc::fd_q_zero(0.1, 64, 20.0, 1.0).unwrap() < 0.0);
+    assert!(vc::core_norm(-0.1, 1.0).is_err());
+    assert!(vc::fd_q_zero(0.0, 64, 20.0, 1.0).is_err());
+}
+
+#[test]
 fn fluid_frank_oseen_dispersion() {
     use research_engine::domains_fluid_frank_oseen as fo;
     let matrix = fo::elastic_matrix(1.0, 2.0, 3.0, 1.2, 0.8, 1.5);
