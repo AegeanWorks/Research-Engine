@@ -5,9 +5,9 @@
     "last_phase": "in_progress",
     "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1795374134.9800448,
+    "updated_at": 1795374859.1292489,
     "owner": "opencode:rust-rewrite",
-    "lease_until": 1795381334.9800448,
+    "lease_until": 1795382059.1292489,
     "started_by": "opencode:rust-rewrite",
     "continuations": []
   },
@@ -92,29 +92,6 @@
         "mitigation": "Port bounded modules with Python parity helpers, keep separate schema initialization for lattice stores, verify with cargo test plus direct hygiene/KB/secret/test scripts before each commit."
       },
       "plan_digest": "aa86d74d20a2aa574d309dbaebd42d9d88ae476163fffe70a12c668f65645169"
-    },
-    {
-      "task_id": "T-028-outer-layers",
-      "phase": "in_progress",
-      "phase_num": 3,
-      "description": "[6/6 final] Ported dimensional reduction and effective-moment-of-inertia theory with claim-6b verdict and Markdown report",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795370636.0025058,
-      "timestamp_str": "2026-11-22 21:03:56",
-      "agent": "opencode:rust-rewrite"
-    },
-    {
-      "task_id": "T-028-outer-layers",
-      "phase": "in_progress",
-      "phase_num": 4,
-      "description": "[6/6 final] Verification: cargo test 47/47; fluid_reduction_parity.py 23/23 matches; project gates passing",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795370636.2026777,
-      "timestamp_str": "2026-11-22 21:03:56",
-      "agent": "opencode:rust-rewrite",
-      "checklists": "passed"
     },
     {
       "task_id": "T-028-outer-layers",
@@ -251,6 +228,29 @@
       "status": "in_progress",
       "timestamp": 1795374134.9800448,
       "timestamp_str": "2026-11-22 22:02:14",
+      "agent": "opencode:rust-rewrite",
+      "checklists": "passed"
+    },
+    {
+      "task_id": "T-028-outer-layers",
+      "phase": "in_progress",
+      "phase_num": 3,
+      "description": "[6/6 final] Ported PNN library curation: candidate preparation, ID/SMILES deduplication, tier filtering, bin caps and global limits",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795374858.8761034,
+      "timestamp_str": "2026-11-22 22:14:18",
+      "agent": "opencode:rust-rewrite"
+    },
+    {
+      "task_id": "T-028-outer-layers",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[6/6 final] Verification: cargo test 54/54; pnn_curation_parity.py 4/4 matches; project gates passing",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795374859.1292489,
+      "timestamp_str": "2026-11-22 22:14:19",
       "agent": "opencode:rust-rewrite",
       "checklists": "passed"
     }

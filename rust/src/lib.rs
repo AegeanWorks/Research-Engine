@@ -31,6 +31,7 @@ pub mod domains_pnn_docking;
 pub mod domains_pnn_compounds;
 pub mod domains_pnn_screen;
 pub mod domains_pnn_tables;
+pub mod domains_pnn_curation;
 pub mod domains_pnn_rules;
 pub mod domains_pnn_safety;
 pub mod discovery;

@@ -433,6 +433,37 @@ fn fluid_frank_oseen_dispersion() {
 }
 
 #[test]
+fn pnn_library_curation_pipeline() {
+    use research_engine::domains_pnn_curation as curation;
+    fn compound(id: &str, smiles: &str) -> Value {
+        serde_json::json!({
+            "compound_id": id, "mw": 345.5, "logp": 2.6, "tpsa": 58.0,
+            "hbd": 2, "hba": 5, "rotatable_bonds": 4,
+            "name": id, "smiles": smiles, "charge": "", "pka": null,
+        })
+    }
+    let inputs = vec![
+        ("libA".to_string(), vec![compound("C1", "CCO"), compound("C2", "CCN")]),
+        ("libB".to_string(), vec![compound("C1", "CCO")]),
+    ];
+    let prepared = curation::prepare_candidates(&inputs).unwrap();
+    assert_eq!(prepared.len(), 3);
+    assert!(curation::prepare_candidates(&[]).is_err());
+    let deduped = curation::deduplicate(&prepared).unwrap();
+    assert_eq!(deduped.get("stats").unwrap().get("duplicate_ids").and_then(Value::as_u64), Some(1));
+    assert_eq!(deduped.get("stats").unwrap().get("duplicate_smiles").and_then(Value::as_u64), Some(0));
+    let curated = curation::curate(&prepared, "A", 25, 0.1, None).unwrap();
+    assert!(curated.get("summary").unwrap().get("selected").and_then(Value::as_u64).unwrap() <= 3);
+    let capped = curation::curate(&prepared, "B", 25, 0.1, Some(1)).unwrap();
+    assert_eq!(capped.get("summary").unwrap().get("selected").and_then(Value::as_u64), Some(1));
+    assert_eq!(capped.get("summary").unwrap().get("truncated_by_max").and_then(Value::as_bool), Some(true));
+    assert!(curation::curate(&prepared, "Z", 25, 0.1, None).is_err());
+    assert!(curation::curate(&prepared, "B", 0, 0.1, None).is_err());
+    assert!(curation::curate(&prepared, "B", 25, 0.0, None).is_err());
+    assert!(curation::curate(&prepared, "B", 25, 0.1, Some(0)).is_err());
+}
+
+#[test]
 fn pnn_csv_row_contracts() {
     use research_engine::domains_pnn_tables as tables;
     let compound = serde_json::json!({

@@ -67,6 +67,7 @@ pub enum Commands {
     PnnCompounds { #[command(subcommand)] action: PnnCompoundsAction },
     PnnScreen { #[command(subcommand)] action: PnnScreenAction },
     PnnTables { #[command(subcommand)] action: PnnTablesAction },
+    PnnCuration { #[command(subcommand)] action: PnnCurationAction },
     Providers { #[command(subcommand)] action: ProvidersAction },
     Search {
         query: String,
@@ -293,6 +294,19 @@ pub enum ProvidersAction {
 pub enum PnnRulesAction {
     Evaluate { #[arg(long, required = true)] compound: String },
     Weight { criterion: String },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum PnnCurationAction {
+    Prepare { #[arg(long, required = true)] inputs: String },
+    Dedupe { #[arg(long, required = true)] candidates: String },
+    Curate {
+        #[arg(long, required = true)] candidates: String,
+        #[arg(long, default_value = "B")] min_tier: String,
+        #[arg(long, default_value_t = 25)] per_bin: usize,
+        #[arg(long, default_value_t = 0.1)] bin_width: f64,
+        #[arg(long)] max_compounds: Option<usize>,
+    },
 }
 
 #[derive(Debug, Subcommand)]
@@ -783,7 +797,8 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::Obezite { .. }
         | Commands::PnnRules { .. } | Commands::PnnDocking { .. }
         | Commands::PnnCompounds { .. } | Commands::PnnScreen { .. }
-        | Commands::PnnTables { .. } | Commands::Providers { .. }) {
+        | Commands::PnnTables { .. } | Commands::PnnCuration { .. }
+        | Commands::Providers { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -896,6 +911,42 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::PnnCuration { action } => {
+            use crate::domains_pnn_curation as curation;
+            fn candidates(raw: &str) -> Result<Vec<Value>> {
+                serde_json::from_str(raw).map_err(|e| EngineError::new(
+                    format!("invalid candidates JSON: {e}"), "candidates must be a JSON array",
+                    "pass an array of candidate objects"))
+            }
+            match action {
+                PnnCurationAction::Prepare { inputs } => {
+                    let inputs: Vec<Value> = serde_json::from_str(inputs).map_err(|e| EngineError::new(
+                        format!("invalid inputs JSON: {e}"), "inputs must be a JSON array",
+                        "pass an array of {source, compounds} objects"))?;
+                    let mut parsed = Vec::new();
+                    for input in inputs {
+                        let source = input.get("source").and_then(Value::as_str).unwrap_or("").to_string();
+                        let compounds: Vec<Value> = input.get("compounds").and_then(Value::as_array)
+                            .cloned().unwrap_or_default();
+                        parsed.push((source, compounds));
+                    }
+                    let value = Value::Array(curation::prepare_candidates(&parsed)?);
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                PnnCurationAction::Dedupe { candidates: raw } => {
+                    let value = curation::deduplicate(&candidates(raw)?)?;
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                PnnCurationAction::Curate { candidates: raw, min_tier, per_bin, bin_width, max_compounds } => {
+                    let value = curation::curate(&candidates(raw)?, min_tier, *per_bin,
+                        *bin_width, *max_compounds)?;
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+            }
+        }
         Commands::PnnTables { action } => {
             use crate::domains_pnn_tables as tables;
             fn parse(raw: &str, name: &str) -> Result<Value> {
