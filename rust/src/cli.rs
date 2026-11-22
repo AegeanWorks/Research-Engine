@@ -83,6 +83,7 @@ pub enum Commands {
     HydrogenVortex { #[command(subcommand)] action: HydrogenVortexAction },
     NodeDefect { #[command(subcommand)] action: NodeDefectAction },
     WaterPressure { #[command(subcommand)] action: WaterPressureAction },
+    WaterReorganization { #[command(subcommand)] action: WaterReorganizationAction },
     Providers { #[command(subcommand)] action: ProvidersAction },
     Search {
         query: String,
@@ -309,6 +310,14 @@ pub enum ProvidersAction {
 pub enum PnnRulesAction {
     Evaluate { #[arg(long, required = true)] compound: String },
     Weight { criterion: String },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum WaterReorganizationAction {
+    Contrast { #[arg(long, default_value_t = 78.4)] epsilon_s: f64, #[arg(long, default_value_t = 1.78)] epsilon_opt: f64 },
+    Energy { radius_m: f64, #[arg(long, default_value_t = 78.4)] epsilon_s: f64, #[arg(long, default_value_t = 1.78)] epsilon_opt: f64 },
+    Radius { difference_ev: f64, #[arg(long, default_value_t = 78.4)] epsilon_s: f64, #[arg(long, default_value_t = 1.78)] epsilon_opt: f64 },
+    Scales,
 }
 
 #[derive(Debug, Subcommand)]
@@ -970,7 +979,8 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::WaterRays { .. } | Commands::VortexCascade { .. }
         | Commands::VortexParticles { .. } | Commands::ObservedShape { .. }
         | Commands::HydrogenVortex { .. } | Commands::NodeDefect { .. }
-        | Commands::WaterPressure { .. } | Commands::Providers { .. }) {
+        | Commands::WaterPressure { .. } | Commands::WaterReorganization { .. }
+        | Commands::Providers { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -1083,6 +1093,28 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::WaterReorganization { action } => {
+            use crate::domains_fluid_water_reorganization as wr;
+            macro_rules! scalar {
+                ($expr:expr) => {{
+                    let value = $expr?;
+                    emit(json!({"value": value}), format!("{value}\n"))
+                }};
+            }
+            match action {
+                WaterReorganizationAction::Contrast { epsilon_s, epsilon_opt } =>
+                    scalar!(wr::dielectric_contrast(*epsilon_s, *epsilon_opt)),
+                WaterReorganizationAction::Energy { radius_m, epsilon_s, epsilon_opt } =>
+                    scalar!(wr::reorganization_energy_ev(*radius_m, *epsilon_s, *epsilon_opt)),
+                WaterReorganizationAction::Radius { difference_ev, epsilon_s, epsilon_opt } =>
+                    scalar!(wr::radius_for_difference(*difference_ev, *epsilon_s, *epsilon_opt)),
+                WaterReorganizationAction::Scales => {
+                    let value = wr::reorganization_scales()?;
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+            }
+        }
         Commands::WaterPressure { action } => {
             use crate::domains_fluid_water_pressure as wp;
             match action {

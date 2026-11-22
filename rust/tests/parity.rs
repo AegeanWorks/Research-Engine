@@ -433,6 +433,30 @@ fn fluid_frank_oseen_dispersion() {
 }
 
 #[test]
+fn water_reorganization_relation() {
+    use research_engine::domains_fluid_water_reorganization as wr;
+    let contrast = wr::dielectric_contrast(78.4, 1.78).unwrap();
+    assert!((contrast - (1.0 / 1.78 - 1.0 / 78.4)).abs() < 1e-15);
+    assert!(wr::dielectric_contrast(1.0, 1.78).is_err());
+    assert!(wr::dielectric_contrast(78.4, 78.4).is_err());
+    assert!(wr::dielectric_contrast(78.4, 0.0).is_err());
+    let radius = 2.858e-10;
+    let lambda = wr::reorganization_energy_ev(radius, 78.4, 1.78).unwrap();
+    assert!(lambda > 0.0 && lambda < 3.0);
+    assert!(wr::reorganization_energy_ev(0.0, 78.4, 1.78).is_err());
+    let inverted = wr::radius_for_difference(lambda, 78.4, 1.78).unwrap();
+    assert!((inverted - radius).abs() / radius < 1e-12);
+    assert!(wr::radius_for_difference(0.0, 78.4, 1.78).is_err());
+    let scales = wr::reorganization_scales().unwrap();
+    assert_eq!(scales["observed_difference_ev"].as_f64(), Some(1.57));
+    assert_eq!(scales["vde_ev"].as_f64(), Some(3.27));
+    let capillary = &scales["capillary"];
+    assert!(capillary["lambda_ev"].as_f64().unwrap() > 0.0);
+    assert!(capillary["sigma"].as_f64().unwrap() > 0.0);
+    assert!(scales["pressure"]["radius_m"].as_f64().unwrap() > 0.0);
+}
+
+#[test]
 fn pressure_balanced_cavity() {
     use research_engine::domains_fluid_water_pressure as wp;
     let radius = research_engine::domains_fluid_water_electron::capillary_cavity_radius(0.0728, 9.1093837015e-31, 1.054571817e-34).unwrap();
