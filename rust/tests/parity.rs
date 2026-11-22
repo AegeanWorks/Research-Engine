@@ -221,6 +221,23 @@ fn search_is_phrase_first_and_program_scoped() {
 }
 
 #[test]
+fn lattice_discovery_offline_provider_and_ingest() {
+    use research_engine::lattice_discovery as d;
+    let found = d::offline_search("sleep memory", 5).unwrap();
+    assert!(!found.is_empty());
+    assert_eq!(field(&found[0], "source"), "offline");
+    let deduped = d::dedupe(&[found[0].clone(), found[0].clone()]);
+    assert_eq!(deduped.len(), 1);
+    assert_eq!(d::provider_names(), vec!["arxiv", "crossref", "europepmc", "offline", "openalex"]);
+    let path = temp_db("discovery");
+    let conn = research_engine::lattice_repo::open(path.to_str().unwrap()).unwrap();
+    let result = d::discover(&conn, "sleep", "offline", 3, true).unwrap();
+    assert_eq!(result.get("count").and_then(Value::as_u64), Some(2));
+    assert!(result.get("created").and_then(Value::as_u64).unwrap_or(0) > 0);
+    assert!(d::offline_search("", 5).is_err());
+}
+
+#[test]
 fn lattice_queries_detect_contradictions_and_pack_context() {
     let path = temp_db("lattice_query");
     let conn = research_engine::lattice_repo::open(path.to_str().unwrap()).unwrap();

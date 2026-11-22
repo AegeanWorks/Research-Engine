@@ -44,6 +44,7 @@ pub enum Commands {
     LatticeSnap { #[command(subcommand)] action: LatticeSnapAction },
     Meta { #[command(subcommand)] action: MetaAction },
     LatticeQuery { #[command(subcommand)] action: LatticeQueryAction },
+    Discovery { #[command(subcommand)] action: DiscoveryAction },
     Search {
         query: String,
         #[arg(long)] research: Option<String>,
@@ -257,6 +258,21 @@ pub enum AnalysisAction {
         #[arg(long, default_value = "")] since: String,
         #[arg(long, default_value = "")] until: String,
     },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum DiscoveryAction {
+    Providers,
+    Offline { query: String, #[arg(long, default_value_t = 10)] limit: i64 },
+    Discover {
+        query: String,
+        #[arg(long, default_value = "offline")] source: String,
+        #[arg(long, default_value_t = 10)] limit: i64,
+        #[arg(long)] no_ingest: bool,
+    },
+    CrossrefAuthors { authors: String },
+    CrossrefYear { item: String },
+    InvertedAbstract { inverted: String },
 }
 
 #[derive(Debug, Subcommand)]
@@ -523,7 +539,7 @@ pub fn run(cli: &Cli) -> Result<Output> {
     let conn = open(&cli.db)?;
     if !matches!(cli.command, Commands::Init | Commands::Lattice { .. }
         | Commands::LatticeRepo { .. } | Commands::LatticeSnap { .. } | Commands::Meta { .. }
-        | Commands::LatticeQuery { .. }) {
+        | Commands::LatticeQuery { .. } | Commands::Discovery { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -636,6 +652,44 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::Discovery { action } => {
+            use crate::lattice_discovery as discovery;
+            match action {
+                DiscoveryAction::Providers => {
+                    let names = discovery::provider_names();
+                    emit(Value::Array(names.iter().cloned().map(Value::String).collect()),
+                        format!("{}\n", names.join(", ")))
+                }
+                DiscoveryAction::Offline { query, limit } => {
+                    let rows = discovery::offline_search(query, *limit)?;
+                    emit(Value::Array(rows.clone()), to_stable_json(&Value::Array(rows)))
+                }
+                DiscoveryAction::Discover { query, source, limit, no_ingest } => {
+                    let conn = crate::lattice_repo::open(&cli.db)?;
+                    let result = discovery::discover(&conn, query, source, *limit, !*no_ingest)?;
+                    emit(result.clone(), to_stable_json(&result))
+                }
+                DiscoveryAction::CrossrefAuthors { authors } => {
+                    let list: Vec<Value> = serde_json::from_str(authors).map_err(|e| EngineError::new(
+                        format!("invalid authors JSON: {e}"), "authors must be a JSON array of objects.",
+                        "pass a JSON array such as [{\"family\":\"Lovelace\",\"given\":\"Ada\"}]."))?;
+                    let value = discovery::format_crossref_authors(&list);
+                    emit(json!({"value": value.clone()}), format!("{}\n", value))
+                }
+                DiscoveryAction::CrossrefYear { item } => {
+                    let value_obj: Value = serde_json::from_str(item).map_err(|e| EngineError::new(
+                        format!("invalid item JSON: {e}"), "item must be a JSON object.", "pass a JSON object."))?;
+                    let value = discovery::extract_crossref_year(&value_obj);
+                    emit(json!({"value": value.clone()}), format!("{}\n", value))
+                }
+                DiscoveryAction::InvertedAbstract { inverted } => {
+                    let value_obj: Value = serde_json::from_str(inverted).map_err(|e| EngineError::new(
+                        format!("invalid inverted index JSON: {e}"), "the index must be a JSON object.", "pass a JSON object."))?;
+                    let value = discovery::reconstruct_inverted_abstract(&value_obj);
+                    emit(json!({"value": value.clone()}), format!("{}\n", value))
+                }
+            }
+        }
         Commands::LatticeQuery { action } => {
             use crate::lattice_query;
             let lattice = crate::lattice_repo::open(&cli.db)?;

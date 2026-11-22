@@ -57,6 +57,7 @@ argparse requires in `python -m engine`.
 | Lattice snapshots | JSONL, BibTeX, GraphML and Cytoscape exports with byte-identical serializers (`lattice-snap` CLI) |
 | Meta-analysis | Fixed/DerSimonian-Laird random-effects pooling, Q/I²/τ², Hedges' g study construction and ASCII forest plots (`meta` CLI) |
 | Lattice queries | Contradiction detection, bounded outline/search views and GraphRAG context packs (`lattice-query` CLI) |
+| Lattice discovery | Offline seed-corpus provider, candidate de-duplication, provider registry and Crossref/OpenAlex helper parsers (`discovery` CLI) |
 | Search | deterministic phrase-first lexical `search` with exact snippet/token-budget output |
 | Markdown | `sanitize`/`cell`/`estimate_tokens`/`pack` shared with reports and search |
 | Integrity | 24 finding codes including `PROV-*`, `EVID-*`, `GRAPH-*`, `GAP-*`, `LEDGER-001` |
@@ -94,9 +95,12 @@ argparse requires in `python -m engine`.
   all five checks match.
 - `lattice_query_parity.py` compares contradiction detection, outline, compact
   search and both context-pack formats; all five checks match.
+- `discovery_parity.py` compares provider names, offline ranking, ingest,
+  de-duplication and the bibliographic helper parsers; all six checks match.
 
 ## Still to port
 
-the remaining lattice analysis/discovery modules, studio, domains and the
-Python CLI text renderer. These remain served by their Python entry points
-until their Rust equivalents land; the SQLite graph is shared throughout.
+the network-backed lattice providers (arXiv, Crossref, OpenAlex, EuropePMC),
+studio, domains and the Python CLI text renderer. These remain served by their
+Python entry points until their Rust equivalents land; the SQLite graph is
+shared throughout.

@@ -6,15 +6,15 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `432`
+- **Total Python Modules**: `434`
 - **Total Classes**: `317`
-- **Total Top-Level Functions**: `1979`
+- **Total Top-Level Functions**: `1981`
 - **Total Class Methods**: `1545`
-- **Total Source Lines**: `90183`
+- **Total Source Lines**: `90270`
 
 ## 🧭 Map Coverage
-- **Indexed**: python (`432` module(s))
-- **Not indexed by this map**: javascript (`1` file(s)), rust (`33` file(s))
+- **Indexed**: python (`434` module(s))
+- **Not indexed by this map**: javascript (`1` file(s)), rust (`34` file(s))
 
 > Only Python symbols are catalogued. A language above is reported as not indexed, never as verified by this map.
 
@@ -4645,6 +4645,22 @@
 
 **Functions:**
 - `def run(cmd, cwd)`
+
+---
+
+### [`rust/discovery_expected.py`](rust/discovery_expected.py)
+> *Python reference for the Rust `discovery` CLI commands.*
+
+**Size**: `49` lines
+
+---
+
+### [`rust/discovery_parity.py`](rust/discovery_parity.py)
+**Size**: `38` lines
+
+**Functions:**
+- `def run(cmd, cwd)`
+- `def compare(label, args, db_rust, db_py)`
 
 ---
 
