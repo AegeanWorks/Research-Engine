@@ -433,6 +433,25 @@ fn fluid_frank_oseen_dispersion() {
 }
 
 #[test]
+fn hydrated_electron_cavity_scale() {
+    use research_engine::domains_fluid_water_electron as we;
+    assert!((we::screened_bohr_radius(78.4).unwrap() - 78.4 * we::BOHR).abs() < 1e-20);
+    assert!(we::screened_energy_ev(78.4).unwrap() < 0.0);
+    assert!(we::screened_bohr_radius(0.0).is_err());
+    let radius = we::capillary_cavity_radius(we::GAMMA_WATER, we::MASS, we::HBAR).unwrap();
+    assert!((radius - 2.8580710555848763e-10).abs() < 1e-22);
+    assert!(we::capillary_cavity_radius(0.0, we::MASS, we::HBAR).is_err());
+    assert!(we::capillary_cavity_energy_ev(we::GAMMA_WATER, we::MASS, we::HBAR).unwrap() > 0.0);
+    assert!(we::infinite_well_gap_ev(radius, we::MASS, we::HBAR).unwrap() > 0.0);
+    assert!(we::infinite_well_gap_ev(0.0, we::MASS, we::HBAR).is_err());
+    assert!(we::well_radius_for_gap(1.7, we::MASS, we::HBAR).unwrap() > 0.0);
+    assert!(we::well_radius_for_gap(0.0, we::MASS, we::HBAR).is_err());
+    let scales = we::hydrated_scales().unwrap();
+    assert_eq!(scales.get("epsilon_water").and_then(Value::as_f64), Some(78.4));
+    assert!(scales.get("cavity_energy_ev").and_then(Value::as_f64).unwrap() > 0.0);
+}
+
+#[test]
 fn hydrated_electron_finite_well() {
     use research_engine::domains_fluid_water_well as well;
     let radius = well::capillary_cavity_radius();

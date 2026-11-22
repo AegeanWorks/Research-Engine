@@ -76,6 +76,7 @@ argparse requires in `python -m engine`.
 | Domains: convergence | Resolution/temporal convergence diagnostics and linear trend projections for the claim-15 scan (`fluid-convergence` CLI) |
 | Domains: water analogue | Shallow-water acoustic horizon: sound speed, radial flow, horizon radius, surface gravity, analogue temperature, metric and validity scales (`water-analogue` CLI) |
 | Domains: water well | Finite spherical well for the hydrated electron: Born depth, 1s/1p matching roots, transition gaps, inverse depth and full scales bundle (`water-well` CLI) |
+| Domains: water electron | Hydrated-electron cavity scale: screened Bohr radius/energy, capillary cavity radius/energy, infinite-well gap and inverse radius (`water-electron` CLI) |
 | Domains: obezite | Citation-number extraction with bibliography-noise stripping and claim-row de-duplication (`obezite` CLI) |
 | Domains: PNN rules | CNS/property design-rule evaluation and criterion weighting (`pnn-rules` CLI) |
 | Domains: PNN docking | Docking-score alias parsing, RMSD/Vina filtering, weighted consensus normalization and per-compound best-target aggregation (`pnn-docking` CLI) |
@@ -178,6 +179,8 @@ argparse requires in `python -m engine`.
   scales and validity bundle; all eleven checks match.
 - `water_well_parity.py` compares Born depths, well roots, inverse depths,
   minimum depth and the full scales bundle; all seventeen checks match.
+- `water_electron_parity.py` compares screened scales, cavity radius/energy,
+  well gaps, inverse radii and the scales bundle; all thirteen checks match.
 
 ## Still to port
 

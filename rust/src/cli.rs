@@ -71,6 +71,7 @@ pub enum Commands {
     WaterAnalogue { #[command(subcommand)] action: WaterAnalogueAction },
     PnnReports { #[command(subcommand)] action: PnnReportsAction },
     WaterWell { #[command(subcommand)] action: WaterWellAction },
+    WaterElectron { #[command(subcommand)] action: WaterElectronAction },
     Providers { #[command(subcommand)] action: ProvidersAction },
     Search {
         query: String,
@@ -297,6 +298,17 @@ pub enum ProvidersAction {
 pub enum PnnRulesAction {
     Evaluate { #[arg(long, required = true)] compound: String },
     Weight { criterion: String },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum WaterElectronAction {
+    ScreenedRadius { #[arg(long, default_value_t = 78.4)] epsilon_r: f64 },
+    ScreenedEnergy { #[arg(long, default_value_t = 78.4)] epsilon_r: f64 },
+    CavityRadius,
+    CavityEnergy,
+    WellGap { radius: f64 },
+    RadiusForGap { energy_ev: f64 },
+    Scales,
 }
 
 #[derive(Debug, Subcommand)]
@@ -835,7 +847,8 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::PnnCompounds { .. } | Commands::PnnScreen { .. }
         | Commands::PnnTables { .. } | Commands::PnnCuration { .. }
         | Commands::WaterAnalogue { .. } | Commands::PnnReports { .. }
-        | Commands::WaterWell { .. } | Commands::Providers { .. }) {
+        | Commands::WaterWell { .. } | Commands::WaterElectron { .. }
+        | Commands::Providers { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -948,6 +961,29 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::WaterElectron { action } => {
+            use crate::domains_fluid_water_electron as we;
+            let (mass, hbar, gamma) = (we::MASS, we::HBAR, we::GAMMA_WATER);
+            macro_rules! scalar {
+                ($expr:expr) => {{
+                    let value = $expr?;
+                    emit(json!({"value": value}), format!("{value}\n"))
+                }};
+            }
+            match action {
+                WaterElectronAction::ScreenedRadius { epsilon_r } => scalar!(we::screened_bohr_radius(*epsilon_r)),
+                WaterElectronAction::ScreenedEnergy { epsilon_r } => scalar!(we::screened_energy_ev(*epsilon_r)),
+                WaterElectronAction::CavityRadius => scalar!(we::capillary_cavity_radius(gamma, mass, hbar)),
+                WaterElectronAction::CavityEnergy => scalar!(we::capillary_cavity_energy_ev(gamma, mass, hbar)),
+                WaterElectronAction::WellGap { radius } => scalar!(we::infinite_well_gap_ev(*radius, mass, hbar)),
+                WaterElectronAction::RadiusForGap { energy_ev } => scalar!(we::well_radius_for_gap(*energy_ev, mass, hbar)),
+                WaterElectronAction::Scales => {
+                    let value = we::hydrated_scales()?;
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+            }
+        }
         Commands::WaterWell { action } => {
             use crate::domains_fluid_water_well as well;
             macro_rules! scalar {
