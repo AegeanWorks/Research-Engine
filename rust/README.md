@@ -74,6 +74,7 @@ argparse requires in `python -m engine`.
 | Domains: variational width | Gaussian Ritz width selection: G-M vs Yasui actions, derivatives, analytic/grid/Newton extrema, Ermakov cross-check and claim-49 scales (`fluid-variational-width` CLI) |
 | Domains: osmotic closure | Fokker-Planck residual with conservative flux, Gaussian/bimodal probes, residual scaling, frozen-drift sigma map and claim-48 scales (`fluid-nelson-closure` CLI) |
 | Domains: convergence | Resolution/temporal convergence diagnostics and linear trend projections for the claim-15 scan (`fluid-convergence` CLI) |
+| Domains: water analogue | Shallow-water acoustic horizon: sound speed, radial flow, horizon radius, surface gravity, analogue temperature, metric and validity scales (`water-analogue` CLI) |
 | Domains: obezite | Citation-number extraction with bibliography-noise stripping and claim-row de-duplication (`obezite` CLI) |
 | Domains: PNN rules | CNS/property design-rule evaluation and criterion weighting (`pnn-rules` CLI) |
 | Domains: PNN docking | Docking-score alias parsing, RMSD/Vina filtering, weighted consensus normalization and per-compound best-target aggregation (`pnn-docking` CLI) |
@@ -169,6 +170,8 @@ argparse requires in `python -m engine`.
   (the log-fit over ~1e-16 error floors uses a documented wider tolerance).
 - `fluid_convergence_parity.py` compares scan, temporal and trend diagnostics;
   all four checks match.
+- `water_analogue_parity.py` compares horizon scalars, acoustic metric, lab
+  scales and validity bundle; all eleven checks match.
 
 ## Still to port
 

@@ -68,6 +68,7 @@ pub enum Commands {
     PnnScreen { #[command(subcommand)] action: PnnScreenAction },
     PnnTables { #[command(subcommand)] action: PnnTablesAction },
     PnnCuration { #[command(subcommand)] action: PnnCurationAction },
+    WaterAnalogue { #[command(subcommand)] action: WaterAnalogueAction },
     Providers { #[command(subcommand)] action: ProvidersAction },
     Search {
         query: String,
@@ -294,6 +295,21 @@ pub enum ProvidersAction {
 pub enum PnnRulesAction {
     Evaluate { #[arg(long, required = true)] compound: String },
     Weight { criterion: String },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum WaterAnalogueAction {
+    Speed { #[arg(long, default_value_t = 0.1)] depth: f64, #[arg(long, default_value_t = crate::domains_fluid_water_analogue::GRAVITY)] gravity: f64 },
+    Flow { r: f64, #[arg(long)] flow_rate: f64, #[arg(long, default_value_t = 0.1)] depth: f64, #[arg(long, default_value_t = crate::domains_fluid_water_analogue::GRAVITY)] gravity: f64 },
+    Radius { #[arg(long)] flow_rate: f64, #[arg(long, default_value_t = 0.1)] depth: f64, #[arg(long, default_value_t = crate::domains_fluid_water_analogue::GRAVITY)] gravity: f64 },
+    Gravity { #[arg(long)] flow_rate: f64, #[arg(long, default_value_t = 0.1)] depth: f64, #[arg(long, default_value_t = crate::domains_fluid_water_analogue::GRAVITY)] gravity: f64 },
+    Temperature { kappa: f64 },
+    Metric { r: f64, #[arg(long)] flow_rate: f64, #[arg(long, default_value_t = 0.1)] depth: f64, #[arg(long, default_value_t = crate::domains_fluid_water_analogue::GRAVITY)] gravity: f64 },
+    Lab { #[arg(long, default_value_t = 0.1)] depth: f64, #[arg(long, default_value_t = 1e-3)] flow_rate: f64, #[arg(long, default_value_t = crate::domains_fluid_water_analogue::GRAVITY)] gravity: f64 },
+    Capillary { #[arg(long, default_value_t = 0.0728)] gamma: f64, #[arg(long, default_value_t = 998.0)] density: f64, #[arg(long, default_value_t = crate::domains_fluid_water_analogue::GRAVITY)] gravity: f64 },
+    Ratio { radius: f64, length: f64 },
+    MinFlow { #[arg(long, default_value_t = 0.1)] depth: f64, #[arg(long, default_value_t = crate::domains_fluid_water_analogue::GRAVITY)] gravity: f64, #[arg(long, default_value_t = 0.0728)] gamma: f64, #[arg(long, default_value_t = 998.0)] density: f64, #[arg(long, default_value_t = 10.0)] ratio: f64 },
+    Validity { #[arg(long, default_value_t = 0.1)] depth: f64, #[arg(long, default_value_t = 1e-3)] flow_rate: f64, #[arg(long, default_value_t = 0.0728)] gamma: f64, #[arg(long, default_value_t = 998.0)] density: f64, #[arg(long, default_value_t = crate::domains_fluid_water_analogue::GRAVITY)] gravity: f64, #[arg(long, default_value_t = 10.0)] ratio: f64 },
 }
 
 #[derive(Debug, Subcommand)]
@@ -798,7 +814,7 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::PnnRules { .. } | Commands::PnnDocking { .. }
         | Commands::PnnCompounds { .. } | Commands::PnnScreen { .. }
         | Commands::PnnTables { .. } | Commands::PnnCuration { .. }
-        | Commands::Providers { .. }) {
+        | Commands::WaterAnalogue { .. } | Commands::Providers { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -911,6 +927,43 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::WaterAnalogue { action } => {
+            use crate::domains_fluid_water_analogue as wa;
+            macro_rules! scalar {
+                ($expr:expr) => {{
+                    let value = $expr?;
+                    emit(json!({"value": value}), format!("{value}\n"))
+                }};
+            }
+            macro_rules! bundle {
+                ($expr:expr) => {{
+                    let value = $expr?;
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }};
+            }
+            match action {
+                WaterAnalogueAction::Speed { depth, gravity } => scalar!(wa::sound_speed(*depth, *gravity)),
+                WaterAnalogueAction::Flow { r, flow_rate, depth, gravity } =>
+                    scalar!(wa::flow_velocity(*r, *flow_rate, *depth, *gravity)),
+                WaterAnalogueAction::Radius { flow_rate, depth, gravity } =>
+                    scalar!(wa::horizon_radius(*flow_rate, *depth, *gravity)),
+                WaterAnalogueAction::Gravity { flow_rate, depth, gravity } =>
+                    scalar!(wa::surface_gravity(*flow_rate, *depth, *gravity)),
+                WaterAnalogueAction::Temperature { kappa } => scalar!(wa::hawking_temperature(*kappa)),
+                WaterAnalogueAction::Metric { r, flow_rate, depth, gravity } =>
+                    bundle!(wa::acoustic_metric(*r, *flow_rate, *depth, *gravity)),
+                WaterAnalogueAction::Lab { depth, flow_rate, gravity } =>
+                    bundle!(wa::lab_scales(*depth, *flow_rate, *gravity)),
+                WaterAnalogueAction::Capillary { gamma, density, gravity } =>
+                    scalar!(wa::capillary_length(*gamma, *density, *gravity)),
+                WaterAnalogueAction::Ratio { radius, length } => scalar!(wa::capillary_ratio(*radius, *length)),
+                WaterAnalogueAction::MinFlow { depth, gravity, gamma, density, ratio } =>
+                    scalar!(wa::long_wavelength_min_flow(*depth, *gravity, *gamma, *density, *ratio)),
+                WaterAnalogueAction::Validity { depth, flow_rate, gamma, density, gravity, ratio } =>
+                    bundle!(wa::validity(*depth, *flow_rate, *gamma, *density, *gravity, *ratio)),
+            }
+        }
         Commands::PnnCuration { action } => {
             use crate::domains_pnn_curation as curation;
             fn candidates(raw: &str) -> Result<Vec<Value>> {

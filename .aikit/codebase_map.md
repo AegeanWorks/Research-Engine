@@ -6,15 +6,15 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `469`
+- **Total Python Modules**: `470`
 - **Total Classes**: `317`
-- **Total Top-Level Functions**: `2044`
+- **Total Top-Level Functions**: `2047`
 - **Total Class Methods**: `1545`
-- **Total Source Lines**: `91947`
+- **Total Source Lines**: `91997`
 
 ## 🧭 Map Coverage
-- **Indexed**: python (`469` module(s))
-- **Not indexed by this map**: javascript (`1` file(s)), rust (`62` file(s))
+- **Indexed**: python (`470` module(s))
+- **Not indexed by this map**: javascript (`1` file(s)), rust (`63` file(s))
 
 > Only Python symbols are catalogued. A language above is reported as not indexed, never as verified by this map.
 
@@ -5071,6 +5071,16 @@
 **Functions:**
 - `def run(cmd, cwd)`
 - `def compare(label, args)`
+
+---
+
+### [`rust/water_analogue_parity.py`](rust/water_analogue_parity.py)
+**Size**: `50` lines
+
+**Functions:**
+- `def run(*args)`
+- `def close(a, b)`
+- `def check(label, rust, py)`
 
 ---
 

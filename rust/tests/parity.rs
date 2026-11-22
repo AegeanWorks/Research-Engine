@@ -433,6 +433,34 @@ fn fluid_frank_oseen_dispersion() {
 }
 
 #[test]
+fn shallow_water_acoustic_horizon() {
+    use research_engine::domains_fluid_water_analogue as wa;
+    assert!((wa::sound_speed(0.1, 9.81).unwrap() - 0.9904544411531507).abs() < 1e-9);
+    let radius = wa::horizon_radius(1e-3, 0.1, 9.81).unwrap();
+    assert!(radius > 0.0);
+    let kappa = wa::surface_gravity(1e-3, 0.1, 9.81).unwrap();
+    assert!((kappa - 0.9904544411531507_f64.powi(2) / radius).abs() < 1e-9);
+    assert!(wa::hawking_temperature(kappa).unwrap() > 0.0);
+    let metric = wa::acoustic_metric(0.5, 1e-3, 0.1, 9.81).unwrap();
+    assert_eq!(metric.get("g_rr").and_then(Value::as_f64), Some(1.0));
+    assert_eq!(metric.get("g_phiphi").and_then(Value::as_f64), Some(0.25));
+    assert!(metric.get("g_tt").and_then(Value::as_f64).unwrap() < 0.0);
+    let lab = wa::lab_scales(0.1, 1e-3, 9.81).unwrap();
+    assert!(lab.get("hawking_temperature_k").and_then(Value::as_f64).unwrap() > 0.0);
+    let capillary = wa::capillary_length(0.0728, 998.0, 9.81).unwrap();
+    assert!(capillary > 0.0);
+    assert!((wa::capillary_ratio(radius, capillary).unwrap() - (capillary / radius).powi(2)).abs() < 1e-12);
+    assert!(wa::long_wavelength_min_flow(0.1, 9.81, 0.0728, 998.0, 10.0).unwrap() > 0.0);
+    let validity = wa::validity(0.1, 1e-3, 0.0728, 998.0, 9.81, 10.0).unwrap();
+    assert!(validity.get("long_wavelength").and_then(Value::as_bool).is_some());
+    assert!(wa::sound_speed(0.0, 9.81).is_err());
+    assert!(wa::flow_velocity(0.0, 1e-3, 0.1, 9.81).is_err());
+    assert!(wa::hawking_temperature(0.0).is_err());
+    assert!(wa::capillary_ratio(radius, 0.0).is_err());
+    assert!(wa::long_wavelength_min_flow(0.1, 9.81, 0.0728, 998.0, 0.0).is_err());
+}
+
+#[test]
 fn pnn_library_curation_pipeline() {
     use research_engine::domains_pnn_curation as curation;
     fn compound(id: &str, smiles: &str) -> Value {

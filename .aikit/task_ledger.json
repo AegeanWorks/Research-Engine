@@ -5,9 +5,9 @@
     "last_phase": "in_progress",
     "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1795374859.1292489,
+    "updated_at": 1795375737.1490955,
     "owner": "opencode:rust-rewrite",
-    "lease_until": 1795382059.1292489,
+    "lease_until": 1795382937.1490955,
     "started_by": "opencode:rust-rewrite",
     "continuations": []
   },
@@ -92,29 +92,6 @@
         "mitigation": "Port bounded modules with Python parity helpers, keep separate schema initialization for lattice stores, verify with cargo test plus direct hygiene/KB/secret/test scripts before each commit."
       },
       "plan_digest": "aa86d74d20a2aa574d309dbaebd42d9d88ae476163fffe70a12c668f65645169"
-    },
-    {
-      "task_id": "T-028-outer-layers",
-      "phase": "in_progress",
-      "phase_num": 3,
-      "description": "[6/6 final] Ported Gaussian Ritz width selection: G-M/Yasui actions, derivatives, analytic/grid/Newton extrema, Ermakov cross-check and scales bundle",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795371177.4620903,
-      "timestamp_str": "2026-11-22 21:12:57",
-      "agent": "opencode:rust-rewrite"
-    },
-    {
-      "task_id": "T-028-outer-layers",
-      "phase": "in_progress",
-      "phase_num": 4,
-      "description": "[6/6 final] Verification: cargo test 48/48; fluid_variational_width_parity.py 13/13 matches; project gates passing",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795371177.7896645,
-      "timestamp_str": "2026-11-22 21:12:57",
-      "agent": "opencode:rust-rewrite",
-      "checklists": "passed"
     },
     {
       "task_id": "T-028-outer-layers",
@@ -251,6 +228,29 @@
       "status": "in_progress",
       "timestamp": 1795374859.1292489,
       "timestamp_str": "2026-11-22 22:14:19",
+      "agent": "opencode:rust-rewrite",
+      "checklists": "passed"
+    },
+    {
+      "task_id": "T-028-outer-layers",
+      "phase": "in_progress",
+      "phase_num": 3,
+      "description": "[6/6 final] Ported shallow-water acoustic horizon theory with analogue temperature, acoustic metric and validity scales",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795375736.9369235,
+      "timestamp_str": "2026-11-22 22:28:56",
+      "agent": "opencode:rust-rewrite"
+    },
+    {
+      "task_id": "T-028-outer-layers",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[6/6 final] Verification: cargo test 55/55; water_analogue_parity.py 11/11 matches; project gates passing",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795375737.1490955,
+      "timestamp_str": "2026-11-22 22:28:57",
       "agent": "opencode:rust-rewrite",
       "checklists": "passed"
     }
