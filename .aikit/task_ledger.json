@@ -5,9 +5,9 @@
     "last_phase": "in_progress",
     "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1795377894.0631053,
+    "updated_at": 1795378551.4801621,
     "owner": "opencode:rust-rewrite",
-    "lease_until": 1795385094.0631053,
+    "lease_until": 1795385751.4801621,
     "started_by": "opencode:rust-rewrite",
     "continuations": []
   },
@@ -92,29 +92,6 @@
         "mitigation": "Port bounded modules with Python parity helpers, keep separate schema initialization for lattice stores, verify with cargo test plus direct hygiene/KB/secret/test scripts before each commit."
       },
       "plan_digest": "aa86d74d20a2aa574d309dbaebd42d9d88ae476163fffe70a12c668f65645169"
-    },
-    {
-      "task_id": "T-028-outer-layers",
-      "phase": "in_progress",
-      "phase_num": 3,
-      "description": "[6/6 final] Ported PNN CSV row contracts: curated/screen rows, optional-field coercion and six-property binning",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795374134.6636739,
-      "timestamp_str": "2026-11-22 22:02:14",
-      "agent": "opencode:rust-rewrite"
-    },
-    {
-      "task_id": "T-028-outer-layers",
-      "phase": "in_progress",
-      "phase_num": 4,
-      "description": "[6/6 final] Verification: cargo test 53/53; pnn_tables_parity.py 7/7 matches; project gates passing",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795374134.9800448,
-      "timestamp_str": "2026-11-22 22:02:14",
-      "agent": "opencode:rust-rewrite",
-      "checklists": "passed"
     },
     {
       "task_id": "T-028-outer-layers",
@@ -251,6 +228,29 @@
       "status": "in_progress",
       "timestamp": 1795377894.0631053,
       "timestamp_str": "2026-11-22 23:04:54",
+      "agent": "opencode:rust-rewrite",
+      "checklists": "passed"
+    },
+    {
+      "task_id": "T-028-outer-layers",
+      "phase": "in_progress",
+      "phase_num": 3,
+      "description": "[6/6 final] Ported dispersive shallow-water horizon: capillary-gravity dispersion, group velocity and horizon wavenumber bracket solve",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795378550.4720254,
+      "timestamp_str": "2026-11-22 23:15:50",
+      "agent": "opencode:rust-rewrite"
+    },
+    {
+      "task_id": "T-028-outer-layers",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[6/6 final] Verification: cargo test 60/60; water_dispersive_parity.py 15/15 matches; project gates passing",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795378551.4801621,
+      "timestamp_str": "2026-11-22 23:15:51",
       "agent": "opencode:rust-rewrite",
       "checklists": "passed"
     }

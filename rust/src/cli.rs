@@ -73,6 +73,7 @@ pub enum Commands {
     WaterWell { #[command(subcommand)] action: WaterWellAction },
     WaterElectron { #[command(subcommand)] action: WaterElectronAction },
     WaterVde { #[command(subcommand)] action: WaterVdeAction },
+    WaterDispersive { #[command(subcommand)] action: WaterDispersiveAction },
     Providers { #[command(subcommand)] action: ProvidersAction },
     Search {
         query: String,
@@ -299,6 +300,15 @@ pub enum ProvidersAction {
 pub enum PnnRulesAction {
     Evaluate { #[arg(long, required = true)] compound: String },
     Weight { criterion: String },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum WaterDispersiveAction {
+    Dispersion { k: f64, #[arg(long, default_value_t = 0.1)] depth: f64, #[arg(long, default_value_t = 0.0728)] gamma: f64, #[arg(long, default_value_t = 998.0)] density: f64, #[arg(long, default_value_t = crate::domains_fluid_water_analogue::GRAVITY)] gravity: f64 },
+    Group { k: f64, #[arg(long, default_value_t = 0.1)] depth: f64, #[arg(long, default_value_t = 0.0728)] gamma: f64, #[arg(long, default_value_t = 998.0)] density: f64, #[arg(long, default_value_t = crate::domains_fluid_water_analogue::GRAVITY)] gravity: f64 },
+    Wavenumber { omega: f64, #[arg(long, default_value_t = 0.1)] depth: f64, #[arg(long, default_value_t = 0.0728)] gamma: f64, #[arg(long, default_value_t = 998.0)] density: f64, #[arg(long, default_value_t = crate::domains_fluid_water_analogue::GRAVITY)] gravity: f64, #[arg(long, default_value_t = 1e5)] maximum: f64 },
+    Horizon { omega: f64, #[arg(long)] flow_rate: f64, #[arg(long, default_value_t = 0.1)] depth: f64, #[arg(long, default_value_t = 0.0728)] gamma: f64, #[arg(long, default_value_t = 998.0)] density: f64, #[arg(long, default_value_t = crate::domains_fluid_water_analogue::GRAVITY)] gravity: f64 },
+    Capillary { #[arg(long, default_value_t = 0.1)] depth: f64, #[arg(long, default_value_t = 0.0728)] gamma: f64, #[arg(long, default_value_t = 998.0)] density: f64, #[arg(long, default_value_t = crate::domains_fluid_water_analogue::GRAVITY)] gravity: f64 },
 }
 
 #[derive(Debug, Subcommand)]
@@ -856,7 +866,8 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::PnnTables { .. } | Commands::PnnCuration { .. }
         | Commands::WaterAnalogue { .. } | Commands::PnnReports { .. }
         | Commands::WaterWell { .. } | Commands::WaterElectron { .. }
-        | Commands::WaterVde { .. } | Commands::Providers { .. }) {
+        | Commands::WaterVde { .. } | Commands::WaterDispersive { .. }
+        | Commands::Providers { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -969,6 +980,30 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::WaterDispersive { action } => {
+            use crate::domains_fluid_water_dispersive as wd;
+            macro_rules! scalar {
+                ($expr:expr) => {{
+                    let value = $expr?;
+                    emit(json!({"value": value}), format!("{value}\n"))
+                }};
+            }
+            match action {
+                WaterDispersiveAction::Dispersion { k, depth, gamma, density, gravity } =>
+                    scalar!(wd::dispersion(*k, *depth, *gamma, *density, *gravity)),
+                WaterDispersiveAction::Group { k, depth, gamma, density, gravity } =>
+                    scalar!(wd::group_velocity(*k, *depth, *gamma, *density, *gravity)),
+                WaterDispersiveAction::Wavenumber { omega, depth, gamma, density, gravity, maximum } =>
+                    scalar!(wd::horizon_wavenumber(*omega, *depth, *gamma, *density, *gravity, *maximum)),
+                WaterDispersiveAction::Horizon { omega, flow_rate, depth, gamma, density, gravity } => {
+                    let value = wd::dispersive_horizon(*omega, *flow_rate, *depth, *gamma, *density, *gravity)?;
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                WaterDispersiveAction::Capillary { depth, gamma, density, gravity } =>
+                    scalar!(wd::capillary_frequency(*depth, *gamma, *density, *gravity)),
+            }
+        }
         Commands::WaterVde { action } => {
             use crate::domains_fluid_water_vde as vde;
             match action {

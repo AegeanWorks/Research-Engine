@@ -78,6 +78,7 @@ argparse requires in `python -m engine`.
 | Domains: water well | Finite spherical well for the hydrated electron: Born depth, 1s/1p matching roots, transition gaps, inverse depth and full scales bundle (`water-well` CLI) |
 | Domains: water electron | Hydrated-electron cavity scale: screened Bohr radius/energy, capillary cavity radius/energy, infinite-well gap and inverse radius (`water-electron` CLI) |
 | Domains: water VDE | Two-observable inversion: well depth for VDE binding, cavity radius for the 1.7 eV gap and capillary comparison (`water-vde` CLI) |
+| Domains: dispersive water | Full capillary-gravity dispersion, group velocity, horizon wavenumber, dispersive horizon radius and capillary frequency (`water-dispersive` CLI) |
 | Domains: obezite | Citation-number extraction with bibliography-noise stripping and claim-row de-duplication (`obezite` CLI) |
 | Domains: PNN rules | CNS/property design-rule evaluation and criterion weighting (`pnn-rules` CLI) |
 | Domains: PNN docking | Docking-score alias parsing, RMSD/Vina filtering, weighted consensus normalization and per-compound best-target aggregation (`pnn-docking` CLI) |
@@ -184,6 +185,8 @@ argparse requires in `python -m engine`.
   well gaps, inverse radii and the scales bundle; all thirteen checks match.
 - `water_vde_parity.py` compares binding-depth inversion, cavity solutions and
   the capillary comparison; all seven checks match.
+- `water_dispersive_parity.py` compares dispersion, group velocities, horizon
+  wavenumbers/radii and capillary frequency; all fifteen checks match.
 
 ## Still to port
 

@@ -433,6 +433,26 @@ fn fluid_frank_oseen_dispersion() {
 }
 
 #[test]
+fn dispersive_water_horizon() {
+    use research_engine::domains_fluid_water_dispersive as wd;
+    let g = research_engine::domains_fluid_water_analogue::GRAVITY;
+    assert_eq!(wd::dispersion(0.0, 0.1, 0.0728, 998.0, g).unwrap(), 0.0);
+    assert!((wd::group_velocity(0.0, 0.1, 0.0728, 998.0, g).unwrap()
+        - (g * 0.1).sqrt()).abs() < 1e-12);
+    let omega = wd::dispersion(500.0, 0.1, 0.0728, 998.0, g).unwrap()
+        + 500.0 * wd::group_velocity(500.0, 0.1, 0.0728, 998.0, g).unwrap();
+    let k = wd::horizon_wavenumber(omega, 0.1, 0.0728, 998.0, g, 1e5).unwrap();
+    assert!((k - 500.0).abs() / 500.0 < 1e-9);
+    let horizon = wd::dispersive_horizon(omega, 1e-3, 0.1, 0.0728, 998.0, g).unwrap();
+    assert!(horizon["horizon_radius_m"].as_f64().unwrap() > 0.0);
+    assert!(horizon["ratio"].as_f64().unwrap() > 0.0);
+    assert!(wd::capillary_frequency(0.1, 0.0728, 998.0, g).unwrap() > 0.0);
+    assert!(wd::dispersion(-1.0, 0.1, 0.0728, 998.0, g).is_err());
+    assert!(wd::horizon_wavenumber(0.0, 0.1, 0.0728, 998.0, g, 1e5).is_err());
+    assert!(wd::dispersive_horizon(omega, 0.0, 0.1, 0.0728, 998.0, g).is_err());
+}
+
+#[test]
 fn hydrated_electron_vde_inversion() {
     use research_engine::domains_fluid_water_vde as vde;
     let depth = vde::depth_for_binding(3.732e-10, 3.27).unwrap();
