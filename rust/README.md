@@ -44,6 +44,9 @@ argparse requires in `python -m engine`.
 | Kill tests | `test add/list/run/verify/runs/attempts`, command/input binding, negative control, two agreeing runs, authoritative run group, G-003 NUMERIC gate |
 | Cascade | `cascade preview`, `claim invalidate`, `source retract`, preview digests and the 10-record bulk tripwire (G-004/G-005) |
 | Synthesis | `report`, `scorecard`, graph-derived consensus and coverage (G-006) |
+| Measurements | `protocol add/list/amend`, `observation add/list/void/import-csv`, provenance and group gates, `OBS-001`..`OBS-004` |
+| Search | deterministic phrase-first lexical `search` with exact snippet/token-budget output |
+| Markdown | `sanitize`/`cell`/`estimate_tokens`/`pack` shared with reports and search |
 | Integrity | 24 finding codes including `PROV-*`, `EVID-*`, `GRAPH-*`, `GAP-*`, `LEDGER-001` |
 | Events | hash-chained event ledger, byte-identical hash algorithm to Python |
 | Maintenance | `db integrity`, `db backup`, `events --verify`, `inventory`, `check` |
@@ -57,11 +60,13 @@ argparse requires in `python -m engine`.
   `provenance.code_sha256()` (`16f01351…` at the time of writing).
 - A graph written by the Rust binary passes `python -m engine --db … check`
   with the same findings as the Rust `check`.
+- `parity_check.py <db>` compares Rust and Python JSON for `search`,
+  `observation list` and `check` on the same graph; all three compare equal.
 
 ## Still to port
 
 `outline`/`brief`, full report manifest parity (`--strict` record digest),
-observations/protocols/analysis, search, AI artifacts, bundle export/diff,
+`analysis stats`/`trend`/`calibration`, AI artifacts, bundle export/diff,
 studio/adapters/experiments/domains, and the Python CLI text renderer. These
 remain served by `python -m engine` until their Rust equivalents land; the
 SQLite graph is shared throughout.

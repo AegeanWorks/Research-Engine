@@ -262,6 +262,59 @@ pub fn check(conn: &Connection) -> Result<Vec<Value>> {
             "link it with `claim link-question`, or record why it is standalone."));
     }
 
+    let sql = "SELECT claim_id, MAX(at) AS data_at FROM observation GROUP BY claim_id ORDER BY claim_id";
+    for row in query_json(conn, sql, [])? {
+        let claim_id = field(&row, "claim_id");
+        let analysis: String = query_json(conn,
+            "SELECT MAX(at) AS last FROM event WHERE subject=?1 AND kind IN ('claim.stats','claim.trend')",
+            params![claim_id])?
+            .into_iter().next().map(|r| field(&r, "last")).unwrap_or_default();
+        let observation_ids: Vec<String> = query_json(conn,
+            "SELECT id FROM observation WHERE claim_id=?1 ORDER BY id", params![claim_id])?
+            .into_iter().map(|r| field(&r, "id")).collect();
+        let mut voided_at = String::new();
+        for id in &observation_ids {
+            let last: String = query_json(conn,
+                "SELECT MAX(at) AS last FROM event WHERE kind='observation.void' AND subject=?1",
+                params![id])?
+                .into_iter().next().map(|r| field(&r, "last")).unwrap_or_default();
+            if last > voided_at { voided_at = last; }
+        }
+        let live: i64 = conn.query_row(
+            "SELECT COUNT(*) FROM observation WHERE claim_id=?1 AND voided=0",
+            params![claim_id], |r| r.get(0)).unwrap_or(0);
+        let data_at = field(&row, "data_at").max(voided_at);
+        if (!analysis.is_empty() && analysis >= data_at) || (analysis.is_empty() && live == 0) {
+            continue;
+        }
+        let message = if analysis.is_empty() {
+            "claim has recorded observations but no statistics run"
+        } else {
+            "observations changed after the last statistics run"
+        };
+        findings.push(finding("OBS-001", "warning", &claim_id, message,
+            "re-run `analysis stats CLAIM --baseline ... --treatment ...` before citing numbers."));
+    }
+
+    let sql = "SELECT id, claim_id FROM observation WHERE voided=0 AND (trim(instrument_id)='' OR trim(rater_id)='' OR trim(protocol_id)='') ORDER BY id";
+    for row in query_json(conn, sql, [])? {
+        findings.push(finding("OBS-002", "warning", &field(&row, "id"),
+            format!("observation for {} has no measurement provenance", field(&row, "claim_id")),
+            "record the instrument, rater and protocol together, or keep it as legacy data."));
+    }
+    let sql = "SELECT id, claim_id FROM observation WHERE voided=0 AND provenance_class='unclassified' ORDER BY id";
+    for row in query_json(conn, sql, [])? {
+        findings.push(finding("OBS-003", "warning", &field(&row, "id"),
+            format!("observation for {} is not classified independent or self-reported", field(&row, "claim_id")),
+            "pass --provenance-class when recording, or keep it as legacy data."));
+    }
+    let sql = "SELECT id, claim_id FROM observation WHERE voided=0 AND provenance_class='self_reported' ORDER BY id";
+    for row in query_json(conn, sql, [])? {
+        findings.push(finding("OBS-004", "warning", &field(&row, "id"),
+            format!("self-reported measurement for {} is quarantined", field(&row, "claim_id")),
+            "use an independent measurement for a comparative claim, or record a caveat."));
+    }
+
     Ok(findings)
 }
 

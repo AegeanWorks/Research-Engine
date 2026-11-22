@@ -61,6 +61,12 @@ pub fn sha256_text(value: &str) -> String {
     format!("{:x}", hasher.finalize())
 }
 
+pub fn sha256_bytes(value: &[u8]) -> String {
+    let mut hasher = Sha256::new();
+    hasher.update(value);
+    format!("{:x}", hasher.finalize())
+}
+
 /// Exact port of `engine/events.py::event_hash_for`: newline-joined fields in
 /// predecessor-first order, hashed with plain SHA-256.
 #[allow(clippy::too_many_arguments)]

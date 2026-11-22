@@ -12,6 +12,7 @@ use research_engine::db::{initialize, open};
 use research_engine::error::EngineError;
 use research_engine::integrity;
 use research_engine::vocab::SCHEMA_VERSION;
+use serde_json::Value;
 
 static COUNTER: AtomicUsize = AtomicUsize::new(0);
 
@@ -132,6 +133,61 @@ fn report_numbers_come_from_the_graph() {
     assert!(report.contains("no hand-written numbers"));
     let scorecard = research_engine::synthesis::scorecard(&conn, &field(&research, "id")).unwrap();
     assert!(scorecard.contains("| PROVEN |"));
+}
+
+#[test]
+fn protocols_and_observations_enforce_provenance() {
+    let path = temp_db("observations");
+    let conn = open(path.to_str().unwrap()).unwrap();
+    initialize(&conn).unwrap();
+    let research = core::add_research(&conn, "Measurements", "", None).unwrap();
+    let claim = core::add_claim(&conn, &field(&research, "id"), "Measured", "derived",
+        None, "", "", 0.5, "", "basis", &[]).unwrap();
+
+    let protocol = research_engine::protocols::register(&conn, "accuracy_at_1", "top-1 accuracy",
+        false, false, "", "", "agent").unwrap();
+    assert_eq!(field(&protocol, "id"), "accuracy_at_1");
+    assert!(research_engine::protocols::register(&conn, "accuracy_at_1", "duplicate",
+        false, false, "", "", "agent").is_err());
+
+    let ob = research_engine::observations::add(&conn, &field(&claim, "id"), "Baseline", 1.5,
+        "", "", "", "", "", "", "", "", 1, "raw", "", "unclassified", "", "").unwrap();
+    assert_eq!(field(&ob, "group_label"), "baseline");
+    assert!(research_engine::observations::add(&conn, &field(&claim, "id"), "bad group", 1.0,
+        "", "", "", "", "", "", "", "", 1, "raw", "", "unclassified", "", "").is_err());
+    assert!(research_engine::observations::add(&conn, &field(&claim, "id"), "x", f64::NAN,
+        "", "", "", "", "", "", "", "", 1, "raw", "", "unclassified", "", "").is_err());
+
+    let amended = research_engine::protocols::amend(&conn, "accuracy_at_1", "top-1 accuracy v2", "clarify", "agent").unwrap();
+    assert_eq!(field(&amended, "measures"), "top-1 accuracy v2");
+    let findings = integrity::check(&conn).unwrap();
+    let codes: Vec<&str> = findings.iter().map(|f| f.get("code").and_then(Value::as_str).unwrap_or("")).collect();
+    assert!(codes.contains(&"OBS-001"), "missing OBS-001 in {codes:?}");
+    assert!(codes.contains(&"OBS-002"));
+    assert!(codes.contains(&"OBS-003"));
+}
+
+#[test]
+fn search_is_phrase_first_and_program_scoped() {
+    let path = temp_db("search");
+    let conn = open(path.to_str().unwrap()).unwrap();
+    initialize(&conn).unwrap();
+    let research = core::add_research(&conn, "Search Program", "", None).unwrap();
+    core::add_source(&conn, &field(&research, "id"), "Quantum Paper", Some(2024), "", "", "", "paper").unwrap();
+    core::add_question(&conn, &field(&research, "id"), "Is quantum effect real?").unwrap();
+    core::add_claim(&conn, &field(&research, "id"), "Quantum effect measured", "derived",
+        None, "", "", 0.5, "", "quantum basis", &[]).unwrap();
+    let result = research_engine::search::search(&conn, "quantum", None, None, 5, false, 800).unwrap();
+    let hits = result.get("counts").unwrap();
+    assert_eq!(hits["claim"]["hits"], 1);
+    assert_eq!(hits["source"]["hits"], 1);
+    assert_eq!(hits["question"]["hits"], 1);
+    for hit in result.get("results").unwrap().as_array().unwrap() {
+        assert_eq!(hit.get("score").and_then(Value::as_i64), Some(153));
+    }
+    assert!(result.get("text").and_then(Value::as_str).unwrap().contains("SEARCH \"quantum\""));
+    let scoped = research_engine::search::search(&conn, "quantum", Some(&field(&research, "id")), None, 5, false, 800).unwrap();
+    assert_eq!(scoped.get("research").and_then(Value::as_str), Some(field(&research, "id").as_str()));
 }
 
 #[test]

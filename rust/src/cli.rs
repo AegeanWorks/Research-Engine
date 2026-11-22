@@ -29,6 +29,16 @@ pub enum Commands {
     Demo,
     Check,
     Inventory,
+    Search {
+        query: String,
+        #[arg(long)] research: Option<String>,
+        #[arg(long = "kind")] kinds: Vec<String>,
+        #[arg(long, default_value_t = 5)] limit: i64,
+        #[arg(long, default_value_t = 800)] budget: i64,
+        #[arg(long)] all: bool,
+    },
+    Protocol { #[command(subcommand)] action: ProtocolAction },
+    Observation { #[command(subcommand)] action: ObservationAction },
     Report {
         reference: String,
         #[arg(long)] out: Option<String>,
@@ -192,6 +202,65 @@ pub enum TestAction {
 }
 
 #[derive(Debug, Subcommand)]
+pub enum ProtocolAction {
+    Add {
+        #[arg(long, required = true)] id: String,
+        #[arg(long, required = true)] measures: String,
+        #[arg(long)] includes_generation: bool,
+        #[arg(long)] includes_judge: bool,
+        #[arg(long, default_value = "")] doc_digest: String,
+        #[arg(long, default_value = "")] doc_path: String,
+        #[arg(long, default_value = "agent")] actor: String,
+    },
+    List,
+    Amend {
+        reference: String,
+        #[arg(long, required = true)] measures: String,
+        #[arg(long, required = true)] reason: String,
+        #[arg(long, default_value = "agent")] actor: String,
+    },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum ObservationAction {
+    Add {
+        claim: String,
+        #[arg(long, required = true)] group: String,
+        #[arg(long, required = true)] value: f64,
+        #[arg(long, default_value = "")] note: String,
+        #[arg(long, default_value = "")] instrument_kind: String,
+        #[arg(long, default_value = "")] instrument_id: String,
+        #[arg(long, default_value = "")] instrument_digest: String,
+        #[arg(long, default_value = "")] rater_kind: String,
+        #[arg(long, default_value = "")] rater_id: String,
+        #[arg(long, default_value = "")] rater_version: String,
+        #[arg(long, default_value = "")] protocol_id: String,
+        #[arg(long, default_value_t = 1)] sample_size: i64,
+        #[arg(long, default_value = "raw")] aggregation: String,
+        #[arg(long, default_value = "")] unit: String,
+        #[arg(long, default_value = "unclassified")] provenance_class: String,
+        #[arg(long, default_value = "")] producer_path: String,
+        #[arg(long, default_value = "")] producer_digest: String,
+    },
+    List {
+        claim: String,
+        #[arg(long)] group: Option<String>,
+        #[arg(long)] include_voided: bool,
+    },
+    Void {
+        reference: String,
+        #[arg(long, required = true)] reason: String,
+        #[arg(long, default_value = "agent")] actor: String,
+    },
+    ImportCsv {
+        claim: String,
+        path: String,
+        #[arg(long)] template: bool,
+        #[arg(long)] dry_run: bool,
+    },
+}
+
+#[derive(Debug, Subcommand)]
 pub enum CascadeAction {
     Preview { reference: String },
 }
@@ -242,11 +311,7 @@ pub fn run(cli: &Cli) -> Result<Output> {
         }
         Commands::Check => {
             let findings = integrity::check(&conn)?;
-            let value = json!({
-                "ok": !integrity::has_errors(&findings),
-                "findings": findings,
-            });
-            emit(value, integrity::render_markdown(&findings))
+            emit(Value::Array(findings.clone()), integrity::render_markdown(&findings))
         }
         Commands::Inventory => {
             let mut out = serde_json::Map::new();
@@ -258,6 +323,17 @@ pub fn run(cli: &Cli) -> Result<Output> {
             let text = to_stable_json(&value);
             emit(value, text)
         }
+        Commands::Search { query, research, kinds, limit, budget, all } => {
+            let result = crate::search::search(&conn, query, research.as_deref(),
+                if kinds.is_empty() { None } else { Some(kinds.as_slice()) },
+                *limit, *all, *budget)?;
+            let text = field(&result, "text");
+            let mut payload = result.as_object().cloned().unwrap_or_default();
+            payload.remove("text"); // python CLI omits the rendered text from --json
+            emit(Value::Object(payload), text)
+        }
+        Commands::Protocol { action } => run_protocol(&conn, action),
+        Commands::Observation { action } => run_observation(&conn, action),
         Commands::Report { reference, out, check, strict } => {
             use crate::synthesis;
             if let Some(path) = check {
@@ -493,6 +569,61 @@ fn run_hypothesis(conn: &Connection, action: &HypothesisAction) -> Result<Output
         HypothesisAction::Outcome { reference, status, evidence, note, actor } => {
             let record = core::record_outcome(conn, reference, status, evidence, note, actor)?;
             emit_record(record, format!("{} -> {}", reference, status))
+        }
+    }
+}
+
+fn run_protocol(conn: &Connection, action: &ProtocolAction) -> Result<Output> {
+    use crate::protocols;
+    match action {
+        ProtocolAction::Add { id, measures, includes_generation, includes_judge, doc_digest, doc_path, actor } => {
+            let record = protocols::register(conn, id, measures, *includes_generation, *includes_judge,
+                doc_digest, doc_path, actor)?;
+            emit_record(record.clone(), format!("{} {}", field(&record, "id"), field(&record, "measures")))
+        }
+        ProtocolAction::List => {
+            let rows = protocols::list_protocols(conn)?;
+            let text = if rows.is_empty() { "no protocols\n".to_string() } else {
+                rows.iter().map(|p| format!("{}  generation={} judge={}  {}\n", field(p, "id"),
+                    p.get("includes_generation").and_then(Value::as_i64).unwrap_or(0),
+                    p.get("includes_judge").and_then(Value::as_i64).unwrap_or(0), field(p, "measures"))).collect()
+            };
+            emit(Value::Array(rows), text)
+        }
+        ProtocolAction::Amend { reference, measures, reason, actor } => {
+            let record = protocols::amend(conn, reference, measures, reason, actor)?;
+            emit_record(record, format!("{} amended {}", reference, measures))
+        }
+    }
+}
+
+fn run_observation(conn: &Connection, action: &ObservationAction) -> Result<Output> {
+    use crate::observations;
+    match action {
+        ObservationAction::Add { claim, group, value, note, instrument_kind, instrument_id,
+            instrument_digest, rater_kind, rater_id, rater_version, protocol_id, sample_size,
+            aggregation, unit, provenance_class, producer_path, producer_digest } => {
+            let record = observations::add(conn, claim, group, *value, note, instrument_kind,
+                instrument_id, instrument_digest, rater_kind, rater_id, rater_version, protocol_id,
+                *sample_size, aggregation, unit, provenance_class, producer_path, producer_digest)?;
+            emit_record(record.clone(), format!("{} {} {:.6}", field(&record, "id"),
+                field(&record, "group_label"), record.get("value").and_then(Value::as_f64).unwrap_or(0.0)))
+        }
+        ObservationAction::List { claim, group, include_voided } => {
+            let rows = observations::list_observations(conn, claim, group.as_deref(), *include_voided)?;
+            emit(Value::Array(rows.clone()), list_text(&rows))
+        }
+        ObservationAction::Void { reference, reason, actor } => {
+            let record = observations::void_observation(conn, reference, reason, actor)?;
+            emit_record(record, format!("{} voided", reference))
+        }
+        ObservationAction::ImportCsv { claim, path, template, dry_run } => {
+            if *template {
+                return emit(json!({"header": observations::CSV_TEMPLATE_HEADER}),
+                    format!("{}\n", observations::CSV_TEMPLATE_HEADER));
+            }
+            let result = observations::import_csv(conn, claim, path, *dry_run)?;
+            emit(result.clone(), to_stable_json(&result))
         }
     }
 }

@@ -5,35 +5,13 @@
     "last_phase": "in_progress",
     "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1795342286.2162497,
+    "updated_at": 1795344775.0652297,
     "owner": "opencode:rust-rewrite",
-    "lease_until": 1795349486.2162497,
+    "lease_until": 1795351975.0652297,
     "started_by": "opencode:rust-rewrite",
     "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "T-022-windows-dryrun-holm",
-      "phase": "in_progress",
-      "phase_num": 4,
-      "description": "[3/4] Dry-run plus Holm shipped: import-csv dry-run rolls back with counts plus stats-all holm display table, golden extended, 4/4 gates pass, checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793913376.8482642,
-      "timestamp_str": "2026-11-06 00:16:16",
-      "agent": "kilo:goal"
-    },
-    {
-      "task_id": "T-022-windows-dryrun-holm",
-      "phase": "in_progress",
-      "phase_num": 4,
-      "description": "[4/4] Docs plus ADR shipped: README within 22500 plus ARCHITECTURE and MECHANICS windows/dry-run/holm plus ADR-053, full suite pass, checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793913377.0006294,
-      "timestamp_str": "2026-11-06 00:16:17",
-      "agent": "kilo:goal"
-    },
     {
       "task_id": "T-022-windows-dryrun-holm",
       "phase": "completed",
@@ -255,6 +233,29 @@
       "status": "in_progress",
       "timestamp": 1795342286.2162497,
       "timestamp_str": "2026-11-22 13:11:26",
+      "agent": "opencode:rust-rewrite",
+      "checklists": "passed"
+    },
+    {
+      "task_id": "T-026-rust-rewrite",
+      "phase": "in_progress",
+      "phase_num": 3,
+      "description": "[6/6] Port observations, protocol registry and lexical search into rust/src with Python parity tests",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795342513.4636097,
+      "timestamp_str": "2026-11-22 13:15:13",
+      "agent": "opencode:rust-rewrite"
+    },
+    {
+      "task_id": "T-026-rust-rewrite",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[6/6] Verification: cargo test 13/13 passed; Rust and Python JSON equal for search, observation list and check; project gates 4/4 passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795344775.0652297,
+      "timestamp_str": "2026-11-22 13:52:55",
       "agent": "opencode:rust-rewrite",
       "checklists": "passed"
     }
