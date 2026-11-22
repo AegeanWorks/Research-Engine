@@ -895,3 +895,11 @@ ender.py into engine/series.py
 - **Consequences**: Reports and experiment summaries can use one stdlib-only
   series vocabulary. No third-party dependency is added. Other scanned projects
   (games, compilers, chains, model harnesses) are not lifted into the core.
+
+### ADR-060: Rust binary is the canonical runtime entry point
+
+- **Date**: 2026-11-23
+- **Status**: Accepted
+- **Context**: The Rust crate now covers schema-14 storage, the core graph, evidence, reports, cascades, measurements, analysis, AI artifacts, studio surfaces, discovery and several domain packs. The Python CLI remains a compatibility surface, but operators should use one canonical runtime.
+- **Decision**: Ship `research-engine` / `research-engine.cmd` launchers that build (when needed) and execute the Rust release binary. Python `-m engine` is retained as a compatibility entry point for the remaining Python-only modules and the contract test suite.
+- **Consequences**: The canonical regression gate includes `cd rust && cargo test`; the Python suite verifies compatibility. No Python source is deleted before its Rust replacement has parity evidence.

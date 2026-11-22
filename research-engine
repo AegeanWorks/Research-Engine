@@ -1,0 +1,18 @@
+#!/bin/sh
+# Canonical Research Engine runtime launcher (Rust).
+set -eu
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+find_bin() {
+  for candidate in \
+    "$ROOT/rust/target/release/research-engine" \
+    "$ROOT/rust/target/x86_64-pc-windows-gnu/release/research-engine.exe"; do
+    if [ -x "$candidate" ]; then printf '%s' "$candidate"; return 0; fi
+  done
+  return 1
+}
+BIN=$(find_bin || true)
+if [ -z "$BIN" ]; then
+  (cd "$ROOT/rust" && cargo build --release)
+  BIN=$(find_bin)
+fi
+exec "$BIN" "$@"

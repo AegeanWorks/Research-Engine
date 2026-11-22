@@ -5,9 +5,9 @@
     "last_phase": "in_progress",
     "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1795364573.5527291,
+    "updated_at": 1795366169.7410429,
     "owner": "opencode:rust-rewrite",
-    "lease_until": 1795371773.5527291,
+    "lease_until": 1795373369.7410429,
     "started_by": "opencode:rust-rewrite",
     "continuations": []
   },
@@ -92,29 +92,6 @@
         "mitigation": "Port bounded modules with Python parity helpers, keep separate schema initialization for lattice stores, verify with cargo test plus direct hygiene/KB/secret/test scripts before each commit."
       },
       "plan_digest": "aa86d74d20a2aa574d309dbaebd42d9d88ae476163fffe70a12c668f65645169"
-    },
-    {
-      "task_id": "T-028-outer-layers",
-      "phase": "in_progress",
-      "phase_num": 3,
-      "description": "[6/6 partial] Ported studio web GET routes, lattice integrity checks, influential-entity ranking and the static UI page into rust/src/studio_web.rs",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795357446.369759,
-      "timestamp_str": "2026-11-22 17:24:06",
-      "agent": "opencode:rust-rewrite"
-    },
-    {
-      "task_id": "T-028-outer-layers",
-      "phase": "in_progress",
-      "phase_num": 4,
-      "description": "[6/6 partial] Verification: cargo test 32/32; web_parity.py 11/11 exact matches; project gates passing",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795357446.564754,
-      "timestamp_str": "2026-11-22 17:24:06",
-      "agent": "opencode:rust-rewrite",
-      "checklists": "passed"
     },
     {
       "task_id": "T-028-outer-layers",
@@ -251,6 +228,29 @@
       "status": "in_progress",
       "timestamp": 1795364573.5527291,
       "timestamp_str": "2026-11-22 19:22:53",
+      "agent": "opencode:rust-rewrite",
+      "checklists": "passed"
+    },
+    {
+      "task_id": "T-028-outer-layers",
+      "phase": "in_progress",
+      "phase_num": 3,
+      "description": "[6/6] Switched canonical runtime to the Rust release binary via research-engine / research-engine.cmd launchers; documented in ADR-060 and project metadata",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795366169.5532641,
+      "timestamp_str": "2026-11-22 19:49:29",
+      "agent": "opencode:rust-rewrite"
+    },
+    {
+      "task_id": "T-028-outer-layers",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[6/6] Verification: launcher reports research-engine 0.2.0; cargo test 39/39; Python compatibility suite 1180 tests OK; all gates pass",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795366169.7410429,
+      "timestamp_str": "2026-11-22 19:49:29",
       "agent": "opencode:rust-rewrite",
       "checklists": "passed"
     }

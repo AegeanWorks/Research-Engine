@@ -9,15 +9,14 @@ A falsification-first research engine for provenance-backed claims, executable k
 
 ## ⚡ 30-Second Cold-Start Quick Reference
 
-- **Runtime Prerequisites**: Python 3.10+; standard library only, no network or third-party packages.
+- **Runtime Prerequisites**: Rust 1.100+; launch with `research-engine` (or `.cmd`). Python 3.10+ is the compatibility suite only.
 - **Canonical Regression Shield Gate**:
   ```bash
+  cd rust && cargo test && cd ..
   python -m unittest discover -s tests -t .
   ```
-- **Try it in 10 seconds**: `python -m engine demo` builds a synthetic program and makes no
-  scientific claim; then run `check` and `report`.
-- **Start a real program**: see [Commands](#commands) for `research`, `question`, `source` and
-  `claim add`.
+- **Try it**: `research-engine demo` (synthetic, no scientific claim), then `check` and `report`.
+- **Real**: see [Commands](#commands).
 
 ### 🛠️ AIKit Commands (run from the AIKit folder)
 | Role | Command |
@@ -30,8 +29,7 @@ A falsification-first research engine for provenance-backed claims, executable k
 ## Why this is not "just lattice"
 
 `lattice` is an evidence store, not a lifecycle. The host adds `adapters/lattice`, `studio`,
-`experiments` and isolated `domains/{pnn,fluid_universe,obezite,atlas}` packs. Data stays
-external; see [docs/merge/READINESS.md](docs/merge/READINESS.md).
+`experiments` and isolated domain packs; see [docs/merge/READINESS.md](docs/merge/READINESS.md).
 
 ## How It Works
 
@@ -106,6 +104,8 @@ machine-checked formal proof. The engine's job is to keep the record honest, not
 researcher's judgment.
 
 ## Commands
+
+The canonical runtime is the Rust binary (`research-engine`); `python -m engine` is the compatibility entry point.
 
 ```text
 python -m engine [--db PATH] [--json] init

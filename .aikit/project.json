@@ -83,5 +83,10 @@
     "aegean-science-license",
     "research",
     "commercial-license"
-  ]
+  ],
+  "runtime": {
+    "language": "rust",
+    "entry": "research-engine",
+    "compat_entry": "python -m engine"
+  }
 }
