@@ -221,6 +221,41 @@ fn search_is_phrase_first_and_program_scoped() {
 }
 
 #[test]
+fn fluid_convergence_diagnostics() {
+    use research_engine::domains_fluid_convergence as conv;
+    let metric = |h: f64, h_up: f64, z3: f64, force: f64, bond: f64| serde_json::json!({
+        "H": h, "H_upsampled": h_up, "Z3": z3, "force_rms": force, "max_bond": bond,
+    });
+    let payload = |n: i64, steps: i64, dt: f64, m: Value| serde_json::json!({
+        "n": n, "length": 20.0, "mu": 0.5, "steps": steps, "dt": dt,
+        "final": m, "verdict": {"claim_15_status": "UNVERIFIED"},
+    });
+    let low = payload(64, 1000, 0.01, metric(0.92, 0.99, 0.48, 0.02, 0.31));
+    let high = payload(128, 1000, 0.01, metric(0.97, 1.002, 0.505, 0.015, 0.29));
+    let scan = conv::compare_scans(&low, &high).unwrap();
+    assert_eq!(scan.get("n_low").and_then(Value::as_i64), Some(64));
+    assert_eq!(scan.get("n_high").and_then(Value::as_i64), Some(128));
+    assert_eq!(scan.get("claim_15_status").and_then(Value::as_str), Some("UNVERIFIED"));
+    let coarse = payload(64, 1000, 0.02, metric(0.90, 0.98, 0.47, 0.03, 0.35));
+    let fine = payload(64, 2000, 0.01, metric(0.96, 1.001, 0.502, 0.02, 0.30));
+    let temporal = conv::compare_temporal(&coarse, &fine).unwrap();
+    assert_eq!(temporal.get("n").and_then(Value::as_i64), Some(64));
+    assert!((temporal.get("physical_time").and_then(Value::as_f64).unwrap() - 20.0).abs() < 1e-12);
+    let rows = vec![
+        serde_json::json!({"steps": 100, "t": 1.0, "Z3": 0.10, "force_rms": 0.09}),
+        serde_json::json!({"steps": 200, "t": 2.0, "Z3": 0.22, "force_rms": 0.07}),
+        serde_json::json!({"steps": 400, "t": 4.0, "Z3": 0.46, "force_rms": 0.03}),
+    ];
+    let trend = conv::summarize_trend(&rows, 0.5, 0.01).unwrap();
+    assert_eq!(trend.get("rows").and_then(Value::as_u64), Some(3));
+    assert_eq!(trend.get("z3_monotone").and_then(Value::as_bool), Some(true));
+    assert_eq!(trend.get("claim_15_status").and_then(Value::as_str), Some(""));
+    assert!(conv::compare_scans(&high, &low).is_err());
+    assert!(conv::compare_temporal(&low, &high).is_err());
+    assert!(conv::summarize_trend(&rows[..1], 0.5, 0.01).is_err());
+}
+
+#[test]
 fn fluid_osmotic_closure_no_go() {
     use research_engine::domains_fluid_nelson_closure as nc;
     let values = vec![1.0, 2.0, 4.0, 8.0];

@@ -60,6 +60,7 @@ pub enum Commands {
     FluidReduction { #[command(subcommand)] action: FluidReductionAction },
     FluidVariationalWidth { #[command(subcommand)] action: FluidVariationalWidthAction },
     FluidNelsonClosure { #[command(subcommand)] action: FluidNelsonClosureAction },
+    FluidConvergence { #[command(subcommand)] action: FluidConvergenceAction },
     Obezite { #[command(subcommand)] action: ObeziteAction },
     PnnRules { #[command(subcommand)] action: PnnRulesAction },
     PnnDocking { #[command(subcommand)] action: PnnDockingAction },
@@ -321,6 +322,17 @@ pub enum FluidBridgeAction {
     Horizon { omega: f64 },
     Coeffs { s0: f64, st: f64, horizon_t: f64, omega: f64, hbar: f64, mass: f64 },
     Path { #[arg(long)] coeffs: String, #[arg(long)] times: String, #[arg(long)] omega: f64 },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum FluidConvergenceAction {
+    Scan { #[arg(long, required = true)] low: String, #[arg(long, required = true)] high: String },
+    Temporal { #[arg(long, required = true)] coarse: String, #[arg(long, required = true)] fine: String },
+    Trend {
+        #[arg(long, required = true)] rows: String,
+        #[arg(long, default_value_t = 0.5)] z3_target: f64,
+        #[arg(long, default_value_t = 0.01)] force_tol: f64,
+    },
 }
 
 #[derive(Debug, Subcommand)]
@@ -739,7 +751,7 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::FluidVortexCore { .. } | Commands::HydrogenRadial { .. }
         | Commands::FluidTopology { .. } | Commands::FluidCirculant { .. }
         | Commands::FluidReduction { .. } | Commands::FluidVariationalWidth { .. }
-        | Commands::FluidNelsonClosure { .. }
+        | Commands::FluidNelsonClosure { .. } | Commands::FluidConvergence { .. }
         | Commands::Obezite { .. }
         | Commands::PnnRules { .. } | Commands::PnnDocking { .. } | Commands::Providers { .. }) {
         initialize(&conn)?;
@@ -933,6 +945,38 @@ pub fn run(cli: &Cli) -> Result<Output> {
                     let result = obezite::deduplicate(&list, std::path::Path::new(retracted),
                         std::path::Path::new(archive), std::path::Path::new(updated), stamp)?;
                     emit(result.clone(), to_stable_json(&result))
+                }
+            }
+        }
+        Commands::FluidConvergence { action } => {
+            use crate::domains_fluid_convergence as conv;
+            fn payload(raw: &str, name: &str) -> Result<Value> {
+                serde_json::from_str(raw).map_err(|e| EngineError::new(
+                    format!("invalid {name} JSON: {e}"), "the convergence payload must be a JSON object",
+                    &format!("pass a JSON object for {name}")))
+            }
+            match action {
+                FluidConvergenceAction::Scan { low, high } => {
+                    let low = payload(low, "low")?;
+                    let high = payload(high, "high")?;
+                    let value = conv::compare_scans(&low, &high)?;
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                FluidConvergenceAction::Temporal { coarse, fine } => {
+                    let coarse = payload(coarse, "coarse")?;
+                    let fine = payload(fine, "fine")?;
+                    let value = conv::compare_temporal(&coarse, &fine)?;
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                FluidConvergenceAction::Trend { rows, z3_target, force_tol } => {
+                    let rows: Vec<Value> = serde_json::from_str(rows).map_err(|e| EngineError::new(
+                        format!("invalid rows JSON: {e}"), "rows must be a JSON array of objects",
+                        "pass an array of row objects"))?;
+                    let value = conv::summarize_trend(&rows, *z3_target, *force_tol)?;
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
                 }
             }
         }

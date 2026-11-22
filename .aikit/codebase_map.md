@@ -6,15 +6,15 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `464`
+- **Total Python Modules**: `465`
 - **Total Classes**: `317`
-- **Total Top-Level Functions**: `2024`
+- **Total Top-Level Functions**: `2028`
 - **Total Class Methods**: `1545`
-- **Total Source Lines**: `91575`
+- **Total Source Lines**: `91642`
 
 ## 🧭 Map Coverage
-- **Indexed**: python (`464` module(s))
-- **Not indexed by this map**: javascript (`1` file(s)), rust (`57` file(s))
+- **Indexed**: python (`465` module(s))
+- **Not indexed by this map**: javascript (`1` file(s)), rust (`58` file(s))
 
 > Only Python symbols are catalogued. A language above is reported as not indexed, never as verified by this map.
 
@@ -4743,6 +4743,17 @@
 - `def complex_json(matrix)`
 - `def close(a, b)`
 - `def check(label, rust, py)`
+
+---
+
+### [`rust/fluid_convergence_parity.py`](rust/fluid_convergence_parity.py)
+**Size**: `67` lines
+
+**Functions:**
+- `def run(*args)`
+- `def close(a, b)`
+- `def check(label, rust, py)`
+- `def payload(n, steps, dt, h, h_up, z3, force, bond, status)`
 
 ---
 

@@ -24,6 +24,7 @@ pub mod domains_fluid_circulant;
 pub mod domains_fluid_reduction;
 pub mod domains_fluid_variational_width;
 pub mod domains_fluid_nelson_closure;
+pub mod domains_fluid_convergence;
 pub mod domains_fluid_topology;
 pub mod domains_obezite;
 pub mod domains_pnn_docking;
