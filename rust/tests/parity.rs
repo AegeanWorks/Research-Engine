@@ -433,6 +433,29 @@ fn fluid_frank_oseen_dispersion() {
 }
 
 #[test]
+fn two_branch_nodal_defect() {
+    use research_engine::domains_fluid_node_defect as nd;
+    let xs = [-2.0, -1.0, 0.0, 1.0, 2.0];
+    let split = nd::branch_split(&xs, 1.0, 1.0, 1.0).unwrap();
+    assert_eq!(split.get("identity_residual").and_then(Value::as_f64), Some(0.0));
+    assert_eq!(split.get("node_density").and_then(Value::as_f64), Some(0.0));
+    assert_eq!(split.get("phase_slip").and_then(Value::as_f64).unwrap().to_string(),
+        std::f64::consts::PI.to_string());
+    let match_result = nd::branch_regular_pressure_match(&xs, 1.0, 1.0, 1.0).unwrap();
+    assert_eq!(match_result.get("n_branch_points").and_then(Value::as_u64), Some(4));
+    assert_eq!(match_result.get("n_excluded").and_then(Value::as_u64), Some(1));
+    assert_eq!(match_result.get("pressure finite").and_then(Value::as_bool), Some(true));
+    let scaling = nd::node_scaling().unwrap();
+    assert_eq!(scaling.get("grid_ns").unwrap().as_array().unwrap().len(), 4);
+    assert!(scaling.get("slope").and_then(Value::as_f64).unwrap() < 0.0);
+    let vortex = nd::vortex_gate().unwrap();
+    assert!((vortex["radial_norm"].as_f64().unwrap() - 1.0).abs() < 1e-6);
+    let scales = nd::representation_scales().unwrap();
+    assert_eq!(scales["branch"]["node_density"].as_f64(), Some(0.0));
+    assert!(scales.get("scaling").is_some() && scales.get("vortex").is_some());
+}
+
+#[test]
 fn hydrogen_2p_vortex_identification() {
     use research_engine::domains_fluid_hydrogen_vortex as hv;
     let xs = [0.0, 1.0, 2.0, 4.0];

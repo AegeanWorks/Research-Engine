@@ -81,6 +81,7 @@ pub enum Commands {
     VortexParticles { #[command(subcommand)] action: VortexParticlesAction },
     ObservedShape { #[command(subcommand)] action: ObservedShapeAction },
     HydrogenVortex { #[command(subcommand)] action: HydrogenVortexAction },
+    NodeDefect { #[command(subcommand)] action: NodeDefectAction },
     Providers { #[command(subcommand)] action: ProvidersAction },
     Search {
         query: String,
@@ -307,6 +308,15 @@ pub enum ProvidersAction {
 pub enum PnnRulesAction {
     Evaluate { #[arg(long, required = true)] compound: String },
     Weight { criterion: String },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum NodeDefectAction {
+    Split { #[arg(long, required = true)] xs: String, #[arg(long, default_value_t = 1.0)] omega: f64 },
+    Pressure { #[arg(long, required = true)] xs: String },
+    Scaling,
+    Vortex,
+    Scales,
 }
 
 #[derive(Debug, Subcommand)]
@@ -949,7 +959,8 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::TwoStateMarcus { .. } | Commands::ExcitedFluid { .. }
         | Commands::WaterRays { .. } | Commands::VortexCascade { .. }
         | Commands::VortexParticles { .. } | Commands::ObservedShape { .. }
-        | Commands::HydrogenVortex { .. } | Commands::Providers { .. }) {
+        | Commands::HydrogenVortex { .. } | Commands::NodeDefect { .. }
+        | Commands::Providers { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -1062,6 +1073,25 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::NodeDefect { action } => {
+            use crate::domains_fluid_node_defect as nd;
+            macro_rules! bundle {
+                ($expr:expr) => {{
+                    let value = $expr?;
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }};
+            }
+            match action {
+                NodeDefectAction::Split { xs, omega } =>
+                    bundle!(nd::branch_split(&nd::parse_xs(xs)?, *omega, 1.0, 1.0)),
+                NodeDefectAction::Pressure { xs } =>
+                    bundle!(nd::branch_regular_pressure_match(&nd::parse_xs(xs)?, 1.0, 1.0, 1.0)),
+                NodeDefectAction::Scaling => bundle!(nd::node_scaling()),
+                NodeDefectAction::Vortex => bundle!(nd::vortex_gate()),
+                NodeDefectAction::Scales => bundle!(nd::representation_scales()),
+            }
+        }
         Commands::HydrogenVortex { action } => {
             use crate::domains_fluid_hydrogen_vortex as hv;
             match action {
