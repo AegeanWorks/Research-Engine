@@ -74,6 +74,7 @@ pub enum Commands {
     WaterElectron { #[command(subcommand)] action: WaterElectronAction },
     WaterVde { #[command(subcommand)] action: WaterVdeAction },
     WaterDispersive { #[command(subcommand)] action: WaterDispersiveAction },
+    TwoStateMarcus { #[command(subcommand)] action: TwoStateMarcusAction },
     Providers { #[command(subcommand)] action: ProvidersAction },
     Search {
         query: String,
@@ -300,6 +301,15 @@ pub enum ProvidersAction {
 pub enum PnnRulesAction {
     Evaluate { #[arg(long, required = true)] compound: String },
     Weight { criterion: String },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum TwoStateMarcusAction {
+    Width { #[arg(long, default_value_t = 1.6171325440878093)] lambda_ev: f64, #[arg(long, default_value_t = 300.0)] temperature_k: f64 },
+    Shared { #[arg(long, default_value_t = 300.0)] temperature_k: f64 },
+    Ratio,
+    Thresholds,
+    Scales { #[arg(long, default_value_t = 300.0)] temperature_k: f64 },
 }
 
 #[derive(Debug, Subcommand)]
@@ -867,7 +877,7 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::WaterAnalogue { .. } | Commands::PnnReports { .. }
         | Commands::WaterWell { .. } | Commands::WaterElectron { .. }
         | Commands::WaterVde { .. } | Commands::WaterDispersive { .. }
-        | Commands::Providers { .. }) {
+        | Commands::TwoStateMarcus { .. } | Commands::Providers { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -980,6 +990,35 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::TwoStateMarcus { action } => {
+            use crate::domains_fluid_two_state_marcus as ts;
+            match action {
+                TwoStateMarcusAction::Width { lambda_ev, temperature_k } => {
+                    let value = ts::marcus_width_ev(*lambda_ev, *temperature_k)?;
+                    emit(json!({"value": value}), format!("{value}\n"))
+                }
+                TwoStateMarcusAction::Shared { temperature_k } => {
+                    let value = ts::shared_lambda_widths(*temperature_k)?;
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                TwoStateMarcusAction::Ratio => {
+                    let value = ts::component_ratio();
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                TwoStateMarcusAction::Thresholds => {
+                    let value = ts::kill_thresholds();
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                TwoStateMarcusAction::Scales { temperature_k } => {
+                    let value = ts::two_state_scales(*temperature_k)?;
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+            }
+        }
         Commands::WaterDispersive { action } => {
             use crate::domains_fluid_water_dispersive as wd;
             macro_rules! scalar {

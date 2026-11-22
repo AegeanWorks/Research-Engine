@@ -6,15 +6,15 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `475`
+- **Total Python Modules**: `476`
 - **Total Classes**: `317`
-- **Total Top-Level Functions**: `2060`
+- **Total Top-Level Functions**: `2063`
 - **Total Class Methods**: `1545`
-- **Total Source Lines**: `92239`
+- **Total Source Lines**: `92288`
 
 ## 🧭 Map Coverage
-- **Indexed**: python (`475` module(s))
-- **Not indexed by this map**: javascript (`1` file(s)), rust (`68` file(s))
+- **Indexed**: python (`476` module(s))
+- **Not indexed by this map**: javascript (`1` file(s)), rust (`69` file(s))
 
 > Only Python symbols are catalogued. A language above is reported as not indexed, never as verified by this map.
 
@@ -5070,6 +5070,16 @@
 
 **Functions:**
 - `def run(cmd, cwd)`
+
+---
+
+### [`rust/two_state_marcus_parity.py`](rust/two_state_marcus_parity.py)
+**Size**: `49` lines
+
+**Functions:**
+- `def run(*args)`
+- `def close(a, b)`
+- `def check(label, rust, py)`
 
 ---
 

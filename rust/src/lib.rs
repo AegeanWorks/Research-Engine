@@ -38,6 +38,7 @@ pub mod domains_fluid_water_well;
 pub mod domains_fluid_water_electron;
 pub mod domains_fluid_water_vde;
 pub mod domains_fluid_water_dispersive;
+pub mod domains_fluid_two_state_marcus;
 pub mod domains_pnn_rules;
 pub mod domains_pnn_safety;
 pub mod discovery;

@@ -433,6 +433,27 @@ fn fluid_frank_oseen_dispersion() {
 }
 
 #[test]
+fn shared_lambda_two_state_assignment() {
+    use research_engine::domains_fluid_two_state_marcus as ts;
+    let width = ts::marcus_width_ev(ts::LAMBDA_EV, 300.0).unwrap();
+    assert!((width - 0.680915).abs() < 0.001);
+    assert!(ts::marcus_width_ev(0.0, 300.0).is_err());
+    assert!(ts::marcus_width_ev(ts::LAMBDA_EV, 0.0).is_err());
+    let shared = ts::shared_lambda_widths(300.0).unwrap();
+    assert_eq!(shared.get("width_g1_ev").and_then(Value::as_f64), Some(width));
+    assert_eq!(shared.get("width_g2_ev").and_then(Value::as_f64), Some(width));
+    assert_eq!(shared.get("predicted_ratio").and_then(Value::as_f64), Some(1.0));
+    assert!(ts::shared_lambda_widths(0.0).is_err());
+    let observed = ts::component_ratio();
+    assert!((observed["observed_ratio"].as_f64().unwrap() - 0.71 / 0.37).abs() < 1e-12);
+    assert!(observed["diff_vs_one"].as_f64().unwrap() > ts::SHAPE_RATIO_TOL);
+    assert_eq!(ts::kill_thresholds()["shape_ratio_tol"].as_f64(), Some(0.15));
+    let scales = ts::two_state_scales(300.0).unwrap();
+    assert_eq!(scales["lambda_ev"].as_f64(), Some(ts::LAMBDA_EV));
+    assert!(scales.get("observed").is_some());
+}
+
+#[test]
 fn dispersive_water_horizon() {
     use research_engine::domains_fluid_water_dispersive as wd;
     let g = research_engine::domains_fluid_water_analogue::GRAVITY;

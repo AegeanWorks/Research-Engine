@@ -79,6 +79,7 @@ argparse requires in `python -m engine`.
 | Domains: water electron | Hydrated-electron cavity scale: screened Bohr radius/energy, capillary cavity radius/energy, infinite-well gap and inverse radius (`water-electron` CLI) |
 | Domains: water VDE | Two-observable inversion: well depth for VDE binding, cavity radius for the 1.7 eV gap and capillary comparison (`water-vde` CLI) |
 | Domains: dispersive water | Full capillary-gravity dispersion, group velocity, horizon wavenumber, dispersive horizon radius and capillary frequency (`water-dispersive` CLI) |
+| Domains: two-state Marcus | Classical Marcus FWHM, shared-λ two-state width prediction, observed component ratio and frozen kill thresholds (`two-state-marcus` CLI) |
 | Domains: obezite | Citation-number extraction with bibliography-noise stripping and claim-row de-duplication (`obezite` CLI) |
 | Domains: PNN rules | CNS/property design-rule evaluation and criterion weighting (`pnn-rules` CLI) |
 | Domains: PNN docking | Docking-score alias parsing, RMSD/Vina filtering, weighted consensus normalization and per-compound best-target aggregation (`pnn-docking` CLI) |
@@ -187,6 +188,8 @@ argparse requires in `python -m engine`.
   the capillary comparison; all seven checks match.
 - `water_dispersive_parity.py` compares dispersion, group velocities, horizon
   wavenumbers/radii and capillary frequency; all fifteen checks match.
+- `two_state_marcus_parity.py` compares Marcus widths, shared-λ predictions,
+  the observed ratio, thresholds and scales; all nine checks match.
 
 ## Still to port
 
