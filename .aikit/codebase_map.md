@@ -6,15 +6,15 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `476`
+- **Total Python Modules**: `477`
 - **Total Classes**: `317`
-- **Total Top-Level Functions**: `2063`
+- **Total Top-Level Functions**: `2066`
 - **Total Class Methods**: `1545`
-- **Total Source Lines**: `92288`
+- **Total Source Lines**: `92346`
 
 ## 🧭 Map Coverage
-- **Indexed**: python (`476` module(s))
-- **Not indexed by this map**: javascript (`1` file(s)), rust (`69` file(s))
+- **Indexed**: python (`477` module(s))
+- **Not indexed by this map**: javascript (`1` file(s)), rust (`70` file(s))
 
 > Only Python symbols are catalogued. A language above is reported as not indexed, never as verified by this map.
 
@@ -4693,6 +4693,16 @@
 **Functions:**
 - `def run(cmd, cwd)`
 - `def compare(label, args, db_rust, db_py)`
+
+---
+
+### [`rust/excited_fluid_parity.py`](rust/excited_fluid_parity.py)
+**Size**: `58` lines
+
+**Functions:**
+- `def run(*args)`
+- `def close(a, b)`
+- `def check(label, rust, py)`
 
 ---
 

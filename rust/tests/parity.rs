@@ -433,6 +433,28 @@ fn fluid_frank_oseen_dispersion() {
 }
 
 #[test]
+fn excited_madelung_fluid_node() {
+    use research_engine::domains_fluid_excited_fluid as ef;
+    assert!((ef::oscillator_width(1.0, 1.0, 1.0).unwrap() - 1.0).abs() < 1e-12);
+    assert!(ef::oscillator_width(0.0, 1.0, 1.0).is_err());
+    let xs = vec![-2.0, -1.0, 0.0, 1.0, 2.0];
+    let density = ef::excited_density(&xs, 1.0, 1.0, 1.0).unwrap();
+    assert_eq!(density[2], 0.0);
+    assert!(density[0] < density[1]);
+    let wave = ef::excited_wavefunction(&xs, 1.0, 1.0, 1.0).unwrap();
+    assert!(wave[0] < 0.0 && wave[4] > 0.0);
+    let pressure = ef::excited_quantum_pressure_regular(&xs, 1.0, 1.0, 1.0).unwrap();
+    assert!((pressure[2] - 1.5).abs() < 1e-12);
+    assert!((ef::phase_slip(&wave) - std::f64::consts::PI).abs() < 1e-12);
+    assert!((ef::phase_slip(&[1.0, 2.0, 3.0])).abs() < 1e-12);
+    assert!(ef::phase_gradient_max(&wave, 0.25).unwrap() > 0.0);
+    assert!(ef::phase_gradient_max(&wave, 0.0).is_err());
+    let slope = ef::scaling_slope(&[0.1, 0.05, 0.025, 0.0125], &[8.0, 16.1, 32.2, 64.5]).unwrap();
+    assert!(slope < 0.0);
+    assert!(ef::scaling_slope(&[0.1], &[8.0]).is_err());
+}
+
+#[test]
 fn shared_lambda_two_state_assignment() {
     use research_engine::domains_fluid_two_state_marcus as ts;
     let width = ts::marcus_width_ev(ts::LAMBDA_EV, 300.0).unwrap();

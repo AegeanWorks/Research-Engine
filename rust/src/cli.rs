@@ -75,6 +75,7 @@ pub enum Commands {
     WaterVde { #[command(subcommand)] action: WaterVdeAction },
     WaterDispersive { #[command(subcommand)] action: WaterDispersiveAction },
     TwoStateMarcus { #[command(subcommand)] action: TwoStateMarcusAction },
+    ExcitedFluid { #[command(subcommand)] action: ExcitedFluidAction },
     Providers { #[command(subcommand)] action: ProvidersAction },
     Search {
         query: String,
@@ -301,6 +302,17 @@ pub enum ProvidersAction {
 pub enum PnnRulesAction {
     Evaluate { #[arg(long, required = true)] compound: String },
     Weight { criterion: String },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum ExcitedFluidAction {
+    Width { #[arg(long, default_value_t = 1.0)] omega: f64, #[arg(long, default_value_t = 1.0)] hbar: f64, #[arg(long, default_value_t = 1.0)] mass: f64 },
+    Density { #[arg(long, required = true)] xs: String, #[arg(long, default_value_t = 1.0)] omega: f64, #[arg(long, default_value_t = 1.0)] hbar: f64, #[arg(long, default_value_t = 1.0)] mass: f64 },
+    Wavefunction { #[arg(long, required = true)] xs: String, #[arg(long, default_value_t = 1.0)] omega: f64, #[arg(long, default_value_t = 1.0)] hbar: f64, #[arg(long, default_value_t = 1.0)] mass: f64 },
+    Pressure { #[arg(long, required = true)] xs: String, #[arg(long, default_value_t = 1.0)] omega: f64, #[arg(long, default_value_t = 1.0)] hbar: f64, #[arg(long, default_value_t = 1.0)] mass: f64 },
+    PhaseSlip { #[arg(long, required = true)] xs: String },
+    PhaseGradient { #[arg(long, required = true)] xs: String, #[arg(long)] dx: f64 },
+    ScalingSlope { #[arg(long, required = true)] dxs: String, #[arg(long, required = true)] maxima: String },
 }
 
 #[derive(Debug, Subcommand)]
@@ -877,7 +889,8 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::WaterAnalogue { .. } | Commands::PnnReports { .. }
         | Commands::WaterWell { .. } | Commands::WaterElectron { .. }
         | Commands::WaterVde { .. } | Commands::WaterDispersive { .. }
-        | Commands::TwoStateMarcus { .. } | Commands::Providers { .. }) {
+        | Commands::TwoStateMarcus { .. } | Commands::ExcitedFluid { .. }
+        | Commands::Providers { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -990,6 +1003,48 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::ExcitedFluid { action } => {
+            use crate::domains_fluid_excited_fluid as ef;
+            macro_rules! curve {
+                ($expr:expr) => {{
+                    let value = ef::json_array($expr?);
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }};
+            }
+            match action {
+                ExcitedFluidAction::Width { omega, hbar, mass } => {
+                    let value = ef::oscillator_width(*omega, *hbar, *mass)?;
+                    emit(json!({"value": value}), format!("{value}\n"))
+                }
+                ExcitedFluidAction::Density { xs, omega, hbar, mass } => {
+                    let xs = ef::parse_xs(xs)?;
+                    curve!(ef::excited_density(&xs, *omega, *hbar, *mass))
+                }
+                ExcitedFluidAction::Wavefunction { xs, omega, hbar, mass } => {
+                    let xs = ef::parse_xs(xs)?;
+                    curve!(ef::excited_wavefunction(&xs, *omega, *hbar, *mass))
+                }
+                ExcitedFluidAction::Pressure { xs, omega, hbar, mass } => {
+                    let xs = ef::parse_xs(xs)?;
+                    curve!(ef::excited_quantum_pressure_regular(&xs, *omega, *hbar, *mass))
+                }
+                ExcitedFluidAction::PhaseSlip { xs } => {
+                    let value = ef::phase_slip(&ef::parse_xs(xs)?);
+                    emit(json!({"value": value}), format!("{value}\n"))
+                }
+                ExcitedFluidAction::PhaseGradient { xs, dx } => {
+                    let value = ef::phase_gradient_max(&ef::parse_xs(xs)?, *dx)?;
+                    emit(json!({"value": value}), format!("{value}\n"))
+                }
+                ExcitedFluidAction::ScalingSlope { dxs, maxima } => {
+                    let dxs = ef::parse_xs(dxs)?;
+                    let maxima = ef::parse_xs(maxima)?;
+                    let value = ef::scaling_slope(&dxs, &maxima)?;
+                    emit(json!({"value": value}), format!("{value}\n"))
+                }
+            }
+        }
         Commands::TwoStateMarcus { action } => {
             use crate::domains_fluid_two_state_marcus as ts;
             match action {
