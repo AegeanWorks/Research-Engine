@@ -58,6 +58,7 @@ pub enum Commands {
     FluidTopology { #[command(subcommand)] action: FluidTopologyAction },
     FluidCirculant { #[command(subcommand)] action: FluidCirculantAction },
     FluidReduction { #[command(subcommand)] action: FluidReductionAction },
+    FluidVariationalWidth { #[command(subcommand)] action: FluidVariationalWidthAction },
     Obezite { #[command(subcommand)] action: ObeziteAction },
     PnnRules { #[command(subcommand)] action: PnnRulesAction },
     PnnDocking { #[command(subcommand)] action: PnnDockingAction },
@@ -319,6 +320,23 @@ pub enum FluidBridgeAction {
     Horizon { omega: f64 },
     Coeffs { s0: f64, st: f64, horizon_t: f64, omega: f64, hbar: f64, mass: f64 },
     Path { #[arg(long)] coeffs: String, #[arg(long)] times: String, #[arg(long)] omega: f64 },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum FluidVariationalWidthAction {
+    Diffusivity { #[arg(long, default_value_t = 1.0)] hbar: f64, #[arg(long, default_value_t = 1.0)] mass: f64 },
+    ActionGm { s2: f64, #[arg(long, default_value_t = 1.0)] omega: f64, #[arg(long, default_value_t = 1.0)] hbar: f64, #[arg(long, default_value_t = 1.0)] mass: f64 },
+    ActionYasui { s2: f64, #[arg(long, default_value_t = 1.0)] omega: f64, #[arg(long, default_value_t = 1.0)] hbar: f64, #[arg(long, default_value_t = 1.0)] mass: f64 },
+    DGm { s2: f64, #[arg(long, default_value_t = 1.0)] omega: f64, #[arg(long, default_value_t = 1.0)] hbar: f64, #[arg(long, default_value_t = 1.0)] mass: f64 },
+    DYasui { s2: f64, #[arg(long, default_value_t = 1.0)] omega: f64, #[arg(long, default_value_t = 1.0)] hbar: f64, #[arg(long, default_value_t = 1.0)] mass: f64 },
+    D2S2 { s2: f64, #[arg(long, default_value_t = 1.0)] omega: f64, #[arg(long, default_value_t = 1.0)] hbar: f64, #[arg(long, default_value_t = 1.0)] mass: f64 },
+    D2Sigma { sigma: f64, #[arg(long, default_value_t = 1.0)] omega: f64, #[arg(long, default_value_t = 1.0)] hbar: f64, #[arg(long, default_value_t = 1.0)] mass: f64 },
+    Extremum { #[arg(long, default_value_t = 1.0)] omega: f64, #[arg(long, default_value_t = 1.0)] hbar: f64, #[arg(long, default_value_t = 1.0)] mass: f64 },
+    Newton { start: f64, #[arg(long, default_value_t = 1.0)] omega: f64, #[arg(long, default_value_t = 1.0)] hbar: f64, #[arg(long, default_value_t = 1.0)] mass: f64, #[arg(long, default_value_t = 8)] steps: usize },
+    GridMax { #[arg(long, default_value_t = 1.0)] omega: f64, #[arg(long, default_value_t = 1.0)] hbar: f64, #[arg(long, default_value_t = 1.0)] mass: f64 },
+    YasuiMonotone { #[arg(long, default_value_t = 1.0)] omega: f64, #[arg(long, default_value_t = 1.0)] hbar: f64, #[arg(long, default_value_t = 1.0)] mass: f64 },
+    Ermakov,
+    Scales,
 }
 
 #[derive(Debug, Subcommand)]
@@ -709,7 +727,7 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::FluidBridge { .. } | Commands::FluidFrankOseen { .. }
         | Commands::FluidVortexCore { .. } | Commands::HydrogenRadial { .. }
         | Commands::FluidTopology { .. } | Commands::FluidCirculant { .. }
-        | Commands::FluidReduction { .. }
+        | Commands::FluidReduction { .. } | Commands::FluidVariationalWidth { .. }
         | Commands::Obezite { .. }
         | Commands::PnnRules { .. } | Commands::PnnDocking { .. } | Commands::Providers { .. }) {
         initialize(&conn)?;
@@ -904,6 +922,55 @@ pub fn run(cli: &Cli) -> Result<Output> {
                         std::path::Path::new(archive), std::path::Path::new(updated), stamp)?;
                     emit(result.clone(), to_stable_json(&result))
                 }
+            }
+        }
+        Commands::FluidVariationalWidth { action } => {
+            use crate::domains_fluid_variational_width as vw;
+            macro_rules! scalar {
+                ($expr:expr) => {{
+                    let value = $expr?;
+                    emit(json!({"value": value}), format!("{value}\n"))
+                }};
+            }
+            macro_rules! bundle {
+                ($expr:expr) => {{
+                    let value = $expr?;
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }};
+            }
+            match action {
+                FluidVariationalWidthAction::Diffusivity { hbar, mass } => scalar!(vw::diffusivity(*hbar, *mass)),
+                FluidVariationalWidthAction::ActionGm { s2, omega, hbar, mass } =>
+                    scalar!(vw::action_gm(*s2, *omega, *hbar, *mass)),
+                FluidVariationalWidthAction::ActionYasui { s2, omega, hbar, mass } =>
+                    scalar!(vw::action_yasui(*s2, *omega, *hbar, *mass)),
+                FluidVariationalWidthAction::DGm { s2, omega, hbar, mass } =>
+                    scalar!(vw::d_action_gm(*s2, *omega, *hbar, *mass)),
+                FluidVariationalWidthAction::DYasui { s2, omega, hbar, mass } =>
+                    scalar!(vw::d_action_yasui(*s2, *omega, *hbar, *mass)),
+                FluidVariationalWidthAction::D2S2 { s2, omega, hbar, mass } =>
+                    scalar!(vw::d2_action_gm_s2(*s2, *omega, *hbar, *mass)),
+                FluidVariationalWidthAction::D2Sigma { sigma, omega, hbar, mass } =>
+                    scalar!(vw::d2_action_gm_sigma(*sigma, *omega, *hbar, *mass)),
+                FluidVariationalWidthAction::Extremum { omega, hbar, mass } =>
+                    scalar!(vw::extremum_s2(*omega, *hbar, *mass)),
+                FluidVariationalWidthAction::Newton { start, omega, hbar, mass, steps } =>
+                    scalar!(vw::newton_refine(*start, *omega, *hbar, *mass, *steps)),
+                FluidVariationalWidthAction::GridMax { omega, hbar, mass } => {
+                    let grid = vw::grid_s2();
+                    let value = vw::grid_maximum(&grid, *omega, *hbar, *mass)?;
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                FluidVariationalWidthAction::YasuiMonotone { omega, hbar, mass } => {
+                    let grid = vw::grid_s2();
+                    let value = vw::yasui_monotone(&grid, *omega, *hbar, *mass)?;
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                FluidVariationalWidthAction::Ermakov => bundle!(vw::ermakov_cross_check()),
+                FluidVariationalWidthAction::Scales => bundle!(vw::selection_scales()),
             }
         }
         Commands::FluidReduction { action } => {

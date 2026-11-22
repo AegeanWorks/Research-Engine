@@ -221,6 +221,28 @@ fn search_is_phrase_first_and_program_scoped() {
 }
 
 #[test]
+fn fluid_variational_width_selection() {
+    use research_engine::domains_fluid_variational_width as vw;
+    assert!((vw::diffusivity(1.0, 1.0).unwrap() - 0.5).abs() < 1e-12);
+    assert!((vw::extremum_s2(1.0, 1.0, 1.0).unwrap() - 0.5).abs() < 1e-12);
+    let gm = vw::action_gm(0.5, 1.0, 1.0, 1.0).unwrap();
+    assert!(gm > vw::action_gm(0.4, 1.0, 1.0, 1.0).unwrap());
+    assert!(gm > vw::action_gm(0.6, 1.0, 1.0, 1.0).unwrap());
+    assert!(vw::d_action_yasui(0.5, 1.0, 1.0, 1.0).unwrap() < 0.0);
+    assert!((vw::d2_action_gm_s2(0.5, 1.0, 1.0, 1.0).unwrap() + 2.0).abs() < 1e-12);
+    let refined = vw::newton_refine(0.6, 1.0, 1.0, 1.0, 8).unwrap();
+    assert!((refined - 0.5).abs() < 1e-12);
+    assert!(vw::grid_s2().len() == 2001);
+    let peak = vw::grid_maximum(&vw::grid_s2(), 1.0, 1.0, 1.0).unwrap();
+    assert!((peak.get("grid_argmax").and_then(Value::as_f64).unwrap() - 0.5).abs() < 0.002);
+    let yasui = vw::yasui_monotone(&vw::grid_s2(), 1.0, 1.0, 1.0).unwrap();
+    assert_eq!(yasui.get("all_negative").and_then(Value::as_bool), Some(true));
+    let scales = vw::selection_scales().unwrap();
+    assert_eq!(scales.get("base").unwrap().get("omega").and_then(Value::as_f64), Some(1.0));
+    assert!(vw::action_gm(0.0, 1.0, 1.0, 1.0).is_err());
+}
+
+#[test]
 fn fluid_reduction_moment_audit() {
     use research_engine::domains_fluid_reduction as red;
     assert!((red::wall_tension(1.0).unwrap() - 8.0 / 3.0).abs() < 1e-12);
