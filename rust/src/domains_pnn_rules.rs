@@ -2,7 +2,9 @@
 
 use serde_json::{json, Value};
 
-const CORE_CRITERIA: &[&str] = &["mw", "logp", "tpsa", "hbd", "hba", "rotatable_bonds"];
+pub const CORE_CRITERIA: &[&str] = &["mw", "logp", "tpsa", "hbd", "hba", "rotatable_bonds"];
+pub const HARD_REJECT_CRITERIA: &[&str] = &["logbb", "brain_plasma_ratio",
+    "oral_bioavailability", "cyp3a4_inhibition", "herg_liability"];
 
 fn num(value: &Value, key: &str) -> f64 {
     value.get(key).and_then(Value::as_f64).unwrap_or(0.0)

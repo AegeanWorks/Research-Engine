@@ -65,6 +65,7 @@ pub enum Commands {
     PnnRules { #[command(subcommand)] action: PnnRulesAction },
     PnnDocking { #[command(subcommand)] action: PnnDockingAction },
     PnnCompounds { #[command(subcommand)] action: PnnCompoundsAction },
+    PnnScreen { #[command(subcommand)] action: PnnScreenAction },
     Providers { #[command(subcommand)] action: ProvidersAction },
     Search {
         query: String,
@@ -291,6 +292,13 @@ pub enum ProvidersAction {
 pub enum PnnRulesAction {
     Evaluate { #[arg(long, required = true)] compound: String },
     Weight { criterion: String },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum PnnScreenAction {
+    Evaluate { #[arg(long, required = true)] compound: String },
+    Rank { #[arg(long, required = true)] compounds: String },
+    Summary { #[arg(long, required = true)] compounds: String },
 }
 
 #[derive(Debug, Subcommand)]
@@ -765,7 +773,7 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::FluidNelsonClosure { .. } | Commands::FluidConvergence { .. }
         | Commands::Obezite { .. }
         | Commands::PnnRules { .. } | Commands::PnnDocking { .. }
-        | Commands::PnnCompounds { .. } | Commands::Providers { .. }) {
+        | Commands::PnnCompounds { .. } | Commands::PnnScreen { .. } | Commands::Providers { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -878,6 +886,36 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::PnnScreen { action } => {
+            use crate::domains_pnn_screen as screen;
+            fn compound(raw: &str) -> Result<Value> {
+                serde_json::from_str(raw).map_err(|e| EngineError::new(
+                    format!("invalid compound JSON: {e}"), "compound must be a JSON object",
+                    "pass an object with the PNN physicochemical fields"))
+            }
+            fn compounds(raw: &str) -> Result<Vec<Value>> {
+                serde_json::from_str(raw).map_err(|e| EngineError::new(
+                    format!("invalid compounds JSON: {e}"), "compounds must be a JSON array",
+                    "pass an array of compound objects"))
+            }
+            match action {
+                PnnScreenAction::Evaluate { compound: raw } => {
+                    let value = screen::evaluate_compound(&compound(raw)?);
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                PnnScreenAction::Rank { compounds: raw } => {
+                    let value = Value::Array(screen::screen_compounds(&compounds(raw)?));
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                PnnScreenAction::Summary { compounds: raw } => {
+                    let value = screen::summarize(&screen::screen_compounds(&compounds(raw)?));
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+            }
+        }
         Commands::PnnCompounds { action } => {
             use crate::domains_pnn_compounds as compounds;
             match action {

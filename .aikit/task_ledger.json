@@ -5,9 +5,9 @@
     "last_phase": "in_progress",
     "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1795372753.3990047,
+    "updated_at": 1795373423.7731903,
     "owner": "opencode:rust-rewrite",
-    "lease_until": 1795379953.3990047,
+    "lease_until": 1795380623.7731903,
     "started_by": "opencode:rust-rewrite",
     "continuations": []
   },
@@ -92,29 +92,6 @@
         "mitigation": "Port bounded modules with Python parity helpers, keep separate schema initialization for lattice stores, verify with cargo test plus direct hygiene/KB/secret/test scripts before each commit."
       },
       "plan_digest": "aa86d74d20a2aa574d309dbaebd42d9d88ae476163fffe70a12c668f65645169"
-    },
-    {
-      "task_id": "T-028-outer-layers",
-      "phase": "in_progress",
-      "phase_num": 3,
-      "description": "[6/6 final] Ported hydrogen-2s radial-node representation with shared Bohr radius, force-balance and loop-circulation helpers",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795369845.9077966,
-      "timestamp_str": "2026-11-22 20:50:45",
-      "agent": "opencode:rust-rewrite"
-    },
-    {
-      "task_id": "T-028-outer-layers",
-      "phase": "in_progress",
-      "phase_num": 4,
-      "description": "[6/6 final] Verification: cargo test 44/44; hydrogen_radial_parity.py 12/12 matches; project gates passing",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795369846.1439395,
-      "timestamp_str": "2026-11-22 20:50:46",
-      "agent": "opencode:rust-rewrite",
-      "checklists": "passed"
     },
     {
       "task_id": "T-028-outer-layers",
@@ -251,6 +228,29 @@
       "status": "in_progress",
       "timestamp": 1795372753.3990047,
       "timestamp_str": "2026-11-22 21:39:13",
+      "agent": "opencode:rust-rewrite",
+      "checklists": "passed"
+    },
+    {
+      "task_id": "T-028-outer-layers",
+      "phase": "in_progress",
+      "phase_num": 3,
+      "description": "[6/6 final] Ported PNN property screen: weighted criterion scoring, tier assignment, compound ranking and summary statistics",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795373423.452559,
+      "timestamp_str": "2026-11-22 21:50:23",
+      "agent": "opencode:rust-rewrite"
+    },
+    {
+      "task_id": "T-028-outer-layers",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[6/6 final] Verification: cargo test 52/52; pnn_screen_parity.py 3/3 matches; project gates passing",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795373423.7731903,
+      "timestamp_str": "2026-11-22 21:50:23",
       "agent": "opencode:rust-rewrite",
       "checklists": "passed"
     }

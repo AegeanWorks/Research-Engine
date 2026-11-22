@@ -433,6 +433,33 @@ fn fluid_frank_oseen_dispersion() {
 }
 
 #[test]
+fn pnn_screen_tiering_and_ranking() {
+    use research_engine::domains_pnn_screen as screen;
+    let good = serde_json::json!({
+        "compound_id": "C1", "mw": 345.5, "logp": 2.6, "tpsa": 58.0,
+        "hbd": 2, "hba": 5, "rotatable_bonds": 4, "pka": 8.2, "charge": "basic",
+        "logbb": -0.3, "brain_plasma_ratio": 0.45, "oral_bioavailability": 24.0,
+        "cyp3a4_inhibition": 18.0, "herg_liability": 8.0, "pnn_ec50_nm": 42.0,
+    });
+    let bad = serde_json::json!({
+        "compound_id": "C2", "mw": 480.0, "logp": 4.2, "tpsa": 95.0,
+        "hbd": 5, "hba": 9, "rotatable_bonds": 9, "herg_liability": 40.0,
+    });
+    let result = screen::evaluate_compound(&good);
+    assert_eq!(result.get("tier").and_then(Value::as_str), Some("A"));
+    assert!(result.get("compound").unwrap().get("name").and_then(Value::as_str) == Some(""));
+    let rejected = screen::evaluate_compound(&bad);
+    assert_eq!(rejected.get("tier").and_then(Value::as_str), Some("Reject"));
+    let ranked = screen::screen_compounds(&[bad.clone(), good.clone()]);
+    assert_eq!(ranked[0].get("tier").and_then(Value::as_str), Some("A"));
+    let summary = screen::summarize(&ranked);
+    assert_eq!(summary.get("total").and_then(Value::as_u64), Some(2));
+    assert_eq!(summary.get("by_tier").unwrap().get("Reject").and_then(Value::as_u64), Some(1));
+    assert!(summary.get("average_score").and_then(Value::as_f64).is_some());
+    assert_eq!(screen::summarize(&[]).get("average_score").and_then(Value::as_f64), Some(0.0));
+}
+
+#[test]
 fn pnn_compound_ingestion() {
     use research_engine::domains_pnn_compounds as compounds;
     use std::collections::BTreeMap;
