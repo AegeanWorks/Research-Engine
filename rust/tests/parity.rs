@@ -433,6 +433,28 @@ fn fluid_frank_oseen_dispersion() {
 }
 
 #[test]
+fn pnn_compound_ingestion() {
+    use research_engine::domains_pnn_compounds as compounds;
+    use std::collections::BTreeMap;
+    assert_eq!(compounds::normalize_field("CLogP"), Some("logp"));
+    assert_eq!(compounds::normalize_field("Compound Name"), Some("name"));
+    assert_eq!(compounds::normalize_field("Ionization"), Some("charge"));
+    assert_eq!(compounds::normalize_field("bogus"), None);
+    let row: BTreeMap<String, String> = [
+        ("ID", "C1"), ("Molecular Weight", "345.5"), ("clogp", "2.6"),
+        ("Polar Area", "58"), ("Donors", "2"), ("Acceptors", "5"), ("Rotors", "4"),
+        ("Charge", "weakly basic"),
+    ].into_iter().map(|(k, v)| (k.to_string(), v.to_string())).collect();
+    let parsed = compounds::parse_compounds(&[row.clone()], "input", false).unwrap();
+    assert_eq!(parsed.len(), 1);
+    assert_eq!(parsed[0].get("compound_id").and_then(Value::as_str), Some("C1"));
+    assert_eq!(parsed[0].get("charge").and_then(Value::as_str), Some("basic"));
+    assert_eq!(parsed[0].get("mw").and_then(Value::as_f64), Some(345.5));
+    assert!(compounds::parse_compounds(&[row.clone(), row.clone()], "input", false).is_err());
+    assert_eq!(compounds::parse_compounds(&[row.clone(), row], "input", true).unwrap().len(), 2);
+}
+
+#[test]
 fn pnn_docking_consensus_ranking() {
     use research_engine::domains_pnn_docking as docking;
     use std::collections::BTreeMap;

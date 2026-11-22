@@ -77,6 +77,7 @@ argparse requires in `python -m engine`.
 | Domains: obezite | Citation-number extraction with bibliography-noise stripping and claim-row de-duplication (`obezite` CLI) |
 | Domains: PNN rules | CNS/property design-rule evaluation and criterion weighting (`pnn-rules` CLI) |
 | Domains: PNN docking | Docking-score alias parsing, RMSD/Vina filtering, weighted consensus normalization and per-compound best-target aggregation (`pnn-docking` CLI) |
+| Domains: PNN compounds | Compound CSV header aliasing, numeric validation, charge normalization and duplicate handling (`pnn-compounds` CLI) |
 | Search | deterministic phrase-first lexical `search` with exact snippet/token-budget output |
 | Markdown | `sanitize`/`cell`/`estimate_tokens`/`pack` shared with reports and search |
 | Integrity | 24 finding codes including `PROV-*`, `EVID-*`, `GRAPH-*`, `GAP-*`, `LEDGER-001` |
@@ -137,6 +138,8 @@ argparse requires in `python -m engine`.
   all eight checks match.
 - `pnn_docking_parity.py` compares score parsing, default/filtered ranking and
   best-target aggregation; all three checks match.
+- `pnn_compounds_parity.py` compares header aliasing, record parsing and
+  duplicate rejection; all eleven checks match.
 - `fluid_frank_oseen_parity.py` compares the elastic matrix, dispersion,
   equal-K modes, anisotropy and mode metadata; all twelve checks match.
 - `fluid_vortex_core_parity.py` compares the core radius, width, norm, sampled

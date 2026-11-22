@@ -64,6 +64,7 @@ pub enum Commands {
     Obezite { #[command(subcommand)] action: ObeziteAction },
     PnnRules { #[command(subcommand)] action: PnnRulesAction },
     PnnDocking { #[command(subcommand)] action: PnnDockingAction },
+    PnnCompounds { #[command(subcommand)] action: PnnCompoundsAction },
     Providers { #[command(subcommand)] action: ProvidersAction },
     Search {
         query: String,
@@ -290,6 +291,16 @@ pub enum ProvidersAction {
 pub enum PnnRulesAction {
     Evaluate { #[arg(long, required = true)] compound: String },
     Weight { criterion: String },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum PnnCompoundsAction {
+    Parse {
+        #[arg(long, required = true)] rows: String,
+        #[arg(long, default_value = "input")] source: String,
+        #[arg(long, default_value_t = false)] allow_duplicates: bool,
+    },
+    Field { name: String },
 }
 
 #[derive(Debug, Subcommand)]
@@ -753,7 +764,8 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::FluidReduction { .. } | Commands::FluidVariationalWidth { .. }
         | Commands::FluidNelsonClosure { .. } | Commands::FluidConvergence { .. }
         | Commands::Obezite { .. }
-        | Commands::PnnRules { .. } | Commands::PnnDocking { .. } | Commands::Providers { .. }) {
+        | Commands::PnnRules { .. } | Commands::PnnDocking { .. }
+        | Commands::PnnCompounds { .. } | Commands::Providers { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -866,6 +878,25 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::PnnCompounds { action } => {
+            use crate::domains_pnn_compounds as compounds;
+            match action {
+                PnnCompoundsAction::Parse { rows, source, allow_duplicates } => {
+                    let rows: Vec<std::collections::BTreeMap<String, String>> =
+                        serde_json::from_str(rows).map_err(|e| EngineError::new(
+                            format!("invalid rows JSON: {e}"), "rows must be an array of string maps",
+                            "pass an array of objects with string values"))?;
+                    let values = compounds::parse_compounds(&rows, source, *allow_duplicates)?;
+                    let value = compounds::array(values.clone());
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                PnnCompoundsAction::Field { name } => {
+                    let value = compounds::normalize_field(name).unwrap_or("");
+                    emit(json!({"field": value}), format!("{value}\n"))
+                }
+            }
+        }
         Commands::PnnDocking { action } => {
             use crate::domains_pnn_docking as docking;
             fn read_rows(path: &str) -> Result<Vec<std::collections::BTreeMap<String, String>>> {
