@@ -89,6 +89,7 @@ argparse requires in `python -m engine`.
 | Domains: nodal defect | Exact two-branch split of the excited state, phase slip, branch-wise pressure, gradient scaling and the frozen 2p vortex gate (`node-defect` CLI) |
 | Domains: water pressure | Surface energy, finite-well total energy, golden-section equilibrium radius, VDE-matched depth and pressure scales (`water-pressure` CLI) |
 | Domains: reorganization | Dielectric contrast, reorganization energy, radius inversion and the VDE–optical comparison (`water-reorganization` CLI) |
+| Domains: Born cavity | Self-consistent Born cavity energy, equilibrium radius search and the reorganization/VDE synthesis (`born-cavity` CLI) |
 | Domains: obezite | Citation-number extraction with bibliography-noise stripping and claim-row de-duplication (`obezite` CLI) |
 | Domains: PNN rules | CNS/property design-rule evaluation and criterion weighting (`pnn-rules` CLI) |
 | Domains: PNN docking | Docking-score alias parsing, RMSD/Vina filtering, weighted consensus normalization and per-compound best-target aggregation (`pnn-docking` CLI) |
@@ -218,6 +219,8 @@ argparse requires in `python -m engine`.
   results use a documented 1e-3 relative tolerance vs scipy).
 - `water_reorganization_parity.py` compares dielectric contrast, energy,
   radius inversion and scales; all seven checks match.
+- `born_cavity_parity.py` compares cavity energies, equilibrium radius and
+  synthesis; all five checks match (optimizer uses a documented 1e-3 tolerance).
 
 ## Still to port
 

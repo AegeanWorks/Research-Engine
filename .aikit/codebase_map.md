@@ -6,15 +6,15 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `485`
+- **Total Python Modules**: `486`
 - **Total Classes**: `317`
-- **Total Top-Level Functions**: `2089`
+- **Total Top-Level Functions**: `2092`
 - **Total Class Methods**: `1545`
-- **Total Source Lines**: `92720`
+- **Total Source Lines**: `92763`
 
 ## 🧭 Map Coverage
-- **Indexed**: python (`485` module(s))
-- **Not indexed by this map**: javascript (`1` file(s)), rust (`78` file(s))
+- **Indexed**: python (`486` module(s))
+- **Not indexed by this map**: javascript (`1` file(s)), rust (`79` file(s))
 
 > Only Python symbols are catalogued. A language above is reported as not indexed, never as verified by this map.
 
@@ -4661,6 +4661,16 @@
 **Functions:**
 - `def run(cmd, cwd)`
 - `def compare(label, args)`
+
+---
+
+### [`rust/born_cavity_parity.py`](rust/born_cavity_parity.py)
+**Size**: `43` lines
+
+**Functions:**
+- `def run(*args)`
+- `def close(a, b)`
+- `def check(label, rust, py)`
 
 ---
 

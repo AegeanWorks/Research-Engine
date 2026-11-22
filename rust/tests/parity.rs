@@ -433,6 +433,27 @@ fn fluid_frank_oseen_dispersion() {
 }
 
 #[test]
+fn born_cavity_synthesis() {
+    use research_engine::domains_fluid_water_born_cavity as bc;
+    let energy = bc::born_cavity_energy(2.86e-10).unwrap();
+    assert!(energy.is_some());
+    assert!(bc::born_cavity_energy(0.0).is_err());
+    let equilibrium = bc::born_cavity_equilibrium(1.8e-10, 4.0e-10).unwrap();
+    let radius = equilibrium["radius_m"].as_f64().unwrap();
+    assert!(radius > 1.8e-10 && radius < 4.0e-10);
+    assert!(equilibrium["total_energy_ev"].as_f64().unwrap() < 0.0);
+    assert!(equilibrium["binding_ev"].as_f64().unwrap() > 0.0);
+    assert!(bc::born_cavity_equilibrium(4.0e-10, 1.8e-10).is_err());
+    let scales = bc::born_cavity_scales().unwrap();
+    assert_eq!(scales["vde_ev"].as_f64(), Some(3.27));
+    let synthesis = &scales["synthesis"];
+    assert!(synthesis["lambda_ev"].as_f64().unwrap() > 0.0);
+    assert!(synthesis["predicted_vde_ev"].as_f64().unwrap() > 3.0);
+    assert!(synthesis["required_ratio"].as_f64().unwrap() > 0.0);
+    assert!(synthesis["capillary_ratio"].as_f64().unwrap() > 0.0);
+}
+
+#[test]
 fn water_reorganization_relation() {
     use research_engine::domains_fluid_water_reorganization as wr;
     let contrast = wr::dielectric_contrast(78.4, 1.78).unwrap();

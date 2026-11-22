@@ -84,6 +84,7 @@ pub enum Commands {
     NodeDefect { #[command(subcommand)] action: NodeDefectAction },
     WaterPressure { #[command(subcommand)] action: WaterPressureAction },
     WaterReorganization { #[command(subcommand)] action: WaterReorganizationAction },
+    BornCavity { #[command(subcommand)] action: BornCavityAction },
     Providers { #[command(subcommand)] action: ProvidersAction },
     Search {
         query: String,
@@ -310,6 +311,13 @@ pub enum ProvidersAction {
 pub enum PnnRulesAction {
     Evaluate { #[arg(long, required = true)] compound: String },
     Weight { criterion: String },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum BornCavityAction {
+    Energy { radius_m: f64 },
+    Equilibrium { #[arg(long, default_value_t = 1.8e-10)] lower_m: f64, #[arg(long, default_value_t = 4.0e-10)] upper_m: f64 },
+    Scales,
 }
 
 #[derive(Debug, Subcommand)]
@@ -980,7 +988,7 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::VortexParticles { .. } | Commands::ObservedShape { .. }
         | Commands::HydrogenVortex { .. } | Commands::NodeDefect { .. }
         | Commands::WaterPressure { .. } | Commands::WaterReorganization { .. }
-        | Commands::Providers { .. }) {
+        | Commands::BornCavity { .. } | Commands::Providers { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -1093,6 +1101,25 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::BornCavity { action } => {
+            use crate::domains_fluid_water_born_cavity as bc;
+            match action {
+                BornCavityAction::Energy { radius_m } => {
+                    let value = bc::born_cavity_energy(*radius_m)?;
+                    emit(json!({"value": value}), to_stable_json(&json!({"value": value})))
+                }
+                BornCavityAction::Equilibrium { lower_m, upper_m } => {
+                    let value = bc::born_cavity_equilibrium(*lower_m, *upper_m)?;
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                BornCavityAction::Scales => {
+                    let value = bc::born_cavity_scales()?;
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+            }
+        }
         Commands::WaterReorganization { action } => {
             use crate::domains_fluid_water_reorganization as wr;
             macro_rules! scalar {
