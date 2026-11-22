@@ -5,9 +5,9 @@
     "last_phase": "in_progress",
     "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1795363396.5593436,
+    "updated_at": 1795364573.5527291,
     "owner": "opencode:rust-rewrite",
-    "lease_until": 1795370596.5593436,
+    "lease_until": 1795371773.5527291,
     "started_by": "opencode:rust-rewrite",
     "continuations": []
   },
@@ -92,29 +92,6 @@
         "mitigation": "Port bounded modules with Python parity helpers, keep separate schema initialization for lattice stores, verify with cargo test plus direct hygiene/KB/secret/test scripts before each commit."
       },
       "plan_digest": "aa86d74d20a2aa574d309dbaebd42d9d88ae476163fffe70a12c668f65645169"
-    },
-    {
-      "task_id": "T-028-outer-layers",
-      "phase": "in_progress",
-      "phase_num": 3,
-      "description": "[6/6 partial] Ported the studio MCP JSON-RPC dispatcher with all tool/resource/prompt declarations and the implemented tool handlers",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795356629.9738333,
-      "timestamp_str": "2026-11-22 17:10:29",
-      "agent": "opencode:rust-rewrite"
-    },
-    {
-      "task_id": "T-028-outer-layers",
-      "phase": "in_progress",
-      "phase_num": 4,
-      "description": "[6/6 partial] Verification: cargo test 31/31; mcp_parity.py 11/11 exact matches (timestamps normalized); project gates passing",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1795356630.4448907,
-      "timestamp_str": "2026-11-22 17:10:30",
-      "agent": "opencode:rust-rewrite",
-      "checklists": "passed"
     },
     {
       "task_id": "T-028-outer-layers",
@@ -251,6 +228,29 @@
       "status": "in_progress",
       "timestamp": 1795363396.5593436,
       "timestamp_str": "2026-11-22 19:03:16",
+      "agent": "opencode:rust-rewrite",
+      "checklists": "passed"
+    },
+    {
+      "task_id": "T-028-outer-layers",
+      "phase": "in_progress",
+      "phase_num": 3,
+      "description": "[6/6 partial] Ported PNN design-property rules and criterion weighting into rust/src/domains_pnn_rules.rs",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795364573.3259735,
+      "timestamp_str": "2026-11-22 19:22:53",
+      "agent": "opencode:rust-rewrite"
+    },
+    {
+      "task_id": "T-028-outer-layers",
+      "phase": "in_progress",
+      "phase_num": 4,
+      "description": "[6/6 partial] Verification: cargo test 39/39; pnn_rules_parity.py 4/4 exact matches; project gates passing",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1795364573.5527291,
+      "timestamp_str": "2026-11-22 19:22:53",
       "agent": "opencode:rust-rewrite",
       "checklists": "passed"
     }

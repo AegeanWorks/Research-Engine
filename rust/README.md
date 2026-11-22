@@ -66,6 +66,7 @@ argparse requires in `python -m engine`.
 | Domains: PNN safety | NOAEL→HED conversion, most-sensitive study selection, IND safety thresholds and Markdown report (`pnn-safety` CLI) |
 | Domains: fluid bridge | Diffusivity, horizon, Pinney coefficients and bridge paths (`fluid-bridge` CLI) |
 | Domains: obezite | Citation-number extraction with bibliography-noise stripping and claim-row de-duplication (`obezite` CLI) |
+| Domains: PNN rules | CNS/property design-rule evaluation and criterion weighting (`pnn-rules` CLI) |
 | Search | deterministic phrase-first lexical `search` with exact snippet/token-budget output |
 | Markdown | `sanitize`/`cell`/`estimate_tokens`/`pack` shared with reports and search |
 | Integrity | 24 finding codes including `PROV-*`, `EVID-*`, `GRAPH-*`, `GAP-*`, `LEDGER-001` |
@@ -120,6 +121,8 @@ argparse requires in `python -m engine`.
 - `fluid_bridge_parity.py` compares the bridge primitives; all four checks match.
 - `obezite_parity.py` compares citation extraction and de-duplication outputs;
   all four checks match.
+- `pnn_rules_parity.py` compares compound rule verdicts and weights; all four
+  checks match.
 
 ## Still to port
 

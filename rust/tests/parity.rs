@@ -221,6 +221,26 @@ fn search_is_phrase_first_and_program_scoped() {
 }
 
 #[test]
+fn pnn_design_rules_evaluate_compound() {
+    use research_engine::domains_pnn_rules as rules;
+    let compound = serde_json::json!({
+        "mw": 345.5, "logp": 2.6, "tpsa": 58.0, "hbd": 2, "hba": 5,
+        "rotatable_bonds": 4, "pka": 8.2, "charge": "basic", "logbb": -0.3,
+        "brain_plasma_ratio": 0.45, "oral_bioavailability": 24.0,
+        "cyp3a4_inhibition": 18.0, "herg_liability": 8.0, "pnn_ec50_nm": 42.0,
+    });
+    let results = rules::evaluate(&compound);
+    assert_eq!(results.len(), 14);
+    assert!(results.iter().all(|r| r.get("status").and_then(Value::as_str) == Some("PASS")));
+    assert_eq!(rules::weight("mw"), 1.0);
+    assert_eq!(rules::weight("logbb"), 0.5);
+    let empty = serde_json::json!({"mw": 100.0, "logp": 0.0, "tpsa": 10.0,
+        "hbd": 1, "hba": 1, "rotatable_bonds": 1});
+    let verdicts = rules::evaluate(&empty);
+    assert!(verdicts.iter().any(|r| r.get("status").and_then(Value::as_str) == Some("UNKNOWN")));
+}
+
+#[test]
 fn obezite_citation_extraction_and_dedupe() {
     use research_engine::domains_obezite as obezite;
     let ids = obezite::atiflar("Bulgur 74, Nature. 2020;578(7795):444-448, PMID: 12345, 120 ve 42");

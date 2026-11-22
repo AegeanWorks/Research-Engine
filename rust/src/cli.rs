@@ -53,6 +53,7 @@ pub enum Commands {
     Client { #[command(subcommand)] action: ClientAction },
     FluidBridge { #[command(subcommand)] action: FluidBridgeAction },
     Obezite { #[command(subcommand)] action: ObeziteAction },
+    PnnRules { #[command(subcommand)] action: PnnRulesAction },
     Search {
         query: String,
         #[arg(long)] research: Option<String>,
@@ -266,6 +267,12 @@ pub enum AnalysisAction {
         #[arg(long, default_value = "")] since: String,
         #[arg(long, default_value = "")] until: String,
     },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum PnnRulesAction {
+    Evaluate { #[arg(long, required = true)] compound: String },
+    Weight { criterion: String },
 }
 
 #[derive(Debug, Subcommand)]
@@ -602,7 +609,8 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::LatticeQuery { .. } | Commands::Discovery { .. } | Commands::Studio { .. }
         | Commands::Mcp { .. } | Commands::Web { .. } | Commands::Atlas { .. }
         | Commands::PnnSafety { .. } | Commands::Client { .. }
-        | Commands::FluidBridge { .. } | Commands::Obezite { .. }) {
+        | Commands::FluidBridge { .. } | Commands::Obezite { .. }
+        | Commands::PnnRules { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -715,6 +723,19 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::PnnRules { action } => match action {
+            PnnRulesAction::Evaluate { compound } => {
+                let value: Value = serde_json::from_str(compound).map_err(|e| EngineError::new(
+                    format!("invalid compound JSON: {e}"), "compound must be a JSON object.",
+                    "pass an object with mw, logp, tpsa, hbd, hba and rotatable_bonds."))?;
+                let rows = crate::domains_pnn_rules::evaluate(&value);
+                emit(Value::Array(rows.clone()), to_stable_json(&Value::Array(rows)))
+            }
+            PnnRulesAction::Weight { criterion } => {
+                let value = crate::domains_pnn_rules::weight(criterion);
+                emit(json!({"value": value}), format!("{value}\n"))
+            }
+        },
         Commands::Obezite { action } => {
             use crate::domains_obezite as obezite;
             match action {

@@ -166,4 +166,5 @@ still names every top-level and archived directory.
 | `archive/kiln` | archived; read-only |
 | `archive/muse` | archived; read-only |
 | `anvil` | out of scope - AIKit tooling, not a research primitive |
+| `cairn-rs` | out of scope - AIKit tooling, not a research primitive |
 | `archive/crucible` | archived; read-only |

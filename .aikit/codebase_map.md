@@ -6,15 +6,15 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `450`
+- **Total Python Modules**: `452`
 - **Total Classes**: `317`
-- **Total Top-Level Functions**: `1996`
+- **Total Top-Level Functions**: `1997`
 - **Total Class Methods**: `1545`
-- **Total Source Lines**: `90909`
+- **Total Source Lines**: `90964`
 
 ## 🧭 Map Coverage
-- **Indexed**: python (`450` module(s))
-- **Not indexed by this map**: javascript (`1` file(s)), rust (`46` file(s))
+- **Indexed**: python (`452` module(s))
+- **Not indexed by this map**: javascript (`1` file(s)), rust (`47` file(s))
 
 > Only Python symbols are catalogued. A language above is reported as not indexed, never as verified by this map.
 
@@ -4849,6 +4849,21 @@
 
 ### [`rust/parity_check.py`](rust/parity_check.py)
 **Size**: `36` lines
+
+**Functions:**
+- `def run(cmd, cwd)`
+
+---
+
+### [`rust/pnn_rules_expected.py`](rust/pnn_rules_expected.py)
+> *Python reference for the Rust `pnn-rules` CLI commands.*
+
+**Size**: `17` lines
+
+---
+
+### [`rust/pnn_rules_parity.py`](rust/pnn_rules_parity.py)
+**Size**: `38` lines
 
 **Functions:**
 - `def run(cmd, cwd)`
