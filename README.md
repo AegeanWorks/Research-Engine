@@ -296,6 +296,7 @@ research-engine/
 ├── research-engine.cmd       <- canonical Rust runtime launcher (Windows)
 ├── docs/
 │   ├── ARCHITECTURE.md       <- layers, schema, transactions, extension points
+│   ├── CONSOLIDATION.md      <- kept/removed parts
 │   ├── MECHANICS.md          <- reference mechanics and their clean-room rules
 │   └── merge/                <- source pins, parity, dry-run and readiness
 ├── engine/

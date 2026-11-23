@@ -99,7 +99,7 @@ explicit so no directory is silently skipped.
 | `driftwood` | 39 | 14 | Python + .md:10 | reviewed — git hotspot ranking, not evidence |
 | `dupefinder` | 36 | 11 | Python + .md:10 | reviewed — file dedupe; host has source dedupe |
 | `dustline` | 289 | 30 | Python + .png:206 | out of scope — game |
-| `fluid-universe` | 2094 | 210 | Python + (none):1671 | merged |
+| `fluid-universe` | 2094 | 210 | Python + (none):1671 | merged; standalone checkout removed from workspace in the 2026-11-23 consolidation, see docs/CONSOLIDATION.md |
 | `foundry` | 24 | 9 | Python + .json:7 | out of scope — game content pipeline |
 | `gauge` | 43 | 10 | Python + .md:17 | ported — `engine/series.py` + `engine/charts.py` |
 | `harness` | 127 | 43 | Python + .json:21 | out of scope — agent test harness |

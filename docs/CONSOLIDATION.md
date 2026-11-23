@@ -34,9 +34,10 @@ this consolidation removes.
 ## Deletion record
 
 `projects/fluid-universe` was removed from the workspace on 2026-11-23 after the
-parity evidence was committed. The removal is recoverable from the approved temp
-area during the session. No host test imports the standalone checkout: the only
-references are string fixtures and an optional external data-root reference.
+parity evidence was committed. The removal is recoverable from
+`C:\Users\Yunus-Emre\AppData\Local\Temp\opencode\removed-projects\fluid-universe-20261123-221119`.
+No host test imports the standalone checkout: the only references are string
+fixtures and an optional external data-root reference.
 
 ## Verification
 
