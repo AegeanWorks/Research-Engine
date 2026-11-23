@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "research-engine",
-  "test_command": "python -m unittest discover -s tests -t .",
+  "test_command": "cd rust && cargo test && cd .. && python -m unittest tests.test_projects_scan",
   "topics": [
     "aikit",
     "aikit-integrated",

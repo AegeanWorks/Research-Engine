@@ -289,6 +289,30 @@ pub fn add_claim(
     basis: &str,
     prerequisites: &[String],
 ) -> Result<Value> {
+    let tx = conn.unchecked_transaction()?;
+    let claim = add_claim_in(&tx, research_ref, claim_text, kind, source_ref, quote,
+        locator, confidence, kill_test, basis, prerequisites, None, "")?;
+    tx.commit()?;
+    Ok(claim)
+}
+
+/// Insert a claim inside an existing transaction, with optional revision provenance.
+/// (`&Transaction` derefs to `&Connection`, so all helpers see the uncommitted writes.)
+pub fn add_claim_in(
+    conn: &Connection,
+    research_ref: &str,
+    claim_text: &str,
+    kind: &str,
+    source_ref: Option<&str>,
+    quote: &str,
+    locator: &str,
+    confidence: f64,
+    kill_test: &str,
+    basis: &str,
+    prerequisites: &[String],
+    revision_of: Option<&str>,
+    revision_reason: &str,
+) -> Result<Value> {
     let research = get_research(conn, research_ref)?;
     let claim_text = claim_text.trim();
     if claim_text.is_empty() {
@@ -365,20 +389,18 @@ pub fn add_claim(
         }
         prereq_ids.push(text(&claim, "id"));
     }
-    let tx = conn.unchecked_transaction()?;
-    let id = next_id(&tx, "c")?;
+    let id = next_id(conn, "c")?;
     let stamp = utc_now();
-    tx.execute(&(
+    conn.execute(&(
         "INSERT INTO claim(id, research_id, source_id, text, quote, locator, kind, basis,"
-            .to_owned() + " kill_test, status, confidence, created_at, updated_at)"
-            + " VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,'UNVERIFIED',?10,?11,?11)"),
+            .to_owned() + " kill_test, status, confidence, created_at, updated_at, revision_of, revision_reason)"
+            + " VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,'UNVERIFIED',?10,?11,?11,?12,?13)"),
         params![id, text(&research, "id"), source_id, claim_text, quote.trim(), locator.trim(),
-            kind, basis.trim(), kill_test.trim(), confidence, stamp],
+            kind, basis.trim(), kill_test.trim(), confidence, stamp, revision_of, revision_reason],
     )?;
     for prereq in &prereq_ids {
-        record_edge(&tx, "claim", &id, "claim", prereq, "derived_from")?;
+        record_edge(conn, "claim", &id, "claim", prereq, "derived_from")?;
     }
-    tx.commit()?;
     get_claim(conn, &id)
 }
 

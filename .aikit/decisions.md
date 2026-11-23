@@ -927,3 +927,11 @@ ender.py into engine/series.py
 - **Context**: ADR-061/062 retired the imported Python trees and the per-module CLI namespaces, but 52 `rust/src/domains_*.rs` modules remained. Only five were reachable from the cohesive `run` facade; the rest were dead implementation weight from the one-for-one porting effort.
 - **Decision**: Delete 47 unreachable `domains_*` modules, remove their dependency tests, and rename the five retained modules to `engine_bridge`, `engine_corpus`, `engine_rules`, `engine_safety` and `engine_screen`. `run execute` is the only entry point for these capabilities, grouped as `bridge.*`, `corpus.*`, `candidate.*` plus `catalog.*` (`lattice.rs`).
 - **Consequences**: The crate has five cohesive engine subsystems instead of 52 domain modules. Tests for deleted modules were removed with the code; no assertion in the retained tests was weakened.
+
+### ADR-064: make Rust the complete runtime and remove the Python engine
+
+- **Date**: 2026-11-24
+- **Status**: Accepted
+- **Context**: ADR-061..063 removed the wholesale imports and collapsed the domain modules, but `engine/`, `studio/` and `experiments/` Python packages and 675 Python tests remained as the compatibility/test surface. Five CLI behaviours (`claim merge/revise`, `hypothesis card/amend`, `analysis plan`) plus `source duplicates` and `analysis stats-all` still lacked Rust equivalents.
+- **Decision**: Port all seven remaining behaviours into `rust/src/runtime_*.rs` with cross-implementation parity checks and Rust integration tests. Switch `.aikit/project.json` `test_command` to `cargo test --manifest-path rust/Cargo.toml && python -m unittest tests.test_projects_scan`. Remove the `engine/`, `studio/` and `experiments/` Python packages, the Python test suite and the dev-only parity scripts (recoverable under the approved temp area). `tests/test_projects_scan.py` is retained because it checks documentation, not the removed runtime.
+- **Consequences**: The engine is one Rust crate with one CLI and no Python runtime. The gate exercises the Rust suite. Behaviour that was Python-only is now covered by Rust integration tests; no retained assertion was weakened. The Python sources were archived rather than hard-deleted.

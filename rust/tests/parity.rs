@@ -243,6 +243,88 @@ fn runtime_prisma_flow() {
 }
 
 #[test]
+fn runtime_claim_revise_and_merge() {
+    use research_engine::runtime_claims as claims;
+    let path = temp_db("claim_runtime");
+    let conn = open(path.to_str().unwrap()).unwrap();
+    initialize(&conn).unwrap();
+    let research = core::add_research(&conn, "Study", "scope", None).unwrap();
+    let rid = research.get("id").and_then(Value::as_str).unwrap();
+    let claim = core::add_claim(&conn, rid, "Original", "assumption", None, "", "",
+        0.5, "", "argument A", &[]).unwrap();
+    let cid = claim.get("id").and_then(Value::as_str).unwrap().to_string();
+
+    let revised = claims::revise_claim(&conn, &cid, "Revised", " better evidence ",
+        None, "", "", 0.7, "", "", &[], "tester").unwrap();
+    assert_eq!(field(&revised, "text"), "Revised");
+    assert_eq!(field(&revised, "revision_of"), cid);
+    assert_eq!(field(&revised, "revision_reason"), "better evidence");
+    let old = core::get_claim(&conn, &cid).unwrap();
+    assert_eq!(field(&old, "superseded_by"), field(&revised, "id"));
+    assert!(claims::revise_claim(&conn, &cid, "Again", "reason", None, "", "", 0.5,
+        "", "", &[], "tester").is_err());
+
+    let head = field(&revised, "id");
+    let dup = core::add_claim(&conn, rid, "Duplicate", "assumption", None, "", "",
+        0.5, "", "argument B", &[]).unwrap();
+    let did = dup.get("id").and_then(Value::as_str).unwrap().to_string();
+    core::record_edge(&conn, "claim", &did, "claim", &head, "related").unwrap();
+    let merged = claims::merge_claims(&conn, &head, &[did.clone()], " consolidated ", "tester").unwrap();
+    assert_eq!(merged["retired"].as_array().unwrap().len(), 1);
+    assert_eq!(field(&core::get_claim(&conn, &did).unwrap(), "status"), "RETRACTED");
+}
+
+#[test]
+fn runtime_analysis_plan() {
+    use research_engine::runtime_plans as plans;
+    let path = temp_db("plan");
+    let conn = open(path.to_str().unwrap()).unwrap();
+    initialize(&conn).unwrap();
+    let research = core::add_research(&conn, "Study", "scope", None).unwrap();
+    let rid = research.get("id").and_then(Value::as_str).unwrap();
+    let claim = core::add_claim(&conn, rid, "Claim", "assumption", None, "", "",
+        0.5, "", "argument", &[]).unwrap();
+    let cid = claim.get("id").and_then(Value::as_str).unwrap();
+
+    let plan = plans::add_plan(&conn, cid, " Control ", "Treatment", " treatment wins ", "tester").unwrap();
+    assert_eq!(field(&plan, "baseline"), "control");
+    assert_eq!(field(&plan, "treatment"), "treatment");
+    assert_eq!(field(&plan, "status"), "PREREGISTERED");
+    let matched = plans::match_plan(&conn, cid, "control", "treatment").unwrap();
+    assert_eq!(matched.len(), 1);
+    assert!(plans::add_plan(&conn, cid, "a", "a", "prediction", "tester").is_err());
+}
+
+#[test]
+fn runtime_hypothesis_card_and_amend() {
+    use research_engine::runtime_hypotheses as hypotheses;
+    let path = temp_db("hypothesis");
+    let conn = open(path.to_str().unwrap()).unwrap();
+    initialize(&conn).unwrap();
+    let research = core::add_research(&conn, "Study", "scope", None).unwrap();
+    let rid = research.get("id").and_then(Value::as_str).unwrap();
+    let hypothesis = core::add_hypothesis(&conn, rid, "Original statement",
+        "Original criterion", 0.6, None).unwrap();
+    let hid = hypothesis.get("id").and_then(Value::as_str).unwrap().to_string();
+
+    let card = hypotheses::preregistration_card(&conn, &hid).unwrap();
+    assert!(card.contains("Original statement"));
+    assert!(card.contains("PREREGISTERED"));
+
+    let amended = hypotheses::amend_hypothesis(&conn, &hid, " typo ",
+        Some("Corrected statement"), None, "tester").unwrap();
+    assert_eq!(field(&amended, "statement"), "Corrected statement");
+    let amendments: i64 = conn.query_row(
+        "SELECT COUNT(*) FROM amendment WHERE subject_id=?1 AND field='statement'",
+        rusqlite::params![hid], |row| row.get(0)).unwrap();
+    assert_eq!(amendments, 1);
+    // Empty reason and no-op edits are rejected.
+    assert!(hypotheses::amend_hypothesis(&conn, &hid, "", Some("Other"), None, "agent").is_err());
+    assert!(hypotheses::amend_hypothesis(&conn, &hid, "noop",
+        Some("Corrected statement"), None, "agent").is_err());
+}
+
+#[test]
 fn runtime_source_duplicate_detection() {
     use research_engine::runtime_sources as sources;
     assert_eq!(sources::normalize_doi("https://doi.org/10.1/ABC"), "10.1/abc");

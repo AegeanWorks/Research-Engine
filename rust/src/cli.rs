@@ -105,6 +105,10 @@ pub enum SourceAction {
     },
     List { #[arg(long)] research: Option<String> },
     Prisma { #[arg(long)] research: Option<String> },
+    Duplicates {
+        #[arg(long)] research: Option<String>,
+        #[arg(long, default_value_t = 20)] limit: usize,
+    },
     Status {
         reference: String,
         #[arg(long)] status: String,
@@ -145,6 +149,23 @@ pub enum ClaimAction {
         #[arg(long)] history: bool,
     },
     Show { reference: String },
+    Revise {
+        reference: String,
+        #[arg(long, required = true)] text: String,
+        #[arg(long, required = true)] reason: String,
+        #[arg(long)] source: Option<String>,
+        #[arg(long, default_value = "")] quote: String,
+        #[arg(long, default_value = "")] locator: String,
+        #[arg(long, default_value_t = 0.5)] confidence: f64,
+        #[arg(long, default_value = "")] kill_test: String,
+        #[arg(long, default_value = "")] basis: String,
+        #[arg(long = "from", name = "from")] prerequisites: Vec<String>,
+    },
+    Merge {
+        keep: String,
+        #[arg(required = true)] duplicates: Vec<String>,
+        #[arg(long, default_value = "")] note: String,
+    },
     Link {
         src: String,
         dst: String,
@@ -186,6 +207,14 @@ pub enum HypothesisAction {
         #[arg(long)] question: Option<String>,
     },
     List { #[arg(long)] research: Option<String> },
+    Card { reference: String },
+    Amend {
+        reference: String,
+        #[arg(long, required = true)] reason: String,
+        #[arg(long)] statement: Option<String>,
+        #[arg(long)] criterion: Option<String>,
+        #[arg(long, default_value = "agent")] actor: String,
+    },
     Outcome {
         reference: String,
         #[arg(long, required = true)] status: String,
@@ -253,6 +282,24 @@ pub enum AnalysisAction {
         #[arg(long)] allow_self_reported: bool,
         #[arg(long, default_value = "")] since: String,
         #[arg(long, default_value = "")] until: String,
+    },
+    Plan {
+        claim: String,
+        #[arg(long, required = true)] baseline: String,
+        #[arg(long, required = true)] treatment: String,
+        #[arg(long, required = true)] prediction: String,
+    },
+    StatsAll {
+        reference: String,
+        #[arg(long, required = true)] baseline: String,
+        #[arg(long, required = true)] treatment: String,
+        #[arg(long, default_value_t = 0)] seed: i64,
+        #[arg(long, default_value_t = 2000)] resamples: usize,
+        #[arg(long)] allow_incomparable: bool,
+        #[arg(long)] allow_self_reported: bool,
+        #[arg(long, default_value = "")] since: String,
+        #[arg(long, default_value = "")] until: String,
+        #[arg(long)] holm: bool,
     },
 }
 
@@ -561,6 +608,18 @@ pub fn run(cli: &Cli) -> Result<Output> {
             emit(Value::Object(payload), text)
         }
         Commands::Analysis { action } => match action {
+            AnalysisAction::Plan { claim, baseline, treatment, prediction } => {
+                let result = crate::runtime_plans::add_plan(&conn, claim, baseline, treatment,
+                    prediction, "agent")?;
+                emit(result.clone(), to_stable_json(&result))
+            }
+            AnalysisAction::StatsAll { reference, baseline, treatment, seed, resamples,
+                allow_incomparable, allow_self_reported, since, until, holm } => {
+                let result = crate::runtime_analysis::batch_statistics(&conn, reference,
+                    baseline, treatment, *seed, *resamples, *allow_incomparable,
+                    *allow_self_reported, "agent", since, until, *holm)?;
+                emit(result.clone(), to_stable_json(&result))
+            }
             AnalysisAction::Stats { claim, baseline, treatment, seed, resamples,
                 allow_incomparable, allow_self_reported, plan, since, until, actor } => {
                 let result = crate::analysis::claim_statistics(&conn, claim, baseline, treatment,
@@ -784,6 +843,12 @@ fn run_source(conn: &Connection, action: &SourceAction) -> Result<Output> {
             let stable = to_stable_json(&result);
             emit(result, stable)
         }
+        SourceAction::Duplicates { research, limit } => {
+            let sources = core::list_sources(conn, research.as_deref())?;
+            let result = crate::runtime_sources::duplicate_sources(&sources, Some(*limit))?;
+            let stable = to_stable_json(&result);
+            emit(result, stable)
+        }
         SourceAction::Status { reference, status, note } => {
             let record = core::set_source_status(conn, reference, status, note)?;
             emit_record(record, format!("{} -> {}", reference, status))
@@ -819,6 +884,19 @@ fn run_claim(conn: &Connection, action: &ClaimAction) -> Result<Output> {
         ClaimAction::Show { reference } => {
             let record = core::get_claim(conn, reference)?;
             emit(record.clone(), to_stable_json(&record))
+        }
+        ClaimAction::Revise { reference, text, reason, source, quote, locator, confidence,
+            kill_test, basis, prerequisites } => {
+            let record = crate::runtime_claims::revise_claim(conn, reference, text, reason,
+                source.as_deref(), quote, locator, *confidence, kill_test, basis,
+                prerequisites, "agent")?;
+            let stable = to_stable_json(&record);
+            emit(record, stable)
+        }
+        ClaimAction::Merge { keep, duplicates, note } => {
+            let result = crate::runtime_claims::merge_claims(conn, keep, duplicates, note, "agent")?;
+            let stable = to_stable_json(&result);
+            emit(result, stable)
         }
         ClaimAction::Link { src, dst, rel } => {
             let a = core::get_claim(conn, src)?;
@@ -866,6 +944,16 @@ fn run_hypothesis(conn: &Connection, action: &HypothesisAction) -> Result<Output
         HypothesisAction::Add { research, statement, criterion, confidence, question } => {
             let record = core::add_hypothesis(conn, research, statement, criterion, *confidence, question.as_deref())?;
             emit_record(record.clone(), format!("{} {}", field(&record, "id"), field(&record, "statement")))
+        }
+        HypothesisAction::Card { reference } => {
+            let card = crate::runtime_hypotheses::preregistration_card(conn, reference)?;
+            emit(json!({"card": card.clone()}), format!("{card}\n"))
+        }
+        HypothesisAction::Amend { reference, reason, statement, criterion, actor } => {
+            let value = crate::runtime_hypotheses::amend_hypothesis(conn, reference, reason,
+                statement.as_deref(), criterion.as_deref(), actor)?;
+            let stable = to_stable_json(&value);
+            emit(value, stable)
         }
         HypothesisAction::List { research } => {
             let rows = core::list_hypotheses(conn, research.as_deref())?;

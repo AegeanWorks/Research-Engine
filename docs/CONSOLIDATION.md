@@ -69,3 +69,19 @@ under `C:\Users\Yunus-Emre\AppData\Local\Temp\opencode\removed-from-host-2026112
 - `cargo test --manifest-path rust/Cargo.toml` — all engine tests pass.
 - `python -m unittest discover -s tests -t .` — host compatibility suite passes.
 - `research-engine run analyze --input …` — one integrated report from the facade.
+
+## Full Rust conversion (ADR-064)
+
+The last Python runtime was removed after every remaining CLI behaviour was
+ported: `claim revise` and `claim merge` (`runtime_claims.rs`), `hypothesis card`
+and `hypothesis amend` (`runtime_hypotheses.rs`), `analysis plan`
+(`runtime_plans.rs`), `source duplicates` (`runtime_sources.rs`) and
+`analysis stats-all` (`runtime_analysis.rs`). Each was checked against the Python
+implementation before its Python source was archived.
+
+`engine/`, `studio/`, `experiments/`, the Python test suite and the dev-only parity
+scripts are preserved under
+`C:\Users\Yunus-Emre\AppData\Local\Temp\opencode\removed-python-runtime-20261124`.
+Only `tests/test_projects_scan.py` remains in Python because it validates the
+project-scan document rather than the runtime. The project gate now runs the Rust
+suite followed by that single test.

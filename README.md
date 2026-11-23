@@ -9,11 +9,10 @@ A falsification-first research engine for provenance-backed claims, executable k
 
 ## ⚡ 30-Second Cold-Start Quick Reference
 
-- **Runtime Prerequisites**: Rust 1.100+; launch with `research-engine` (or `.cmd`). Python 3.10+ is the compatibility suite only.
+- **Runtime Prerequisites**: Rust 1.100+. Launch with `research-engine` (or `research-engine.cmd`); both build the release binary on first use. There is no Python runtime.
 - **Canonical Regression Shield Gate**:
   ```bash
-  cd rust && cargo test && cd ..
-  python -m unittest discover -s tests -t .
+  cd rust && cargo test && cd .. && python -m unittest tests.test_projects_scan
   ```
 - **Try it**: `research-engine demo` (synthetic, no scientific claim), then `check` and `report`.
 - **Real**: see [Commands](#commands).
@@ -28,8 +27,9 @@ A falsification-first research engine for provenance-backed claims, executable k
 
 ## Why this is not "just lattice"
 
-`lattice` is an evidence store, not a lifecycle. The host keeps `studio`,
-`experiments` and isolated domain packs; see [docs/merge/READINESS.md](docs/merge/READINESS.md).
+The engine is a single Rust crate with one CLI. The imported `lattice`, `studio`, `experiments`
+and per-domain surfaces were consolidated into cohesive subsystems behind `run`; see
+[docs/CONSOLIDATION.md](docs/CONSOLIDATION.md).
 
 ## How It Works
 
@@ -103,112 +103,43 @@ researcher's judgment.
 
 ## Commands
 
-The canonical runtime is the Rust binary (`research-engine`); `python -m engine` is the compatibility entry point.
+The canonical and only runtime is the Rust binary (`research-engine`). Every capability below is
+implemented in `rust/src`; there is no Python entry point. The command tree is authoritative via
+`research-engine --help` and `research-engine <command> --help`.
 
 ```text
-python -m engine [--db PATH] [--json] init
-python -m engine [--db PATH] [--json] demo
-python -m engine [--db PATH] [--json] check
-python -m engine [--db PATH] [--json] inventory
-python -m engine [--db PATH] [--json] search QUERY [--research REF] [--kind KIND]...
-                        [--limit N] [--budget N] [--all]
-
-python -m engine [--db PATH] research add TITLE [--scope TEXT] [--slug SLUG]
-python -m engine [--db PATH] research list
-python -m engine [--db PATH] research show REF
-
-python -m engine [--db PATH] question add RESEARCH TEXT
-python -m engine [--db PATH] question list [--research REF]
-python -m engine [--db PATH] question close REF
-
-python -m engine [--db PATH] source add RESEARCH --title TITLE [--year Y] [--doi DOI] [--url URL]
-python -m engine [--db PATH] source list [--research REF]
-python -m engine [--db PATH] source status REF --status active|expression_of_concern|retracted [--note TEXT]
-python -m engine [--db PATH] source screen REF --status identified|screened_in|screened_out|included|excluded [--reason R]
-python -m engine [--db PATH] source prisma [--research REF]
-python -m engine [--db PATH] source duplicates [--research REF] [--limit N]
-python -m engine [--db PATH] source retract REF --reason TEXT --evidence TEXT [--allow-bulk] [--preview-digest DIGEST]
-
-python -m engine [--db PATH] protocol add --id ID --measures TEXT [--includes-generation]
-                        [--includes-judge] [--doc-digest SHA256] [--doc-path PATH]
-python -m engine [--db PATH] protocol list
-python -m engine [--db PATH] protocol amend ID --measures TEXT --reason TEXT
-
-python -m engine [--db PATH] observation add CLAIM --group LABEL --value F [--note TEXT]
-                        [--instrument-kind K] [--instrument-id ID] [--instrument-digest SHA256]
-                        [--rater-kind K] [--rater-id ID] [--rater-version V]
-                        [--protocol ID] [--sample-size N] [--aggregation METHOD] [--unit U]
-                        [--provenance-class independent|self_reported|unclassified]
-                        [--producer-path PATH] [--producer-digest SHA256]
-python -m engine [--db PATH] observation list CLAIM [--group LABEL] [--include-voided]
-python -m engine [--db PATH] observation void OBS --reason TEXT
-python -m engine [--db PATH] observation import-csv [--template] [--dry-run] [CLAIM PATH]
-
-python -m engine [--db PATH] claim add RESEARCH --text TEXT --kind KIND [--source REF]
-                        [--quote TEXT] [--locator TEXT] [--confidence C] [--kill-test TEXT]
-                        [--basis TEXT] [--from CLAIM]...
-python -m engine [--db PATH] claim list [--research REF] [--status STATUS] [--history]
-python -m engine [--db PATH] claim revise REF --text TEXT --reason TEXT [--source REF]
-                        [--quote TEXT] [--locator TEXT] [--confidence C] [--kill-test TEXT]
-                        [--basis TEXT] [--from CLAIM]...
-python -m engine [--db PATH] claim history REF
-python -m engine [--db PATH] claim show REF
-python -m engine [--db PATH] claim link SRC DST --rel REL
-python -m engine [--db PATH] claim link-question CLAIM QUESTION --stance STANCE
-python -m engine [--db PATH] claim verdict REF --status STATUS --evidence TEXT [--note TEXT] [--group GROUP]
-python -m engine [--db PATH] claim invalidate REF --status FALSIFIED|RETRACTED --reason TEXT --evidence TEXT [--allow-bulk] [--preview-digest DIGEST]
-python -m engine [--db PATH] claim merge KEEP DUP... [--note TEXT]
-python -m engine [--db PATH] claim context REF [--budget N]
-
-python -m engine [--db PATH] hypothesis add RESEARCH --statement TEXT --criterion TEXT
-                        [--confidence C] [--question REF]
-python -m engine [--db PATH] hypothesis list [--research REF]
-python -m engine [--db PATH] hypothesis outcome REF --status SUPPORTED|REFUTED|INCONCLUSIVE --evidence TEXT
-python -m engine [--db PATH] hypothesis amend REF [--statement TEXT] [--criterion TEXT] --reason TEXT
-python -m engine [--db PATH] hypothesis card REF
-
-python -m engine [--db PATH] test add RESEARCH --name NAME --command CMD [--claim REF]
-                        [--hypothesis REF] [--expect-exit N] [--timeout SECONDS] [--input PATH]...
-                        [--control CMD]
-python -m engine [--db PATH] test list [--research REF]
-python -m engine [--db PATH] test run REF [--runs N]
-python -m engine [--db PATH] test verify REF
-python -m engine [--db PATH] test runs [REF] [--limit N]
-python -m engine [--db PATH] test attempts [REF] [--limit N]
-
-python -m engine [--db PATH] cascade preview REF
-python -m engine [--db PATH] report REF [--out PATH]
-python -m engine [--db PATH] report REF --check PATH [--strict]
-python -m engine [--db PATH] outline REF [--budget N]
-python -m engine [--db PATH] brief REF [--budget N]
-python -m engine [--db PATH] analysis contradictions REF [--min-score S] [--unlinked]
-python -m engine [--db PATH] analysis matrix REF
-python -m engine [--db PATH] analysis keystone REF [--limit N]
-python -m engine [--db PATH] analysis expose REF
-python -m engine [--db PATH] analysis calibration REF [--min-n N]
-python -m engine [--db PATH] analysis stats CLAIM --baseline L --treatment L [--seed N] [--resamples N] [--allow-*] [--plan PLAN] [--since/until D]
-python -m engine [--db PATH] analysis stats-all REF --baseline L --treatment L [--seed N] [--resamples N] [--allow-*] [--since/until D] [--holm]
-python -m engine [--db PATH] analysis correlation CLAIM [--groups A,B] [--allow-*] [--since/until D]
-python -m engine [--db PATH] analysis plan CLAIM --baseline L --treatment L --prediction TEXT
-python -m engine [--db PATH] analysis trend CLAIM --group LABEL [--since/until D]
-python -m engine [--db PATH] diff OLD.jsonl NEW.jsonl [--exact]
-python -m engine [--db PATH] db integrity
-python -m engine [--db PATH] db backup PATH
-python -m engine [--db PATH] events [--research REF] [--kind K] [--limit N]
-python -m engine [--db PATH] events --tree ROOT
-python -m engine [--db PATH] events --path EVENT
-python -m engine [--db PATH] events --verify
-python -m engine [--db PATH] scorecard REF
-python -m engine [--db PATH] export PATH [--research REF] [--check]
-python -m engine [--db PATH] ai sweep|extract|idea|propose-test|draft|artifacts
+research-engine [--db PATH] [--json] init | demo | check | inventory | report | scorecard | outline | brief | events | diff | export
+research-engine [--db PATH] [--json] search QUERY [--research REF] [--kind KIND]...
+research-engine [--db PATH] research add LIST | show REF
+research-engine [--db PATH] question add | list | close
+research-engine [--db PATH] source add | list | status | screen | retract | prisma | duplicates
+research-engine [--db PATH] protocol add | list | amend
+research-engine [--db PATH] observation add | list | void | import-csv
+research-engine [--db PATH] claim add | list | show | revise | merge | link | link-question | verdict | history | context | invalidate
+research-engine [--db PATH] hypothesis add | list | card | amend | outcome
+research-engine [--db PATH] test add | list | run | verify | runs | attempts
+research-engine [--db PATH] cascade preview
+research-engine [--db PATH] analysis stats | stats-all | trend | calibration | contradictions | matrix | keystone | expose | correlation | plan
+research-engine [--db PATH] db integrity | backup
+research-engine [--db PATH] ai sweep | extract | idea | propose-test | draft | artifacts
+research-engine [--db PATH] experiment ...
 ```
 
-`--json` prints stable machine-readable payloads. `check` exits 1 when any error-level finding is
-present and 0 when only warnings remain. Domain errors print the `Error / Why / Fix` triad and exit 1.
+The unified `run` entry point carries the engine's important capabilities:
+
+```text
+research-engine run analyze --input FILE
+research-engine run execute <capability> --input '{...}'
+```
+
+`run execute` capabilities are grouped into four subsystems: `catalog.*` (literature identity),
+`candidate.*` (design rules, screening, safety), `bridge.primitives` (Gaussian/fluid primitives)
+and `corpus.*` (bibliography parsing and duplicate-source detection). See
+[rust/README.md](rust/README.md) for the full capability vocabulary.
 
 ## Integrity Gate
 
-`python -m engine check` audits:
+`research-engine check` audits:
 
 - empirical claims missing a source, quote or locator (`PROV-001`);
 - sources with no year, DOI or URL (`PROV-002`);
@@ -276,86 +207,37 @@ Verdicts, runs, events, observations and amendments are append-only. See
 - A self-reported measurement is listed separately and needs a caveat to compare.
 - A failed premise invalidates its dependents; a report with `CASCADE-001` is not trustworthy.
 - Reports and scorecards are generated from the graph.
-- The engine is standard library only and makes no network calls.
+- The engine has no undeclared inputs and makes no network calls.
 
 ## What's Inside
 
 ```text
 research-engine/
-├── .aikit/                   <- project memory: ledger, decisions, guidelines
-├── .gitattributes            <- LF line endings for tracked text
+├── .aikit/             <- project memory: ledger, decisions, guidelines
+├── .gitattributes      <- LF line endings for tracked text
 ├── .gitignore
-├── assets/                   <- logo and social preview images
-├── ASSETS.md                 <- data and asset manifest
+├── ASSETS.md           <- data and asset manifest
 ├── COMMERCIAL.md
-├── LICENSE                   <- Aegean Science License 1.1 (ASL-1.1)
+├── LICENSE             <- Aegean Science License 1.1 (ASL-1.1)
 ├── LICENSES/
 ├── REUSE.toml
 ├── README.md
-├── research-engine           <- canonical Rust runtime launcher (POSIX)
-├── research-engine.cmd       <- canonical Rust runtime launcher (Windows)
-├── docs/
-│   ├── ARCHITECTURE.md       <- layers, schema, transactions, extension points
-│   ├── CONSOLIDATION.md      <- kept/removed parts
-│   ├── MECHANICS.md          <- reference mechanics and their clean-room rules
-│   └── merge/                <- source pins, parity, dry-run and readiness
-├── engine/
-│   ├── __init__.py
-│   ├── __main__.py           <- `python -m engine`
-│   ├── ai.py
-│   ├── analysis.py
-│   ├── amendments.py        <- append-only correction ledger
-│   ├── artifacts.py
-│   ├── attempts.py
-│   ├── bundle.py
-│   ├── calibration.py        <- Brier, log loss, reliability
-│   ├── cascade.py
-│   ├── claims.py
-│   ├── cli.py
-│   ├── context.py
-│   ├── database.py
-│   ├── demo.py
-│   ├── diffing.py
-│   ├── duplicates.py         <- duplicate source identity
-│   ├── events.py
-│   ├── errors.py
-│   ├── evidence.py
-│   ├── hypotheses.py
-│   ├── information.py
-│   ├── integrity.py
-│   ├── killtests.py
-│   ├── maintenance.py
-│   ├── manifest.py
-│   ├── markdown.py
-│   ├── merging.py
-│   ├── models.py
-│   ├── plans.py
-│   ├── provenance.py
-│   ├── protocols.py
-│   ├── observations.py
-│   ├── questions.py
-│   ├── researches.py
-│   ├── screening.py
-│   ├── search.py             <- lexical graph search
-│   ├── sources.py
-│   ├── stats.py
-│   ├── series.py
-│   ├── charts.py
-│   ├── NOTICE-gauge.md    <- gauge source notice
-│   ├── migrations.py         <- source snapshot inspection and dry-run
-│   ├── packs.py              <- domain-pack registry
-│   └── synthesis.py
-├── studio/                   <- lattice web studio, MCP and API
-├── experiments/              <- N1 models, metrics, events and analysis
-├── rust/                     <- canonical Rust engine; `run` is the unified entry point
-└── tests/                    <- regression shield, ported contracts, golden run
+├── assets/             <- logo and social preview images
+├── docs/               <- architecture, consolidation, merge pins and readiness
+├── rust/               <- the complete Rust engine (single crate, single CLI)
+├── tests/              <- the project-scan coverage test
+├── research-engine     <- canonical Rust runtime launcher (POSIX)
+└── research-engine.cmd <- canonical Rust runtime launcher (Windows)
 ```
 
-## Rust implementation (in progress)
+## Rust implementation
 
-`rust/` writes the same schema-14 graph as `engine/`. Build with `cd rust && cargo build`,
-test with `cargo test`; the binary takes the same global `--db`/`--json` flags.
-See [rust/README.md](rust/README.md) for ported commands and remaining work.
+`rust/` is the canonical implementation of every command: schema and migrations, integrity,
+provenance, verdicts, cascade, screening, analysis, statistics, AI artifacts, the lattice catalog
+and the four consolidated engine subsystems. The Python runtime and its tests were removed under
+ADR-064; the binary writes the same schema-14 graph and takes the same global `--db`/`--json`
+flags. Build with `cd rust && cargo build`, test with `cargo test`. See
+[rust/README.md](rust/README.md).
 
 ## Deliberate Limits
 
