@@ -433,6 +433,24 @@ fn fluid_frank_oseen_dispersion() {
 }
 
 #[test]
+fn temperature_dependent_cavity() {
+    use research_engine::domains_fluid_water_temperature as wt;
+    assert!((wt::water_dielectric_constant(0.0).unwrap() - 87.740).abs() < 1e-9);
+    assert!((wt::water_surface_tension(0.0).unwrap() - 0.07564).abs() < 1e-9);
+    assert!(wt::water_dielectric_constant(-1.0).is_err());
+    assert!(wt::water_surface_tension(101.0).is_err());
+    let cavity = wt::born_cavity_at_temperature(25.0).unwrap();
+    assert!(cavity["radius_m"].as_f64().unwrap() > 1.8e-10);
+    assert!(cavity["lambda_ev"].as_f64().unwrap() > 0.0);
+    assert!(cavity["fwhm_ev"].as_f64().unwrap() > 0.0);
+    let scales = wt::temperature_scales().unwrap();
+    assert_eq!(scales["scan"].as_array().unwrap().len(), 7);
+    assert_eq!(scales["cavity_terms_oppose"].as_bool(), Some(true));
+    assert!(scales["width_change_ev"].as_f64().unwrap().abs() > 0.0);
+    assert!(scales["lambda_slope_mev_per_k"].as_f64().unwrap() < 0.0);
+}
+
+#[test]
 fn marcus_band_width() {
     use research_engine::domains_fluid_water_marcus as wm;
     let width = wm::marcus_width_ev(1.6171325440878093, 300.0).unwrap();

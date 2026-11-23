@@ -86,6 +86,7 @@ pub enum Commands {
     WaterReorganization { #[command(subcommand)] action: WaterReorganizationAction },
     BornCavity { #[command(subcommand)] action: BornCavityAction },
     WaterMarcus { #[command(subcommand)] action: WaterMarcusAction },
+    WaterTemperature { #[command(subcommand)] action: WaterTemperatureAction },
     Providers { #[command(subcommand)] action: ProvidersAction },
     Search {
         query: String,
@@ -312,6 +313,14 @@ pub enum ProvidersAction {
 pub enum PnnRulesAction {
     Evaluate { #[arg(long, required = true)] compound: String },
     Weight { criterion: String },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum WaterTemperatureAction {
+    Dielectric { temperature_c: f64 },
+    Tension { temperature_c: f64 },
+    Cavity { temperature_c: f64 },
+    Scales,
 }
 
 #[derive(Debug, Subcommand)]
@@ -997,7 +1006,7 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::HydrogenVortex { .. } | Commands::NodeDefect { .. }
         | Commands::WaterPressure { .. } | Commands::WaterReorganization { .. }
         | Commands::BornCavity { .. } | Commands::WaterMarcus { .. }
-        | Commands::Providers { .. }) {
+        | Commands::WaterTemperature { .. } | Commands::Providers { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -1110,6 +1119,29 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::WaterTemperature { action } => {
+            use crate::domains_fluid_water_temperature as wt;
+            macro_rules! scalar {
+                ($expr:expr) => {{
+                    let value = $expr?;
+                    emit(json!({"value": value}), format!("{value}\n"))
+                }};
+            }
+            match action {
+                WaterTemperatureAction::Dielectric { temperature_c } => scalar!(wt::water_dielectric_constant(*temperature_c)),
+                WaterTemperatureAction::Tension { temperature_c } => scalar!(wt::water_surface_tension(*temperature_c)),
+                WaterTemperatureAction::Cavity { temperature_c } => {
+                    let value = wt::born_cavity_at_temperature(*temperature_c)?;
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                WaterTemperatureAction::Scales => {
+                    let value = wt::temperature_scales()?;
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+            }
+        }
         Commands::WaterMarcus { action } => {
             use crate::domains_fluid_water_marcus as wm;
             match action {
