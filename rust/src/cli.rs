@@ -93,6 +93,7 @@ pub enum Commands {
     PnnCurate { #[command(subcommand)] action: PnnCurateAction },
     LeadSelection { #[command(subcommand)] action: LeadSelectionAction },
     PnnMpo { #[command(subcommand)] action: PnnMpoAction },
+    PnnTarget { #[command(subcommand)] action: PnnTargetAction },
     Providers { #[command(subcommand)] action: ProvidersAction },
     Search {
         query: String,
@@ -319,6 +320,20 @@ pub enum ProvidersAction {
 pub enum PnnRulesAction {
     Evaluate { #[arg(long, required = true)] compound: String },
     Weight { criterion: String },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum PnnTargetAction {
+    List,
+    Show { target_id: String },
+    Config {
+        target_id: String,
+        #[arg(long, default_value = "receptor.pdbqt")] receptor: String,
+        #[arg(long, default_value = "docked_output.pdbqt")] out: String,
+        #[arg(long, default_value_t = 8)] exhaustiveness: i64,
+        #[arg(long, default_value_t = 9)] num_modes: i64,
+        #[arg(long, default_value_t = 3)] energy_range: i64,
+    },
 }
 
 #[derive(Debug, Subcommand)]
@@ -1078,7 +1093,8 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::WaterTemperature { .. } | Commands::WaterLineshape { .. }
         | Commands::Predictions { .. } | Commands::PnnRank { .. }
         | Commands::PnnCurate { .. } | Commands::LeadSelection { .. }
-        | Commands::PnnMpo { .. } | Commands::Providers { .. }) {
+        | Commands::PnnMpo { .. } | Commands::PnnTarget { .. }
+        | Commands::Providers { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -1191,6 +1207,27 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::PnnTarget { action } => {
+            use crate::domains_pnn_target as target;
+            match action {
+                PnnTargetAction::List => {
+                    let value = target::target_profiles();
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                PnnTargetAction::Show { target_id } => {
+                    let value = target::get_target(target_id)?;
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                PnnTargetAction::Config { target_id, receptor, out, exhaustiveness, num_modes, energy_range } => {
+                    let profile = target::get_target(target_id)?;
+                    let text = target::generate_vina_config(&profile, receptor, out,
+                        *exhaustiveness, *num_modes, *energy_range);
+                    emit(json!({"config": text.clone()}), format!("{text}\n"))
+                }
+            }
+        }
         Commands::PnnMpo { action } => {
             use crate::domains_pnn_mpo as mpo;
             match action {

@@ -433,6 +433,23 @@ fn fluid_frank_oseen_dispersion() {
 }
 
 #[test]
+fn pnn_target_profiles_and_vina_config() {
+    use research_engine::domains_pnn_target as target;
+    let profiles = target::target_profiles();
+    assert_eq!(profiles.as_array().unwrap().len(), 8);
+    let ptp = target::get_target("ptpsigma").unwrap();
+    assert_eq!(ptp["target_id"].as_str(), Some("PTPsigma"));
+    assert_eq!(ptp["grid_center"].as_array().unwrap().len(), 3);
+    assert!(target::get_target("UNKNOWN").is_err());
+    let config = target::generate_vina_config(&ptp, "r.pdbqt", "o.pdbqt", 8, 9, 3);
+    assert!(config.contains("center_x = 12.500"));
+    assert!(config.contains("size_z = 20.0"));
+    assert!(config.contains("exhaustiveness = 8"));
+    assert!(config.contains("receptor = r.pdbqt"));
+    assert!(config.contains("# Key residues: Lys201, Arg204"));
+}
+
+#[test]
 fn pnn_multiparametric_optimization() {
     use research_engine::domains_pnn_mpo as mpo;
     assert_eq!(mpo::ramp_desirability(0.5, 0.0, 1.0, true), 0.5);

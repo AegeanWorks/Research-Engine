@@ -98,6 +98,7 @@ argparse requires in `python -m engine`.
 | Domains: PNN curate | CLI driver merging compound CSVs, deduplicating, curating and writing the library plus JSON summary (`pnn-curate` CLI) |
 | Domains: PNN selection | End-to-end lead selection: CSV ingest, curation, screening, docking consensus, SHA-256 provenance and Markdown report (`lead-selection` CLI) |
 | Domains: PNN MPO | Pfizer CNS MPO desirability, Derringer-Suich composite, liability/recommendation diagnostics and report (`pnn-mpo` CLI) |
+| Domains: PNN targets | Eight receptor profiles with pocket invariants, grid coordinates and AutoDock Vina config generation (`pnn-target` CLI) |
 | Domains: obezite | Citation-number extraction with bibliography-noise stripping and claim-row de-duplication (`obezite` CLI) |
 | Domains: PNN rules | CNS/property design-rule evaluation and criterion weighting (`pnn-rules` CLI) |
 | Domains: PNN docking | Docking-score alias parsing, RMSD/Vina filtering, weighted consensus normalization and per-compound best-target aggregation (`pnn-docking` CLI) |
@@ -245,6 +246,8 @@ argparse requires in `python -m engine`.
   summaries; all four checks match.
 - `pnn_mpo_parity.py` compares ramps, MPO scores, profiles, report and CSV rows;
   all eleven checks match.
+- `pnn_target_parity.py` compares target listings, lookups and Vina configs;
+  all nine checks match.
 
 ## Still to port
 
