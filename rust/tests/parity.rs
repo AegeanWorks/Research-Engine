@@ -433,6 +433,28 @@ fn fluid_frank_oseen_dispersion() {
 }
 
 #[test]
+fn cohesive_engine_facade() {
+    use research_engine::engine;
+    let input = serde_json::json!({
+        "program": {"title": "Integrated candidate"},
+        "compound": {"compound_id": "C1", "mw": 345.5, "logp": 2.6, "tpsa": 58.0,
+            "hbd": 2, "hba": 5, "rotatable_bonds": 4, "pka": 8.2, "charge": "basic",
+            "logbb": -0.3, "brain_plasma_ratio": 0.45, "oral_bioavailability": 24.0,
+            "cyp3a4_inhibition": 18.0, "herg_liability": 8.0, "pnn_ec50_nm": 42.0},
+        "bridge": {"hbar": 1.0, "mass": 1.0, "omega": 1.0},
+    });
+    let analysis = engine::analyze(&input).unwrap();
+    assert_eq!(analysis["summary"]["verdict"].as_str(), Some("CANDIDATE"));
+    assert_eq!(analysis["summary"]["failures"].as_u64(), Some(0));
+    assert_eq!(analysis["summary"]["unknowns"].as_u64(), Some(0));
+    assert!(analysis["bridge"]["diffusivity"].as_f64().unwrap() > 0.0);
+    let report = engine::render_report(&analysis);
+    assert!(report.contains("# Research Engine — Integrated Candidate Analysis"));
+    assert!(report.contains("**Verdict**: CANDIDATE"));
+    assert!(engine::analyze(&serde_json::json!({})).is_err());
+}
+
+#[test]
 fn pnn_scaffold_decomposition() {
     use research_engine::domains_pnn_sar as sar;
     let (atoms, adj) = sar::parse_smiles_graph("CCO").unwrap();

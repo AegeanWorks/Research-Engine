@@ -25,6 +25,7 @@ pub struct Cli {
 
 #[derive(Debug, Subcommand)]
 pub enum Commands {
+    Run { #[command(subcommand)] action: RunAction },
     Init,
     Demo,
     Check,
@@ -314,6 +315,12 @@ pub enum AnalysisAction {
         #[arg(long, default_value = "")] since: String,
         #[arg(long, default_value = "")] until: String,
     },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum RunAction {
+    /// One integrated analysis using the engine's important capabilities.
+    Analyze { #[arg(long, required = true)] input: String },
 }
 
 #[derive(Debug, Subcommand)]
@@ -1154,7 +1161,7 @@ fn list_text(rows: &[Value]) -> String {
 /// Execute a parsed command against an initialized database.
 pub fn run(cli: &Cli) -> Result<Output> {
     let conn = open(&cli.db)?;
-    if !matches!(cli.command, Commands::Init | Commands::Lattice { .. }
+    if !matches!(cli.command, Commands::Run { .. } | Commands::Init | Commands::Lattice { .. }
         | Commands::LatticeRepo { .. } | Commands::LatticeSnap { .. } | Commands::Meta { .. }
         | Commands::LatticeQuery { .. } | Commands::Discovery { .. } | Commands::Studio { .. }
         | Commands::Mcp { .. } | Commands::Web { .. } | Commands::Atlas { .. }
@@ -1188,6 +1195,18 @@ pub fn run(cli: &Cli) -> Result<Output> {
         initialize(&conn)?;
     }
     match &cli.command {
+        Commands::Run { action } => match action {
+            RunAction::Analyze { input } => {
+                let input: Value = serde_json::from_str(input).map_err(|e| EngineError::new(
+                    format!("invalid analysis input: {e}"), "input must be a JSON object",
+                    "pass an object with a compound and optional tox_studies/bridge"))?;
+                let analysis = crate::engine::analyze(&input)?;
+                let report = crate::engine::render_report(&analysis);
+                let value = json!({"analysis": analysis, "report": report});
+                let stable = to_stable_json(&value);
+                emit(value, stable)
+            }
+        },
         Commands::Init => {
             let report = initialize(&conn)?;
             let value = json!({"ok": true, "schema_version": 14, "migration": report});
