@@ -433,6 +433,30 @@ fn fluid_frank_oseen_dispersion() {
 }
 
 #[test]
+fn pnn_ind_allometric_projection() {
+    use research_engine::domains_pnn_ind as ind;
+    let scale = ind::calculate_allometric_scaling(10.0, 11.7, 87.2, 80.0, 3.0,
+        0.020, 60.0, 37.0, 10.0).unwrap();
+    assert_eq!(scale["hed_mg_kg"].as_f64(), Some(10.0 * 3.0 / 37.0));
+    assert!(ind::calculate_allometric_scaling(0.0, 11.7, 87.2, 80.0, 3.0,
+        0.020, 60.0, 37.0, 10.0).is_err());
+    let compounds = vec![serde_json::json!({"compound_id": "C1", "name": "Compound A"})];
+    let pk = serde_json::json!({"C1": {
+        "dose_mg_kg": 10.0, "cl_l_h_kg": 11.7, "vd_l_kg": 87.2,
+        "noael_mg_kg": 80.0, "brain_kp": 0.45, "oral_f": 35.0,
+    }});
+    let projections = ind::project_clinical_candidates(&compounds, Some(&pk),
+        None, 10.0, 60.0);
+    assert_eq!(projections.len(), 1);
+    assert_eq!(projections[0]["evidence_status"].as_str(), Some("COMPLETE"));
+    assert_eq!(ind::as_row(&projections[0])["compound_id"].as_str(), Some("C1"));
+    let report = ind::render_ind_dossier(&projections, None, None);
+    assert!(report.contains("# Investigational New Drug (IND) Candidate Nomination Dossier"));
+    assert!(report.contains("mouse K_m (3) against the human K_m (37)"));
+    assert!(ind::render_ind_dossier(&[], None, None).contains("No candidate records were supplied"));
+}
+
+#[test]
 fn pnn_preclinical_nca_and_triage() {
     use research_engine::domains_pnn_preclinical as pre;
     let points = vec![

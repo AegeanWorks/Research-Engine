@@ -97,6 +97,7 @@ pub enum Commands {
     PnnPathway { #[command(subcommand)] action: PnnPathwayAction },
     PnnAssay { #[command(subcommand)] action: PnnAssayAction },
     PnnPreclinical { #[command(subcommand)] action: PnnPreclinicalAction },
+    PnnInd { #[command(subcommand)] action: PnnIndAction },
     Providers { #[command(subcommand)] action: ProvidersAction },
     Search {
         query: String,
@@ -323,6 +324,25 @@ pub enum ProvidersAction {
 pub enum PnnRulesAction {
     Evaluate { #[arg(long, required = true)] compound: String },
     Weight { criterion: String },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum PnnIndAction {
+    Scale {
+        animal_dose: f64, mouse_cl: f64, mouse_vd: f64, noael: f64,
+        #[arg(long, default_value_t = 3.0)] noael_km: f64,
+        #[arg(long, default_value_t = 0.020)] mouse_weight: f64,
+        #[arg(long, default_value_t = 60.0)] human_weight: f64,
+        #[arg(long, default_value_t = 37.0)] km_human: f64,
+        #[arg(long, default_value_t = 10.0)] safety_factor: f64,
+    },
+    Project {
+        #[arg(long, required = true)] compounds: String,
+        #[arg(long)] preclinical: Option<String>,
+        #[arg(long)] lead_id: Option<String>,
+        #[arg(long, default_value_t = 10.0)] safety_factor: f64,
+        #[arg(long, default_value_t = 60.0)] human_weight: f64,
+    },
 }
 
 #[derive(Debug, Subcommand)]
@@ -1144,7 +1164,8 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::PnnCurate { .. } | Commands::LeadSelection { .. }
         | Commands::PnnMpo { .. } | Commands::PnnTarget { .. }
         | Commands::PnnPathway { .. } | Commands::PnnAssay { .. }
-        | Commands::PnnPreclinical { .. } | Commands::Providers { .. }) {
+        | Commands::PnnPreclinical { .. } | Commands::PnnInd { .. }
+        | Commands::Providers { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -1257,6 +1278,37 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::PnnInd { action } => {
+            use crate::domains_pnn_ind as ind;
+            match action {
+                PnnIndAction::Scale { animal_dose, mouse_cl, mouse_vd, noael, noael_km,
+                                      mouse_weight, human_weight, km_human, safety_factor } => {
+                    let value = ind::calculate_allometric_scaling(*animal_dose, *mouse_cl,
+                        *mouse_vd, *noael, *noael_km, *mouse_weight, *human_weight,
+                        *km_human, *safety_factor)?;
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                PnnIndAction::Project { compounds, preclinical, lead_id, safety_factor, human_weight } => {
+                    let compounds: Vec<Value> = serde_json::from_str(compounds).map_err(|e| EngineError::new(
+                        format!("invalid compounds JSON: {e}"), "compounds must be a JSON array",
+                        "pass an array of compound records"))?;
+                    let pk: Option<Value> = match preclinical {
+                        Some(text) => Some(serde_json::from_str(text).map_err(|e| EngineError::new(
+                            format!("invalid preclinical JSON: {e}"), "preclinical must be a JSON object",
+                            "pass an object keyed by compound_id"))?),
+                        None => None,
+                    };
+                    let projections = ind::project_clinical_candidates(&compounds,
+                        pk.as_ref(), lead_id.as_deref(), *safety_factor, *human_weight);
+                    let report = ind::render_ind_dossier(&projections, lead_id.as_deref(), None);
+                    let rows: Vec<Value> = projections.iter().map(ind::as_row).collect();
+                    let value = json!({"projections": projections, "report": report, "rows": rows});
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+            }
+        }
         Commands::PnnPreclinical { action } => {
             use crate::domains_pnn_preclinical as pre;
             match action {
