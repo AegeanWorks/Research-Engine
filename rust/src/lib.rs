@@ -54,6 +54,7 @@ pub mod domains_fluid_water_temperature;
 pub mod domains_fluid_water_lineshape;
 pub mod domains_fluid_predictions;
 pub mod domains_pnn_rank;
+pub mod domains_pnn_curate;
 pub mod domains_pnn_rules;
 pub mod domains_pnn_safety;
 pub mod discovery;

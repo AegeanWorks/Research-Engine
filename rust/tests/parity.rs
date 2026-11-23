@@ -433,6 +433,41 @@ fn fluid_frank_oseen_dispersion() {
 }
 
 #[test]
+fn pnn_curation_cli_driver() {
+    use research_engine::domains_pnn_curate as cli;
+    use std::collections::BTreeMap;
+    let row = |id: &str, smiles: &str| -> BTreeMap<String, String> {
+        [("compound_id".to_string(), id.to_string()),
+         ("name".to_string(), format!("Name {id}")),
+         ("smiles".to_string(), smiles.to_string()),
+         ("mw".to_string(), "345.5".to_string()),
+         ("logp".to_string(), "2.6".to_string()),
+         ("tpsa".to_string(), "58".to_string()),
+         ("hbd".to_string(), "2".to_string()),
+         ("hba".to_string(), "5".to_string()),
+         ("rotatable_bonds".to_string(), "4".to_string())]
+          .into_iter().collect()
+    };
+    let inputs = vec![("libA".to_string(), vec![row("C1", "CCO"), row("C2", "CCN")])];
+    let path = temp_db("pnn-curate").parent().unwrap()
+        .join(format!("curated-{}.csv", COUNTER.load(Ordering::Relaxed)));
+    let options = cli::CurateOptions {
+        out_path: path.to_str().unwrap(),
+        json_path: None,
+        min_tier: "B",
+        per_bin: 25,
+        bin_width: 0.1,
+        max_compounds: None,
+    };
+    let result = cli::run_curation(&inputs, &options).unwrap();
+    assert_eq!(result["input_rows"].as_u64(), Some(2));
+    assert!(path.exists());
+    let csv = std::fs::read_to_string(&path).unwrap();
+    assert!(csv.starts_with("compound_id,name,smiles,source"));
+    assert!(cli::run_curation(&[], &options).is_err());
+}
+
+#[test]
 fn pnn_consensus_shortlist() {
     use research_engine::domains_pnn_rank as rank;
     use std::collections::BTreeMap;

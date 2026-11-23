@@ -90,6 +90,7 @@ pub enum Commands {
     WaterLineshape { #[command(subcommand)] action: WaterLineshapeAction },
     Predictions { #[command(subcommand)] action: PredictionsAction },
     PnnRank { #[command(subcommand)] action: PnnRankAction },
+    PnnCurate { #[command(subcommand)] action: PnnCurateAction },
     Providers { #[command(subcommand)] action: ProvidersAction },
     Search {
         query: String,
@@ -316,6 +317,19 @@ pub enum ProvidersAction {
 pub enum PnnRulesAction {
     Evaluate { #[arg(long, required = true)] compound: String },
     Weight { criterion: String },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum PnnCurateAction {
+    Run {
+        #[arg(long, required = true)] inputs: String,
+        #[arg(long, required = true)] out: String,
+        #[arg(long)] json_path: Option<String>,
+        #[arg(long, default_value = "B")] min_tier: String,
+        #[arg(long, default_value_t = 25)] per_bin: usize,
+        #[arg(long, default_value_t = 0.1)] bin_width: f64,
+        #[arg(long)] max_compounds: Option<usize>,
+    },
 }
 
 #[derive(Debug, Subcommand)]
@@ -1037,7 +1051,7 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::BornCavity { .. } | Commands::WaterMarcus { .. }
         | Commands::WaterTemperature { .. } | Commands::WaterLineshape { .. }
         | Commands::Predictions { .. } | Commands::PnnRank { .. }
-        | Commands::Providers { .. }) {
+        | Commands::PnnCurate { .. } | Commands::Providers { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -1150,6 +1164,37 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::PnnCurate { action } => {
+            use crate::domains_pnn_curate as curation_cli;
+            match action {
+                PnnCurateAction::Run { inputs, out, json_path, min_tier, per_bin, bin_width, max_compounds } => {
+                    let raw: Vec<Value> = serde_json::from_str(inputs).map_err(|e| EngineError::new(
+                        format!("invalid inputs JSON: {e}"), "inputs must be an array of {source, rows} objects",
+                        "pass an array of input objects"))?;
+                    let mut parsed = Vec::new();
+                    for item in raw {
+                        let source = item.get("source").and_then(Value::as_str).unwrap_or("").to_string();
+                        let rows: Vec<std::collections::BTreeMap<String, String>> =
+                            serde_json::from_value(item.get("rows").cloned().unwrap_or(Value::Null))
+                                .map_err(|e| EngineError::new(
+                                    format!("invalid rows JSON: {e}"), "rows must be an array of string maps",
+                                    "pass an array of compound row objects"))?;
+                        parsed.push((source, rows));
+                    }
+                    let options = curation_cli::CurateOptions {
+                        out_path: out,
+                        json_path: json_path.as_deref(),
+                        min_tier,
+                        per_bin: *per_bin,
+                        bin_width: *bin_width,
+                        max_compounds: *max_compounds,
+                    };
+                    let value = curation_cli::run_curation(&parsed, &options)?;
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+            }
+        }
         Commands::PnnRank { action } => {
             use crate::domains_pnn_rank as rank;
             match action {
