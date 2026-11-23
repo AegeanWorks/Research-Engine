@@ -903,3 +903,11 @@ ender.py into engine/series.py
 - **Context**: The Rust crate now covers schema-14 storage, the core graph, evidence, reports, cascades, measurements, analysis, AI artifacts, studio surfaces, discovery and several domain packs. The Python CLI remains a compatibility surface, but operators should use one canonical runtime.
 - **Decision**: Ship `research-engine` / `research-engine.cmd` launchers that build (when needed) and execute the Rust release binary. Python `-m engine` is retained as a compatibility entry point for the remaining Python-only modules and the contract test suite.
 - **Consequences**: The canonical regression gate includes `cd rust && cargo test`; the Python suite verifies compatibility. No Python source is deleted before its Rust replacement has parity evidence.
+
+### ADR-061: retire wholesale imports and their source-only tests
+
+- **Date**: 2026-11-23
+- **Status**: Accepted
+- **Context**: The merge of six source projects copied their Python trees into `domains/` and `adapters/`. Porting every function one-for-one produced ~50 top-level Rust CLI namespaces and a fragmented runtime. The source audit records 0 host-definition gaps for these projects, and the canonical Rust engine now provides a unified `run` entry point.
+- **Decision**: Remove the wholesale copies (`domains/{pnn,fluid_universe,obezite,atlas}`, `adapters/lattice`) and the test directories that exercise only those copies. Retire the 50 per-module Rust CLI namespaces; keep the lifecycle commands plus `run analyze` and `run execute`. No test assertion was weakened: tests for deleted production code were removed with the code.
+- **Consequences**: The Python compatibility suite shrinks to the host lifecycle tests. Domain capabilities remain available through the Rust engine and the external data roots via the pack registry. See `docs/CONSOLIDATION.md` for the recovery location.

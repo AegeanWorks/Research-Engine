@@ -28,7 +28,7 @@ A falsification-first research engine for provenance-backed claims, executable k
 
 ## Why this is not "just lattice"
 
-`lattice` is an evidence store, not a lifecycle. The host adds `adapters/lattice`, `studio`,
+`lattice` is an evidence store, not a lifecycle. The host keeps `studio`,
 `experiments` and isolated domain packs; see [docs/merge/READINESS.md](docs/merge/READINESS.md).
 
 ## How It Works
@@ -345,11 +345,9 @@ research-engine/
 │   ├── migrations.py         <- source snapshot inspection and dry-run
 │   ├── packs.py              <- domain-pack registry
 │   └── synthesis.py
-├── adapters/                 <- lattice discovery, ingest, extraction, snapshots
 ├── studio/                   <- lattice web studio, MCP and API
 ├── experiments/              <- N1 models, metrics, events and analysis
-├── domains/                  <- pnn, fluid_universe, obezite and atlas packs
-├── rust/                     <- Rust implementation of the schema-14 core (see rust/README.md)
+├── rust/                     <- canonical Rust engine; `run` is the unified entry point
 └── tests/                    <- regression shield, ported contracts, golden run
 ```
 

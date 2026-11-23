@@ -39,6 +39,17 @@ parity evidence was committed. The removal is recoverable from
 No host test imports the standalone checkout: the only references are string
 fixtures and an optional external data-root reference.
 
+The wholesale copies inside the host were removed in the same step:
+`domains/{pnn,fluid_universe,obezite,atlas}`, `adapters/lattice` and the test
+directories that only exercised those copies. Their capabilities remain in the
+canonical Rust engine, exposed through the single `research-engine run` entry
+point; 50 per-module CLI namespaces were retired from `Commands`, leaving the
+lifecycle commands and `run analyze` / `run execute`.
+
+The removed test directories are preserved under
+`C:\Users\Yunus-Emre\AppData\Local\Temp\opencode\removed-from-host-20261123`
+together with the removed Python trees.
+
 ## Verification
 
 - `cargo test --manifest-path rust/Cargo.toml` — all engine tests pass.

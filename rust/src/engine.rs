@@ -8,6 +8,7 @@
 use serde_json::{json, Value};
 
 use crate::domains_fluid_bridge as bridge;
+use crate::domains_obezite as obezite;
 use crate::domains_pnn_rules as rules;
 use crate::domains_pnn_safety as safety;
 use crate::error::{EngineError, Result};
@@ -66,6 +67,25 @@ pub fn analyze(input: &Value) -> Result<Value> {
         "safety": tox,
         "bridge": primitives,
     }))
+}
+
+/// Execute one retained capability through the single engine entry point.
+pub fn execute(capability: &str, input: &Value) -> Result<Value> {
+    match capability {
+        "pnn-rules" => {
+            let compound = input.get("compound").unwrap_or(input);
+            Ok(Value::Array(rules::evaluate(compound)))
+        }
+        "fluid-bridge" => Ok(json!({
+            "diffusivity": bridge::diffusivity(number(input, "hbar", 1.0), number(input, "mass", 1.0))?,
+            "horizon": bridge::horizon(number(input, "omega", 1.0))?,
+        })),
+        "obezite-atiflar" => Ok(Value::Array(obezite::atiflar(&field(input, "text"))
+            .into_iter().map(Value::from).collect())),
+        other => Err(EngineError::new(format!("unknown capability: {other}"),
+            "capabilities are a closed vocabulary",
+            "pass pnn-rules, fluid-bridge or obezite-atiflar")),
+    }
 }
 
 pub fn render_report(analysis: &Value) -> String {

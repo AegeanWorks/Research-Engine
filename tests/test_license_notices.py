@@ -7,12 +7,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 NOTICES = {
-    "adapters/lattice/NOTICE.md": "d3f0502b99983f1436fe9466f5553935ea7be868",
     "studio/NOTICE.md": "d3f0502b99983f1436fe9466f5553935ea7be868",
-    "domains/pnn/NOTICE.md": "3b6e6c277552dcb2c3604483de1277307bc18c4d",
-    "domains/fluid_universe/NOTICE.md": "7b4efe141dfbcc267b0efceb82247f5004186c06",
-    "domains/obezite/NOTICE.md": "18b5d4d8e2196384f4e960f01b3031beb0a6315a",
-    "domains/atlas/NOTICE.md": "f3cd7470e99683bc95b05f49e404bb00bffa2663",
 }
 
 
