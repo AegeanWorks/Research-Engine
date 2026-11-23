@@ -433,6 +433,34 @@ fn fluid_frank_oseen_dispersion() {
 }
 
 #[test]
+fn pnn_preclinical_nca_and_triage() {
+    use research_engine::domains_pnn_preclinical as pre;
+    let points = vec![
+        serde_json::json!({"time_h": 0.0, "concentration": 0.0}),
+        serde_json::json!({"time_h": 1.0, "concentration": 120.0}),
+        serde_json::json!({"time_h": 3.0, "concentration": 80.0}),
+        serde_json::json!({"time_h": 8.0, "concentration": 30.0}),
+        serde_json::json!({"time_h": 24.0, "concentration": 5.0}),
+    ];
+    let profile = pre::calculate_nca(&points, 10.0, "C1", "PO", "plasma").unwrap();
+    assert_eq!(profile["cmax"].as_f64(), Some(120.0));
+    assert_eq!(profile["tmax_h"].as_f64(), Some(1.0));
+    assert!(profile["auc_0_t"].as_f64().unwrap() > 0.0);
+    assert!(pre::calculate_nca(&[], 10.0, "C1", "PO", "plasma").is_err());
+    let pk = serde_json::json!({"C1": {"PO_plasma": profile}});
+    let criteria = pre::PreclinicalCriteria {
+        min_kp_brain: 0.30, min_oral_f_pct: 20.0,
+        min_wfa_reduction_pct: 15.0, min_itt_improvement_pct: 20.0,
+    };
+    let candidates = pre::evaluate_candidates(&pk, None, &criteria);
+    assert_eq!(candidates.len(), 1);
+    assert_eq!(candidates[0]["status"].as_str(), Some("ADVANCED_LEAD"));
+    let report = pre::render_preclinical_report(&candidates, &criteria);
+    assert!(report.contains("# PNN Phase 4 In Vivo Preclinical Candidate Selection Report"));
+    assert_eq!(pre::as_row(&candidates[0])["brain_plasma_ratio"].as_str(), Some(""));
+}
+
+#[test]
 fn pnn_assay_hit_qualification() {
     use research_engine::domains_pnn_assay as assay;
     let degradation = serde_json::json!({
