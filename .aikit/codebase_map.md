@@ -6,15 +6,15 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `200`
+- **Total Python Modules**: `201`
 - **Total Classes**: `124`
-- **Total Top-Level Functions**: `584`
+- **Total Top-Level Functions**: `585`
 - **Total Class Methods**: `804`
-- **Total Source Lines**: `30979`
+- **Total Source Lines**: `31023`
 
 ## 🧭 Map Coverage
-- **Indexed**: python (`200` module(s))
-- **Not indexed by this map**: rust (`49` file(s))
+- **Indexed**: python (`201` module(s))
+- **Not indexed by this map**: rust (`50` file(s))
 
 > Only Python symbols are catalogued. A language above is reported as not indexed, never as verified by this map.
 
@@ -1508,6 +1508,14 @@
 **Functions:**
 - `def run(*args)`
 - `def check(label, rust, py)`
+
+---
+
+### [`rust/prisma_parity.py`](rust/prisma_parity.py)
+**Size**: `44` lines
+
+**Functions:**
+- `def run(*args)`
 
 ---
 

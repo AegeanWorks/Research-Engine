@@ -104,6 +104,7 @@ pub enum SourceAction {
         #[arg(long, default_value = "paper")] kind: String,
     },
     List { #[arg(long)] research: Option<String> },
+    Prisma { #[arg(long)] research: Option<String> },
     Status {
         reference: String,
         #[arg(long)] status: String,
@@ -777,6 +778,11 @@ fn run_source(conn: &Connection, action: &SourceAction) -> Result<Output> {
                     field(s, "status"), field(s, "screening"), field(s, "title"))).collect()
             };
             emit(Value::Array(rows), text)
+        }
+        SourceAction::Prisma { research } => {
+            let result = crate::runtime_screening::prisma_flow(conn, research.as_deref())?;
+            let stable = to_stable_json(&result);
+            emit(result, stable)
         }
         SourceAction::Status { reference, status, note } => {
             let record = core::set_source_status(conn, reference, status, note)?;

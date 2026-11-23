@@ -221,6 +221,28 @@ fn search_is_phrase_first_and_program_scoped() {
 }
 
 #[test]
+fn runtime_prisma_flow() {
+    use research_engine::runtime_screening as screening;
+    let path = temp_db("prisma");
+    let conn = open(path.to_str().unwrap()).unwrap();
+    initialize(&conn).unwrap();
+    let research = core::add_research(&conn, "Review", "scope", None).unwrap();
+    let rid = research.get("id").and_then(Value::as_str).unwrap();
+    for (index, (status, reason)) in [("screened_in", ""), ("included", ""),
+        ("excluded", "duplicate"), ("excluded", "duplicate")].iter().enumerate() {
+        let source = core::add_source(&conn, rid, &format!("Paper {index}"), Some(2020),
+            "", "", "", "paper").unwrap();
+        let sid = source.get("id").and_then(Value::as_str).unwrap();
+        core::set_screening(&conn, sid, status, reason).unwrap();
+    }
+    let flow = screening::prisma_flow(&conn, Some(rid)).unwrap();
+    assert_eq!(flow["total"].as_i64(), Some(4));
+    assert_eq!(flow["included"].as_i64(), Some(1));
+    assert_eq!(flow["reasons"]["duplicate"].as_i64(), Some(2));
+    assert!((flow["included_fraction"].as_f64().unwrap() - 0.25).abs() < 1e-9);
+}
+
+#[test]
 fn runtime_source_duplicate_detection() {
     use research_engine::runtime_sources as sources;
     assert_eq!(sources::normalize_doi("https://doi.org/10.1/ABC"), "10.1/abc");
