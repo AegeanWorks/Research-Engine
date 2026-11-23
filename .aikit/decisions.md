@@ -919,3 +919,11 @@ ender.py into engine/series.py
 - **Context**: After ADR-061, the CLI still exposed the imported surfaces (`lattice*`, `studio`, `atlas`, `pnn-safety`, `mcp`, `web`, `client`) and `run` carried only three capabilities. The obezite source checkout remained alongside the merged host.
 - **Decision**: Retire those 12 CLI namespaces, exposing the retained capabilities as eight `run execute` capabilities in four subsystems (`catalog`, `candidate`, `bridge`, `corpus`). Remove `projects/obezite-mekanizma-projesi` from the workspace; its data remains an external pack root and its Rust capabilities remain behind `run`.
 - **Consequences**: The only CLI surfaces are the lifecycle commands and `run`. Recovery copies of removed trees are recorded in `docs/CONSOLIDATION.md`. No test assertion was weakened.
+
+### ADR-063: collapse the domain Rust modules into engine subsystems
+
+- **Date**: 2026-11-24
+- **Status**: Accepted
+- **Context**: ADR-061/062 retired the imported Python trees and the per-module CLI namespaces, but 52 `rust/src/domains_*.rs` modules remained. Only five were reachable from the cohesive `run` facade; the rest were dead implementation weight from the one-for-one porting effort.
+- **Decision**: Delete 47 unreachable `domains_*` modules, remove their dependency tests, and rename the five retained modules to `engine_bridge`, `engine_corpus`, `engine_rules`, `engine_safety` and `engine_screen`. `run execute` is the only entry point for these capabilities, grouped as `bridge.*`, `corpus.*`, `candidate.*` plus `catalog.*` (`lattice.rs`).
+- **Consequences**: The crate has five cohesive engine subsystems instead of 52 domain modules. Tests for deleted modules were removed with the code; no assertion in the retained tests was weakened.

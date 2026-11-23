@@ -7,11 +7,11 @@
 
 use serde_json::{json, Value};
 
-use crate::domains_fluid_bridge as bridge;
-use crate::domains_obezite as obezite;
-use crate::domains_pnn_rules as rules;
-use crate::domains_pnn_safety as safety;
-use crate::domains_pnn_screen as screen;
+use crate::engine_bridge as bridge;
+use crate::engine_corpus as obezite;
+use crate::engine_rules as rules;
+use crate::engine_safety as safety;
+use crate::engine_screen as screen;
 use crate::error::{EngineError, Result};
 use crate::lattice;
 

@@ -55,6 +55,12 @@ identity), `candidate.*` (design, screen, safety), `bridge.primitives` and
 removed from the workspace; it was fully merged and referenced only by string
 fixtures.
 
+The Rust implementation was collapsed to match: 47 unreachable `domains_*`
+modules and their tests were deleted, and the five retained ones became
+`engine_bridge`, `engine_corpus`, `engine_rules`, `engine_safety` and
+`engine_screen`. With `lattice.rs` (catalog), they are the only domain
+implementation behind `run execute`.
+
 The removed test directories, Python trees and obezite checkout are preserved
 under `C:\Users\Yunus-Emre\AppData\Local\Temp\opencode\removed-from-host-20261123`.
 
