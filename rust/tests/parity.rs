@@ -433,6 +433,26 @@ fn fluid_frank_oseen_dispersion() {
 }
 
 #[test]
+fn fixed_lambda_lineshape() {
+    use research_engine::domains_fluid_water_lineshape as wl;
+    let moments = wl::gaussian_moments();
+    assert_eq!(moments["skewness"].as_f64(), Some(0.0));
+    assert_eq!(moments["half_width_ratio"].as_f64(), Some(1.0));
+    assert_eq!(moments["symmetric"].as_bool(), Some(true));
+    let thresholds = wl::kill_thresholds();
+    assert_eq!(thresholds["width_ratio_tol"].as_f64(), Some(0.05));
+    assert_eq!(thresholds["shape_ratio_tol"].as_f64(), Some(0.15));
+    assert_eq!(thresholds["skew_tol"].as_f64(), Some(0.3));
+    let widths = wl::predicted_widths().unwrap();
+    assert!(widths["width_0c_ev"].as_f64().unwrap() > 0.0);
+    assert!(widths["width_45c_ev"].as_f64().unwrap() > 0.0);
+    assert!(widths["width_ratio_45_over_0"].as_f64().unwrap() > 0.0);
+    let scales = wl::lineshape_scales().unwrap();
+    assert!((scales["lambda_ev"].as_f64().unwrap() - wl::LAMBDA_EV).abs() < 1e-3);
+    assert!(scales.get("moments").is_some() && scales.get("prediction").is_some());
+}
+
+#[test]
 fn temperature_dependent_cavity() {
     use research_engine::domains_fluid_water_temperature as wt;
     assert!((wt::water_dielectric_constant(0.0).unwrap() - 87.740).abs() < 1e-9);

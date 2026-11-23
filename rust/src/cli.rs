@@ -87,6 +87,7 @@ pub enum Commands {
     BornCavity { #[command(subcommand)] action: BornCavityAction },
     WaterMarcus { #[command(subcommand)] action: WaterMarcusAction },
     WaterTemperature { #[command(subcommand)] action: WaterTemperatureAction },
+    WaterLineshape { #[command(subcommand)] action: WaterLineshapeAction },
     Providers { #[command(subcommand)] action: ProvidersAction },
     Search {
         query: String,
@@ -313,6 +314,14 @@ pub enum ProvidersAction {
 pub enum PnnRulesAction {
     Evaluate { #[arg(long, required = true)] compound: String },
     Weight { criterion: String },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum WaterLineshapeAction {
+    Moments,
+    Widths,
+    Thresholds,
+    Scales,
 }
 
 #[derive(Debug, Subcommand)]
@@ -1006,7 +1015,8 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::HydrogenVortex { .. } | Commands::NodeDefect { .. }
         | Commands::WaterPressure { .. } | Commands::WaterReorganization { .. }
         | Commands::BornCavity { .. } | Commands::WaterMarcus { .. }
-        | Commands::WaterTemperature { .. } | Commands::Providers { .. }) {
+        | Commands::WaterTemperature { .. } | Commands::WaterLineshape { .. }
+        | Commands::Providers { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -1119,6 +1129,30 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::WaterLineshape { action } => {
+            use crate::domains_fluid_water_lineshape as wl;
+            macro_rules! bundle {
+                ($expr:expr) => {{
+                    let value = $expr?;
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }};
+            }
+            match action {
+                WaterLineshapeAction::Moments => {
+                    let value = wl::gaussian_moments();
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                WaterLineshapeAction::Widths => bundle!(wl::predicted_widths()),
+                WaterLineshapeAction::Thresholds => {
+                    let value = wl::kill_thresholds();
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                WaterLineshapeAction::Scales => bundle!(wl::lineshape_scales()),
+            }
+        }
         Commands::WaterTemperature { action } => {
             use crate::domains_fluid_water_temperature as wt;
             macro_rules! scalar {
