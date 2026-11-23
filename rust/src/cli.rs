@@ -88,6 +88,7 @@ pub enum Commands {
     WaterMarcus { #[command(subcommand)] action: WaterMarcusAction },
     WaterTemperature { #[command(subcommand)] action: WaterTemperatureAction },
     WaterLineshape { #[command(subcommand)] action: WaterLineshapeAction },
+    Predictions { #[command(subcommand)] action: PredictionsAction },
     Providers { #[command(subcommand)] action: ProvidersAction },
     Search {
         query: String,
@@ -314,6 +315,13 @@ pub enum ProvidersAction {
 pub enum PnnRulesAction {
     Evaluate { #[arg(long, required = true)] compound: String },
     Weight { criterion: String },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum PredictionsAction {
+    Candidates,
+    Verdict,
+    Render { #[arg(long, required = true)] payload: String },
 }
 
 #[derive(Debug, Subcommand)]
@@ -1016,7 +1024,7 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::WaterPressure { .. } | Commands::WaterReorganization { .. }
         | Commands::BornCavity { .. } | Commands::WaterMarcus { .. }
         | Commands::WaterTemperature { .. } | Commands::WaterLineshape { .. }
-        | Commands::Providers { .. }) {
+        | Commands::Predictions { .. } | Commands::Providers { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -1129,6 +1137,28 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::Predictions { action } => {
+            use crate::domains_fluid_predictions as pred;
+            match action {
+                PredictionsAction::Candidates => {
+                    let value = pred::candidates();
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                PredictionsAction::Verdict => {
+                    let value = pred::verdict();
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                PredictionsAction::Render { payload } => {
+                    let payload: Value = serde_json::from_str(payload).map_err(|e| EngineError::new(
+                        format!("invalid payload JSON: {e}"), "payload must be a JSON object",
+                        "pass a JSON object with candidates, verdict and meta"))?;
+                    let markdown = pred::render_markdown(&payload)?;
+                    emit(json!({"markdown": markdown.clone()}), format!("{markdown}\n"))
+                }
+            }
+        }
         Commands::WaterLineshape { action } => {
             use crate::domains_fluid_water_lineshape as wl;
             macro_rules! bundle {

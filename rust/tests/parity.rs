@@ -433,6 +433,29 @@ fn fluid_frank_oseen_dispersion() {
 }
 
 #[test]
+fn prediction_audit_report() {
+    use research_engine::domains_fluid_predictions as pred;
+    let candidates = pred::candidates();
+    assert_eq!(candidates.as_array().unwrap().len(), 7);
+    assert!(candidates.as_array().unwrap().iter()
+        .all(|row| row.get("new").and_then(Value::as_bool) == Some(false)));
+    let verdict = pred::verdict();
+    assert_eq!(verdict.get("count").and_then(Value::as_u64), Some(0));
+    assert_eq!(verdict.get("new_prediction_found").and_then(Value::as_bool), Some(false));
+    let payload = serde_json::json!({
+        "candidates": candidates,
+        "verdict": verdict,
+        "meta": {"config_sha256": "abc", "git": {"commit": "def", "dirty": false}},
+    });
+    let markdown = pred::render_markdown(&payload).unwrap();
+    assert!(markdown.contains("# New-prediction audit (claim 16)"));
+    assert!(markdown.contains("| mass relation | Q = 2/3 (Koide) for pole masses | False |"));
+    assert!(markdown.contains("new prediction found: **False** (count 0)"));
+    assert!(markdown.contains("(dirty=False)"));
+    assert!(pred::render_markdown(&serde_json::json!({})).is_err());
+}
+
+#[test]
 fn fixed_lambda_lineshape() {
     use research_engine::domains_fluid_water_lineshape as wl;
     let moments = wl::gaussian_moments();

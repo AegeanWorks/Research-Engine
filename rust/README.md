@@ -93,6 +93,7 @@ argparse requires in `python -m engine`.
 | Domains: water Marcus | Classical Marcus FWHM, normalized Gaussian line shape and temperature-scan scales (`water-marcus` CLI) |
 | Domains: water temperature | Temperature-dependent dielectric/surface tension, cavity equilibrium, reorganization slope and observed-shift comparison (`water-temperature` CLI) |
 | Domains: water lineshape | Fixed-λ Gaussian symmetry facts, predicted widths at 0/45 C, pre-registered kill thresholds and scales (`water-lineshape` CLI) |
+| Phenomenology: predictions | New-prediction audit candidate data, verdict and claim-16 Markdown report (`predictions` CLI) |
 | Domains: obezite | Citation-number extraction with bibliography-noise stripping and claim-row de-duplication (`obezite` CLI) |
 | Domains: PNN rules | CNS/property design-rule evaluation and criterion weighting (`pnn-rules` CLI) |
 | Domains: PNN docking | Docking-score alias parsing, RMSD/Vina filtering, weighted consensus normalization and per-compound best-target aggregation (`pnn-docking` CLI) |
@@ -230,6 +231,8 @@ argparse requires in `python -m engine`.
   cavities and the slope bundle; all twelve checks match.
 - `water_lineshape_parity.py` compares moments, predicted widths, thresholds
   and scales; all four checks match.
+- `predictions_parity.py` compares audit candidates, verdict and Markdown;
+  all four checks match.
 
 ## Still to port
 

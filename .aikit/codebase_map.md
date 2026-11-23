@@ -6,15 +6,15 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `489`
+- **Total Python Modules**: `490`
 - **Total Classes**: `317`
-- **Total Top-Level Functions**: `2101`
+- **Total Top-Level Functions**: `2103`
 - **Total Class Methods**: `1545`
-- **Total Source Lines**: `92884`
+- **Total Source Lines**: `92915`
 
 ## 🧭 Map Coverage
-- **Indexed**: python (`489` module(s))
-- **Not indexed by this map**: javascript (`1` file(s)), rust (`82` file(s))
+- **Indexed**: python (`490` module(s))
+- **Not indexed by this map**: javascript (`1` file(s)), rust (`83` file(s))
 
 > Only Python symbols are catalogued. A language above is reported as not indexed, never as verified by this map.
 
@@ -5086,6 +5086,15 @@
 - `def run(*args)`
 - `def check(label, rust, py)`
 - `def compound(cid, mw, logp, tpsa, hbd, hba, rot, **extra)`
+
+---
+
+### [`rust/predictions_parity.py`](rust/predictions_parity.py)
+**Size**: `31` lines
+
+**Functions:**
+- `def run(*args)`
+- `def check(label, rust, py)`
 
 ---
 
