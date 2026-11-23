@@ -433,6 +433,25 @@ fn fluid_frank_oseen_dispersion() {
 }
 
 #[test]
+fn pnn_scaffold_decomposition() {
+    use research_engine::domains_pnn_sar as sar;
+    let (atoms, adj) = sar::parse_smiles_graph("CCO").unwrap();
+    assert_eq!(atoms, vec!["C", "C", "O"]);
+    assert_eq!(adj[&0].len(), 1);
+    assert!(sar::parse_smiles_graph("").is_err());
+    assert!(sar::parse_smiles_graph("C(C").is_err());
+    let blocks = sar::find_biconnected_blocks(atoms.len(), &adj);
+    assert!(blocks.is_empty());
+    let benzene = sar::extract_scaffold("c1ccccc1").unwrap();
+    assert_eq!(benzene["scaffold_name"].as_str(), Some("Phenyl"));
+    assert_eq!(benzene["r_groups"].as_str(), Some("None"));
+    assert!(sar::extract_scaffold("CCO").unwrap()["scaffold_name"].as_str() == Some("Acyclic-Scaffold"));
+    let caffeine = sar::extract_scaffold("CN1C=NC2=C1C(=O)N(C(=O)N2C)C").unwrap();
+    assert_eq!(caffeine["scaffold_name"].as_str(), Some("FusedPolycycle-9"));
+    assert!(caffeine["core_smiles"].as_str().unwrap().len() > 0);
+}
+
+#[test]
 fn pnn_md_trajectory_analysis() {
     use research_engine::domains_pnn_dynamics as dynamics;
     let point = |t: f64, r: f64| serde_json::json!({

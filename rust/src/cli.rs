@@ -99,6 +99,7 @@ pub enum Commands {
     PnnPreclinical { #[command(subcommand)] action: PnnPreclinicalAction },
     PnnInd { #[command(subcommand)] action: PnnIndAction },
     PnnDynamics { #[command(subcommand)] action: PnnDynamicsAction },
+    PnnSar { #[command(subcommand)] action: PnnSarAction },
     Providers { #[command(subcommand)] action: ProvidersAction },
     Search {
         query: String,
@@ -325,6 +326,13 @@ pub enum ProvidersAction {
 pub enum PnnRulesAction {
     Evaluate { #[arg(long, required = true)] compound: String },
     Weight { criterion: String },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum PnnSarAction {
+    Scaffold { smiles: String },
+    Graph { smiles: String },
+    Blocks { smiles: String },
 }
 
 #[derive(Debug, Subcommand)]
@@ -1175,7 +1183,8 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::PnnMpo { .. } | Commands::PnnTarget { .. }
         | Commands::PnnPathway { .. } | Commands::PnnAssay { .. }
         | Commands::PnnPreclinical { .. } | Commands::PnnInd { .. }
-        | Commands::PnnDynamics { .. } | Commands::Providers { .. }) {
+        | Commands::PnnDynamics { .. } | Commands::PnnSar { .. }
+        | Commands::Providers { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -1288,6 +1297,29 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::PnnSar { action } => {
+            use crate::domains_pnn_sar as sar;
+            match action {
+                PnnSarAction::Scaffold { smiles } => {
+                    let value = sar::extract_scaffold(smiles)?;
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                PnnSarAction::Graph { smiles } => {
+                    let value = sar::graph_json(smiles)?;
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                PnnSarAction::Blocks { smiles } => {
+                    let (atoms, adj) = sar::parse_smiles_graph(smiles)?;
+                    let blocks = sar::find_biconnected_blocks(atoms.len(), &adj);
+                    let value = Value::Array(blocks.into_iter().map(|block|
+                        Value::Array(block.into_iter().map(Value::from).collect())).collect());
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+            }
+        }
         Commands::PnnDynamics { action } => {
             use crate::domains_pnn_dynamics as dynamics;
             match action {

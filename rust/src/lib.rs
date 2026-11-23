@@ -63,6 +63,7 @@ pub mod domains_pnn_assay;
 pub mod domains_pnn_preclinical;
 pub mod domains_pnn_ind;
 pub mod domains_pnn_dynamics;
+pub mod domains_pnn_sar;
 pub mod domains_pnn_rules;
 pub mod domains_pnn_safety;
 pub mod discovery;
