@@ -433,6 +433,33 @@ fn fluid_frank_oseen_dispersion() {
 }
 
 #[test]
+fn pnn_consensus_shortlist() {
+    use research_engine::domains_pnn_rank as rank;
+    use std::collections::BTreeMap;
+    let row = |id: &str, target: &str, vina: &str| -> BTreeMap<String, String> {
+        [("Compound ID".to_string(), id.to_string()),
+         ("Target".to_string(), target.to_string()),
+         ("Vina".to_string(), vina.to_string())].into_iter().collect()
+    };
+    let scores = research_engine::domains_pnn_docking::parse_rows(
+        &[row("C1", "TP53", "-9.2"), row("C1", "MDM2", "-8.0"), row("C2", "TP53", "-7.5")],
+        "input").unwrap();
+    let mut screen = BTreeMap::new();
+    screen.insert("C1".to_string(), serde_json::json!({"name": "A", "tier": "A", "score": "0.9"}));
+    screen.insert("C2".to_string(), serde_json::json!({"name": "B", "tier": "C", "score": "0.6"}));
+    let result = rank::build_shortlist(&scores, Some(&screen), "B", None, None).unwrap();
+    let rows = result["rows"].as_array().unwrap();
+    assert_eq!(rows.len(), 1);
+    assert_eq!(rows[0]["compound_id"].as_str(), Some("C1"));
+    assert_eq!(rows[0]["consensus"].as_f64(), Some(1.0));
+    assert_eq!(result["summary"]["skipped_by_tier"].as_u64(), Some(1));
+    assert_eq!(result["summary"]["compounds_ranked"].as_u64(), Some(2));
+    assert!(rank::build_shortlist(&scores, None, "X", None, None).is_err());
+    let no_screen = rank::build_shortlist(&scores, None, "B", None, None).unwrap();
+    assert_eq!(no_screen["summary"]["skipped_by_tier"].as_u64(), Some(0));
+}
+
+#[test]
 fn prediction_audit_report() {
     use research_engine::domains_fluid_predictions as pred;
     let candidates = pred::candidates();

@@ -89,6 +89,7 @@ pub enum Commands {
     WaterTemperature { #[command(subcommand)] action: WaterTemperatureAction },
     WaterLineshape { #[command(subcommand)] action: WaterLineshapeAction },
     Predictions { #[command(subcommand)] action: PredictionsAction },
+    PnnRank { #[command(subcommand)] action: PnnRankAction },
     Providers { #[command(subcommand)] action: ProvidersAction },
     Search {
         query: String,
@@ -315,6 +316,17 @@ pub enum ProvidersAction {
 pub enum PnnRulesAction {
     Evaluate { #[arg(long, required = true)] compound: String },
     Weight { criterion: String },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum PnnRankAction {
+    Build {
+        #[arg(long, required = true)] rows: String,
+        #[arg(long)] screen: Option<String>,
+        #[arg(long, default_value = "B")] min_tier: String,
+        #[arg(long)] max_rmsd: Option<f64>,
+        #[arg(long)] min_vina: Option<f64>,
+    },
 }
 
 #[derive(Debug, Subcommand)]
@@ -1024,7 +1036,8 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::WaterPressure { .. } | Commands::WaterReorganization { .. }
         | Commands::BornCavity { .. } | Commands::WaterMarcus { .. }
         | Commands::WaterTemperature { .. } | Commands::WaterLineshape { .. }
-        | Commands::Predictions { .. } | Commands::Providers { .. }) {
+        | Commands::Predictions { .. } | Commands::PnnRank { .. }
+        | Commands::Providers { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -1137,6 +1150,28 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::PnnRank { action } => {
+            use crate::domains_pnn_rank as rank;
+            match action {
+                PnnRankAction::Build { rows, screen, min_tier, max_rmsd, min_vina } => {
+                    let rows: Vec<std::collections::BTreeMap<String, String>> =
+                        serde_json::from_str(rows).map_err(|e| EngineError::new(
+                            format!("invalid rows JSON: {e}"), "rows must be an array of string maps",
+                            "pass an array of docking row objects"))?;
+                    let scores = crate::domains_pnn_docking::parse_rows(&rows, "input")?;
+                    let screen_map: Option<std::collections::BTreeMap<String, Value>> = match screen {
+                        Some(text) => Some(serde_json::from_str(text).map_err(|e| EngineError::new(
+                            format!("invalid screen JSON: {e}"), "screen must be a JSON object keyed by compound_id",
+                            "pass an object of screening rows"))?),
+                        None => None,
+                    };
+                    let value = rank::build_shortlist(&scores, screen_map.as_ref(), min_tier,
+                        *max_rmsd, *min_vina)?;
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+            }
+        }
         Commands::Predictions { action } => {
             use crate::domains_fluid_predictions as pred;
             match action {

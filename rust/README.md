@@ -94,6 +94,7 @@ argparse requires in `python -m engine`.
 | Domains: water temperature | Temperature-dependent dielectric/surface tension, cavity equilibrium, reorganization slope and observed-shift comparison (`water-temperature` CLI) |
 | Domains: water lineshape | Fixed-λ Gaussian symmetry facts, predicted widths at 0/45 C, pre-registered kill thresholds and scales (`water-lineshape` CLI) |
 | Phenomenology: predictions | New-prediction audit candidate data, verdict and claim-16 Markdown report (`predictions` CLI) |
+| Domains: PNN rank | Consensus shortlist with screening-tier gates, property-score tiebreaks and filter summaries (`pnn-rank` CLI) |
 | Domains: obezite | Citation-number extraction with bibliography-noise stripping and claim-row de-duplication (`obezite` CLI) |
 | Domains: PNN rules | CNS/property design-rule evaluation and criterion weighting (`pnn-rules` CLI) |
 | Domains: PNN docking | Docking-score alias parsing, RMSD/Vina filtering, weighted consensus normalization and per-compound best-target aggregation (`pnn-docking` CLI) |
@@ -233,6 +234,8 @@ argparse requires in `python -m engine`.
   and scales; all four checks match.
 - `predictions_parity.py` compares audit candidates, verdict and Markdown;
   all four checks match.
+- `pnn_rank_parity.py` compares tier-gated shortlists and filter summaries;
+  all three checks match.
 
 ## Still to port
 
