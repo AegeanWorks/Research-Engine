@@ -94,6 +94,7 @@ pub enum Commands {
     LeadSelection { #[command(subcommand)] action: LeadSelectionAction },
     PnnMpo { #[command(subcommand)] action: PnnMpoAction },
     PnnTarget { #[command(subcommand)] action: PnnTargetAction },
+    PnnPathway { #[command(subcommand)] action: PnnPathwayAction },
     Providers { #[command(subcommand)] action: ProvidersAction },
     Search {
         query: String,
@@ -320,6 +321,21 @@ pub enum ProvidersAction {
 pub enum PnnRulesAction {
     Evaluate { #[arg(long, required = true)] compound: String },
     Weight { criterion: String },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum PnnPathwayAction {
+    Simulate {
+        #[arg(long, default_value = "PNN-101")] compound: String,
+        #[arg(long, default_value_t = 10.0)] dose: f64,
+        #[arg(long, default_value = "INTERMITTENT_PULSATILE")] regimen: String,
+        #[arg(long, default_value_t = 14)] days: i64,
+        #[arg(long, default_value_t = 0.25)] dt: f64,
+        #[arg(long, default_value_t = 3.2)] half_life: f64,
+        #[arg(long, default_value_t = 32.5)] cmax: f64,
+        #[arg(long, default_value_t = 24.0)] ec50: f64,
+        #[arg(long, default_value_t = 349.46)] mw: f64,
+    },
 }
 
 #[derive(Debug, Subcommand)]
@@ -1094,7 +1110,7 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::Predictions { .. } | Commands::PnnRank { .. }
         | Commands::PnnCurate { .. } | Commands::LeadSelection { .. }
         | Commands::PnnMpo { .. } | Commands::PnnTarget { .. }
-        | Commands::Providers { .. }) {
+        | Commands::PnnPathway { .. } | Commands::Providers { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -1207,6 +1223,24 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::PnnPathway { action } => {
+            use crate::domains_pnn_pathway as pathway;
+            match action {
+                PnnPathwayAction::Simulate { compound, dose, regimen, days, dt, half_life,
+                                             cmax, ec50, mw } => {
+                    let options = pathway::SimOptions {
+                        compound_id: compound, dose_mg_kg: *dose, regimen, duration_days: *days,
+                        dt_h: *dt, half_life_h: *half_life, cmax_per_dose: *cmax,
+                        ec50_nm: *ec50, mw: *mw,
+                    };
+                    let value = pathway::simulate_circuit_dynamics(&options)?;
+                    let markdown = pathway::render_pathway_report(&value);
+                    let result = json!({"report": markdown, "simulation": value});
+                    let stable = to_stable_json(&result);
+                    emit(result, stable)
+                }
+            }
+        }
         Commands::PnnTarget { action } => {
             use crate::domains_pnn_target as target;
             match action {

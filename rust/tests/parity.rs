@@ -433,6 +433,33 @@ fn fluid_frank_oseen_dispersion() {
 }
 
 #[test]
+fn pnn_dosing_pathway_simulation() {
+    use research_engine::domains_pnn_pathway as pathway;
+    assert_eq!(pathway::dosing_times("SINGLE_DOSE", 168.0).unwrap(), vec![0.0]);
+    assert_eq!(pathway::dosing_times("CONTINUOUS_DAILY", 50.0).unwrap(), vec![0.0, 24.0, 48.0]);
+    assert_eq!(pathway::dosing_times("TWICE_WEEKLY", 200.0).unwrap().len(), 3);
+    assert!(pathway::dosing_times("BOGUS", 24.0).is_err());
+    let options = pathway::SimOptions {
+        compound_id: "PNN-101", dose_mg_kg: 10.0, regimen: "INTERMITTENT_PULSATILE",
+        duration_days: 7, dt_h: 0.25, half_life_h: 3.2, cmax_per_dose: 32.5,
+        ec50_nm: 24.0, mw: 349.46,
+    };
+    let result = pathway::simulate_circuit_dynamics(&options).unwrap();
+    let summary = &result["summary"];
+    assert!(summary["mean_pnn_reduction_pct"].as_f64().unwrap() > 0.0);
+    assert!(summary["plasticity_safety_score"].as_f64().unwrap() <= 100.0);
+    assert!(summary["recommendation"].as_str().unwrap().len() > 10);
+    let points = result["points"].as_array().unwrap();
+    assert!(!points.is_empty());
+    assert_eq!(points[0]["pnn_density_pct"].as_f64().unwrap(), 100.0);
+    let report = pathway::render_pathway_report(&result);
+    assert!(report.contains("# PNN Hypothalamic Circuit & Dosing Dynamics Report: PNN-101"));
+    assert!(report.contains("10.0 mg/kg PO for 7 days"));
+    assert_eq!(pathway::SIMULATION_FIELDS.len(), 8);
+    assert_eq!(pathway::REGIMEN_FIELDS.len(), 10);
+}
+
+#[test]
 fn pnn_target_profiles_and_vina_config() {
     use research_engine::domains_pnn_target as target;
     let profiles = target::target_profiles();
