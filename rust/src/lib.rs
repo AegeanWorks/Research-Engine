@@ -59,6 +59,7 @@ pub mod domains_pnn_selection;
 pub mod domains_pnn_mpo;
 pub mod domains_pnn_target;
 pub mod domains_pnn_pathway;
+pub mod domains_pnn_assay;
 pub mod domains_pnn_rules;
 pub mod domains_pnn_safety;
 pub mod discovery;

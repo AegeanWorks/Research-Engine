@@ -433,6 +433,37 @@ fn fluid_frank_oseen_dispersion() {
 }
 
 #[test]
+fn pnn_assay_hit_qualification() {
+    use research_engine::domains_pnn_assay as assay;
+    let degradation = serde_json::json!({
+        "C1": {"ec50_nm": 42.0, "max_degradation_pct": 78.0},
+        "C2": {"ec50_nm": 9000.0, "max_degradation_pct": 12.0},
+    });
+    let permeability = serde_json::json!({
+        "C1": {"pe_1e6_cm_s": 5.2},
+    });
+    let cytotoxicity = serde_json::json!({
+        "C1": {"cc50_um": 80.0},
+    });
+    let criteria = assay::AssayCriteria {
+        ec50_ceiling_nm: 10000.0, max_deg_floor_pct: 20.0, pampa_pe_floor: 3.0,
+        mdck_efflux_ceiling: 3.0, min_selectivity_index: 50.0,
+    };
+    let hits = assay::qualify_leads(&degradation, Some(&permeability),
+        Some(&cytotoxicity), &criteria);
+    assert_eq!(hits.len(), 2);
+    assert_eq!(hits[0]["status"].as_str(), Some("CONFIRMED_HIT"));
+    assert_eq!(hits[1]["status"].as_str(), Some("INCONCLUSIVE"));
+    assert_eq!(hits[0]["bbb_status"].as_str(), Some("PERMEANT_PAMPA"));
+    let row = assay::as_row(&hits[0]);
+    assert_eq!(row["ec50_nm"].as_str(), Some("42.0"));
+    let report = assay::render_assay_report(&hits, &criteria);
+    assert!(report.contains("# PNN Phase 3 In Vitro Hit Qualification Report"));
+    assert!(report.contains("- **Confirmed Hits (Active + Permeant + Non-toxic)**: 1"));
+    assert_eq!(assay::HIT_FIELDS.len(), 11);
+}
+
+#[test]
 fn pnn_dosing_pathway_simulation() {
     use research_engine::domains_pnn_pathway as pathway;
     assert_eq!(pathway::dosing_times("SINGLE_DOSE", 168.0).unwrap(), vec![0.0]);

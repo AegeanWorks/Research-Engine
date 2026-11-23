@@ -95,6 +95,7 @@ pub enum Commands {
     PnnMpo { #[command(subcommand)] action: PnnMpoAction },
     PnnTarget { #[command(subcommand)] action: PnnTargetAction },
     PnnPathway { #[command(subcommand)] action: PnnPathwayAction },
+    PnnAssay { #[command(subcommand)] action: PnnAssayAction },
     Providers { #[command(subcommand)] action: ProvidersAction },
     Search {
         query: String,
@@ -321,6 +322,18 @@ pub enum ProvidersAction {
 pub enum PnnRulesAction {
     Evaluate { #[arg(long, required = true)] compound: String },
     Weight { criterion: String },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum PnnAssayAction {
+    Qualify {
+        #[arg(long, required = true)] degradation: String,
+        #[arg(long)] permeability: Option<String>,
+        #[arg(long)] cytotoxicity: Option<String>,
+        #[arg(long, default_value_t = 10000.0)] ec50_ceiling: f64,
+        #[arg(long, default_value_t = 20.0)] max_deg_floor: f64,
+        #[arg(long, default_value_t = 50.0)] min_si: f64,
+    },
 }
 
 #[derive(Debug, Subcommand)]
@@ -1110,7 +1123,8 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::Predictions { .. } | Commands::PnnRank { .. }
         | Commands::PnnCurate { .. } | Commands::LeadSelection { .. }
         | Commands::PnnMpo { .. } | Commands::PnnTarget { .. }
-        | Commands::PnnPathway { .. } | Commands::Providers { .. }) {
+        | Commands::PnnPathway { .. } | Commands::PnnAssay { .. }
+        | Commands::Providers { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -1223,6 +1237,33 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::PnnAssay { action } => {
+            use crate::domains_pnn_assay as assay;
+            match action {
+                PnnAssayAction::Qualify { degradation, permeability, cytotoxicity,
+                                          ec50_ceiling, max_deg_floor, min_si } => {
+                    let parse = |raw: &str| -> Result<Value> {
+                        serde_json::from_str(raw).map_err(|e| EngineError::new(
+                            format!("invalid JSON: {e}"), "assay data must be a JSON object",
+                            "pass an object keyed by compound_id"))
+                    };
+                    let deg = parse(degradation)?;
+                    let perm = match permeability { Some(text) => Some(parse(text)?), None => None };
+                    let cyto = match cytotoxicity { Some(text) => Some(parse(text)?), None => None };
+                    let criteria = assay::AssayCriteria {
+                        ec50_ceiling_nm: *ec50_ceiling, max_deg_floor_pct: *max_deg_floor,
+                        pampa_pe_floor: 3.0, mdck_efflux_ceiling: 3.0,
+                        min_selectivity_index: *min_si,
+                    };
+                    let hits = assay::qualify_leads(&deg, perm.as_ref(), cyto.as_ref(), &criteria);
+                    let report = assay::render_assay_report(&hits, &criteria);
+                    let rows: Vec<Value> = hits.iter().map(assay::as_row).collect();
+                    let value = json!({"hits": hits, "report": report, "rows": rows});
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+            }
+        }
         Commands::PnnPathway { action } => {
             use crate::domains_pnn_pathway as pathway;
             match action {
