@@ -46,9 +46,17 @@ canonical Rust engine, exposed through the single `research-engine run` entry
 point; 50 per-module CLI namespaces were retired from `Commands`, leaving the
 lifecycle commands and `run analyze` / `run execute`.
 
-The removed test directories are preserved under
-`C:\Users\Yunus-Emre\AppData\Local\Temp\opencode\removed-from-host-20261123`
-together with the removed Python trees.
+The remaining imported-surface CLI namespaces (`lattice`, `lattice-repo`,
+`lattice-snap`, `lattice-query`, `meta`, `discovery`, `studio`, `atlas`,
+`pnn-safety`, `mcp`, `web`, `client`) were retired in the same way. `run` now
+carries eight capabilities grouped into four subsystems: `catalog.*` (literature
+identity), `candidate.*` (design, screen, safety), `bridge.primitives` and
+`corpus.citations`. The standalone `obezite-mekanizma-projesi` checkout was
+removed from the workspace; it was fully merged and referenced only by string
+fixtures.
+
+The removed test directories, Python trees and obezite checkout are preserved
+under `C:\Users\Yunus-Emre\AppData\Local\Temp\opencode\removed-from-host-20261123`.
 
 ## Verification
 

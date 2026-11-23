@@ -911,3 +911,11 @@ ender.py into engine/series.py
 - **Context**: The merge of six source projects copied their Python trees into `domains/` and `adapters/`. Porting every function one-for-one produced ~50 top-level Rust CLI namespaces and a fragmented runtime. The source audit records 0 host-definition gaps for these projects, and the canonical Rust engine now provides a unified `run` entry point.
 - **Decision**: Remove the wholesale copies (`domains/{pnn,fluid_universe,obezite,atlas}`, `adapters/lattice`) and the test directories that exercise only those copies. Retire the 50 per-module Rust CLI namespaces; keep the lifecycle commands plus `run analyze` and `run execute`. No test assertion was weakened: tests for deleted production code were removed with the code.
 - **Consequences**: The Python compatibility suite shrinks to the host lifecycle tests. Domain capabilities remain available through the Rust engine and the external data roots via the pack registry. See `docs/CONSOLIDATION.md` for the recovery location.
+
+### ADR-062: retire imported-surface namespaces and the obezite source checkout
+
+- **Date**: 2026-11-23
+- **Status**: Accepted
+- **Context**: After ADR-061, the CLI still exposed the imported surfaces (`lattice*`, `studio`, `atlas`, `pnn-safety`, `mcp`, `web`, `client`) and `run` carried only three capabilities. The obezite source checkout remained alongside the merged host.
+- **Decision**: Retire those 12 CLI namespaces, exposing the retained capabilities as eight `run execute` capabilities in four subsystems (`catalog`, `candidate`, `bridge`, `corpus`). Remove `projects/obezite-mekanizma-projesi` from the workspace; its data remains an external pack root and its Rust capabilities remain behind `run`.
+- **Consequences**: The only CLI surfaces are the lifecycle commands and `run`. Recovery copies of removed trees are recorded in `docs/CONSOLIDATION.md`. No test assertion was weakened.

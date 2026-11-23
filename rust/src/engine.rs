@@ -11,7 +11,9 @@ use crate::domains_fluid_bridge as bridge;
 use crate::domains_obezite as obezite;
 use crate::domains_pnn_rules as rules;
 use crate::domains_pnn_safety as safety;
+use crate::domains_pnn_screen as screen;
 use crate::error::{EngineError, Result};
+use crate::lattice;
 
 fn field(value: &Value, key: &str) -> String {
     value.get(key).and_then(Value::as_str).unwrap_or("").to_string()
@@ -69,22 +71,45 @@ pub fn analyze(input: &Value) -> Result<Value> {
     }))
 }
 
+/// Capabilities retained by the cohesive engine, grouped into four subsystems.
+pub const CAPABILITIES: &[&str] = &[
+    "catalog.normalize", "catalog.study-type", "catalog.paper-id",
+    "candidate.rules", "candidate.screen", "candidate.noael-hed",
+    "bridge.primitives", "corpus.citations",
+];
+
 /// Execute one retained capability through the single engine entry point.
 pub fn execute(capability: &str, input: &Value) -> Result<Value> {
     match capability {
-        "pnn-rules" => {
+        // catalog — literature identity rules
+        "catalog.normalize" => Ok(json!({"value": lattice::normalize_text(&field(input, "text"))})),
+        "catalog.study-type" => Ok(json!({"value": lattice::normalize_study_type(&field(input, "text"))})),
+        "catalog.paper-id" => Ok(json!({"value": lattice::paper_id(
+            &field(input, "title"), &field(input, "doi"), &field(input, "arxiv"))?})),
+        // candidate — design, safety and screen verdicts
+        "candidate.rules" | "pnn-rules" => {
             let compound = input.get("compound").unwrap_or(input);
             Ok(Value::Array(rules::evaluate(compound)))
         }
-        "fluid-bridge" => Ok(json!({
+        "candidate.screen" => {
+            let compounds: Vec<Value> = input.get("compounds").and_then(Value::as_array)
+                .cloned().unwrap_or_default();
+            Ok(json!({"screen": screen::screen_compounds(&compounds),
+                "summary": screen::summarize(&screen::screen_compounds(&compounds))}))
+        }
+        "candidate.noael-hed" => Ok(json!({"value": safety::noael_hed(
+            number(input, "noael", 0.0), &field(input, "species"), number(input, "km", 3.0))?})),
+        // bridge — Gaussian/fluid primitives
+        "bridge.primitives" | "fluid-bridge" => Ok(json!({
             "diffusivity": bridge::diffusivity(number(input, "hbar", 1.0), number(input, "mass", 1.0))?,
             "horizon": bridge::horizon(number(input, "omega", 1.0))?,
         })),
-        "obezite-atiflar" => Ok(Value::Array(obezite::atiflar(&field(input, "text"))
-            .into_iter().map(Value::from).collect())),
+        // corpus — bibliography parsing helpers
+        "corpus.citations" | "obezite-atiflar" => Ok(Value::Array(
+            obezite::atiflar(&field(input, "text")).into_iter().map(Value::from).collect())),
         other => Err(EngineError::new(format!("unknown capability: {other}"),
             "capabilities are a closed vocabulary",
-            "pass pnn-rules, fluid-bridge or obezite-atiflar")),
+            "pass one of catalog.*, candidate.*, bridge.primitives or corpus.citations")),
     }
 }
 
