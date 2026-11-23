@@ -103,6 +103,7 @@ argparse requires in `python -m engine`.
 | Domains: PNN assay | In vitro degradation/permeability/cytotoxicity qualification, BBB/safety verdicts and hit report (`pnn-assay` CLI) |
 | Domains: PNN preclinical | Non-compartmental PK analysis, oral F/brain Kp/PD triage and in-vivo report (`pnn-preclinical` CLI) |
 | Domains: PNN IND | Allometric HED/MRSD scaling, FIH dose projections, evidence triage and IND dossier (`pnn-ind` CLI) |
+| Domains: PNN dynamics | MD trajectory RMSD/contact/MM-GBSA statistics, pose stability classes and trajectory report (`pnn-dynamics` CLI) |
 | Domains: obezite | Citation-number extraction with bibliography-noise stripping and claim-row de-duplication (`obezite` CLI) |
 | Domains: PNN rules | CNS/property design-rule evaluation and criterion weighting (`pnn-rules` CLI) |
 | Domains: PNN docking | Docking-score alias parsing, RMSD/Vina filtering, weighted consensus normalization and per-compound best-target aggregation (`pnn-docking` CLI) |
@@ -260,6 +261,8 @@ argparse requires in `python -m engine`.
   rows; all five checks match.
 - `pnn_ind_parity.py` compares allometric scaling, projections, dossier and rows;
   all five checks match.
+- `pnn_dynamics_parity.py` compares trajectory analyses and reports for stable
+  and partial-evidence cases; all six checks match.
 
 ## Still to port
 

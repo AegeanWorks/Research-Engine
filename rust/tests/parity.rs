@@ -433,6 +433,26 @@ fn fluid_frank_oseen_dispersion() {
 }
 
 #[test]
+fn pnn_md_trajectory_analysis() {
+    use research_engine::domains_pnn_dynamics as dynamics;
+    let point = |t: f64, r: f64| serde_json::json!({
+        "time_ns": t, "ligand_rmsd": r, "protein_rmsd": 1.2,
+        "contacts_count": 4, "mmgbsa_dg": -32.0,
+        "residue_contacts": {"LYS201": true},
+    });
+    let points = vec![point(0.0, 1.1), point(1.0, 1.3), point(2.0, 1.2), point(3.0, 1.4)];
+    let analysis = dynamics::analyze_trajectory(&points, "C1", "PTPsigma").unwrap();
+    assert_eq!(analysis["frames_count"].as_u64(), Some(4));
+    assert_eq!(analysis["stability_class"].as_str(), Some("STABLE_POSE"));
+    assert_eq!(analysis["evidence_status"].as_str(), Some("COMPLETE"));
+    assert_eq!(analysis["residue_persistence"]["LYS201"].as_f64(), Some(100.0));
+    let report = dynamics::render_trajectory_report(&analysis);
+    assert!(report.contains("# Molecular Dynamics Trajectory Stability Report: C1"));
+    assert!(report.contains("| LYS201 | 100.0% | Strong Contact |"));
+    assert!(dynamics::analyze_trajectory(&points[..1], "C1", "PTPsigma").is_err());
+}
+
+#[test]
 fn pnn_ind_allometric_projection() {
     use research_engine::domains_pnn_ind as ind;
     let scale = ind::calculate_allometric_scaling(10.0, 11.7, 87.2, 80.0, 3.0,

@@ -98,6 +98,7 @@ pub enum Commands {
     PnnAssay { #[command(subcommand)] action: PnnAssayAction },
     PnnPreclinical { #[command(subcommand)] action: PnnPreclinicalAction },
     PnnInd { #[command(subcommand)] action: PnnIndAction },
+    PnnDynamics { #[command(subcommand)] action: PnnDynamicsAction },
     Providers { #[command(subcommand)] action: ProvidersAction },
     Search {
         query: String,
@@ -324,6 +325,15 @@ pub enum ProvidersAction {
 pub enum PnnRulesAction {
     Evaluate { #[arg(long, required = true)] compound: String },
     Weight { criterion: String },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum PnnDynamicsAction {
+    Analyze {
+        #[arg(long, required = true)] points: String,
+        #[arg(long, default_value = "PNN-Compound")] compound: String,
+        #[arg(long, default_value = "PTPsigma")] target: String,
+    },
 }
 
 #[derive(Debug, Subcommand)]
@@ -1165,7 +1175,7 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::PnnMpo { .. } | Commands::PnnTarget { .. }
         | Commands::PnnPathway { .. } | Commands::PnnAssay { .. }
         | Commands::PnnPreclinical { .. } | Commands::PnnInd { .. }
-        | Commands::Providers { .. }) {
+        | Commands::PnnDynamics { .. } | Commands::Providers { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -1278,6 +1288,21 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::PnnDynamics { action } => {
+            use crate::domains_pnn_dynamics as dynamics;
+            match action {
+                PnnDynamicsAction::Analyze { points, compound, target } => {
+                    let points: Vec<Value> = serde_json::from_str(points).map_err(|e| EngineError::new(
+                        format!("invalid points JSON: {e}"), "points must be a JSON array",
+                        "pass an array of trajectory frames"))?;
+                    let value = dynamics::analyze_trajectory(&points, compound, target)?;
+                    let report = dynamics::render_trajectory_report(&value);
+                    let result = json!({"analysis": value, "report": report});
+                    let stable = to_stable_json(&result);
+                    emit(result, stable)
+                }
+            }
+        }
         Commands::PnnInd { action } => {
             use crate::domains_pnn_ind as ind;
             match action {
