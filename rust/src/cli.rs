@@ -92,6 +92,7 @@ pub enum Commands {
     PnnRank { #[command(subcommand)] action: PnnRankAction },
     PnnCurate { #[command(subcommand)] action: PnnCurateAction },
     LeadSelection { #[command(subcommand)] action: LeadSelectionAction },
+    PnnMpo { #[command(subcommand)] action: PnnMpoAction },
     Providers { #[command(subcommand)] action: ProvidersAction },
     Search {
         query: String,
@@ -318,6 +319,15 @@ pub enum ProvidersAction {
 pub enum PnnRulesAction {
     Evaluate { #[arg(long, required = true)] compound: String },
     Weight { criterion: String },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum PnnMpoAction {
+    Ramp { val: f64, low: f64, high: f64, #[arg(long, default_value_t = true, action = clap::ArgAction::Set)] increasing: bool },
+    Score { mw: f64, logp: f64, tpsa: f64, hbd: f64, #[arg(long)] pka: Option<f64>, #[arg(long)] logd: Option<f64> },
+    Profile { #[arg(long, required = true)] compound: String },
+    Report { #[arg(long, required = true)] profiles: String },
+    Rows { #[arg(long, required = true)] profiles: String },
 }
 
 #[derive(Debug, Subcommand)]
@@ -1068,7 +1078,7 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::WaterTemperature { .. } | Commands::WaterLineshape { .. }
         | Commands::Predictions { .. } | Commands::PnnRank { .. }
         | Commands::PnnCurate { .. } | Commands::LeadSelection { .. }
-        | Commands::Providers { .. }) {
+        | Commands::PnnMpo { .. } | Commands::Providers { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -1181,6 +1191,55 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::PnnMpo { action } => {
+            use crate::domains_pnn_mpo as mpo;
+            match action {
+                PnnMpoAction::Ramp { val, low, high, increasing } => {
+                    let value = mpo::ramp_desirability(*val, *low, *high, *increasing);
+                    emit(json!({"value": value}), format!("{value}\n"))
+                }
+                PnnMpoAction::Score { mw, logp, tpsa, hbd, pka, logd } => {
+                    let value = mpo::calculate_cns_mpo(*mw, *logp, *tpsa, *hbd, *pka, *logd);
+                    emit(json!({"value": value}), format!("{value}\n"))
+                }
+                PnnMpoAction::Profile { compound } => {
+                    let raw: Value = serde_json::from_str(compound).map_err(|e| EngineError::new(
+                        format!("invalid compound JSON: {e}"), "compound must be a JSON object",
+                        "pass an object with compound_id, mw, logp, tpsa and hbd"))?;
+                    let input = mpo::ProfileInput {
+                        compound_id: raw.get("compound_id").and_then(Value::as_str).unwrap_or(""),
+                        name: raw.get("name").and_then(Value::as_str).unwrap_or(""),
+                        mw: raw.get("mw").and_then(Value::as_f64).unwrap_or(0.0),
+                        logp: raw.get("logp").and_then(Value::as_f64).unwrap_or(0.0),
+                        tpsa: raw.get("tpsa").and_then(Value::as_f64).unwrap_or(0.0),
+                        hbd: raw.get("hbd").and_then(Value::as_f64).unwrap_or(0.0),
+                        pka: raw.get("pka").and_then(Value::as_f64),
+                        ec50_nm: raw.get("ec50_nm").and_then(Value::as_f64),
+                        brain_kp: raw.get("brain_kp").and_then(Value::as_f64),
+                        oral_f_pct: raw.get("oral_f_pct").and_then(Value::as_f64),
+                        selectivity_index: raw.get("selectivity_index").and_then(Value::as_f64),
+                    };
+                    let value = mpo::profile_candidate(&input);
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+                PnnMpoAction::Report { profiles } | PnnMpoAction::Rows { profiles } => {
+                    let values: Vec<Value> = serde_json::from_str(profiles).map_err(|e| EngineError::new(
+                        format!("invalid profiles JSON: {e}"), "profiles must be a JSON array",
+                        "pass an array of profile objects"))?;
+                    let is_report = matches!(action, PnnMpoAction::Report { .. });
+                    if is_report {
+                        let markdown = mpo::render_mpo_report(&values);
+                        emit(json!({"markdown": markdown.clone()}), format!("{markdown}\n"))
+                    } else {
+                        let rows: Vec<Value> = values.iter().map(mpo::as_row).collect();
+                        let value = Value::Array(rows);
+                        let stable = to_stable_json(&value);
+                        emit(value, stable)
+                    }
+                }
+            }
+        }
         Commands::LeadSelection { action } => {
             use crate::domains_pnn_selection as selection;
             match action {

@@ -433,6 +433,30 @@ fn fluid_frank_oseen_dispersion() {
 }
 
 #[test]
+fn pnn_multiparametric_optimization() {
+    use research_engine::domains_pnn_mpo as mpo;
+    assert_eq!(mpo::ramp_desirability(0.5, 0.0, 1.0, true), 0.5);
+    assert_eq!(mpo::ramp_desirability(0.5, 0.0, 1.0, false), 0.5);
+    assert_eq!(mpo::ramp_desirability(2.0, 1.0, 1.0, true), 1.0);
+    let score = mpo::calculate_cns_mpo(345.5, 2.6, 58.0, 2.0, Some(8.2), None);
+    assert!(score > 4.5 && score <= 6.0);
+    let input = mpo::ProfileInput {
+        compound_id: "C1", name: "Compound A", mw: 345.5, logp: 2.6, tpsa: 58.0,
+        hbd: 2.0, pka: Some(8.2), ec50_nm: Some(42.0), brain_kp: Some(0.45),
+        oral_f_pct: Some(24.0), selectivity_index: Some(60.0),
+    };
+    let profile = mpo::profile_candidate(&input);
+    assert_eq!(profile["mpo_tier"].as_str(), Some("DEVELOPMENT_CANDIDATE"));
+    assert!(profile["composite_desirability"].as_f64().unwrap() > 0.7);
+    let row = mpo::as_row(&profile);
+    assert_eq!(row["cns_mpo_score"].as_str().unwrap().len(), 4);
+    let report = mpo::render_mpo_report(&[profile]);
+    assert!(report.contains("# PNN Phase 5 Lead Optimization"));
+    assert!(report.contains("**Total Compounds Profiled**: 1"));
+    assert_eq!(mpo::MPO_FIELDS.len(), 11);
+}
+
+#[test]
 fn pnn_lead_selection_pipeline() {
     use research_engine::domains_pnn_selection as selection;
     let compounds = "compound_id,name,smiles,mw,logp,tpsa,hbd,hba,rotatable_bonds\n\
