@@ -6,15 +6,15 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `199`
+- **Total Python Modules**: `200`
 - **Total Classes**: `124`
-- **Total Top-Level Functions**: `582`
+- **Total Top-Level Functions**: `584`
 - **Total Class Methods**: `804`
-- **Total Source Lines**: `30936`
+- **Total Source Lines**: `30979`
 
 ## 🧭 Map Coverage
-- **Indexed**: python (`199` module(s))
-- **Not indexed by this map**: rust (`48` file(s))
+- **Indexed**: python (`200` module(s))
+- **Not indexed by this map**: rust (`49` file(s))
 
 > Only Python symbols are catalogued. A language above is reported as not indexed, never as verified by this map.
 
@@ -1526,6 +1526,15 @@
 
 **Functions:**
 - `def run(cmd, cwd)`
+
+---
+
+### [`rust/source_duplicates_parity.py`](rust/source_duplicates_parity.py)
+**Size**: `43` lines
+
+**Functions:**
+- `def run(*args)`
+- `def check(label, rust, py)`
 
 ---
 

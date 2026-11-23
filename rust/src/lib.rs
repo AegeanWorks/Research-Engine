@@ -17,6 +17,7 @@ pub mod diffing;
 pub mod engine_bridge;
 pub mod engine_corpus;
 pub mod engine_screen;
+pub mod runtime_sources;
 pub mod engine;
 pub mod engine_rules;
 pub mod engine_safety;

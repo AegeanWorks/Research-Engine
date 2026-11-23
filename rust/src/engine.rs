@@ -14,6 +14,7 @@ use crate::engine_safety as safety;
 use crate::engine_screen as screen;
 use crate::error::{EngineError, Result};
 use crate::lattice;
+use crate::runtime_sources;
 
 fn field(value: &Value, key: &str) -> String {
     value.get(key).and_then(Value::as_str).unwrap_or("").to_string()
@@ -75,7 +76,7 @@ pub fn analyze(input: &Value) -> Result<Value> {
 pub const CAPABILITIES: &[&str] = &[
     "catalog.normalize", "catalog.study-type", "catalog.paper-id",
     "candidate.rules", "candidate.screen", "candidate.noael-hed",
-    "bridge.primitives", "corpus.citations",
+    "bridge.primitives", "corpus.citations", "corpus.duplicates",
 ];
 
 /// Execute one retained capability through the single engine entry point.
@@ -107,6 +108,12 @@ pub fn execute(capability: &str, input: &Value) -> Result<Value> {
         // corpus — bibliography parsing helpers
         "corpus.citations" | "obezite-atiflar" => Ok(Value::Array(
             obezite::atiflar(&field(input, "text")).into_iter().map(Value::from).collect())),
+        "corpus.duplicates" => {
+            let sources: Vec<Value> = input.get("sources").and_then(Value::as_array)
+                .cloned().unwrap_or_default();
+            let limit = input.get("limit").and_then(Value::as_u64).map(|v| v as usize);
+            Ok(runtime_sources::duplicate_sources(&sources, limit)?)
+        }
         other => Err(EngineError::new(format!("unknown capability: {other}"),
             "capabilities are a closed vocabulary",
             "pass one of catalog.*, candidate.*, bridge.primitives or corpus.citations")),

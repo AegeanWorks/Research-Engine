@@ -221,6 +221,27 @@ fn search_is_phrase_first_and_program_scoped() {
 }
 
 #[test]
+fn runtime_source_duplicate_detection() {
+    use research_engine::runtime_sources as sources;
+    assert_eq!(sources::normalize_doi("https://doi.org/10.1/ABC"), "10.1/abc");
+    assert_eq!(sources::normalize_title("Café  Effects!"), "cafe effects");
+    let source = |id: &str, title: &str, doi: &str| serde_json::json!({
+        "id": id, "research_id": "r_000001", "title": title,
+        "year": 2020, "doi": doi, "url": "", "status": "active",
+    });
+    let rows = vec![
+        source("s_000001", "Sleep and Memory", "10.1/abc"),
+        source("s_000002", "Sleep and Memory", "https://doi.org/10.1/abc"),
+        source("s_000003", "Unique", "10.2/unique"),
+    ];
+    let result = sources::duplicate_sources(&rows, Some(20)).unwrap();
+    assert_eq!(result["total"].as_u64(), Some(1));
+    assert_eq!(result["groups"][0]["reason"].as_str(), Some("doi"));
+    assert_eq!(result["groups"][0]["keep"].as_str(), Some("s_000001"));
+    assert!(sources::duplicate_sources(&rows, Some(0)).is_err());
+}
+
+#[test]
 fn cohesive_engine_facade() {
     use research_engine::engine;
     let input = serde_json::json!({
