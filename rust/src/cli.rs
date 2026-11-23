@@ -91,6 +91,7 @@ pub enum Commands {
     Predictions { #[command(subcommand)] action: PredictionsAction },
     PnnRank { #[command(subcommand)] action: PnnRankAction },
     PnnCurate { #[command(subcommand)] action: PnnCurateAction },
+    LeadSelection { #[command(subcommand)] action: LeadSelectionAction },
     Providers { #[command(subcommand)] action: ProvidersAction },
     Search {
         query: String,
@@ -317,6 +318,21 @@ pub enum ProvidersAction {
 pub enum PnnRulesAction {
     Evaluate { #[arg(long, required = true)] compound: String },
     Weight { criterion: String },
+}
+
+#[derive(Debug, Subcommand)]
+pub enum LeadSelectionAction {
+    Report {
+        #[arg(long, required = true)] inputs: String,
+        #[arg(long, required = true)] docking: String,
+        #[arg(long, default_value = "B")] min_tier: String,
+        #[arg(long, default_value_t = 25)] per_bin: usize,
+        #[arg(long, default_value_t = 0.1)] bin_width: f64,
+        #[arg(long)] max_compounds: Option<usize>,
+        #[arg(long)] max_rmsd: Option<f64>,
+        #[arg(long)] min_vina: Option<f64>,
+        #[arg(long, default_value_t = 25)] top_n: usize,
+    },
 }
 
 #[derive(Debug, Subcommand)]
@@ -1051,7 +1067,8 @@ pub fn run(cli: &Cli) -> Result<Output> {
         | Commands::BornCavity { .. } | Commands::WaterMarcus { .. }
         | Commands::WaterTemperature { .. } | Commands::WaterLineshape { .. }
         | Commands::Predictions { .. } | Commands::PnnRank { .. }
-        | Commands::PnnCurate { .. } | Commands::Providers { .. }) {
+        | Commands::PnnCurate { .. } | Commands::LeadSelection { .. }
+        | Commands::Providers { .. }) {
         initialize(&conn)?;
     }
     match &cli.command {
@@ -1164,6 +1181,36 @@ pub fn run(cli: &Cli) -> Result<Output> {
         Commands::Experiment { action } => run_experiment(&conn, action),
         Commands::Lattice { action } => run_lattice(action),
         Commands::LatticeRepo { action } => run_lattice_repo(&cli.db, action),
+        Commands::LeadSelection { action } => {
+            use crate::domains_pnn_selection as selection;
+            match action {
+                LeadSelectionAction::Report { inputs, docking, min_tier, per_bin, bin_width,
+                                              max_compounds, max_rmsd, min_vina, top_n } => {
+                    let paths: Vec<String> = inputs.split(',').map(|s| s.trim().to_string())
+                        .filter(|s| !s.is_empty()).collect();
+                    let mut loaded = Vec::new();
+                    for path in paths {
+                        let text = std::fs::read_to_string(&path).map_err(|e| EngineError::new(
+                            format!("cannot read compound CSV: {e}"), "compound inputs must be readable UTF-8 CSVs",
+                            "pass readable CSV paths"))?;
+                        loaded.push((path, text));
+                    }
+                    let dock_text = std::fs::read_to_string(docking).map_err(|e| EngineError::new(
+                        format!("cannot read docking CSV: {e}"), "the docking CSV must be readable UTF-8",
+                        "pass a readable docking CSV path"))?;
+                    let options = selection::SelectionOptions {
+                        min_tier, per_bin: *per_bin, bin_width: *bin_width,
+                        max_compounds: *max_compounds, max_rmsd: *max_rmsd, min_vina: *min_vina,
+                    };
+                    let result = selection::select_leads(&loaded, &(docking.clone(), dock_text), &options)?;
+                    let opts = selection::options_json(&options);
+                    let markdown = selection::render_lead_report(&result, &opts, *top_n);
+                    let value = json!({"report": markdown, "selection": result});
+                    let stable = to_stable_json(&value);
+                    emit(value, stable)
+                }
+            }
+        }
         Commands::PnnCurate { action } => {
             use crate::domains_pnn_curate as curation_cli;
             match action {

@@ -6,15 +6,15 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `492`
+- **Total Python Modules**: `493`
 - **Total Classes**: `317`
-- **Total Top-Level Functions**: `2107`
+- **Total Top-Level Functions**: `2109`
 - **Total Class Methods**: `1545`
-- **Total Source Lines**: `93034`
+- **Total Source Lines**: `93102`
 
 ## 🧭 Map Coverage
-- **Indexed**: python (`492` module(s))
-- **Not indexed by this map**: javascript (`1` file(s)), rust (`85` file(s))
+- **Indexed**: python (`493` module(s))
+- **Not indexed by this map**: javascript (`1` file(s)), rust (`86` file(s))
 
 > Only Python symbols are catalogued. A language above is reported as not indexed, never as verified by this map.
 
@@ -4916,6 +4916,15 @@
 
 **Functions:**
 - `def run(cmd, cwd)`
+
+---
+
+### [`rust/lead_selection_parity.py`](rust/lead_selection_parity.py)
+**Size**: `68` lines
+
+**Functions:**
+- `def run(*args)`
+- `def make_csv(path, fields, rows)`
 
 ---
 

@@ -96,6 +96,7 @@ argparse requires in `python -m engine`.
 | Phenomenology: predictions | New-prediction audit candidate data, verdict and claim-16 Markdown report (`predictions` CLI) |
 | Domains: PNN rank | Consensus shortlist with screening-tier gates, property-score tiebreaks and filter summaries (`pnn-rank` CLI) |
 | Domains: PNN curate | CLI driver merging compound CSVs, deduplicating, curating and writing the library plus JSON summary (`pnn-curate` CLI) |
+| Domains: PNN selection | End-to-end lead selection: CSV ingest, curation, screening, docking consensus, SHA-256 provenance and Markdown report (`lead-selection` CLI) |
 | Domains: obezite | Citation-number extraction with bibliography-noise stripping and claim-row de-duplication (`obezite` CLI) |
 | Domains: PNN rules | CNS/property design-rule evaluation and criterion weighting (`pnn-rules` CLI) |
 | Domains: PNN docking | Docking-score alias parsing, RMSD/Vina filtering, weighted consensus normalization and per-compound best-target aggregation (`pnn-docking` CLI) |
@@ -239,6 +240,8 @@ argparse requires in `python -m engine`.
   all three checks match.
 - `pnn_curate_parity.py` compares curated CSV and JSON summary bytes; all three
   checks match.
+- `lead_selection_parity.py` compares the full Markdown lead report and stage
+  summaries; all four checks match.
 
 ## Still to port
 

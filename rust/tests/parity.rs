@@ -433,6 +433,31 @@ fn fluid_frank_oseen_dispersion() {
 }
 
 #[test]
+fn pnn_lead_selection_pipeline() {
+    use research_engine::domains_pnn_selection as selection;
+    let compounds = "compound_id,name,smiles,mw,logp,tpsa,hbd,hba,rotatable_bonds\n\
+C1,Compound A,CCO,345.5,2.6,58,2,5,4\n\
+C2,Compound B,CCN,300.0,2.0,60,2,5,3\n";
+    let docking = "Compound ID,Target,Vina,Glide,mmGBSA,RMSD\nC1,TP53,-9.2,-6.1,-45.3,1.2\n";
+    let inputs = vec![("lib.csv".to_string(), compounds.to_string())];
+    let dock = ("docking.csv".to_string(), docking.to_string());
+    let options = selection::SelectionOptions {
+        min_tier: "B", per_bin: 25, bin_width: 0.1,
+        max_compounds: None, max_rmsd: None, min_vina: None,
+    };
+    let result = selection::select_leads(&inputs, &dock, &options).unwrap();
+    assert_eq!(result["curation"]["input_rows"].as_u64(), Some(2));
+    assert_eq!(result["docking"]["rows"].as_u64(), Some(1));
+    assert_eq!(result["screening"]["emitted"].as_u64(), Some(2));
+    assert_eq!(result["ranking"]["rows"].as_array().unwrap().len(), 1);
+    let opts = selection::options_json(&options);
+    let markdown = selection::render_lead_report(&result, &opts, 25);
+    assert!(markdown.contains("# PNN Phase 2 Lead Selection Report"));
+    assert!(markdown.contains("| `lib.csv` | 2 |"));
+    assert!(selection::select_leads(&[], &dock, &options).is_err());
+}
+
+#[test]
 fn pnn_curation_cli_driver() {
     use research_engine::domains_pnn_curate as cli;
     use std::collections::BTreeMap;
