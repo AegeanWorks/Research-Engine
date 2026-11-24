@@ -221,6 +221,18 @@ fn search_is_phrase_first_and_program_scoped() {
 }
 
 #[test]
+fn provenance_hashes_the_rust_runtime() {
+    use research_engine::provenance;
+    let (digest, files) = provenance::code_sha256().unwrap();
+    assert_eq!(digest.len(), 64);
+    assert!(files >= 50, "expected the Rust crate to be hashed, got {files} files");
+    let block = provenance::block(&[]).unwrap();
+    assert_eq!(block["code_files"].as_u64(), Some(files as u64));
+    assert!(block.get("python").is_none(), "no Python runtime remains");
+    assert!(block["code_sha256"].as_str().unwrap() == digest);
+}
+
+#[test]
 fn screening_decision_rules() {
     let path = temp_db("screening_rules");
     let conn = open(path.to_str().unwrap()).unwrap();

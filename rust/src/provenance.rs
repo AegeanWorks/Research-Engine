@@ -1,8 +1,9 @@
 //! Workspace provenance: the exact code and input identity each run is bound to.
 //!
-//! Length-prefixed `(name, kind, content)` hashing mirrors
-//! `engine/provenance.py`, so a run recorded by either implementation has the
-//! same `code_sha256` and `inputs_sha256` for an unchanged tree.
+//! Length-prefixed `(name, kind, content)` hashing mirrors the original
+//! `engine/provenance.py` algorithm. The hashed tree is now the Rust crate
+//! (`rust/src/**/*.rs` plus `Cargo.toml`/`Cargo.lock`), since the Python
+//! runtime was removed under ADR-064.
 
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -35,15 +36,15 @@ fn digest_entries(entries: &[(String, &[u8], Vec<u8>)]) -> String {
     format!("{:x}", hasher.finalize())
 }
 
-fn collect_python_files(dir: &Path, root: &Path, out: &mut Vec<PathBuf>) -> std::io::Result<()> {
+fn collect_code_files(dir: &Path, root: &Path, out: &mut Vec<PathBuf>) -> std::io::Result<()> {
     for entry in std::fs::read_dir(dir)? {
         let path = entry?.path();
         if path.is_dir() {
-            if path.file_name().and_then(|n| n.to_str()) == Some("__pycache__") {
+            if path.file_name().and_then(|n| n.to_str()) == Some("target") {
                 continue;
             }
-            collect_python_files(&path, root, out)?;
-        } else if path.extension().and_then(|e| e.to_str()) == Some("py") {
+            collect_code_files(&path, root, out)?;
+        } else if path.extension().and_then(|e| e.to_str()) == Some("rs") {
             out.push(path.strip_prefix(root).unwrap_or(&path).to_path_buf());
         }
     }
@@ -53,7 +54,11 @@ fn collect_python_files(dir: &Path, root: &Path, out: &mut Vec<PathBuf>) -> std:
 pub fn code_sha256() -> Result<(String, usize)> {
     let root = project_root();
     let mut files = Vec::new();
-    collect_python_files(&root.join("engine"), &root, &mut files)?;
+    collect_code_files(&root.join("rust").join("src"), &root, &mut files)?;
+    for name in ["Cargo.toml", "Cargo.lock"] {
+        let relative = Path::new("rust").join(name);
+        if root.join(&relative).is_file() { files.push(relative); }
+    }
     files.sort();
     let entries: Vec<(String, &[u8], Vec<u8>)> = files.iter()
         .map(|relative| {
@@ -133,6 +138,22 @@ pub fn fingerprint(inputs: &[String]) -> Result<Fingerprint> {
     let (code, code_files) = code_sha256()?;
     let (input, input_files) = inputs_sha256(inputs)?;
     Ok(Fingerprint { code_sha256: code, inputs_sha256: input, code_files, input_files })
+}
+
+/// Diagnostic provenance block behind `research-engine inventory`.
+/// Python-only fields (`python`, `platform`) are omitted: there is no Python runtime.
+pub fn block(inputs: &[String]) -> Result<serde_json::Value> {
+    let fp = fingerprint(inputs)?;
+    let (commit, dirty) = git_state();
+    Ok(serde_json::json!({
+        "code_sha256": fp.code_sha256,
+        "inputs_sha256": fp.inputs_sha256,
+        "code_files": fp.code_files,
+        "input_files": fp.input_files,
+        "git_commit": commit,
+        "git_dirty": dirty,
+        "engine": env!("CARGO_PKG_VERSION"),
+    }))
 }
 
 pub fn git_state() -> (String, bool) {

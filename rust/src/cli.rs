@@ -589,13 +589,21 @@ pub fn run(cli: &Cli) -> Result<Output> {
             emit(Value::Array(findings.clone()), integrity::render_markdown(&findings))
         }
         Commands::Inventory => {
-            let mut out = serde_json::Map::new();
-            for table in ["research", "source", "question", "claim", "hypothesis", "killtest", "verdict", "test_run"] {
+            let mut counts = serde_json::Map::new();
+            for table in ["research", "source", "question", "claim", "hypothesis",
+                "killtest", "test_run", "test_attempt", "verdict", "observation",
+                "protocol", "event"] {
                 let n: i64 = conn.query_row(&format!("SELECT COUNT(*) FROM {table}"), [], |r| r.get(0))?;
-                out.insert(table.to_string(), json!(n));
+                counts.insert(table.to_string(), json!(n));
             }
-            let value = Value::Object(out);
-            let text = to_stable_json(&value);
+            let value = json!({
+                "counts": Value::Object(counts),
+                "provenance": crate::provenance::block(&[])?,
+            });
+            let text = format!("{}engine code: {}\n",
+                value["counts"].as_object().unwrap().iter()
+                    .map(|(k, v)| format!("{k}: {}\n", v.as_i64().unwrap_or(0))).collect::<String>(),
+                value["provenance"]["code_sha256"].as_str().unwrap_or("").chars().take(16).collect::<String>());
             emit(value, text)
         }
         Commands::Search { query, research, kinds, limit, budget, all } => {

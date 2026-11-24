@@ -195,11 +195,14 @@ pub fn claim_statistics(
     let (b_values, t_values) = match (lookup(&baseline), lookup(&treatment)) {
         (Some(b), Some(t)) => (b, t),
         _ => {
-            let available = groups.iter().map(|(name, _)| name.clone()).collect::<Vec<_>>();
+            let missing = if lookup(&baseline).is_none() { &baseline } else { &treatment };
+            let mut available: Vec<String> = groups.iter().map(|(name, _)| name.clone()).collect();
+            available.sort();
             return Err(EngineError::new(
-                format!("no observations in group for {}: need {baseline} and {treatment}", field(&claim, "id")),
+                format!("no observations in group '{missing}' for {}", field(&claim, "id")),
                 "a comparison needs recorded values in both groups.",
-                format!("add values with `observation add`, or choose one of: {}.", available.join(", "))));
+                format!("add values with `observation add`, or choose one of: {}." ,
+                    if available.is_empty() { "none".to_string() } else { available.join(", ") })));
         }
     };
     let plan_ref = plan_ref.trim();
@@ -264,10 +267,14 @@ pub fn claim_trend(conn: &Connection, claim_ref: &str, group: &str, actor: &str,
     let (since, until) = bounds(since, until)?;
     let groups = group_values(conn, &field(&claim, "id"), Some(&since), Some(&until))?;
     let values = groups.iter().find(|(name, _)| *name == group).map(|(_, v)| v.clone())
-        .ok_or_else(|| EngineError::new(format!("no observations in group '{group}' for {}", field(&claim, "id")),
-            "a trend needs a recorded sequence.",
-            format!("add values with `observation add`, or choose one of: {}.",
-                groups.iter().map(|(n, _)| n.clone()).collect::<Vec<_>>().join(", "))))?;
+        .ok_or_else(|| {
+            let mut available: Vec<String> = groups.iter().map(|(n, _)| n.clone()).collect();
+            available.sort();
+            EngineError::new(format!("no observations in group '{group}' for {}", field(&claim, "id")),
+                "a trend needs a recorded sequence.",
+                format!("add values with `observation add`, or choose one of: {}.",
+                    if available.is_empty() { "none".to_string() } else { available.join(", ") }))
+        })?;
     let xs: Vec<f64> = (1..=values.len()).map(|i| i as f64).collect();
     let mut result = stats::linregress(&xs, &values);
     let object = result.as_object_mut().expect("regression object");
