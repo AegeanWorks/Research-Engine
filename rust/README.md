@@ -16,7 +16,7 @@ cargo test
 
 `rust-toolchain.toml` and `.cargo/config.toml` select `stable-x86_64-pc-windows-gnu` and `gcc`;
 `Cargo.lock` pins every dependency. Declared dependencies: `rusqlite` (bundled SQLite), `clap`,
-`chrono`, `serde_json`, `regex`, `sha2`.
+`chrono`, `serde_json`, `regex`, `sha1`, `sha2`, `unicode-normalization` (NFKD title folding).
 
 Run the binary through the project launchers (`research-engine` / `research-engine.cmd`) or
 directly:
@@ -50,7 +50,7 @@ research-engine run execute <capability> --input '{"text": "..."}'
 
 | Subsystem | Capabilities | Source |
 |---|---|---|
-| `catalog` | `catalog.normalize`, `catalog.study-type`, `catalog.paper-id` | `lattice.rs` |
+| `catalog` | `catalog.normalize`, `catalog.study-type`, `catalog.paper-id`, `catalog.normalize-doi`, `catalog.normalize-title` | `lattice.rs`, `runtime_sources.rs` |
 | `candidate` | `candidate.rules`, `candidate.screen`, `candidate.noael-hed` | `engine_rules.rs`, `engine_screen.rs`, `engine_safety.rs` |
 | `bridge` | `bridge.primitives` | `engine_bridge.rs` |
 | `corpus` | `corpus.citations`, `corpus.duplicates` | `engine_corpus.rs`, `runtime_sources.rs` |

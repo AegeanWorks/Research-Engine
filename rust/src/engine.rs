@@ -75,6 +75,7 @@ pub fn analyze(input: &Value) -> Result<Value> {
 /// Capabilities retained by the cohesive engine, grouped into four subsystems.
 pub const CAPABILITIES: &[&str] = &[
     "catalog.normalize", "catalog.study-type", "catalog.paper-id",
+    "catalog.normalize-doi", "catalog.normalize-title",
     "candidate.rules", "candidate.screen", "candidate.noael-hed",
     "bridge.primitives", "corpus.citations", "corpus.duplicates",
 ];
@@ -85,6 +86,8 @@ pub fn execute(capability: &str, input: &Value) -> Result<Value> {
         // catalog — literature identity rules
         "catalog.normalize" => Ok(json!({"value": lattice::normalize_text(&field(input, "text"))})),
         "catalog.study-type" => Ok(json!({"value": lattice::normalize_study_type(&field(input, "text"))})),
+        "catalog.normalize-doi" => Ok(json!({"value": runtime_sources::normalize_doi(&field(input, "text"))})),
+        "catalog.normalize-title" => Ok(json!({"value": runtime_sources::normalize_title(&field(input, "text"))})),
         "catalog.paper-id" => Ok(json!({"value": lattice::paper_id(
             &field(input, "title"), &field(input, "doi"), &field(input, "arxiv"))?})),
         // candidate — design, safety and screen verdicts

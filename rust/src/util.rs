@@ -6,6 +6,17 @@ use sha2::{Digest, Sha256};
 
 use crate::error::Result;
 
+/// Whether a codepoint is a combining mark (Unicode canonical combining class).
+/// The standard combining blocks cover every diacritic produced by NFKD folding.
+pub fn is_combining(c: char) -> bool {
+    let n = c as u32;
+    (0x0300..=0x036F).contains(&n)
+        || (0x1AB0..=0x1AFF).contains(&n)
+        || (0x1DC0..=0x1DFF).contains(&n)
+        || (0x20D0..=0x20FF).contains(&n)
+        || (0xFE20..=0xFE2F).contains(&n)
+}
+
 /// Convert one SQLite row into a JSON object keyed by column name.
 pub fn row_json(row: &rusqlite::Row<'_>) -> Result<Value> {
     let mut object = Map::new();

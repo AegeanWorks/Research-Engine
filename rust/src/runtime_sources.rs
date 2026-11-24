@@ -23,23 +23,21 @@ pub fn normalize_doi(value: &str) -> String {
     text.trim().to_lowercase()
 }
 
-/// Fold Latin accents, case and punctuation while keeping letters from every script.
+/// NFKD-fold accents, case and punctuation while keeping letters from every script.
 pub fn normalize_title(value: &str) -> String {
-    let folded: String = value.chars().map(|c| match c {
-        'À'|'Á'|'Â'|'Ã'|'Ä'|'Å'|'à'|'á'|'â'|'ã'|'ä'|'å' => "a".to_string(),
-        'Ç'|'ç' => "c".to_string(),
-        'È'|'É'|'Ê'|'Ë'|'è'|'é'|'ê'|'ë' => "e".to_string(),
-        'Ì'|'Í'|'Î'|'Ï'|'ì'|'í'|'î'|'ï' => "i".to_string(),
-        'Ñ'|'ñ' => "n".to_string(),
-        'Ò'|'Ó'|'Ô'|'Õ'|'Ö'|'ò'|'ó'|'ô'|'õ'|'ö' => "o".to_string(),
-        'Ù'|'Ú'|'Û'|'Ü'|'ù'|'ú'|'û'|'ü' => "u".to_string(),
-        'Ý'|'ý'|'ÿ' => "y".to_string(),
-        'ß' => "ss".to_string(),
-        'Æ'|'æ' => "ae".to_string(),
-        'Œ'|'œ' => "oe".to_string(),
-        other => other.to_string(),
-    }).collect();
-    folded.to_lowercase().chars().map(|c| if c.is_alphanumeric() { c } else { ' ' })
+    use unicode_normalization::UnicodeNormalization;
+    let decomposed: String = value.nfkd()
+        .filter(|c| !crate::util::is_combining(*c))
+        .flat_map(|c| match c {
+            'ß' => "ss".chars().collect::<Vec<_>>(),
+            'Æ' => "AE".chars().collect::<Vec<_>>(),
+            'æ' => "ae".chars().collect::<Vec<_>>(),
+            'Œ' => "OE".chars().collect::<Vec<_>>(),
+            'œ' => "oe".chars().collect::<Vec<_>>(),
+            other => vec![other],
+        })
+        .collect();
+    decomposed.to_lowercase().chars().map(|c| if c.is_alphanumeric() { c } else { ' ' })
         .collect::<String>().split_whitespace().collect::<Vec<_>>().join(" ")
 }
 

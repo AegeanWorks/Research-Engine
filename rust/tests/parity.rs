@@ -355,6 +355,24 @@ fn runtime_hypothesis_card_and_amend() {
 }
 
 #[test]
+fn catalog_identity_normalizers() {
+    use research_engine::engine;
+    use research_engine::runtime_sources as sources;
+    assert_eq!(sources::normalize_doi("https://doi.org/10.1000/ABC.1"), "10.1000/abc.1");
+    // NFKD folding keeps non-Latin scripts and strips combining diacritics.
+    assert_eq!(sources::normalize_title("Α-Ω: Greek, Τοξικότητα"),
+        "α ω greek τοξικοτητα");
+    assert_eq!(sources::normalize_title("研究: 睡眠と代謝 (2024)"),
+        "研究 睡眠と代謝 2024");
+    let value = serde_json::json!({"text": "Café: Signal, S!"});
+    let result = engine::execute("catalog.normalize-title", &value).unwrap();
+    assert_eq!(result["value"].as_str(), Some("cafe signal s"));
+    let doi = engine::execute("catalog.normalize-doi", &serde_json::json!({"text": "DOI: 10.1/AbC"})).unwrap();
+    assert_eq!(doi["value"].as_str(), Some("10.1/abc"));
+    assert!(engine::execute("catalog.no-such-capability", &value).is_err());
+}
+
+#[test]
 fn runtime_source_duplicate_detection() {
     use research_engine::runtime_sources as sources;
     assert_eq!(sources::normalize_doi("https://doi.org/10.1/ABC"), "10.1/abc");
