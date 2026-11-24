@@ -243,6 +243,36 @@ fn runtime_prisma_flow() {
 }
 
 #[test]
+fn integrity_reports_all_consolidated_finding_codes() {
+    let path = temp_db("integrity_codes");
+    let conn = open(path.to_str().unwrap()).unwrap();
+    initialize(&conn).unwrap();
+    let r1 = core::add_research(&conn, "Program A", "scope", None).unwrap();
+    let rid = field(&r1, "id");
+    core::add_research(&conn, "Empty Program", "scope", None).unwrap();
+    let c1 = core::add_claim(&conn, &rid, "Same assertion", "assumption", None, "", "",
+        0.5, "", "a", &[]).unwrap();
+    let c2 = core::add_claim(&conn, &rid, "Same assertion", "assumption", None, "", "",
+        0.5, "", "b", &[]).unwrap();
+    core::add_source(&conn, &rid, "Paper One", Some(2020), "10.1/same", "", "", "paper").unwrap();
+    core::add_source(&conn, &rid, "Paper One", Some(2020), "https://doi.org/10.1/same",
+        "", "", "paper").unwrap();
+    let cid1 = field(&c1, "id");
+    let cid2 = field(&c2, "id");
+    conn.execute("UPDATE claim SET quote='the and of or', kind='empirical', \
+        source_id=(SELECT id FROM source LIMIT 1), locator='p1' WHERE id=?1",
+        rusqlite::params![cid2]).unwrap();
+
+    let findings = integrity::check(&conn).unwrap();
+    let codes: std::collections::BTreeSet<&str> = findings.iter()
+        .map(|f| f["code"].as_str().unwrap_or("")).collect();
+    for code in ["DUP-001", "DUP-002", "EVID-010", "EMPTY-001", "GAP-002"] {
+        assert!(codes.contains(code), "expected {code}; got {codes:?}");
+    }
+    assert!(!codes.contains("SCOPE-001"));
+}
+
+#[test]
 fn runtime_claim_revise_and_merge() {
     use research_engine::runtime_claims as claims;
     let path = temp_db("claim_runtime");

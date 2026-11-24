@@ -13,6 +13,13 @@ use crate::vocab::AI_KINDS;
 
 pub const TEMPLATE_NAMES: &[&str] = &["constant-probe"];
 
+/// Whether a test's command/control pair still matches an AI probe template.
+pub fn matches_template(command: &str, control: &str) -> Result<bool> {
+    Ok(templates()?.values().any(|spec| {
+        field(spec, "command") == command && field(spec, "control_command") == control
+    }))
+}
+
 fn field(value: &Value, name: &str) -> String {
     value.get(name).and_then(Value::as_str).unwrap_or("").to_string()
 }

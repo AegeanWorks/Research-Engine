@@ -77,6 +77,95 @@ fn visit(node: &str, graph: &HashMap<String, Vec<String>>, state: &mut HashMap<S
 }
 
 /// Return every integrity finding; an empty list means the graph is coherent.
+/// Every historical main-role group that passed twice with identical output.
+fn verified_groups_any(conn: &Connection, test_id: &str) -> Result<Vec<String>> {
+    let rows = query_json(conn,
+        "SELECT run_group FROM test_run WHERE test_id=?1 AND role='main' \
+         GROUP BY run_group HAVING COUNT(*)>=2 AND SUM(passed)=COUNT(*) \
+         AND COUNT(DISTINCT exit_code||':'||stdout_sha256||':'||stderr_sha256)=1",
+        params![test_id])?;
+    Ok(rows.iter().map(|r| field(r, "run_group")).collect())
+}
+
+const INFO_STOPWORDS: &[&str] = &[
+    "a", "an", "and", "are", "as", "at", "be", "but", "by", "for", "from", "has",
+    "have", "if", "in", "into", "is", "it", "its", "of", "on", "or", "that", "the",
+    "their", "then", "there", "these", "this", "to", "was", "were", "will", "with",
+];
+
+fn info_words(text: &str) -> Vec<String> {
+    text.to_lowercase().chars()
+        .map(|c| if c.is_alphanumeric() { c } else { ' ' })
+        .collect::<String>().split_whitespace().map(str::to_string).collect()
+}
+
+/// Information-quality classes for a stored claim quote (engine/information.py).
+fn information_classes(quote: &str, questions: &[String], others: &[String]) -> Vec<&'static str> {
+    let words = info_words(quote);
+    let normalized = words.join(" ");
+    let content: Vec<&String> = words.iter().filter(|w| !INFO_STOPWORDS.contains(&w.as_str())).collect();
+    let mut classes = Vec::new();
+    if content.len() >= 2 && questions.iter().any(|q| {
+        let needle = normalized.clone();
+        !needle.is_empty() && info_words(q).join(" ").contains(&needle)
+    }) {
+        classes.push("restates_question");
+    }
+    if !normalized.is_empty() && others.iter().any(|o| info_words(o).join(" ") == normalized) {
+        classes.push("duplicate_quote");
+    }
+    if content.is_empty() {
+        classes.push("stopword_only");
+    }
+    classes
+}
+
+/// Whether the declared negative control was falsified in one run group.
+fn control_falsified(conn: &Connection, test_id: &str, group: &str) -> Result<bool> {
+    let rows = query_json(conn,
+        "SELECT exit_code, passed, stdout_sha256, stderr_sha256 FROM test_run \
+         WHERE test_id=?1 AND run_group=?2 AND role='control' ORDER BY id",
+        params![test_id, group])?;
+    if rows.len() < 2 { return Ok(false); }
+    let mut fingerprints = std::collections::BTreeSet::new();
+    for row in &rows {
+        if row.get("passed").and_then(Value::as_i64).unwrap_or(0) != 0 { return Ok(false); }
+        fingerprints.insert(format!("{}:{}:{}", field(row, "exit_code"),
+            field(row, "stdout_sha256"), field(row, "stderr_sha256")));
+    }
+    Ok(fingerprints.len() == 1)
+}
+
+/// Declared input files that no longer exist, resolved like the fingerprint.
+fn missing_inputs(tests: &[Value]) -> Result<Vec<String>> {
+    let root = crate::provenance::project_root();
+    let mut missing = Vec::new();
+    for test in tests {
+        let declared: Vec<String> = serde_json::from_str(&field(test, "inputs_json"))
+            .unwrap_or_default();
+        for name in crate::provenance::resolve_inputs(&declared)? {
+            let path = std::path::Path::new(&name);
+            let resolved = if path.is_absolute() { path.to_path_buf() } else { root.join(path) };
+            if !resolved.is_file() { missing.push(resolved.to_string_lossy().into_owned()); }
+        }
+    }
+    Ok(missing)
+}
+
+fn common_parent(paths: &[String]) -> Option<String> {
+    let components: Vec<Vec<String>> = paths.iter().map(|p| std::path::Path::new(p)
+        .components().map(|c| c.as_os_str().to_string_lossy().into_owned()).collect()).collect();
+    let first = components.first()?;
+    let mut prefix = Vec::new();
+    for (index, part) in first.iter().enumerate() {
+        if components.iter().all(|p| p.get(index) == Some(part)) { prefix.push(part.clone()); }
+        else { break; }
+    }
+    if prefix.is_empty() { None } else {
+        Some(prefix.join(std::path::MAIN_SEPARATOR_STR))
+    }
+}
+
 pub fn check(conn: &Connection) -> Result<Vec<Value>> {
     let mut findings = Vec::new();
 
@@ -315,7 +404,232 @@ pub fn check(conn: &Connection) -> Result<Vec<Value>> {
             "use an independent measurement for a comparative claim, or record a caveat."));
     }
 
+    // DUP-001 — duplicate live claim text inside one program.
+    let sql = "SELECT research_id, text, COUNT(*) AS n FROM claim WHERE \
+               status NOT IN ('RETRACTED','INVALIDATED') AND superseded_by IS NULL \
+               GROUP BY research_id, text HAVING n > 1 ORDER BY research_id";
+    for row in query_json(conn, sql, [])? {
+        findings.push(finding("DUP-001", "warning", &field(&row, "research_id"),
+            format!("duplicate claim text appears {} times", row["n"].as_i64().unwrap_or(0)),
+            "merge duplicates, or differentiate the assertions."));
+    }
+
+    // DUP-002 — sources sharing a normalized DOI or title.
+    let sources = query_json(conn, "SELECT * FROM source ORDER BY id", [])?;
+    if let Ok(groups) = crate::runtime_sources::duplicate_sources(&sources, None) {
+        for group in groups.get("groups").and_then(Value::as_array).unwrap_or(&Vec::new()) {
+            let ids: Vec<String> = group.get("sources").and_then(Value::as_array)
+                .unwrap_or(&Vec::new()).iter().map(|s| field(s, "id")).collect();
+            let key: String = field(group, "key").chars().take(120).collect();
+            let detail = match field(group, "reason").as_str() {
+                "doi" => format!("share DOI '{key}'"),
+                "title_year" => format!("share the normalized title/year '{key}'"),
+                _ => format!("share the normalized title '{key}'"),
+            };
+            findings.push(finding("DUP-002", "warning", &field(group, "keep"),
+                format!("sources {} {detail}", ids.join(", ")),
+                "keep one source, re-point its claims, and stop citing the duplicate."));
+        }
+    }
+
+    // EMPTY-001 — research program with no claims.
+    for row in query_json(conn, "SELECT r.id FROM research r WHERE NOT EXISTS \
+        (SELECT 1 FROM claim c WHERE c.research_id = r.id) ORDER BY r.id", [])? {
+        findings.push(finding("EMPTY-001", "warning", &field(&row, "id"),
+            "research program has no claims yet", "add a claim, or remove the unused program."));
+    }
+
+    // PRE-001 — hypothesis outcome dated before its registration.
+    let sql = "SELECT v.id, h.id AS hypothesis_id FROM verdict v JOIN hypothesis h \
+               ON h.id = v.subject_id WHERE v.subject_kind='hypothesis' AND v.at < h.registered_at";
+    for row in query_json(conn, sql, [])? {
+        findings.push(finding("PRE-001", "error", &field(&row, "hypothesis_id"),
+            format!("hypothesis outcome {} is dated before its registration", field(&row, "id")),
+            "restore the chronological record; pre-registration must precede the outcome."));
+    }
+
+    // SCOPE-001 — edge crossing research programs.
+    for row in query_json(conn, "SELECT * FROM edge ORDER BY id", [])? {
+        let src = fetch_entity(conn, &field(&row, "src_kind"), &field(&row, "src_id"))?;
+        let dst = fetch_entity(conn, &field(&row, "dst_kind"), &field(&row, "dst_id"))?;
+        if let (Some(src), Some(dst)) = (src, dst) {
+            if !field(&src, "research_id").is_empty() && !field(&dst, "research_id").is_empty()
+                && field(&src, "research_id") != field(&dst, "research_id") {
+                findings.push(finding("SCOPE-001", "error", &field(&row, "id"),
+                    "edge crosses research programs",
+                    "remove the edge or move both records into one program."));
+            }
+        }
+    }
+
+    // TEST-002 — a test created after another test on the same claim failed.
+    let sql = "SELECT later.id AS test_id, earlier.id AS failed_test FROM killtest later \
+               JOIN killtest earlier ON earlier.claim_id = later.claim_id AND earlier.id <> later.id \
+               JOIN test_attempt failed ON failed.test_id = earlier.id \
+               AND failed.outcome = 'subject_failed' WHERE later.created_at > failed.created_at \
+               GROUP BY later.id ORDER BY later.id";
+    for row in query_json(conn, sql, [])? {
+        findings.push(finding("TEST-002", "warning", &field(&row, "test_id"),
+            format!("test was created after {} failed on the same claim", field(&row, "failed_test")),
+            "record why this is an independent test rather than a retry, or use the authoritative attempt."));
+    }
+
+    // EVID-010 — information-poor stored quote.
+    let quote_rows = query_json(conn, "SELECT id, research_id, quote FROM claim WHERE \
+        trim(quote) <> '' AND status NOT IN ('RETRACTED','INVALIDATED') ORDER BY id", [])?;
+    let mut quotes_by_research: std::collections::BTreeMap<String, Vec<String>> =
+        std::collections::BTreeMap::new();
+    for row in &quote_rows {
+        quotes_by_research.entry(field(row, "research_id")).or_default().push(field(row, "quote"));
+    }
+    let question_rows = query_json(conn, "SELECT e.src_id, q.text FROM edge e JOIN question q \
+        ON q.id=e.dst_id WHERE e.src_kind='claim' AND e.dst_kind='question'", [])?;
+    let mut questions_by_claim: std::collections::BTreeMap<String, Vec<String>> =
+        std::collections::BTreeMap::new();
+    for row in &question_rows {
+        questions_by_claim.entry(field(row, "src_id")).or_default().push(field(row, "text"));
+    }
+    for row in &quote_rows {
+        let claim_id = field(row, "id");
+        let research_id = field(row, "research_id");
+        let quote = field(row, "quote");
+        let others: Vec<String> = quotes_by_research.get(&research_id).unwrap_or(&Vec::new())
+            .iter().filter(|q| *q != &quote).cloned().collect();
+        let classes = information_classes(&quote,
+            questions_by_claim.get(&claim_id).unwrap_or(&Vec::new()), &others);
+        if !classes.is_empty() {
+            findings.push(finding("EVID-010", "warning", &claim_id,
+                format!("claim quote is information-poor: {}", classes.join(", ")),
+                "quote a passage that adds information beyond the question, or record why the repetition is necessary."));
+        }
+    }
+
+    // EVID-009 — declared negative control never failed reproducibly.
+    for row in query_json(conn, "SELECT id, claim_id FROM killtest ORDER BY id", [])? {
+        let test_id = field(&row, "id");
+        let test = crate::killtest::get_test(conn, &test_id)?;
+        let verified = verified_groups_any(conn, &test_id)?;
+        if verified.is_empty() || field(&test, "control_command").is_empty() { continue; }
+        if !control_falsified(conn, &test_id, &verified[0])? {
+            findings.push(finding("EVID-009", "error", &test_id,
+                "the declared negative control never failed reproducibly, so the test has not shown it can fail",
+                "make the control fail deterministically twice, then re-verify the test."));
+        }
+    }
+
+    // EVID-005 / EVID-006 / EVID-011 — numeric evidence currency and missing volumes.
+    let mut stale_volume: std::collections::BTreeMap<String, Vec<(String, Vec<String>)>> =
+        std::collections::BTreeMap::new();
+    for row in query_json(conn, "SELECT * FROM claim WHERE status='NUMERIC' ORDER BY id", [])? {
+        let claim_id = field(&row, "id");
+        let tests: Vec<Value> = query_json(conn, "SELECT * FROM killtest WHERE claim_id=?1 ORDER BY id",
+            params![claim_id])?;
+        if tests.is_empty() { continue; }
+        if !tests.iter().any(|t| !verified_groups_any(conn, &field(t, "id")).unwrap_or_default().is_empty()) {
+            continue;
+        }
+        let current = crate::killtest::claim_groups(conn, &claim_id)?;
+        if current.is_empty() {
+            let missing = missing_inputs(&tests)?;
+            if !missing.is_empty() {
+                stale_volume.entry(field(&row, "research_id")).or_default()
+                    .push((claim_id, missing));
+                continue;
+            }
+            emit_stale(&mut findings, &claim_id);
+            continue;
+        }
+        let bound: String = query_json(conn,
+            "SELECT evidence_group FROM verdict WHERE subject_kind='claim' AND subject_id=?1 \
+             AND status='NUMERIC' ORDER BY id DESC LIMIT 1", params![claim_id])?
+            .into_iter().next().map(|v| field(&v, "evidence_group")).unwrap_or_default();
+        if !current.contains(&bound) {
+            findings.push(finding("EVID-006", "error", &claim_id,
+                format!("the promotion verdict is not tied to the authoritative current run (bound: {}; authoritative: {})",
+                    if bound.is_empty() { "none".to_string() } else { bound }, current.join(", ")),
+                "re-record the verdict against the authoritative group with `claim verdict --group`."));
+        }
+    }
+    for (research_id, candidates) in stale_volume {
+        if candidates.len() < 3 {
+            for (claim_id, _) in candidates { emit_stale(&mut findings, &claim_id); }
+            continue;
+        }
+        let mut all_paths: Vec<String> = Vec::new();
+        for (_, paths) in &candidates { all_paths.extend(paths.iter().cloned()); }
+        let common = common_parent(&all_paths);
+        if common.is_none() {
+            for (claim_id, _) in candidates { emit_stale(&mut findings, &claim_id); }
+            continue;
+        }
+        let names: Vec<String> = candidates.iter().map(|(id, _)| id.clone()).collect();
+        findings.push(finding("EVID-011", "error", &research_id,
+            format!("evidence volume missing: {} leaves {} NUMERIC claims stale ({})",
+                common.unwrap(), candidates.len(), names.join(", ")),
+            "restore the folder, then re-run `test verify` for the affected tests."));
+    }
+
+    // AI-001 — unresolvable citation in a non-sweep AI artifact.
+    for row in query_json(conn,
+        "SELECT id, research_id, kind, cited_json FROM ai_artifact WHERE kind != 'sweep' ORDER BY id", [])? {
+        let cited: Vec<Value> = serde_json::from_str(&field(&row, "cited_json")).unwrap_or_default();
+        for entry in cited {
+            let source_id = field(&entry, "source_id");
+            let locator = field(&entry, "locator");
+            let exists: i64 = conn.query_row(
+                "SELECT COUNT(*) FROM source WHERE id=?1 AND research_id=?2",
+                params![source_id, field(&row, "research_id")], |r| r.get(0)).unwrap_or(0);
+            if locator.trim().is_empty() || exists == 0 {
+                findings.push(finding("AI-001", "error", &field(&row, "id"),
+                    format!("AI {} artifact cites unresolvable source {}", field(&row, "kind"),
+                        if source_id.is_empty() { "(none)" } else { &source_id }),
+                    "cite a source registered in this program with a locator, or leave the claim UNVERIFIED and unlinked."));
+                break;
+            }
+        }
+    }
+
+    // AI-002 — AI-origin claim promoted without any test that ever verified.
+    let sql = "SELECT c.id FROM claim c JOIN ai_artifact a ON a.claim_id=c.id \
+               WHERE a.kind IN ('extraction','idea') AND c.status='PROVEN' ORDER BY c.id";
+    for row in query_json(conn, sql, [])? {
+        let claim_id = field(&row, "id");
+        let tests = query_json(conn, "SELECT id FROM killtest WHERE claim_id=?1", params![claim_id])?;
+        let historical = tests.iter().any(|t| {
+            verified_groups_any(conn, &field(t, "id")).map(|g| !g.is_empty()).unwrap_or(false)
+        });
+        if !historical {
+            findings.push(finding("AI-002", "error", &claim_id,
+                "AI-origin claim is PROVEN with no test that ever passed twice",
+                "bind a kill test, run `test verify`, and re-promote on the verified group, or downgrade the claim."));
+        }
+    }
+
+    // AI-003 — AI-proposed test no longer matches its fixed probe template.
+    let sql = "SELECT t.id, t.command, t.control_command FROM killtest t \
+               JOIN ai_artifact a ON a.test_id=t.id ORDER BY t.id";
+    for row in query_json(conn, sql, [])? {
+        if !crate::ai::matches_template(&field(&row, "command"), &field(&row, "control_command"))? {
+            findings.push(finding("AI-003", "error", &field(&row, "id"),
+                "AI-proposed test no longer matches its fixed template",
+                "re-propose the test from a template with `ai propose-test`, or record why the command was changed by hand."));
+        }
+    }
+
     Ok(findings)
+}
+
+fn emit_stale(findings: &mut Vec<Value>, claim_id: &str) {
+    findings.push(finding("EVID-005", "error", claim_id,
+        "numeric evidence is stale: no verified run matches the current code, inputs and command",
+        "re-run `test verify` for the claim's test, or downgrade the claim."));
+}
+
+fn fetch_entity(conn: &Connection, kind: &str, id: &str) -> Result<Option<Value>> {
+    let table = match kind { "claim" => "claim", "question" => "question",
+        "hypothesis" => "hypothesis", "source" => "source", _ => return Ok(None) };
+    Ok(query_json(conn, &format!("SELECT * FROM {table} WHERE id = ?1"), params![id])?
+        .into_iter().next())
 }
 
 pub fn has_errors(findings: &[Value]) -> bool {

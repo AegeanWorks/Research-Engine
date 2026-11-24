@@ -935,3 +935,11 @@ ender.py into engine/series.py
 - **Context**: ADR-061..063 removed the wholesale imports and collapsed the domain modules, but `engine/`, `studio/` and `experiments/` Python packages and 675 Python tests remained as the compatibility/test surface. Five CLI behaviours (`claim merge/revise`, `hypothesis card/amend`, `analysis plan`) plus `source duplicates` and `analysis stats-all` still lacked Rust equivalents.
 - **Decision**: Port all seven remaining behaviours into `rust/src/runtime_*.rs` with cross-implementation parity checks and Rust integration tests. Switch `.aikit/project.json` `test_command` to `cargo test --manifest-path rust/Cargo.toml && python -m unittest tests.test_projects_scan`. Remove the `engine/`, `studio/` and `experiments/` Python packages, the Python test suite and the dev-only parity scripts (recoverable under the approved temp area). `tests/test_projects_scan.py` is retained because it checks documentation, not the removed runtime.
 - **Consequences**: The engine is one Rust crate with one CLI and no Python runtime. The gate exercises the Rust suite. Behaviour that was Python-only is now covered by Rust integration tests; no retained assertion was weakened. The Python sources were archived rather than hard-deleted.
+
+### ADR-065: complete the integrity finding vocabulary
+
+- **Date**: 2026-11-24
+- **Status**: Accepted
+- **Context**: After ADR-064 the Rust `check` command implemented 30 of the 41 finding codes the Python `integrity.check` emitted. Missing: `DUP-001`, `DUP-002`, `EMPTY-001`, `PRE-001`, `SCOPE-001`, `TEST-002`, `EVID-005/006/009/010/011` and `AI-001/002/003`.
+- **Decision**: Port all eleven checks into `rust/src/integrity.rs`, reusing the existing `killtest`, `runtime_sources` and `provenance` helpers, and expose `ai::matches_template` for `AI-003`.
+- **Consequences**: Rust and Python now emit the same 41-code finding vocabulary. A seeded-graph parity check compares the emitted codes exactly; a Rust integration test locks the new checks in.

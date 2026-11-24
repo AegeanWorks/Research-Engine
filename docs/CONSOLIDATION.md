@@ -85,3 +85,12 @@ scripts are preserved under
 Only `tests/test_projects_scan.py` remains in Python because it validates the
 project-scan document rather than the runtime. The project gate now runs the Rust
 suite followed by that single test.
+
+## Integrity parity (ADR-065)
+
+A follow-up audit found that the Rust `check` command was still missing eleven
+finding codes from the Python integrity audit. All are now implemented in
+`rust/src/integrity.rs`: duplicate claim text and source identity, empty
+programs, hypothesis chronology, cross-program edges, a test created after a
+failure, information-poor quotes, stale numeric evidence and missing evidence
+volumes, and AI provenance. Rust and Python now emit the same 41-code vocabulary.
