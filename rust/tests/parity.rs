@@ -221,6 +221,27 @@ fn search_is_phrase_first_and_program_scoped() {
 }
 
 #[test]
+fn screening_decision_rules() {
+    let path = temp_db("screening_rules");
+    let conn = open(path.to_str().unwrap()).unwrap();
+    initialize(&conn).unwrap();
+    let research = core::add_research(&conn, "Review", "scope", None).unwrap();
+    let rid = research.get("id").and_then(Value::as_str).unwrap();
+    let source = core::add_source(&conn, rid, "Paper", Some(2020), "10.1/a", "", "", "paper").unwrap();
+    let sid = source.get("id").and_then(Value::as_str).unwrap();
+
+    let out = core::set_screening(&conn, sid, "screened_out", "").unwrap();
+    assert_eq!(field(&out, "screening_reason"), "other");
+    let out = core::set_screening(&conn, sid, "SCREENED_IN", " Not_Relevant ").unwrap();
+    assert_eq!(field(&out, "screening"), "screened_in");
+    assert_eq!(field(&out, "screening_reason"), "");
+    assert!(core::set_screening(&conn, sid, "screened_in", "bogus").is_err());
+    assert!(core::set_screening(&conn, sid, "screened_in", "").is_err());
+    let out = core::set_screening(&conn, sid, "excluded", "DUPLICATE").unwrap();
+    assert_eq!(field(&out, "screening_reason"), "duplicate");
+}
+
+#[test]
 fn runtime_prisma_flow() {
     use research_engine::runtime_screening as screening;
     let path = temp_db("prisma");

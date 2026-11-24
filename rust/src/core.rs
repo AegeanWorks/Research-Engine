@@ -188,11 +188,25 @@ pub fn set_source_status(conn: &Connection, id: &str, status: &str, note: &str) 
 }
 
 pub fn set_screening(conn: &Connection, id: &str, status: &str, reason: &str) -> Result<Value> {
-    validate_choice(status, SCREENING_STATUSES, &format!("unknown screening status: {status}"), "pass one of the listed statuses with --status.")?;
+    let status = status.trim().to_lowercase();
+    validate_choice(&status, SCREENING_STATUSES, "unknown screening status",
+        "pass one of the listed statuses with --status.")?;
+    let terminal = status == "screened_out" || status == "excluded";
+    let mut reason = reason.trim().to_lowercase();
+    if terminal && reason.is_empty() { reason = "other".to_string(); }
     if !reason.is_empty() {
-        validate_choice(reason, SCREENING_REASONS, &format!("unknown screening reason: {reason}"), "pass a reason from the closed taxonomy.")?;
+        validate_choice(&reason, SCREENING_REASONS, "unknown exclusion reason",
+            "pass a reason from the closed taxonomy.")?;
     }
+    if !terminal { reason.clear(); }
     let source = get_source(conn, id)?;
+    if text(&source, "screening") == status && text(&source, "screening_reason") == reason {
+        return Err(EngineError::new(
+            if reason.is_empty() { format!("source already has screening {status}") }
+            else { format!("source already has screening {status} ({reason})") },
+            "a screening decision must change the recorded state.",
+            "choose a different status or reason, or inspect the source."));
+    }
     let tx = conn.unchecked_transaction()?;
     tx.execute(
         "UPDATE source SET screening = ?1, screening_reason = ?2, screening_at = ?3 WHERE id = ?4",
